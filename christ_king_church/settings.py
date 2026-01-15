@@ -39,7 +39,11 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-ALLOWED_HOSTS = config('ALLOWED_HOST',default=''.split(',') )
+ALLOWED_HOSTS = [
+    'web-production-593fe1.up.railway.app',  # Your Railway domain
+    'localhost',
+    '127.0.0.1',
+]
  # Allow all Render subdomains 
 
 
@@ -205,3 +209,4 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
