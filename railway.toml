@@ -1,4 +1,5 @@
 builder = "NIXPACKS"
 
 [deploy]
+preDeployCommand = "python manage.py createsuperuser --no-input"
 startCommand = "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn christ_king_church.wsgi"
