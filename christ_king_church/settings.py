@@ -40,7 +40,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 ALLOWED_HOSTS = [
-    'web-production-593fe1.up.railway.app',  # Your Railway domain
+    'web-production-593fe1.up.railway.ap',  # Your Railway domain
     'localhost',
     '127.0.0.1',
 ]
