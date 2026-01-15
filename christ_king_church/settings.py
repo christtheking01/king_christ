@@ -45,6 +45,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
  # Allow all Render subdomains 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+]
 
 
 
@@ -209,4 +212,5 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
 
