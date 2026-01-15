@@ -1,5 +1,5 @@
 from django.utils import timezone
-from enum import member
+from enum import Enum
 import os, random
 from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
@@ -185,4 +185,5 @@ class Member(models.Model):
 
 
 class TestDb(models.Model):
+
     field = models.CharField(max_length=120)
