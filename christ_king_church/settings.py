@@ -40,7 +40,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 ALLOWED_HOSTS = [
-    'https://*.christtheking.space',
+    'https://www.christtheking.space',
     'christtheking.space',
     'web-production-593fe1.up.railway.ap', # Your Railway domain
     '127.0.0.1',
