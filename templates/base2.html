@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Church Management System</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <title>CMS</title>
+        {%block internal_style%}   {%endblock internal_style%}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="app-container">
+        <!-- Sidebar-->
+         <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{% url "home" %}" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-church"></i>
+                    </div>
+                    <div class="logo-text">Christ the King</div>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-scroll-container">
+                    <div class="nav-section">
+                        <div class="nav-label">Main Menu</div>
+                        
+                        <div class="nav-item">
+                            <a href="{% url 'home' %}" class="nav-link {% if home_active %}active{% endif %}">
+                                <div class="nav-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="nav-text">Dashboard</div>
+                            </a>
+                        </div>
+
+                        <!-- Ministries Dropdown -->
+                        <div class="nav-item dropdown-menu">
+                            <div class="nav-link nav-toggle {% if ministries_active_add or ministries_active_list %}active{% endif %}" data-target="ministries-submenu">
+                                <div class="nav-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="nav-text">Ministries</div>
+                                <div class="nav-chevron">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="submenu" id="ministries-submenu" {% if ministries_active_add or ministries_active_list %}style="max-height: 500px;"{% endif %}>
+                                <a href="{% url 'add_ministry' %}" class="submenu-link {% if ministries_active_add %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="submenu-text">Add Ministry</div>
+                                </a>
+                                <a href="{% url 'list_ministries' %}" class="submenu-link {% if ministries_active_list %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="submenu-text">List Ministries</div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Communities Dropdown -->
+                        <div class="nav-item dropdown-menu">
+                            <div class="nav-link nav-toggle {% if shepherds_active_add or shepherds_active_list %}active{% endif %}" data-target="communities-submenu">
+                                <div class="nav-icon">
+                                    <i class="fas fa-people-carry"></i>
+                                </div>
+                                <div class="nav-text">Communities</div>
+                                <div class="nav-chevron">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="submenu" id="communities-submenu" {% if shepherds_active_add or shepherds_active_list %}style="max-height: 500px;"{% endif %}>
+                                <a href="{% url 'add_shepherd' %}" class="submenu-link {% if shepherds_active_add %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="submenu-text">Add Community</div>
+                                </a>
+                                <a href="{% url 'list_shepherds' %}" class="submenu-link {% if shepherds_active_list %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="submenu-text">List Communities</div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Members Dropdown -->
+                        <div class="nav-item dropdown-menu">
+                            <div class="nav-link nav-toggle {% if members_active_list or members_active_add %}active{% endif %}" data-target="members-submenu">
+                                <div class="nav-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="nav-text">Members</div>
+                                <div class="nav-chevron">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="submenu" id="members-submenu" {% if members_active_list or members_active_add %}style="max-height: 500px;"{% endif %}>
+                                <a href="{% url 'add_member' %}" class="submenu-link {% if members_active_add %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="submenu-text">Add Member</div>
+                                </a>
+                                <a href="{% url 'table_members' %}" class="submenu-link {% if members_active_list %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="submenu-text">List Members</div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Finance Dropdown -->
+                        <div class="nav-item dropdown-menu">
+                            <div class="nav-link nav-toggle {% if finance_active or tithepayment_active_list or tithepayment_active_create or tithepayment_active_summary or receipts_active %}active{% endif %}" data-target="finance-submenu">
+                                <div class="nav-icon">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="nav-text">Finance</div>
+                                <div class="nav-chevron">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="submenu" id="finance-submenu" {% if finance_active or tithepayment_active_list or tithepayment_active_create or tithepayment_active_summary or receipts_active %}style="max-height: 500px;"{% endif %}>
+                                <a href="{% url 'tithepayment:tithepayment_list' %}" class="submenu-link {% if tithepayment_active_list %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="submenu-text">All Tithe Payments</div>
+                                </a>
+                                <a href="{% url 'tithepayment:tithepayment_create' %}" class="submenu-link {% if tithepayment_active_create %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </div>
+                                    <div class="submenu-text">Record Tithe</div>
+                                </a>
+                                <a href="{% url 'tithepayment:receipt_list' %}" class="submenu-link {% if receipts_active %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <div class="submenu-text">All Receipts</div>
+                                </a>
+                                <a href="{% url 'tithepayment:tithepayment_summary' %}" class="submenu-link {% if tithepayment_active_summary %}active{% endif %}">
+                                    <div class="submenu-icon">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                    <div class="submenu-text">Tithe Reports</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-label">Quick Actions</div>
+                        
+                        <div class="nav-item">
+                            <a href="{% url 'tithepayment:tithepayment_create' %}" class="nav-link">
+                                <div class="nav-icon" style="color: var(--warning);">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <div class="nav-text">Quick Tithe Entry</div>
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{% url 'add_member' %}" class="nav-link">
+                                <div class="nav-icon" style="color: var(--success);">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="nav-text">Add New Member</div>
+                            </a>
+                        </div>
+
+                        <div class="nav-item">
+                            <a href="{% url 'tithepayment:receipt_list' %}" class="nav-link">
+                                <div class="nav-icon" style="color: var(--info);">
+                                    <i class="fas fa-print"></i>
+                                </div>
+                                <div class="nav-text">Print Receipts</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Footer -->
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <div class="user-avatar-sm">
+                            <img src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}" alt="{{ user.username }}">
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="user-role">
+                                {% if user.is_superuser %}Administrator
+                                {% elif user.is_staff %}Staff
+                                {% else %}Member
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="sidebarLogoutBtn">
+                        <i class="fas fa-power-off"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </nav>
+         </aside>
+    </div>
+    {% endif %}
+</body>
+</html>
+
+
+
+
+             <!--'{% url "system_settings" %}',
+               //   '{% url "audit_logs" %}'-->

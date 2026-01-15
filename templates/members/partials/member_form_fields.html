@@ -1,0 +1,118 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label {% if form.name.field.required %}required-field{% endif %}">Full Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.code.id_for_label }}" class="form-label">Member Code</label>
+            {{ form.code }}
+            <small class="form-text text-muted">e.g., 001PT</small>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.telephone.id_for_label }}" class="form-label">Telephone</label>
+            {{ form.telephone }}
+            {% if form.telephone.errors %}
+                <div class="text-danger small mt-1">{{ form.telephone.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">Format: +255 XXX XXX XXX</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.location.id_for_label }}" class="form-label {% if form.location.field.required %}required-field{% endif %}">Location</label>
+            {{ form.location }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.shepherd.id_for_label }}" class="form-label">Community</label>
+            {{ form.shepherd }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="{{ form.ministry.id_for_label }}" class="form-label">Ministry</label>
+            {{ form.ministry }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="mb-3">
+            <label for="{{ form.fathers_name.id_for_label }}" class="form-label">Father's Name</label>
+            {{ form.fathers_name }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="mb-3">
+            <label for="{{ form.mothers_name.id_for_label }}" class="form-label">Mother's Name</label>
+            {{ form.mothers_name }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="mb-3">
+            <label for="{{ form.guardians_name.id_for_label }}" class="form-label">Guardian's Name</label>
+            {{ form.guardians_name }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label d-block mb-3">Status</label>
+            <div class="form-check form-check-inline mb-2">
+                {{ form.active }}
+                <label class="form-check-label ms-2" for="{{ form.active.id_for_label }}">Active Member</label>
+            </div>
+            <div class="form-check form-check-inline mb-2">
+                {{ form.new_believer_school }}
+                <label class="form-check-label ms-2" for="{{ form.new_believer_school.id_for_label }}">New Believer School</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label d-block mb-3">Additional Information</label>
+            <div class="form-check form-check-inline mb-2">
+                {{ form.pays_tithe }}
+                <label class="form-check-label ms-2" for="{{ form.pays_tithe.id_for_label }}">Pays Tithe</label>
+            </div>
+            <div class="form-check form-check-inline mb-2">
+                {{ form.working }}
+                <label class="form-check-label ms-2" for="{{ form.working.id_for_label }}">Working</label>
+            </div>
+            <div class="form-check form-check-inline mb-2">
+                {{ form.schooling }}
+                <label class="form-check-label ms-2" for="{{ form.schooling.id_for_label }}">Schooling</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="mb-3">
+            <label for="{{ form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+            {{ form.picture }}
+            {% if form.picture.errors %}
+                <div class="text-danger small mt-1">{{ form.picture.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1 @@
+web: gunicorn christ_king_church.wsgi

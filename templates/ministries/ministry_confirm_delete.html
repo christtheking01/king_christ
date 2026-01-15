@@ -1,0 +1,30 @@
+<!-- templates/ministries/ministry_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Confirm Delete</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the ministry <strong>{{ ministry.name }}</strong>?</p>
+                    <p class="text-danger">This action cannot be undone and will also delete all associated leaders.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Yes, Delete
+                        </button>
+                        <a href="{% url 'ministry_detail' ministry.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

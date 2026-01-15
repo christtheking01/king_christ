@@ -1,0 +1,232 @@
+<!-- templates/ministries/ministry_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .leader-form {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    .leader-form:hover {
+        background-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header {% if is_update %}bg-warning{% else %}bg-primary{% endif %} text-white">
+                    <h3>{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="ministryForm">
+                        {% csrf_token %}
+                        
+                        <!-- Ministry Information -->
+                        <fieldset class="border p-3 mb-4">
+                            <legend class="w-auto px-2">Ministry Information</legend>
+                            
+                            <div class="form-group">
+                                <label for="{{ ministry_form.name.id_for_label }}">Ministry Name *</label>
+                                {{ ministry_form.name }}
+                                {% if ministry_form.name.errors %}
+                                    <div class="text-danger">{{ ministry_form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ ministry_form.feast_name.id_for_label }}">Feast Name</label>
+                                        {{ ministry_form.feast_name }}
+                                        {% if ministry_form.feast_name.errors %}
+                                            <div class="text-danger">{{ ministry_form.feast_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ ministry_form.feast_date.id_for_label }}">Feast Date</label>
+                                        {{ ministry_form.feast_date }}
+                                        {% if ministry_form.feast_date.errors %}
+                                            <div class="text-danger">{{ ministry_form.feast_date.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Ministry Leaders -->
+                        <fieldset class="border p-3 mb-4">
+                            <legend class="w-auto px-2">
+                                Ministry Leaders
+                                {% if is_update %}
+                                    <span class="badge badge-info">{{ ministry.leaders.count }} Current</span>
+                                {% endif %}
+                            </legend>
+                            
+                            {{ leader_formset.management_form }}
+                            
+                            <div id="leader-forms">
+                                {% for form in leader_formset %}
+                                    <div class="leader-form {% if form.instance.pk %}existing-leader{% else %}new-leader{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="mb-0">
+                                                Leader {{ forloop.counter }}
+                                                {% if form.instance.pk %}
+                                                    <span class="badge badge-success">Existing</span>
+                                                {% else %}
+                                                    <span class="badge badge-primary">New</span>
+                                                {% endif %}
+                                            </h5>
+                                        </div>
+                                        
+                                        {% if form.non_field_errors %}
+                                            <div class="alert alert-danger">
+                                                {{ form.non_field_errors }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Leader Name *</label>
+                                                    {{ form.leader_name }}
+                                                    {% if form.leader_name.errors %}
+                                                        <div class="text-danger">{{ form.leader_name.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Position *</label>
+                                                    {{ form.position }}
+                                                    {% if form.position.errors %}
+                                                        <div class="text-danger">{{ form.position.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Community *</label>
+                                                    {{ form.community }}
+                                                    {% if form.community.errors %}
+                                                        <div class="text-danger">{{ form.community.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Select the community this leader belongs to</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Phone</label>
+                                                    {{ form.phone }}
+                                                    {% if form.phone.errors %}
+                                                        <div class="text-danger">{{ form.phone.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Email</label>
+                                                    {{ form.email }}
+                                                    {% if form.email.errors %}
+                                                        <div class="text-danger">{{ form.email.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Appointed Date</label>
+                                                    {{ form.appointed_date }}
+                                                    {% if form.appointed_date.errors %}
+                                                        <div class="text-danger">{{ form.appointed_date.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                {% if form.instance.pk %}
+                                                    <div class="form-group">
+                                                        <label class="d-block">
+                                                            <input type="checkbox" name="{{ form.DELETE.html_name }}" id="{{ form.DELETE.id_for_label }}">
+                                                            <span class="text-danger">Delete this leader?</span>
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        {{ form.id }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if leader_formset.non_form_errors %}
+                                <div class="alert alert-danger">
+                                    {{ leader_formset.non_form_errors }}
+                                </div>
+                            {% endif %}
+                        </fieldset>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-{% if is_update %}warning{% else %}primary{% endif %} btn-lg">
+                                <i class="fas fa-save"></i> {% if is_update %}Update{% else %}Save{% endif %} Ministry
+                            </button>
+                            <a href="{% if is_update %}{% url 'ministry_detail' ministry.pk %}{% else %}{% url 'ministry_list' %}{% endif %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Confirm before deleting leaders
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteCheckboxes = document.querySelectorAll('input[type="checkbox"][name*="DELETE"]');
+        
+        deleteCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    const confirmed = confirm('Are you sure you want to delete this leader?');
+                    if (!confirmed) {
+                        this.checked = false;
+                    } else {
+                        this.closest('.leader-form').style.opacity = '0.5';
+                    }
+                } else {
+                    this.closest('.leader-form').style.opacity = '1';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

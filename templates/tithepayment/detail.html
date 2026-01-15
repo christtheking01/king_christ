@@ -1,0 +1,868 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    /* Details Container */
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .page-title i {
+        color: var(--primary);
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-disabled);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 25px;
+    }
+
+    .alert {
+        padding: 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .alert-success {
+        background-color: rgba(52, 168, 83, 0.1);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .alert-danger {
+        background-color: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .alert-warning {
+        background-color: rgba(251, 188, 4, 0.1);
+        border: 1px solid rgba(251, 188, 4, 0.2);
+        color: var(--warning);
+    }
+
+    .alert-info {
+        background-color: rgba(66, 133, 244, 0.1);
+        border: 1px solid rgba(66, 133, 244, 0.2);
+        color: var(--info);
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1.2rem;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Layout Grid */
+    .layout-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    @media (min-width: 992px) {
+        .layout-grid {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-base);
+    }
+
+    .card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+        padding: 20px 20px 0;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: var(--primary);
+    }
+
+    /* Details Grid */
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    @media (min-width: 768px) {
+        .details-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .detail-section {
+        background: var(--background);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        border: 1px solid var(--divider);
+    }
+
+    .detail-section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-section-title i {
+        color: var(--primary);
+    }
+
+    /* Detail Table */
+    .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .detail-row {
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        padding: 12px 8px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        width: 40%;
+        vertical-align: top;
+    }
+
+    .detail-value {
+        padding: 12px 8px;
+        color: var(--text-primary);
+        vertical-align: top;
+    }
+
+    .detail-value strong {
+        color: var(--success);
+        font-size: 1.125rem;
+    }
+
+    /* Badge Styles */
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: var(--radius-full);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-success {
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+    }
+
+    .badge-primary {
+        background-color: rgba(66, 133, 244, 0.1);
+        color: var(--primary);
+        border: 1px solid rgba(66, 133, 244, 0.2);
+    }
+
+    .badge-warning {
+        background-color: rgba(251, 188, 4, 0.1);
+        color: var(--warning);
+        border: 1px solid rgba(251, 188, 4, 0.2);
+    }
+
+    .badge-danger {
+        background-color: rgba(234, 67, 53, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+    }
+
+    /* Recent Payments List */
+    .payments-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .payment-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--divider);
+        transition: all 0.2s;
+        cursor: pointer;
+        border-radius: var(--radius-md);
+        margin-bottom: 8px;
+        background: var(--background);
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .payment-item:hover {
+        background: var(--surface);
+        transform: translateX(4px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .payment-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
+
+    .payment-amount {
+        font-weight: 600;
+        color: var(--success);
+        font-size: 1.125rem;
+    }
+
+    .payment-date {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8125rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 14px 20px;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid var(--divider);
+        background: var(--surface);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-button i {
+        font-size: 1.25rem;
+        width: 24px;
+    }
+
+    .action-edit {
+        background: linear-gradient(135deg, rgba(251, 188, 4, 0.1), rgba(251, 188, 4, 0.05));
+        border-color: rgba(251, 188, 4, 0.2);
+        color: var(--warning);
+    }
+
+    .action-edit:hover {
+        background: linear-gradient(135deg, rgba(251, 188, 4, 0.2), rgba(251, 188, 4, 0.1));
+        border-color: var(--warning);
+    }
+
+    .action-delete {
+        background: linear-gradient(135deg, rgba(234, 67, 53, 0.1), rgba(234, 67, 53, 0.05));
+        border-color: rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .action-delete:hover {
+        background: linear-gradient(135deg, rgba(234, 67, 53, 0.2), rgba(234, 67, 53, 0.1));
+        border-color: var(--danger);
+    }
+
+    .action-add {
+        background: linear-gradient(135deg, rgba(52, 168, 83, 0.1), rgba(52, 168, 83, 0.05));
+        border-color: rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .action-add:hover {
+        background: linear-gradient(135deg, rgba(52, 168, 83, 0.2), rgba(52, 168, 83, 0.1));
+        border-color: var(--success);
+    }
+
+    .action-back {
+        background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(66, 133, 244, 0.05));
+        border-color: rgba(66, 133, 244, 0.2);
+        color: var(--primary);
+    }
+
+    .action-back:hover {
+        background: linear-gradient(135deg, rgba(66, 133, 244, 0.2), rgba(66, 133, 244, 0.1));
+        border-color: var(--primary);
+    }
+
+    /* Statistics */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        padding: 15px;
+        border: 1px solid var(--divider);
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-disabled);
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Animation */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .details-container {
+            padding: 15px;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .detail-label {
+            width: 45%;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .payment-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .action-button {
+            padding: 12px 16px;
+            font-size: 0.9375rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="details-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-money-bill-wave"></i>
+            Payment Details
+        </h1>
+        
+        <nav class="breadcrumb">
+            <div class="breadcrumb-item">
+                <a href="{% url 'home' %}" class="breadcrumb-link">Home</a>
+                <span class="breadcrumb-separator">/</span>
+            </div>
+            <div class="breadcrumb-item">
+                <a href="{% url 'tithepayment:tithepayment_list' %}" class="breadcrumb-link">Tithe Payments</a>
+                <span class="breadcrumb-separator">/</span>
+            </div>
+            <div class="breadcrumb-item active">
+                Payment Details
+            </div>
+        </nav>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <div class="alert-content">
+                <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="layout-grid">
+        <!-- Main Content -->
+        <div>
+            <!-- Payment Details Card -->
+            <div class="card">
+                <div class="card-header" style="padding-bottom: 20px; border-bottom: 1px solid var(--divider);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Payment Information
+                        </h3>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="{% url 'tithepayment:tithepayment_update' payment.pk %}" 
+                               class="action-button action-edit" 
+                               style="padding: 10px 16px; font-size: 0.875rem;">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit</span>
+                            </a>
+                            <a href="{% url 'tithepayment:tithepayment_list' %}" 
+                               class="action-button action-back" 
+                               style="padding: 10px 16px; font-size: 0.875rem;">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Back to List</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="details-grid">
+                        <!-- Member Details -->
+                        <div class="detail-section">
+                            <h4 class="detail-section-title">
+                                <i class="fas fa-user"></i>
+                                Member Details
+                            </h4>
+                            <table class="detail-table">
+                                <tbody>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Member Name:</td>
+                                        <td class="detail-value">{{ payment.name }}</td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Contact Number:</td>
+                                        <td class="detail-value">{{ payment.contact_number }}</td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Member ID:</td>
+                                        <td class="detail-value">{{ payment.name.id }}</td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Membership Date:</td>
+                                        <td class="detail-value">{{ payment.name.created_at|date:"M d, Y"|default:"Not available" }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <!-- Member Statistics -->
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">Tsh {{ member_total_contributions|floatformat:2 }}</div>
+                                    <div class="stat-label">Total Contributions</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ member_payment_count }}</div>
+                                    <div class="stat-label">Total Payments</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details -->
+                        <div class="detail-section">
+                            <h4 class="detail-section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Payment Details
+                            </h4>
+                            <table class="detail-table">
+                                <tbody>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Amount:</td>
+                                        <td class="detail-value">
+                                            <strong>Tsh {{ payment.amount }}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Payment Method:</td>
+                                        <td class="detail-value">
+                                            <span class="badge {% if payment.status == 'cash' %}badge-success{% else %}badge-primary{% endif %}">
+                                                {{ payment.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Payment Date:</td>
+                                        <td class="detail-value">{{ payment.date|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Created:</td>
+                                        <td class="detail-value">{{ payment.date|timesince }} ago</td>
+                                    </tr>
+                                    <tr class="detail-row">
+                                        <td class="detail-label">Payment ID:</td>
+                                        <td class="detail-value">#{{ payment.id }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Recent Payments -->
+            <div class="card" style="margin-bottom: 25px;">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Recent Payments from {{ payment.name }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if related_payments %}
+                    <ul class="payments-list">
+                        {% for related_payment in related_payments %}
+                        <a href="{% url 'tithepayment:tithepayment_detail' related_payment.pk %}" 
+                           class="payment-item">
+                            <div class="payment-header">
+                                <div class="payment-amount">Tsh {{ related_payment.amount }}</div>
+                                <div class="payment-date">{{ related_payment.date|date:"M d, Y" }}</div>
+                            </div>
+                            <div class="payment-method">
+                                <span class="badge {% if related_payment.status == 'cash' %}badge-success{% else %}badge-primary{% endif %}">
+                                    {{ related_payment.get_status_display }}
+                                </span>
+                                <span style="color: var(--text-secondary);">Payment #{{ related_payment.id }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <p>No other payments found for this member.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="{% url 'tithepayment:tithepayment_update' payment.pk %}" 
+                           class="action-button action-edit">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit This Payment</span>
+                        </a>
+                        
+                        <a href="{% url 'tithepayment:tithepayment_delete' payment.pk %}" 
+                           class="action-button action-delete">
+                            <i class="fas fa-trash"></i>
+                            <span>Delete This Payment</span>
+                        </a>
+                        
+                        <a href="{% url 'tithepayment:tithepayment_create' %}?member={{ payment.name.id }}" 
+                           class="action-button action-add">
+                            <i class="fas fa-plus"></i>
+                            <span>New Payment for {{ payment.name }}</span>
+                        </a>
+                        
+                        <a href="{% url 'tithepayment:tithepayment_list' %}" 
+                           class="action-button action-back">
+                            <i class="fas fa-list"></i>
+                            <span>View All Payments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').style.display = 'none';
+        });
+    });
+    
+    // Auto-remove alerts after 5 seconds
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.3s';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.style.display = 'none';
+                }
+            }, 300);
+        }, 5000);
+    });
+    
+    // Add hover effect to payment items
+    document.querySelectorAll('.payment-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+    
+    // Confirm delete action
+    document.querySelector('.action-delete')?.addEventListener('click', function(e) {
+        if (!confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Escape key to close alerts
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.display = 'none';
+            });
+        }
+        
+        // Ctrl/Cmd + E to edit
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            const editBtn = document.querySelector('.action-edit');
+            if (editBtn) editBtn.click();
+        }
+        
+        // Ctrl/Cmd + N for new payment
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            const newBtn = document.querySelector('.action-add');
+            if (newBtn) newBtn.click();
+        }
+    });
+    
+    // Add animation to stats cards
+    document.querySelectorAll('.stat-card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 100}ms`;
+        card.style.animation = 'slideUp 0.4s ease forwards';
+        card.style.opacity = '0';
+    });
+    
+    // Format currency display
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-TZ', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        }).format(amount);
+    }
+    
+    // Update currency displays
+    document.querySelectorAll('.stat-value').forEach(element => {
+        const text = element.textContent.trim();
+        if (text.startsWith('Tsh')) {
+            const amount = parseFloat(text.replace('Tsh', '').replace(/,/g, ''));
+            if (!isNaN(amount)) {
+                element.textContent = formatCurrency(amount);
+            }
+        }
+    });
+    
+    // Update payment amounts
+    document.querySelectorAll('.payment-amount').forEach(element => {
+        const text = element.textContent.trim();
+        if (text.startsWith('Tsh')) {
+            const amount = parseFloat(text.replace('Tsh', '').replace(/,/g, ''));
+            if (!isNaN(amount)) {
+                element.textContent = formatCurrency(amount);
+            }
+        }
+    });
+    
+    // Highlight active payment in list
+    const currentPaymentId = {{ payment.id }};
+    document.querySelectorAll('.payment-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href && href.includes(`/detail/${currentPaymentId}/`)) {
+            item.style.background = 'linear-gradient(135deg, rgba(26, 115, 232, 0.1), rgba(26, 115, 232, 0.05))';
+            item.style.borderColor = 'rgba(26, 115, 232, 0.2)';
+            item.style.cursor = 'default';
+            item.style.pointerEvents = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

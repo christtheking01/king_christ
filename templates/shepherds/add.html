@@ -1,0 +1,649 @@
+{% extends 'base.html' %}
+
+{% block internal_style %}
+<style>
+    /* Form Container */
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 16px 20px;
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        color: white;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Form Styles */
+    .form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    /* Leaders Container */
+    .leaders-container {
+        margin: 20px 0;
+    }
+
+    .leader-card {
+        background: var(--background);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--divider);
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+    }
+
+    .leader-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .leader-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Remove Button */
+    .remove-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .remove-btn:hover {
+        background: var(--danger);
+        color: white;
+    }
+
+    .remove-btn.hidden {
+        display: none;
+    }
+
+    /* Leader Grid */
+    .leader-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .leader-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Select Dropdown */
+    .select-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 14px;
+        padding-right: 35px;
+    }
+
+    /* Phone Input */
+    .phone-input {
+        position: relative;
+    }
+
+    .phone-prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        pointer-events: none;
+    }
+
+    .phone-input .form-control {
+        padding-left: 40px;
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    .btn-add {
+        background: var(--primary);
+        color: white;
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .btn-add:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit {
+        background: var(--success);
+        color: white;
+        width: 100%;
+        padding: 10px 16px;
+        font-weight: 600;
+    }
+
+    .btn-submit:hover {
+        background: var(--secondary-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Textarea */
+    .form-control.textarea {
+        min-height: 80px;
+        resize: vertical;
+        font-size: 0.875rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--divider);
+    }
+
+    /* Messages */
+    .alert-message {
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.875rem;
+    }
+
+    .alert-success {
+        background: rgba(52, 168, 83, 0.1);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .alert-danger {
+        background: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 2px;
+        font-size: 0.875rem;
+        opacity: 0.7;
+        margin-left: auto;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .leader-card {
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .leader-card {
+            padding: 12px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message alert-{{ message.tags }}">
+            <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-users"></i>
+                Add Community Leaders
+            </h2>
+        </div>
+        
+        <div class="card-body">
+            <form action="{% url 'create_shepherd' %}" method="post" class="form" id="communityLeadersForm">
+                {% csrf_token %}
+                
+                <!-- Community Selection -->
+                <div class="form-group">
+                    <label for="community_name" class="form-label">Community Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="community_name" 
+                           name="community_name" 
+                           list="communities-list" 
+                           required 
+                           autofocus
+                           placeholder="Type community name">
+                    
+                    <datalist id="communities-list">
+                        {% for community in communities %}
+                            <option value="{{ community.name }}">
+                        {% endfor %}
+                    </datalist>
+                    
+                    <div class="form-text">Select existing or enter new community</div>
+                </div>
+
+                <!-- Leaders Container -->
+                <div class="leaders-container" id="leadersContainer">
+                    <!-- First Leader -->
+                    <div class="leader-card">
+                        <div class="leader-header">
+                            <div class="leader-title">Leader #1</div>
+                            <button type="button" class="remove-btn hidden" aria-label="Remove leader">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="leader-grid">
+                            <!-- Full Name -->
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="leaders_name[]" 
+                                       required
+                                       placeholder="Leader's name">
+                            </div>
+                            
+                            <!-- Position -->
+                            <div class="form-group">
+                                <label class="form-label">Position</label>
+                                <select class="form-control select-control" name="leaders_position[]" required>
+                                    <option value="">Select Position</option>
+                                    <option value="CHAIR PERSON">Chair Person</option>
+                                    <option value="VICE CHAIR">Vice Chair</option>
+                                    <option value="SECRETARY">Secretary</option>
+                                    <option value="VICE SECRETARY">Vice Secretary</option>
+                                    <option value="ACCOUNTANT">Accountant</option>
+                                    <option value="CHAIRPERSON">Chairperson</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Phone Number -->
+                            <div class="form-group full-width">
+                                <label class="form-label">Phone Number</label>
+                                <div class="phone-input">
+                                    <span class="phone-prefix">+255</span>
+                                    <input type="tel" 
+                                           class="form-control" 
+                                           name="leaders_phone[]" 
+                                           placeholder="XXXXXXXXX" 
+                                           pattern="[0-9]{9}" 
+                                           required
+                                           inputmode="tel">
+                                </div>
+                                <div class="form-text">9 digits after +255</div>
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="form-group full-width">
+                                <label class="form-label">Description (Optional)</label>
+                                <textarea class="form-control textarea" 
+                                          name="leaders_description[]" 
+                                          rows="2"
+                                          placeholder="Additional information"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add More Leaders Button -->
+                <div class="form-group">
+                    <button type="button" class="btn btn-add" id="addLeaderBtn">
+                        <i class="fas fa-plus"></i> Add Another Leader
+                    </button>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save"></i> Save All Leaders
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const leadersContainer = document.getElementById('leadersContainer');
+    const addLeaderBtn = document.getElementById('addLeaderBtn');
+    const form = document.getElementById('communityLeadersForm');
+    let leaderCount = 1;
+
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert-message').style.display = 'none';
+        });
+    });
+
+    // Auto-remove alerts after 5 seconds
+    document.querySelectorAll('.alert-message').forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.3s';
+            setTimeout(() => {
+                if (alert.parentNode) alert.style.display = 'none';
+            }, 300);
+        }, 5000);
+    });
+
+    // Add new leader function
+    function addNewLeader() {
+        leaderCount++;
+        
+        const newLeaderCard = document.createElement('div');
+        newLeaderCard.className = 'leader-card';
+        
+        newLeaderCard.innerHTML = `
+            <div class="leader-header">
+                <div class="leader-title">Leader #${leaderCount}</div>
+                <button type="button" class="remove-btn" aria-label="Remove leader">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="leader-grid">
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           name="leaders_name[]" 
+                           required
+                           placeholder="Leader's name">
+                </div>
+                
+                <!-- Position -->
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <select class="form-control select-control" name="leaders_position[]" required>
+                        <option value="">Select Position</option>
+                        <option value="CHAIR PERSON">Chair Person</option>
+                        <option value="VICE CHAIR">Vice Chair</option>
+                        <option value="SECRETARY">Secretary</option>
+                        <option value="VICE SECRETARY">Vice Secretary</option>
+                        <option value="ACCOUNTANT">Accountant</option>
+                        <option value="CHAIRPERSON">Chairperson</option>
+                    </select>
+                </div>
+                
+                <!-- Phone Number -->
+                <div class="form-group full-width">
+                    <label class="form-label">Phone Number</label>
+                    <div class="phone-input">
+                        <span class="phone-prefix">+255</span>
+                        <input type="tel" 
+                               class="form-control" 
+                               name="leaders_phone[]" 
+                               placeholder="XXXXXXXXX" 
+                               pattern="[0-9]{9}" 
+                               required
+                               inputmode="tel">
+                    </div>
+                    <div class="form-text">9 digits after +255</div>
+                </div>
+                
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea class="form-control textarea" 
+                              name="leaders_description[]" 
+                              rows="2"
+                              placeholder="Additional information"></textarea>
+                </div>
+            </div>
+        `;
+        
+        leadersContainer.appendChild(newLeaderCard);
+        
+        // Show remove button for all except first
+        if (leaderCount > 1) {
+            const firstRemoveBtn = document.querySelector('.leader-card:first-child .remove-btn');
+            if (firstRemoveBtn) firstRemoveBtn.classList.remove('hidden');
+        }
+        
+        // Add remove functionality to new button
+        const removeBtn = newLeaderCard.querySelector('.remove-btn');
+        removeBtn.addEventListener('click', function() {
+            leadersContainer.removeChild(newLeaderCard);
+            updateLeaderNumbers();
+        });
+        
+        // Focus on the first input of the new card
+        setTimeout(() => {
+            const firstInput = newLeaderCard.querySelector('input');
+            if (firstInput) firstInput.focus();
+        }, 100);
+        
+        // Scroll to show new card
+        newLeaderCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Update leader numbers
+    function updateLeaderNumbers() {
+        const leaderCards = document.querySelectorAll('.leader-card');
+        leaderCards.forEach((card, index) => {
+            const title = card.querySelector('.leader-title');
+            title.textContent = `Leader #${index + 1}`;
+            
+            // Hide remove button if only one leader remains
+            const removeBtn = card.querySelector('.remove-btn');
+            if (leaderCards.length === 1) {
+                removeBtn.classList.add('hidden');
+            } else {
+                removeBtn.classList.remove('hidden');
+            }
+        });
+        
+        leaderCount = leaderCards.length;
+    }
+
+    // Add leader button click
+    addLeaderBtn.addEventListener('click', addNewLeader);
+
+    // Remove leader functionality for existing buttons
+    document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const leaderCard = this.closest('.leader-card');
+            leadersContainer.removeChild(leaderCard);
+            updateLeaderNumbers();
+        });
+    });
+
+    // Phone number formatting
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'leaders_phone[]' && e.target.type === 'tel') {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 9) value = value.substring(0, 9);
+            e.target.value = value;
+        }
+    });
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const communityName = document.getElementById('community_name').value.trim();
+        const leaderCards = document.querySelectorAll('.leader-card');
+        
+        if (!communityName) {
+            e.preventDefault();
+            alert('Please enter a community name');
+            document.getElementById('community_name').focus();
+            return false;
+        }
+        
+        if (leaderCards.length === 0) {
+            e.preventDefault();
+            alert('Please add at least one leader');
+            addLeaderBtn.focus();
+            return false;
+        }
+        
+        // Validate phone numbers
+        let valid = true;
+        const phoneInputs = document.querySelectorAll('input[name="leaders_phone[]"]');
+        phoneInputs.forEach(input => {
+            const digits = input.value.replace(/\D/g, '');
+            if (digits.length !== 9) {
+                valid = false;
+                input.style.borderColor = 'var(--danger)';
+            }
+        });
+        
+        if (!valid) {
+            e.preventDefault();
+            alert('Please enter valid 9-digit phone numbers');
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('.btn-submit');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        submitBtn.disabled = true;
+    });
+
+    // Keyboard shortcut to add leader
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            addNewLeader();
+        }
+    });
+});
+</script>
+{% endblock %}

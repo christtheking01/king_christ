@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #cbd5e1;
+        --radius: 12px;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-wrapper {
+        background-color: var(--bg);
+        min-height: 100vh;
+        padding: 2rem 1rem;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .edit-card {
+        background: var(--card-bg);
+        max-width: 1000px;
+        margin: 0 auto;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+    }
+
+    .header-section {
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
+
+    .header-section h2 { color: var(--text-main); margin: 0; }
+
+    .leader-entry {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: white;
+        color: var(--text-main);
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .btn-add {
+        background: white;
+        color: var(--primary);
+        border: 2px dashed var(--primary);
+        width: 100%;
+        padding: 1rem;
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+        margin: 1rem 0 2rem 0;
+        transition: background 0.2s;
+    }
+
+    .btn-add:hover { background: #f5f3ff; }
+
+    .btn-save {
+        background: var(--primary);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: var(--radius);
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-save:hover { background: var(--primary-hover); transform: translateY(-1px); }
+</style>
+
+<div class="edit-wrapper">
+    <div class="edit-card">
+        <div class="header-section">
+            <h2>Update Ministry: {{ ministry_name }}</h2>
+            <p style="color: var(--text-muted);">Modify existing leaders or add new ones to this ministry.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Ministry Name Header -->
+            <div class="form-group">
+                <label>Ministry Name</label>
+                <input type="text" name="ministry_name" value="{{ ministry_name }}" class="input-field" required>
+            </div>
+
+            <div id="leader-list">
+                {% for leader in leaders %}
+                <div class="leader-entry">
+                    <div class="grid-container">
+                        <!-- Leader Name -->
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="leaders_name[]" value="{{ leader.leader }}" class="input-field" required>
+                        </div>
+
+                        <!-- Position Selection -->
+                        <div class="form-group">
+                            <label>Position</label>
+                            <select name="leaders_position[]" class="input-field" required>
+                                <option value="">Select Position</option>
+                                {% for code, label in position_choices %}
+                                    <option value="{{ code }}" {% if leader.position == code %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Community Selection -->
+                        <div class="form-group">
+                            <label>Community</label>
+                            <select name="leaders_community[]" class="input-field" required>
+                                <option value="">Select Community</option>
+                                {% for comm in communities %}
+                                    <option value="{{ comm.pk }}" {% if leader.description.pk == comm.pk %}selected{% endif %}>
+                                        {{ comm.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" name="leaders_phone[]" value="{{ leader.phone|default:'' }}" class="input-field">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Dynamic Button -->
+            <button type="button" id="add-row-btn" class="btn-add">
+                + Add Another Leader to {{ ministry_name }}
+            </button>
+
+            <button type="submit" class="btn-save">SAVE ALL UPDATES</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Logic to add new rows
+    document.getElementById('add-row-btn').addEventListener('click', function() {
+        const container = document.getElementById('leader-list');
+        const rows = container.getElementsByClassName('leader-entry');
+        
+        // Clone the first leader entry as a template
+        const newRow = rows[0].cloneNode(true);
+        
+        // Clear all data from the cloned row so the user starts fresh
+        const inputs = newRow.querySelectorAll('input');
+        const selects = newRow.querySelectorAll('select');
+        
+        inputs.forEach(input => input.value = '');
+        selects.forEach(select => {
+            select.selectedIndex = 0; // Resets selection to "Select Position/Community"
+        });
+
+        container.appendChild(newRow);
+    });
+</script>
+
+{% endblock %}

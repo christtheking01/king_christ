@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --radius: 12px;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-wrapper {
+        background-color: var(--bg-color);
+        min-height: 90vh;
+        padding: 2rem 1rem;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .form-card {
+        background: var(--card-bg);
+        max-width: 900px;
+        margin: 0 auto;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+    }
+
+    .header-section {
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
+
+    .header-section h2 {
+        color: var(--text-main);
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .form-grid-top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .row-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .member-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr 1.5fr;
+        gap: 1rem;
+        background: #f1f5f9;
+        padding: 1.25rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+    }
+
+    .input-field {
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .btn-add {
+        background: #ecf0ff;
+        color: var(--primary-color);
+        border: 2px dashed var(--primary-color);
+        width: 100%;
+        padding: 1rem;
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: 0.2s;
+    }
+
+    .btn-add:hover { background: #e0e7ff; }
+
+    .btn-save {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: var(--radius);
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-save:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+        .form-grid-top, .member-row { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="header-section">
+            <h2>Committee Registration</h2>
+            <p style="color: var(--text-muted);">Assign members to a committee and define their roles.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Committee Main Details -->
+            <div class="form-grid-top">
+                <div class="form-group">
+                    <label>Committee Name</label>
+                    <input type="text" name="commitee_name" class="input-field" placeholder="e.g. Finance Board" required>
+                </div>
+                <div class="form-group">
+                    <label>Functions / Description</label>
+                    <input type="text" name="description" class="input-field" placeholder="e.g. Oversees budget and audits">
+                </div>
+            </div>
+
+            <label style="margin-bottom: 1rem; display: block;">Members & Assignments</label>
+            
+            <div id="row-container" class="row-container">
+                <!-- Member Row Template -->
+                <div class="member-row">
+                    <div class="form-group">
+                        <label>Member Name</label>
+                        <input list="member-data" name="members[]" class="input-field member-input" placeholder="Search Member..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select name="positions[]" class="input-field" required>
+                            <option value="">Select Role</option>
+                            {% for val, label in positions %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone (Auto)</label>
+                        <input type="tel" name="phones[]" class="input-field phone-input" placeholder="0xxx-xxx-xxx">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datalist for Search -->
+            <datalist id="member-data">
+                {% for m in members %}
+                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}">
+                {% endfor %}
+            </datalist>
+
+            <button type="button" id="add-row-btn" class="btn-add">
+                + Add Another Member Position
+            </button>
+
+            <button type="submit" class="btn-save">SUBMIT COMMITTEE RECORDS</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 1. Autopopulate Phone Number logic
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('member-input')) {
+            const input = e.target;
+            const value = input.value;
+            const datalist = document.getElementById('member-data');
+            const parentRow = input.closest('.member-row');
+            const phoneField = parentRow.querySelector('.phone-input');
+
+            // Look for matching name in datalist
+            const option = Array.from(datalist.options).find(opt => opt.value === value);
+
+            if (option) {
+                const phone = option.getAttribute('data-phone');
+                phoneField.value = phone ? phone : '';
+            }
+        }
+    });
+
+    // 2. Add Dynamic Rows logic
+    document.getElementById('add-row-btn').addEventListener('click', function() {
+        const container = document.getElementById('row-container');
+        const firstRow = container.querySelector('.member-row');
+        
+        // Clone row
+        const newRow = firstRow.cloneNode(true);
+        
+        // Reset values in new row
+        newRow.querySelectorAll('input').forEach(input => input.value = '');
+        newRow.querySelector('select').selectedIndex = 0;
+
+        container.appendChild(newRow);
+    });
+</script>
+
+{% endblock %}

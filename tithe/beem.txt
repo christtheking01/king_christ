@@ -1,0 +1,136 @@
+from django.conf import settings
+import africastalking
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Initialize Africa's Talking SDK
+# Ensure these are in your settings.py (Username should be 'sandbox' for testing)
+africastalking.initialize(
+    getattr(settings, 'AFRICASTALKING_USERNAME', 'sandbox'),
+    getattr(settings, 'AFRICASTALKING_API_KEY', '')
+)
+at_sms = africastalking.SMS
+
+class SMSService:
+    def send_sms(self, phone_number, message):
+        """
+        Sends SMS via Africa's Talking. 
+        Uses Sandbox if username is set to 'sandbox'.
+        """
+        # 1. Validation for International Format (Required by AT)
+        if not phone_number.startswith('+'):
+            logger.error(f"Invalid phone format: {phone_number}. Must start with +")
+            return {'success': False, 'error': 'Phone number must be in international format (e.g., +255...)'}
+
+        # 2. Get Sender ID (Use None or a Sandbox Shortcode like '12345' for testing)
+        sender_id = getattr(settings, 'AFRICASTALKING_SENDER_ID', None)
+
+        try:
+            # Prepare parameters
+            # AT Python SDK uses 'recipients' (list) and 'message' (string)
+            params = {
+                'message': message,
+                'recipients': [phone_number]
+            }
+            if sender_id:
+                params['sender_id'] = sender_id
+
+            # 3. Send via SDK
+            response = at_sms.send(**params)
+            
+            # 4. Parse Africa's Talking Response
+            # Response structure: {'SMSMessageData': {'Message': '...', 'Recipients': [{...}]}}
+            recipients = response['SMSMessageData']['Recipients']
+            
+            if recipients:
+                status = recipients[0]['status']
+                msg_id = recipients[0].get('messageId', 'no_id')
+                
+                is_success = status.lower() in ['success', 'sent']
+
+                logger.info(
+                    "AT SMS TRANSACTION: To=%s | Status=%s | MsgID=%s",
+                    phone_number, status, msg_id
+                )
+
+                return {
+                    'success': is_success,
+                    'message_id': msg_id,
+                    'provider': 'africastalking',
+                    'data': response
+                }
+
+            return {'success': False, 'error': 'No recipient data returned', 'provider': 'africastalking'}
+
+        except Exception as e:
+            logger.exception("Africa's Talking SDK Error")
+            return {
+                'success': False, 
+                'error': str(e), 
+                'provider': 'africastalking'
+            }
+
+# Instantiate for use across the project
+sms_service = SMSService()
+
+
+
+// signals for beem
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+from .models import TithePayment
+from .sms_service import sms_service 
+import logging
+import re
+
+logger = logging.getLogger(__name__)
+
+def format_phone_number(phone):
+    """Ensures number is in 255XXXXXXXXX format for Beem/Africa's Talking"""
+    cleaned = re.sub(r'\D', '', str(phone))  # Remove non-digits
+    if cleaned.startswith('0'):
+        return '255' + cleaned[1:]
+    if cleaned.startswith('+'):
+        return cleaned[1:]
+    return cleaned
+
+@receiver(post_save, sender=TithePayment)
+def send_tithe_sms_notification(sender, instance, created, **kwargs):
+    # 1. Check if feature is enabled
+    if not getattr(settings, 'SEND_SMS_ENABLED', False):
+        return # Just exit; return value is ignored by Django signals
+
+    try:
+        # 2. Validate and Format Phone
+        raw_phone = getattr(instance, 'contact_number', None)
+        if not raw_phone:
+            logger.warning(f"No phone number for Tithe ID {instance.id}")
+            return
+        
+        phone_number = format_phone_number(raw_phone)
+        
+        # 3. Construct Message
+        # Accessing instance.name.name assumes a Foreign Key to a Member model
+        member_name = instance.name.name if hasattr(instance.name, 'name') else "Member"
+        
+        if created:
+            message = f"Kristo {member_name}, tunakushukuru kwa zaka yako ya {instance.amount} Tsh imepokelewa. malaki 3:10-11. Ubarikiwe"
+        else:
+            # Only send on update if specifically required to avoid spamming users
+            message = f"Habari {member_name}, taarifa za zaka yako zimepata mabadiliko kuwa Tsh {instance.amount:,}. Asante!"
+        
+        # 4. Execute Send
+        # Note: In 2026, consider: my_task.delay(phone_number, message) for Celery
+        result = sms_service.send_sms(phone_number, message)
+        
+        if result.get('success'):
+            logger.info(f"SMS SUCCESS: ID {instance.id} via {result.get('provider')}")
+        else:
+            logger.error(f"SMS FAILURE: ID {instance.id} | Error: {result.get('error')}")
+            
+    except Exception as e:
+        logger.error(f"CRITICAL SMS ERROR: {str(e)}", exc_info=True)

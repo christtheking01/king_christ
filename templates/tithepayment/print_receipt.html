@@ -1,0 +1,825 @@
+{% extends 'base.html' %}
+
+{% block internal_style %}
+<style>
+    /* Receipt Container */
+    .receipt-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        animation: slideUp 0.3s ease;
+    }
+
+    .card-header {
+        padding: 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        position: relative;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-body {
+        padding: 32px;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .status-badge i {
+        font-size: 0.75rem;
+    }
+
+    /* Receipt Preview */
+    .receipt-preview {
+        background: white;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--divider);
+        padding: 32px;
+        margin-bottom: 32px;
+        font-family: 'Courier New', Monaco, monospace;
+        color: #333;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .receipt-preview::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #ddd;
+    }
+
+    .church-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .church-info {
+        font-size: 0.875rem;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .receipt-title {
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 24px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+    }
+
+    .receipt-title::before,
+    .receipt-title::after {
+        content: '✦';
+        color: var(--primary-light);
+        margin: 0 12px;
+    }
+
+    /* Receipt Details */
+    .receipt-details {
+        margin: 32px 0;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    @media (min-width: 480px) {
+        .detail-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px 0;
+        border-bottom: 1px dashed #eee;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #555;
+        min-width: 120px;
+    }
+
+    .detail-value {
+        text-align: right;
+        color: #333;
+        word-break: break-word;
+    }
+
+    /* Amount Display */
+    .amount-display {
+        text-align: center;
+        margin: 32px 0;
+        padding: 32px;
+        background: linear-gradient(135deg, rgba(52, 168, 83, 0.1), rgba(52, 168, 83, 0.05));
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .amount-display::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--success), var(--primary));
+    }
+
+    .amount-label {
+        font-size: 1rem;
+        color: var(--success);
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .amount-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--success);
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .amount-currency {
+        font-size: 1rem;
+        color: #666;
+        font-weight: 600;
+    }
+
+    /* Receipt Footer */
+    .receipt-footer {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 2px dashed #ddd;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .generated-info {
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .thank-you {
+        font-weight: 700;
+        color: var(--primary);
+        margin-top: 16px;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Print Marks (for actual printing) */
+    @media print {
+        .receipt-preview {
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    /* Controls */
+    .controls-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        padding: 24px;
+        background: var(--background);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        margin-top: 32px;
+    }
+
+    /* Button Styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-print {
+        background: linear-gradient(135deg, var(--success) 0%, var(--secondary-dark) 100%);
+        color: white;
+        font-weight: 600;
+    }
+
+    .btn-print:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-list {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-list:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-regenerate {
+        background: var(--warning);
+        color: var(--text-primary);
+    }
+
+    .btn-regenerate:hover:not(:disabled) {
+        background: #f57c00;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--surface);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .receipt-container {
+            padding: 15px;
+        }
+        
+        .card-body {
+            padding: 24px;
+        }
+        
+        .receipt-preview {
+            padding: 24px;
+        }
+        
+        .amount-value {
+            font-size: 2rem;
+        }
+        
+        .controls-container {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .receipt-preview {
+            padding: 20px;
+        }
+        
+        .church-name {
+            font-size: 1.25rem;
+        }
+        
+        .receipt-title {
+            font-size: 1.125rem;
+        }
+        
+        .amount-value {
+            font-size: 1.75rem;
+        }
+        
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes printSuccess {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Loading State */
+    .loading {
+        position: relative;
+    }
+
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary);
+        z-index: 10;
+    }
+
+    /* Receipt Watermark (for printed copies) */
+    .receipt-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 4rem;
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.03);
+        white-space: nowrap;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    @media print {
+        .receipt-watermark {
+            display: block;
+        }
+    }
+
+    /* Print Status */
+    .print-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+        font-weight: 500;
+        animation: slideUp 0.3s ease;
+    }
+
+    .print-status-success {
+        background: rgba(52, 168, 83, 0.1);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .print-status-warning {
+        background: rgba(251, 188, 4, 0.1);
+        border: 1px solid rgba(251, 188, 4, 0.2);
+        color: var(--warning);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <span><i class="fas fa-print"></i> Print Tithe Receipt</span>
+                <span class="status-badge">
+                    <i class="fas fa-{% if receipt.is_printed %}check-circle{% else %}clock{% endif %}"></i>
+                    {% if receipt.is_printed %}Printed{% else %}Not Printed{% endif %}
+                </span>
+            </h2>
+        </div>
+        
+        <div class="card-body">
+            <!-- Print Status Message -->
+            {% if receipt.is_printed %}
+            <div class="print-status print-status-success">
+                <i class="fas fa-check-circle"></i>
+                This receipt was printed on {{ receipt.printed_at|date:"F d, Y H:i" }}
+            </div>
+            {% else %}
+            <div class="print-status print-status-warning">
+                <i class="fas fa-exclamation-circle"></i>
+                This receipt has not been printed yet
+            </div>
+            {% endif %}
+            
+            <!-- Receipt Preview -->
+            <div class="receipt-preview" id="receiptContent">
+                <!-- Watermark (only shows when printed) -->
+                <div class="receipt-watermark" style="display: none;">{{ receipt.church_name }}</div>
+                
+                <!-- Header -->
+                <div class="receipt-header">
+                    <div class="church-name">CHRIST THE KING</div>
+                    <div class="church-info">
+                        <div>P.O BOX 1310</div>
+                        <div>Tel: XXX XXX XXX</div>
+                    </div>
+                </div>
+                
+                <!-- Receipt Title -->
+                <div class="receipt-title">TITHE RECEIPT</div>
+                
+                <!-- Receipt Details -->
+                <div class="receipt-details">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Receipt Number:</span>
+                            <span class="detail-value">{{ receipt.receipt_number }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value">{{ payment.date|date:"Y-m-d" }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time:</span>
+                            <span class="detail-value">{{ payment.date|date:"H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Member Information -->
+                <div class="receipt-details">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Member Name:</span>
+                            <span class="detail-value">{{ payment.name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phone Number:</span>
+                            <span class="detail-value">{{ payment.contact_number }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Method:</span>
+                            <span class="detail-value">{{ payment.get_status_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Amount Display -->
+                <div class="amount-display">
+                    <div class="amount-label">Amount Paid</div>
+                    <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
+                    <div class="amount-currency">Tanzanian Shillings</div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="receipt-footer">
+                    <div class="generated-info">
+                        <div>Generated: {{ receipt.generated_at|date:"Y-m-d H:i" }}</div>
+                        {% if receipt.is_printed %}
+                        <div>Printed: {{ receipt.printed_at|date:"Y-m-d H:i" }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="thank-you">Thank you for your tithe!</div>
+                </div>
+            </div>
+            
+            <!-- Print Controls -->
+            <div class="controls-container no-print">
+                <button id="printButton" class="btn btn-print" {% if receipt.is_printed %}disabled{% endif %}>
+                    <i class="fas fa-print"></i> 
+                    {% if receipt.is_printed %}Already Printed{% else %}Print Receipt{% endif %}
+                </button>
+                
+                <a href="{% url 'tithepayment:receipt_list' %}" class="btn btn-list">
+                    <i class="fas fa-list"></i> All Receipts
+                </a>
+                
+                {% if not receipt.is_printed %}
+                <a href="{% url 'tithepayment:auto_generate_receipt' payment.id %}" class="btn btn-regenerate">
+                    <i class="fas fa-redo"></i> Regenerate
+                </a>
+                {% endif %}
+                
+                <button onclick="window.print()" class="btn btn-secondary">
+                    <i class="fas fa-file-pdf"></i> Print Preview
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const printButton = document.getElementById('printButton');
+    const receiptContent = document.getElementById('receiptContent');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    // Format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-TZ', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount).replace('TZS', 'TZS ');
+    }
+    
+    // Update currency display
+    const amountElements = document.querySelectorAll('.amount-value');
+    amountElements.forEach(element => {
+        const text = element.textContent.trim();
+        if (text.startsWith('TZS')) {
+            const amount = parseFloat(text.replace('TZS', '').replace(/,/g, ''));
+            if (!isNaN(amount)) {
+                element.textContent = formatCurrency(amount);
+            }
+        }
+    });
+    
+    // Print button handler
+    if (printButton) {
+        printButton.addEventListener('click', function() {
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Printing...';
+            button.classList.add('loading');
+            
+            // Show watermark for print
+            const watermark = receiptContent.querySelector('.receipt-watermark');
+            if (watermark) watermark.style.display = 'block';
+            
+            // Send print request
+            fetch("{% url 'tithepayment:print_receipt' receipt.id %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Success animation
+                    button.style.animation = 'printSuccess 0.5s ease';
+                    
+                    // Show success message
+                    showNotification('✅ Receipt printed successfully!', 'success');
+                    
+                    // Reload after delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error(data.message || 'Printing failed');
+                }
+            })
+            .catch(error => {
+                console.error('Printing error:', error);
+                showNotification('❌ Printing failed: ' + error.message, 'error');
+                
+                // Reset button
+                button.disabled = false;
+                button.innerHTML = originalText;
+                button.classList.remove('loading');
+            });
+        });
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        // Remove existing notification
+        const existing = document.querySelector('.notification-toast');
+        if (existing) existing.remove();
+        
+        // Create notification
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+            color: white;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+            max-width: 400px;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Add close event
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+    
+    // Print preview
+    document.querySelector('[onclick="window.print()"]')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        const watermark = receiptContent.querySelector('.receipt-watermark');
+        if (watermark) watermark.style.display = 'block';
+        
+        // Hide non-printable elements
+        document.querySelectorAll('.no-print').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Print
+        window.print();
+        
+        // Restore display
+        setTimeout(() => {
+            document.querySelectorAll('.no-print').forEach(el => {
+                el.style.display = '';
+            });
+            if (watermark) watermark.style.display = 'none';
+        }, 500);
+    });
+    
+    // Add watermark on print dialog
+    window.addEventListener('beforeprint', () => {
+        const watermark = receiptContent.querySelector('.receipt-watermark');
+        if (watermark) watermark.style.display = 'block';
+        document.querySelectorAll('.no-print').forEach(el => {
+            el.style.display = 'none';
+        });
+    });
+    
+    window.addEventListener('afterprint', () => {
+        const watermark = receiptContent.querySelector('.receipt-watermark');
+        if (watermark) watermark.style.display = 'none';
+        document.querySelectorAll('.no-print').forEach(el => {
+            el.style.display = '';
+        });
+    });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + P to print
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            printButton.click();
+        }
+        
+        // Escape to go back
+        if (e.key === 'Escape') {
+            window.history.back();
+        }
+    });
+});
+</script>
+
+<style>
+    /* Additional styles for print */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        
+        #receiptContent,
+        #receiptContent * {
+            visibility: visible;
+        }
+        
+        #receiptContent {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20mm;
+            box-shadow: none;
+            border: none;
+        }
+        
+        .receipt-watermark {
+            opacity: 0.1 !important;
+            display: block !important;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

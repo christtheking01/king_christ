@@ -1,0 +1,1204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    /* Form Container */
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .page-title i {
+        color: var(--primary);
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-disabled);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 25px;
+    }
+
+    .alert {
+        padding: 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .alert-success {
+        background-color: rgba(52, 168, 83, 0.1);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .alert-danger {
+        background-color: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .alert-warning {
+        background-color: rgba(251, 188, 4, 0.1);
+        border: 1px solid rgba(251, 188, 4, 0.2);
+        color: var(--warning);
+    }
+
+    .alert-info {
+        background-color: rgba(66, 133, 244, 0.1);
+        border: 1px solid rgba(66, 133, 244, 0.2);
+        color: var(--info);
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1.2rem;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Layout Grid */
+    .layout-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    @media (min-width: 992px) {
+        .layout-grid {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-base);
+    }
+
+    .card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+        padding: 20px 20px 0;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: var(--primary);
+    }
+
+    /* Form Styles */
+    .form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--danger);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all var(--transition-fast);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .form-control.readonly {
+        background-color: var(--background);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+
+    .form-control.error {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.1);
+    }
+
+    .form-error {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.8125rem;
+        color: var(--danger);
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    /* Search Input */
+    .search-container {
+        position: relative;
+    }
+
+    .search-input-group {
+        position: relative;
+        display: flex;
+    }
+
+    .search-input {
+        flex: 1;
+        padding-right: 50px;
+    }
+
+    .search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-disabled);
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        transition: color 0.2s;
+        z-index: 2;
+    }
+
+    .search-clear:hover {
+        color: var(--text-primary);
+    }
+
+    /* Search Results */
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        margin-top: 4px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .search-results.show {
+        display: block;
+    }
+
+    .search-result-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--divider);
+        transition: background-color 0.2s;
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-result-item:hover {
+        background-color: var(--background);
+    }
+
+    .search-result-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+
+    .search-result-name strong {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .search-result-phone {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .search-loading {
+        padding: 20px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .search-loading i {
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Selected Member Display */
+    .selected-member {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-top: 12px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .selected-member-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .selected-member-info {
+        flex: 1;
+    }
+
+    .selected-member-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .selected-member-phone {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .selected-member-remove {
+        background: none;
+        border: none;
+        color: var(--danger);
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        border-radius: var(--radius-sm);
+    }
+
+    .selected-member-remove:hover {
+        background-color: rgba(234, 67, 53, 0.1);
+    }
+
+    /* Select Dropdown */
+    .select-container {
+        position: relative;
+    }
+
+    .select-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 45px;
+    }
+
+    /* Date Input */
+    .date-input {
+        cursor: pointer;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--divider);
+    }
+
+    /* Button Styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--surface);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+        background: var(--background);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background: #d32f2f;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-info {
+        background: var(--info);
+        color: white;
+    }
+
+    .btn-info:hover:not(:disabled) {
+        background: #1976d2;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: var(--text-primary);
+    }
+
+    .btn-warning:hover:not(:disabled) {
+        background: #f57c00;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Help Card */
+    .help-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+    }
+
+    .help-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+        color: var(--text-secondary);
+    }
+
+    .help-list i {
+        color: var(--success);
+        font-size: 0.875rem;
+        margin-top: 2px;
+    }
+
+    /* History Card */
+    .history-item {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .history-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .history-date {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .history-amount {
+        color: var(--success);
+        font-weight: 500;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .selected-member-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .selected-member-remove {
+            align-self: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-money-bill-wave"></i>
+            {% if title %}{{ title }}{% else %}{% if form.instance.pk %}Edit{% else %}Add New{% endif %} Tithe Payment{% endif %}
+        </h1>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <div class="alert-content">
+                <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="layout-grid">
+        <!-- Main Form -->
+        <div class="card">
+            <div class="card-body">
+                <form method="post" id="tithePaymentForm" class="form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <div class="alert-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="alert-close" aria-label="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Member Search -->
+                    <div class="form-group">
+                        <label class="form-label required">Select Member</label>
+                        <div class="search-container">
+                            <div class="search-input-group">
+                                <input type="text" 
+                                       class="form-control search-input" 
+                                       id="member_search" 
+                                       placeholder="Type member name to search..." 
+                                       autocomplete="off"
+                                       value="{% if form.instance.name %}{{ form.instance.name.name }}{% endif %}">
+                                <button type="button" class="search-clear" id="clear_search" title="Clear Search">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="search-results" id="member_search_results"></div>
+                            
+                            <div class="form-text">Type at least 2 characters to search members</div>
+                            
+                            <!-- Hidden field for selected member -->
+                            <input type="hidden" 
+                                   id="selected_member_id" 
+                                   name="name" 
+                                   value="{% if form.instance.name %}{{ form.instance.name.id }}{% endif %}">
+                        </div>
+                        
+                        <!-- Selected Member Display -->
+                        <div id="selected_member_display" 
+                             class="selected-member" 
+                             style="{% if not form.instance.name %}display: none;{% endif %}">
+                            <div class="selected-member-header">
+                                <div class="selected-member-info">
+                                    <div class="selected-member-name" id="selected_member_name">
+                                        {% if form.instance.name %}{{ form.instance.name.name }}{% endif %}
+                                    </div>
+                                    <div class="selected-member-phone" id="selected_member_telephone">
+                                        {% if form.instance.name %}{{ form.instance.name.telephone|default:"No telephone" }}{% endif %}
+                                    </div>
+                                </div>
+                                <button type="button" 
+                                        class="selected-member-remove" 
+                                        id="remove_member" 
+                                        title="Remove Member">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Display -->
+                        {% if form.name.errors %}
+                        <div class="form-error">
+                            {% for error in form.name.errors %}
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Telephone (Read-only) -->
+                    <div class="form-group">
+                        <label class="form-label">Telephone</label>
+                        <input type="text" 
+                               class="form-control readonly" 
+                               id="telephone_display" 
+                               readonly
+                               value="{% if form.instance.name %}{{ form.instance.name.telephone|default:'' }}{% endif %}">
+                        <input type="hidden" 
+                               id="id_contact_number" 
+                               name="contact_number"
+                               value="{% if form.instance.name %}{{ form.instance.name.telephone|default:'' }}{% endif %}">
+                        
+                        {% if form.contact_number.errors %}
+                        <div class="form-error">
+                            {% for error in form.contact_number.errors %}
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label required">Amount</label>
+                        <input type="number" 
+                               name="{{ form.amount.name }}"
+                               id="{{ form.amount.id_for_label }}"
+                               class="form-control {% if form.amount.errors %}error{% endif %}"
+                               value="{{ form.amount.value|default:'' }}"
+                               step="0.01"
+                               min="0"
+                               placeholder="Enter amount"
+                               required>
+                        {% if form.amount.errors %}
+                        <div class="form-error">
+                            {% for error in form.amount.errors %}
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}" class="form-label required">Payment Method</label>
+                        <div class="select-container">
+                            <select name="{{ form.status.name }}"
+                                    id="{{ form.status.id_for_label }}"
+                                    class="form-control select-control {% if form.status.errors %}error{% endif %}"
+                                    required>
+                                {% for value, label in form.status.field.choices %}
+                                <option value="{{ value }}" 
+                                        {% if form.status.value == value|stringformat:"s" %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if form.status.errors %}
+                        <div class="form-error">
+                            {% for error in form.status.errors %}
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-group">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">Payment Date</label>
+                        <input type="date" 
+                               name="{{ form.date.name }}"
+                               id="{{ form.date.id_for_label }}"
+                               class="form-control date-input {% if form.date.errors %}error{% endif %}"
+                               value="{{ form.date.value|date:'Y-m-d'|default:'' }}"
+                               placeholder="Select date">
+                        {% if form.date.errors %}
+                        <div class="form-error">
+                            {% for error in form.date.errors %}
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            {% if form.instance.pk %}Update Payment{% else %}Create Payment{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Help Card -->
+            <div class="card" style="margin-bottom: 25px;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Quick Help
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-primary);">
+                        Adding Tithe Payments:
+                    </h4>
+                    <ul class="help-list">
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Search for member by name</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Telephone auto-fills from member record</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Select payment method</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Enter payment amount</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Add optional date (defaults to today)</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <div class="alert-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note:</strong> Telephone is automatically retrieved from member record.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Payments (for edit mode) -->
+            {% if form.instance.pk %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Payment History
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="history-item">
+                        <div class="history-date">
+                            Created on {{ form.instance.date|date:"M d, Y" }}
+                        </div>
+                        <div class="history-amount">
+                            Amount: {{ form.instance.amount|floatformat:2 }}
+                        </div>
+                    </div>
+                    
+                    {% if form.instance.receipt_generated %}
+                    <div style="margin-top: 16px;">
+                        <a href="{% url 'tithepayment:tithepayment_detail' form.instance.pk %}" 
+                           class="btn btn-info btn-sm" style="width: 100%;">
+                            <i class="fas fa-eye"></i> View Payment Details
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const memberSearchInput = document.getElementById('member_search');
+    const memberSearchResults = document.getElementById('member_search_results');
+    const selectedMemberId = document.getElementById('selected_member_id');
+    const telephoneDisplay = document.getElementById('telephone_display');
+    const contactNumberInput = document.getElementById('id_contact_number');
+    const selectedMemberDisplay = document.getElementById('selected_member_display');
+    const selectedMemberName = document.getElementById('selected_member_name');
+    const selectedMemberTelephone = document.getElementById('selected_member_telephone');
+    const clearSearchBtn = document.getElementById('clear_search');
+    const removeMemberBtn = document.getElementById('remove_member');
+    const tithePaymentForm = document.getElementById('tithePaymentForm');
+    const amountInput = document.getElementById('{{ form.amount.id_for_label }}');
+    
+    // State
+    let searchTimeout = null;
+    
+    // Get CSRF token
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrfToken = getCSRFToken();
+    
+    // Highlight search matches
+    function highlightText(text, searchTerm) {
+        if (!searchTerm) return text;
+        const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    }
+    
+    // Member search
+    memberSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            memberSearchResults.classList.remove('show');
+            memberSearchResults.innerHTML = '';
+            return;
+        }
+        
+        // Show loading
+        memberSearchResults.innerHTML = `
+            <div class="search-loading">
+                <i class="fas fa-spinner"></i> Searching members...
+            </div>
+        `;
+        memberSearchResults.classList.add('show');
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`{% url "tithepayment:search_members" %}?search=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                memberSearchResults.innerHTML = '';
+                
+                if (data.error) {
+                    memberSearchResults.innerHTML = `
+                        <div class="search-result-item">
+                            <div class="search-result-name">Error: ${data.error}</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!data.members || data.members.length === 0) {
+                    memberSearchResults.innerHTML = `
+                        <div class="search-result-item">
+                            <div class="search-result-name">No members found</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                data.members.forEach(member => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.innerHTML = `
+                        <div class="search-result-name">
+                            ${highlightText(member.name || '', query)}
+                        </div>
+                        <div class="search-result-phone">
+                            ${member.telephone || 'No telephone'}
+                        </div>
+                    `;
+                    
+                    resultItem.addEventListener('click', () => {
+                        selectMember(
+                            member.id,
+                            member.name,
+                            member.telephone || ''
+                        );
+                    });
+                    
+                    memberSearchResults.appendChild(resultItem);
+                });
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                memberSearchResults.innerHTML = `
+                    <div class="search-result-item">
+                        <div class="search-result-name">Search failed: ${error.message}</div>
+                    </div>
+                `;
+            });
+        }, 300);
+    });
+    
+    // Select member
+    function selectMember(memberId, name, telephone) {
+        selectedMemberId.value = memberId;
+        telephoneDisplay.value = telephone;
+        contactNumberInput.value = telephone;
+        selectedMemberName.textContent = name;
+        selectedMemberTelephone.textContent = telephone || 'No telephone';
+        selectedMemberDisplay.style.display = 'block';
+        
+        memberSearchInput.value = '';
+        memberSearchResults.classList.remove('show');
+        memberSearchResults.innerHTML = '';
+        
+        // Focus on amount field
+        amountInput.focus();
+    }
+    
+    // Clear search
+    clearSearchBtn.addEventListener('click', () => {
+        memberSearchInput.value = '';
+        memberSearchResults.classList.remove('show');
+        memberSearchResults.innerHTML = '';
+        memberSearchInput.focus();
+    });
+    
+    // Remove selected member
+    removeMemberBtn.addEventListener('click', () => {
+        selectedMemberId.value = '';
+        telephoneDisplay.value = '';
+        contactNumberInput.value = '';
+        selectedMemberDisplay.style.display = 'none';
+        memberSearchInput.focus();
+    });
+    
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!memberSearchInput.contains(e.target) && 
+            !memberSearchResults.contains(e.target) && 
+            !clearSearchBtn.contains(e.target)) {
+            memberSearchResults.classList.remove('show');
+        }
+    });
+    
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').style.display = 'none';
+        });
+    });
+    
+    // Form validation
+    tithePaymentForm.addEventListener('submit', function(e) {
+        const memberId = selectedMemberId.value;
+        const amount = amountInput.value;
+        
+        if (!memberId) {
+            e.preventDefault();
+            showNotification('Please select a member from the search results.', 'error');
+            memberSearchInput.focus();
+            return false;
+        }
+        
+        if (!amount || parseFloat(amount) <= 0) {
+            e.preventDefault();
+            showNotification('Please enter a valid amount greater than 0.', 'error');
+            amountInput.focus();
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type}`;
+        notification.innerHTML = `
+            <div class="alert-content">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        document.querySelector('.messages-container').prepend(notification);
+        
+        // Add close event
+        notification.querySelector('.alert-close').addEventListener('click', function() {
+            notification.style.display = 'none';
+        });
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+    
+    // Set today as default date if empty
+    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+    if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+    
+    // Enhance number input
+    amountInput.addEventListener('focus', function() {
+        this.select();
+    });
+    
+    amountInput.addEventListener('input', function() {
+        if (this.value && parseFloat(this.value) < 0) {
+            this.value = Math.abs(parseFloat(this.value));
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + / to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+            e.preventDefault();
+            memberSearchInput.focus();
+        }
+        
+        // Escape to close search results
+        if (e.key === 'Escape') {
+            memberSearchResults.classList.remove('show');
+        }
+    });
+    
+    // Initialize form with validation classes
+    function initializeFormValidation() {
+        const formControls = document.querySelectorAll('.form-control');
+        
+        formControls.forEach(control => {
+            // Check for existing errors
+            const errorDiv = control.nextElementSibling;
+            if (errorDiv && errorDiv.classList.contains('form-error')) {
+                control.classList.add('error');
+            }
+            
+            // Add validation on blur
+            control.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+    }
+    
+    function validateField(field) {
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            field.classList.add('error');
+            return false;
+        }
+        
+        if (field.type === 'number' && field.value) {
+            const value = parseFloat(field.value);
+            if (value < 0) {
+                field.classList.add('error');
+                return false;
+            }
+        }
+        
+        field.classList.remove('error');
+        return true;
+    }
+    
+    // Initialize form
+    initializeFormValidation();
+});
+</script>
+{% endblock %}

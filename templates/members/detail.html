@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<style>
+:root {
+    --surface: #FFFFFF;
+    --surface-variant: #F8F9FA;
+    --on-surface: #1C1B1F;
+    --on-surface-variant: #49454F;
+    --primary: #6750A4;
+    --primary-container: #EADDFF;
+    --on-primary: #FFFFFF;
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --error: #BA1A1A;
+    --success: #0D904F;
+    --warning: #F59E0B;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.16);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface-variant); }
+
+/* Layout */
+.dashboard-wrapper { min-height: 100vh; padding: 16px; }
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* Grid */
+.row { display: flex; flex-wrap: wrap; gap: 24px; }
+.product-section { flex: 1; min-width: 300px; }
+
+/* Alert */
+.alert-message { 
+    background: #FFF3CD; 
+    border: 1px solid #FFEAA7; 
+    border-radius: var(--radius-sm); 
+    padding: 12px 16px; 
+    margin-bottom: 20px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    animation: slideIn 0.3s ease; 
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } }
+.close-button { background: none; border: none; font-size: 20px; cursor: pointer; }
+
+/* Image Carousel */
+.product-carousel { 
+    background: var(--surface); 
+    border-radius: var(--radius-lg); 
+    overflow: hidden; 
+    box-shadow: var(--shadow-md); 
+    position: relative; 
+}
+.carousel-image { 
+    width: 100%; 
+    height: 300px; 
+    object-fit: cover; 
+    display: block; 
+}
+.carousel-nav { 
+    position: absolute; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background: rgba(0,0,0,0.5); 
+    color: white; 
+    border: none; 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 20px; 
+}
+.carousel-nav.prev { left: 16px; }
+.carousel-nav.next { right: 16px; }
+
+/* Details Card */
+.details-card { 
+    background: var(--surface); 
+    border-radius: var(--radius-lg); 
+    padding: 24px; 
+    box-shadow: var(--shadow-sm); 
+}
+.header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    margin-bottom: 20px; 
+    padding-bottom: 16px; 
+    border-bottom: 1px solid var(--outline-variant); 
+}
+.member-name { font-size: 28px; font-weight: 700; color: var(--on-surface); }
+.ministry-name { font-size: 18px; color: var(--primary); font-weight: 500; margin-top: 4px; }
+.action-icons { display: flex; gap: 12px; }
+.icon-button { 
+    background: var(--primary-container); 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-decoration: none; 
+    color: var(--primary); 
+}
+
+/* Status Cards */
+.section { margin: 20px 0; }
+.section-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: var(--on-surface); }
+.status-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.status-chip { 
+    background: var(--surface-variant); 
+    padding: 8px 16px; 
+    border-radius: 20px; 
+    font-size: 14px; 
+    color: var(--on-surface-variant); 
+}
+
+/* Action Button */
+.action-button { 
+    display: block; 
+    width: 100%; 
+    padding: 16px; 
+    border: none; 
+    border-radius: var(--radius-md); 
+    font-size: 16px; 
+    font-weight: 600; 
+    text-align: center; 
+    cursor: pointer; 
+    text-decoration: none; 
+    transition: all 0.2s; 
+    margin-top: 20px; 
+}
+.action-danger { background: #DC3545; color: white; }
+.action-success { background: #28A745; color: white; }
+.action-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* Modal */
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.5); 
+    z-index: 1000; 
+    align-items: center; 
+    justify-content: center; 
+}
+.modal.show { display: flex; }
+.modal-card { 
+    background: var(--surface); 
+    border-radius: var(--radius-lg); 
+    padding: 24px; 
+    max-width: 400px; 
+    width: 90%; 
+    box-shadow: var(--shadow-lg); 
+}
+.modal-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+.btn { padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-weight: 500; }
+.btn-outline { background: transparent; border: 1px solid var(--outline); }
+.btn-solid { background: var(--primary); color: white; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .row { flex-direction: column; }
+    .carousel-image { height: 250px; }
+    .member-name { font-size: 24px; }
+    .details-card { padding: 16px; }
+    .modal-card { width: 95%; padding: 20px; }
+}
+</style>
+
+{% endblock extra_css %}
+{% block content %}
+<div class="dashboard-wrapper">
+    <div class="container">
+        <!-- Alert -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-message">
+                    <span>{{ message }}</span>
+                    <button class="close-button">×</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Image Carousel -->
+            <div class="product-section">
+                <div class="product-carousel">
+                    <img src="{{ member.picture }}" alt="{{ member.name }}" class="carousel-image">
+                    <button class="carousel-nav prev">‹</button>
+                    <button class="carousel-nav next">›</button>
+                </div>
+            </div>
+
+            <!-- Details Card -->
+            <div class="product-section">
+                <div class="details-card">
+                    <div class="header">
+                        <div>
+                            <h1 class="member-name">{{ member.name }}</h1>
+                            <p class="ministry-name">{{ member.ministry }}</p>
+                        </div>
+                        <div class="action-icons">
+                            <a href="{% url 'edit_member' member.pk %}" class="icon-button">✏️</a>
+                            <div class="icon-button">🏢</div>
+                        </div>
+                    </div>
+
+                    <!-- Status Section -->
+                    <div class="section">
+                        <h3 class="section-title">Status</h3>
+                        <div class="status-grid">
+                            <span class="status-chip">{% if member.pays_tithe %}Pays Tithe{% else %}No Tithe{% endif %}</span>
+                            <span class="status-chip">{% if member.new_believer_school %}New Believer{% else %}Not New Believer{% endif %}</span>
+                            <span class="status-chip">{% if member.working %}Working{% else %}Not Working{% endif %}</span>
+                            <span class="status-chip">{% if member.schooling %}Schooling{% else %}Not Schooling{% endif %}</span>
+                        </div>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div class="section">
+                        <h3 class="section-title">About</h3>
+                        <p style="color: var(--on-surface-variant); line-height: 1.6;">
+                            {{ member.name }}'s community is <b>{{ member.shepherd }}</b> in the <b>{{ member.ministry }}</b> ministry.
+                            Lives at <b>{{ member.location }}</b>. Parents: {% if member.fathers_name %}Mr. {{ member.fathers_name }}{% endif %}{% if member.mothers_name %} and Mrs. {{ member.mothers_name }}{% endif %}.
+                            Guardian: <b>{{ member.guardians_name }}</b>. Contact: <b>{{ member.telephone }}</b>.
+                        </p>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button class="action-button {% if member.active %}action-danger{% else %}action-success{% endif %} modal-toggle">
+                        {% if member.active %}Delete Member{% else %}Restore Member{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-card">
+        <h3 class="modal-title">
+            {% if member.active %}Remove Member{% else %}Restore Member{% endif %}
+        </h3>
+        <p>Are you sure you want to {% if member.active %}delete{% else %}restore{% endif %} this member?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline modal-close">Cancel</button>
+            <a href="{% if member.active %}{% url 'delete_member' member.pk %}{% else %}{% url 'restore_members' member.pk %}{% endif %}" 
+               class="btn {% if member.active %}action-danger{% else %}action-success{% endif %}">
+                Yes
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal
+    const modal = document.getElementById('deleteModal');
+    const modalToggle = document.querySelector('.modal-toggle');
+    const modalClose = document.querySelector('.modal-close');
+    
+    modalToggle?.addEventListener('click', () => modal.classList.add('show'));
+    modalClose?.addEventListener('click', () => modal.classList.remove('show'));
+    modal?.addEventListener('click', (e) => e.target === modal && modal.classList.remove('show'));
+    
+    // Alert close
+    document.querySelectorAll('.close-button').forEach(btn => {
+        btn.addEventListener('click', () => btn.parentElement.style.display = 'none');
+    });
+    
+    // Image carousel
+    let currentImage = 0;
+    const images = ['{{ member.picture }}', '{{ member.picture }}', '{{ member.picture}}'];
+    const carouselImg = document.querySelector('.carousel-image');
+    const prevBtn = document.querySelector('.carousel-nav.prev');
+    const nextBtn = document.querySelector('.carousel-nav.next');
+    
+    prevBtn?.addEventListener('click', () => {
+        currentImage = (currentImage - 1 + images.length) % images.length;
+        carouselImg.src = images[currentImage];
+    });
+    
+    nextBtn?.addEventListener('click', () => {
+        currentImage = (currentImage + 1) % images.length;
+        carouselImg.src = images[currentImage];
+    });
+});
+</script>
+{% endblock %}

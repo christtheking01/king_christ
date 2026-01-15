@@ -1,0 +1,108 @@
+{% extends 'finance/layout.html' %}
+{% load static %}
+
+{% block body %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="" class="nav-brand">Finance Tracker</a>
+            <div class="nav-links">
+                <a href="{% url 'financial_dashboard' %}">Dashboard</a>
+                <a href="{% url 'transaction_list' %}">Transactions</a>
+                <a href="{% url 'category_list' %}">Categories</a>
+                <a href="{% url 'role_management' %}">Profile</a>
+                <a href="{% url '_logout' %}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Dashboard</h1>
+                <a href="{% url 'add_transaction' %}" class="btn btn-success">+ Add Transaction</a>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-label">Total Income</div>
+                    <div class="stat-value positive">Tsh {{ total_income|default:"0.00" }}</div>
+                </div>
+                
+                <div class="stat-card expense">
+                    <div class="stat-label">Total Expenses</div>
+                    <div class="stat-value negative">Tsh {{ total_expenses|default:"0.00" }}</div>
+                </div>
+                
+                <div class="stat-card balance">
+                    <div class="stat-label">Balance</div>
+                    <div class="stat-value {% if balance >= 0 %}positive{% else %}negative{% endif %}">
+                        Tsh {{ balance|default:"0.00" }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <h2 style="margin-bottom: 20px;">Recent Transactions</h2>
+            
+            {% if recent_transactions %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                        <tr>
+                            <td>{{ transaction.date }}</td>
+                            <td>{{ transaction.description }}</td>
+                            <td>{{ transaction.category.name }}</td>
+                            <td>
+                                <span class="badge badge-{{ transaction.type|lower }}">
+                                    {{ transaction.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>
+                                    Tsh {{ transaction.amount }}
+                                </strong>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{% url 'transaction_list' %}" class="btn btn-secondary">View All Transactions</a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <div class="empty-state-text">No transactions yet</div>
+                <a href="{% url 'add_transaction' %}" class="btn btn-success">Add Your First Transaction</a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Kristo Mfalme. All rights reserved.</p>
+    </footer>
+
+{% endblock %}

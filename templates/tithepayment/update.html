@@ -1,0 +1,356 @@
+{% extends 'tithepayment/base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    .member-search-results {
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        width: 100%;
+        display: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .member-option {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+    }
+    .member-option:hover {
+        background-color: #f8f9fa;
+    }
+    .member-option:last-child {
+        border-bottom: none;
+    }
+    .member-option strong {
+        color: #2e59d9;
+    }
+    .form-group {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-main-wrapper">
+    <div class="dashboard-wrapper">
+        <div class="container-fluid dashboard-content">
+            <!-- Page Header -->
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div class="page-header">
+                        <h2 class="pageheader-title">
+                            <i class="fas fa-money-bill-wave mr-2"></i>
+                            {% if title %}{{ title }}{% else %}{% if form.instance.pk %}Edit{% else %}Add New{% endif %} Tithe Payment{% endif %}
+                        </h2>
+                        <div class="page-breadcrumb">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="breadcrumb-link">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'tithepayment:tithepayment_list' %}" class="breadcrumb-link">Tithe Payments</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        {% if form.instance.pk %}Edit{% else %}Add{% endif %} Payment
+                                    </li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <!-- Form -->
+                <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form method="post" id="tithePaymentForm">
+                                {% csrf_token %}
+                                
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <!-- Member Search -->
+                                <div class="form-group">
+                                    <label for="member_search">Search Member *</label>
+                                    <input type="text" class="form-control" id="member_search" 
+                                           placeholder="Type member name to search..." autocomplete="off"
+                                           value="{% if form.instance.name %}{{ form.instance.name.get_full_name }}{% endif %}">
+                                    <div class="member-search-results" id="member_search_results"></div>
+                                    <small class="form-text text-muted">Start typing to search for members. Select from dropdown.</small>
+                                </div>
+
+                                <!-- Selected Member Info -->
+                                <div class="form-group" id="selected_member_info" 
+                                     style="{% if not form.instance.name %}display: none;{% endif %}">
+                                    <div class="alert alert-info">
+                                        <strong>Selected Member:</strong>
+                                        <span id="selected_member_name">
+                                            {% if form.instance.name %}{{ form.instance.name.get_full_name }}{% endif %}
+                                        </span> - 
+                                        <span id="selected_member_contact">
+                                            {% if form.instance.name %}{{ form.instance.name.contact_number }}{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Hidden Member Field -->
+                                <div class="form-group">
+                                    <label for="{{ form.name.id_for_label }}">Member *</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.name.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Contact Number -->
+                                <div class="form-group">
+                                    <label for="{{ form.contact_number.id_for_label }}">Contact Number</label>
+                                    {{ form.contact_number }}
+                                    {% if form.contact_number.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.contact_number.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Amount -->
+                                <div class="form-group">
+                                    <label for="{{ form.amount.id_for_label }}">Amount *</label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.amount.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Payment Method -->
+                                <div class="form-group">
+                                    <label for="{{ form.status.id_for_label }}">Payment Method *</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.status.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Date -->
+                                <div class="form-group">
+                                    <label for="{{ form.date.id_for_label }}">Payment Date</label>
+                                    {{ form.date }}
+                                    {% if form.date.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.date.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="form-group text-right">
+                                    <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> 
+                                        {% if form.instance.pk %}Update{% else %}Create{% endif %} Payment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-info-circle mr-2"></i>Quick Help</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Adding Tithe Payments:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success mr-2"></i>Search for member by name</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Contact number auto-populates</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Select payment method</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Enter payment amount</li>
+                            </ul>
+                            <div class="alert alert-warning mt-3">
+                                <strong>Note:</strong> Contact number field is automatically filled when you select a member.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Payments -->
+                    {% if form.instance.pk %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-history mr-2"></i>Payment History</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>This payment was created on <strong>{{ form.instance.date|date:"M d, Y" }}</strong></p>
+                            <a href="{% url 'tithepayment:tithepayment_detail' form.instance.pk %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    let memberSearchTimeout;
+    const memberSearchInput = $('#member_search');
+    const memberSearchResults = $('#member_search_results');
+    const memberSelect = $('#id_name');
+    const contactNumberInput = $('#id_contact_number');
+    const selectedMemberInfo = $('#selected_member_info');
+    const selectedMemberName = $('#selected_member_name');
+    const selectedMemberContact = $('#selected_member_contact');
+
+    // Member search functionality
+    memberSearchInput.on('input', function() {
+        clearTimeout(memberSearchTimeout);
+        const query = $(this).val();
+        
+        if (query.length < 2) {
+            memberSearchResults.hide();
+            return;
+        }
+
+        memberSearchTimeout = setTimeout(function() {
+            $.ajax({
+                url: '{% url "tithepayment:search_members" %}',
+                data: {
+                    'q': query
+                },
+                success: function(data) {
+                    memberSearchResults.empty();
+                    if (data.members && data.members.length > 0) {
+                        data.members.forEach(function(member) {
+                            const option = $('<div class="member-option"></div>');
+                            const highlightQuery = query.toLowerCase();
+                            const fullName = member.first_name + ' ' + member.last_name;
+                            const displayName = fullName.replace(
+                                new RegExp(query, 'gi'), 
+                                match => `<strong>${match}</strong>`
+                            );
+                            
+                            option.html(`
+                                <div>${displayName}</div>
+                                <small class="text-muted">${member.contact_number}</small>
+                            `);
+                            option.attr('data-member-id', member.id);
+                            option.attr('data-contact-number', member.contact_number);
+                            option.attr('data-full-name', fullName);
+                            
+                            option.click(function() {
+                                selectMember(
+                                    $(this).attr('data-member-id'),
+                                    $(this).attr('data-full-name'),
+                                    $(this).attr('data-contact-number')
+                                );
+                            });
+                            
+                            memberSearchResults.append(option);
+                        });
+                        memberSearchResults.show();
+                    } else {
+                        memberSearchResults.hide();
+                    }
+                },
+                error: function() {
+                    memberSearchResults.hide();
+                }
+            });
+        }, 300);
+    });
+
+    // Select member function
+    function selectMember(memberId, fullName, contactNumber) {
+        memberSelect.val(memberId);
+        contactNumberInput.val(contactNumber);
+        
+        selectedMemberName.text(fullName);
+        selectedMemberContact.text(contactNumber);
+        selectedMemberInfo.show();
+        
+        memberSearchInput.val(fullName);
+        memberSearchResults.hide();
+    }
+
+    // Hide search results when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('#member_search, #member_search_results').length) {
+            memberSearchResults.hide();
+        }
+    });
+
+    // Initialize form with existing data
+    {% if form.instance.pk and form.instance.name %}
+    // Form is already initialized with member data
+    {% endif %}
+
+    // Form validation
+    $('#tithePaymentForm').on('submit', function() {
+        const memberId = memberSelect.val();
+        const amount = $('#id_amount').val();
+        
+        if (!memberId) {
+            alert('Please select a member.');
+            return false;
+        }
+        
+        if (!amount || parseFloat(amount) <= 0) {
+            alert('Please enter a valid amount.');
+            return false;
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock %}

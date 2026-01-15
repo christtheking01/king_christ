@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+    <style>
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input { padding: 8px; width: 300px; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; }
+        .messages { margin: 10px 0; padding: 10px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h2>Add New User</h2>
+    
+    {% for message in messages %}
+    <div class="messages {% if message.tags %}{{ message.tags }}{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Username:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="error">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_email">Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="error">{{ form.email.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_first_name">First Name:</label>
+            {{ form.firstname }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_last_name">Last Name:</label>
+            {{ form.lastname }}
+        </div>
+        
+        <button type="submit" class="btn">Create User</button>
+    </form>
+    
+    <p><a href="{% url 'list_users' %}">← Back to User List</a></p>
+</body>
+</html>

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary: #4f46e5;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #e2e8f0;
+        --text: #1e293b;
+    }
+
+    .edit-wrapper { padding: 2rem 1.5rem; font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; }
+    .edit-card { background: var(--card); max-width: 950px; margin: 0 auto; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    
+    .header { border-bottom: 2px solid var(--border); margin-bottom: 2rem; padding-bottom: 1rem; }
+    
+    .main-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    
+    .member-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr 1.5fr;
+        gap: 1rem;
+        background: #f1f5f9;
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        position: relative;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-size: 0.8rem; font-weight: 700; color: var(--text); text-transform: uppercase; }
+    
+    .input-field {
+        padding: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        background: white;
+    }
+
+    .btn-add {
+        background: #f0f4ff;
+        color: var(--primary);
+        border: 2px dashed var(--primary);
+        width: 100%;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-update {
+        background: var(--primary);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+    }
+</style>
+
+<div class="edit-wrapper">
+    <div class="edit-card">
+        <div class="header">
+            <h2>Edit Committee: {{ name }}</h2>
+            <p>Modify members or add new positions to this group.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Committee Global Details -->
+            <div class="main-fields">
+                <div class="form-group">
+                    <label>Committee Name</label>
+                    <input type="text" name="commitee_name" value="{{ name }}" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label>Functions / Description</label>
+                    <input type="text" name="description" value="{{ desc }}" class="input-field">
+                </div>
+            </div>
+
+            <label style="margin-bottom: 1rem; display: block;">Members & Assignments</label>
+            
+            <div id="row-container">
+                {% for entry in committee_members %}
+                <div class="member-row">
+                    <div class="form-group">
+                        <label>Member Name</label>
+                        <input type="text" name="members[]" list="member-list" value="{{ entry.member.name }}" class="input-field member-search" placeholder="Search Member..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select name="positions[]" class="input-field" required>
+                            {% for val, label in positions %}
+                            <option value="{{ val }}" {% if entry.position == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phones[]" value="{{ entry.phone|default:'' }}" class="input-field phone-display" readonly>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Global Datalist Source -->
+            <datalist id="member-list">
+                {% for m in members %}
+                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}">
+                {% endfor %}
+            </datalist>
+
+            <button type="button" class="btn-add" id="add-row-btn">+ Add Another Position to Committee</button>
+            <button type="submit" class="btn-update">UPDATE COMMITTEE RECORDS</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 1. AUTO-POPULATE PHONE LOGIC
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('member-search')) {
+            const input = e.target;
+            const typedName = input.value;
+            const datalist = document.getElementById('member-list');
+            
+            const parentRow = input.closest('.member-row');
+            const phoneField = parentRow.querySelector('.phone-display');
+
+            const option = Array.from(datalist.options).find(opt => opt.value === typedName);
+
+            if (option) {
+                const phone = option.getAttribute('data-phone');
+                phoneField.value = phone ? phone : "---";
+            }
+        }
+    });
+
+    // 2. DYNAMIC ROW CLONING LOGIC
+    document.getElementById('add-row-btn').addEventListener('click', function() {
+        const container = document.getElementById('row-container');
+        const rows = container.getElementsByClassName('member-row');
+        
+        // Clone the first row as template
+        const newRow = rows[0].cloneNode(true);
+        
+        // Reset values for new row
+        newRow.querySelectorAll('input').forEach(i => i.value = '');
+        newRow.querySelector('select').selectedIndex = 0;
+
+        container.appendChild(newRow);
+    });
+</script>
+
+{% endblock %}

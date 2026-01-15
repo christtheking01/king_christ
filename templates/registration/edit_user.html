@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block internal_style %}
+<style>
+  /* Add your edit form styles here similar to the add ministry form */
+  .modern-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-2xl);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-xl);
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--divider-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  
+  .alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="modern-card">
+    <div class="modern-header">
+      <h1 class="page-title">
+        <i class="fas fa-user-edit"></i>
+        Edit User: {{ editing_user.username }}
+      </h1>
+    </div>
+
+    {% if editing_user.is_superuser %}
+    <div class="alert-warning">
+      <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong> 
+      You are editing a superuser account. 
+      {% if not request.user.is_superuser %}
+      Only superusers can edit superuser accounts.
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="modern-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input
+          type="text"
+          name="username"
+          value="{{ editing_user.username }}"
+          class="form-control"
+          required
+          {% if editing_user.is_superuser and not request.user.is_superuser %}disabled{% endif %}
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input
+          type="email"
+          name="email"
+          value="{{ editing_user.email }}"
+          class="form-control"
+          required
+          {% if editing_user.is_superuser and not request.user.is_superuser %}disabled{% endif %}
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input
+          type="text"
+          name="first_name"
+          value="{{ editing_user.first_name }}"
+          class="form-control"
+          {% if editing_user.is_superuser and not request.user.is_superuser %}disabled{% endif %}
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input
+          type="text"
+          name="last_name"
+          value="{{ editing_user.last_name }}"
+          class="form-control"
+          {% if editing_user.is_superuser and not request.user.is_superuser %}disabled{% endif %}
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            name="is_active"
+            id="is_active"
+            {% if editing_user.is_active %}checked{% endif %}
+            {% if editing_user.is_superuser and not request.user.is_superuser %}disabled{% endif %}
+          />
+          <label for="is_active">Active</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Staff Status</label>
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            name="is_staff"
+            id="is_staff"
+            {% if editing_user.is_staff %}checked{% endif %}
+            {% if editing_user.is_superuser %}checked disabled{% endif %}
+          />
+          <label for="is_staff">Staff member</label>
+        </div>
+        {% if editing_user.is_superuser %}
+        <small class="form-text text-muted">Superusers are automatically staff members</small>
+        {% endif %}
+      </div>
+
+      {% if request.user.is_superuser %}
+      <div class="form-group">
+        <label class="form-label">Superuser Status</label>
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            name="is_superuser"
+            id="is_superuser"
+            {% if editing_user.is_superuser %}checked{% endif %}
+            {% if editing_user.is_superuser %}disabled{% endif %}
+          />
+          <label for="is_superuser">Superuser/Administrator</label>
+        </div>
+        {% if editing_user.is_superuser %}
+        <small class="form-text text-muted">Cannot remove superuser status once granted</small>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Add password change field -->
+      <div class="form-group">
+        <label class="form-label">New Password (leave blank to keep current)</label>
+        <input
+          type="password"
+          name="new_password"
+          class="form-control"
+          placeholder="Enter new password"
+        />
+      </div>
+
+      <!-- Add confirm password field -->
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input
+          type="password"
+          name="confirm_password"
+          class="form-control"
+          placeholder="Confirm new password"
+        />
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="modern-button">
+          <i class="fas fa-save"></i> Update User
+        </button>
+        <a
+          href="{% url 'list_users' %}"
+          class="modern-button"
+          style="
+            background: var(--text-secondary);
+            margin-left: var(--space-sm);
+          "
+        >
+          <i class="fas fa-times"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

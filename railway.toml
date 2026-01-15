@@ -1,0 +1,4 @@
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn christ_king_church.wsgi"

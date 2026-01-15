@@ -1,0 +1,131 @@
+{% extends 'notifications/base.html' %}
+
+{% block title %}Create Notification{% endblock %}
+{% block page_title %}Create New Notification{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" id="notificationForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Title *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.message.id_for_label }}" class="form-label">Message *</label>
+                        {{ form.message }}
+                        <div class="form-text">
+                            <span id="charCount">0</span>/160 characters (1 SMS)
+                        </div>
+                        {% if form.message.errors %}
+                            <div class="text-danger small">{{ form.message.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.recipient_type.id_for_label }}" class="form-label">Recipient Type *</label>
+                        {{ form.recipient_type }}
+                        {% if form.recipient_type.errors %}
+                            <div class="text-danger small">{{ form.recipient_type.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3" id="memberField" style="display:none;">
+                        <label for="{{ form.member.id_for_label }}" class="form-label">Select Member</label>
+                        {{ form.member }}
+                        {% if form.member.errors %}
+                            <div class="text-danger small">{{ form.member.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3" id="ministryField" style="display:none;">
+                        <label for="{{ form.ministry.id_for_label }}" class="form-label">Select Ministry</label>
+                        {{ form.ministry }}
+                        {% if form.ministry.errors %}
+                            <div class="text-danger small">{{ form.ministry.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3" id="communityField" style="display:none;">
+                        <label for="{{ form.community.id_for_label }}" class="form-label">Select Community</label>
+                        {{ form.community }}
+                        {% if form.community.errors %}
+                            <div class="text-danger small">{{ form.community.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.send_sms }}
+                        <label class="form-check-label" for="{{ form.send_sms.id_for_label }}">
+                            Send SMS via AfricasTalking
+                        </label>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create & Send
+                        </button>
+                        <a href="{% url 'notification_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Character counter
+    const messageField = document.getElementById('{{ form.message.id_for_label }}');
+    const charCount = document.getElementById('charCount');
+    
+    messageField.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+    
+    // Update char count on load
+    charCount.textContent = messageField.value.length;
+    
+    // Show/hide recipient fields based on type
+    const recipientType = document.getElementById('{{ form.recipient_type.id_for_label }}');
+    const memberField = document.getElementById('memberField');
+    const ministryField = document.getElementById('ministryField');
+    const communityField = document.getElementById('communityField');
+    
+    function updateRecipientFields() {
+        const value = recipientType.value;
+        
+        memberField.style.display = 'none';
+        ministryField.style.display = 'none';
+        communityField.style.display = 'none';
+        
+        if (value === 'MEMBER') {
+            memberField.style.display = 'block';
+        } else if (value === 'MINISTRY') {
+            ministryField.style.display = 'block';
+        } else if (value === 'COMMUNITY') {
+            communityField.style.display = 'block';
+        }
+    }
+    
+    recipientType.addEventListener('change', updateRecipientFields);
+    updateRecipientFields(); // Initialize on load
+</script>
+{% endblock %}

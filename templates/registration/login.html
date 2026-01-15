@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <style>
+      body {
+          background:url('{% static "assets/images/empty-christian-church-building.png" %}')
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+          font-family: 'Georgia', serif;
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+      .container {
+          background: rgba(255, 255, 255, 0.9);
+          padding: 2.5rem;
+          border-radius: 15px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          width: 90%;
+          max-width: 400px;
+          border: 2px solid #8B4513;
+      }
+
+      h2 {
+          color: #4a235a;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          border-bottom: 2px solid #8B4513;
+          padding-bottom: 10px;
+      }
+
+      .input-group {
+          margin-bottom: 1.5rem;
+      }
+
+      label {
+          display: block;
+          margin-bottom: 0.5rem;
+          color: #2c3e50;
+          font-weight: bold;
+      }
+
+      input {
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #8B4513;
+          border-radius: 5px;
+          font-size: 16px;
+          background: rgba(255, 255, 255, 0.8);
+      }
+
+      input:focus {
+          outline: none;
+          border-color: #4a235a;
+          box-shadow: 0 0 10px rgba(74, 35, 90, 0.3);
+      }
+
+      button {
+          width: 100%;
+          padding: 14px;
+          background: linear-gradient(to right, #4a235a, #2c3e50);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          font-size: 18px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s;
+      }
+
+      button:hover {
+          background: linear-gradient(to right, #3b1b47, #1a252f);
+          transform: translateY(-2px);
+      }
+
+      .message {
+          padding: 10px;
+          margin-bottom: 1rem;
+          border-radius: 5px;
+          text-align: center;
+      }
+
+      .error {
+          background: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+      }
+
+      .footer {
+          text-align: center;
+          margin-top: 1.5rem;
+          color: #666;
+          font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>⛪ Christ the King Login</h2>
+
+      {% if messages %} {% for message in messages %}
+      <div class="message error">{{ message }}</div>
+      {% endfor %} {% endif %}
+
+      <form method="POST" action="{% url '_login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}" />
+
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+
+        <button type="submit">Enter Sanctuary</button>
+      </form>
+
+      <div class="footer">
+        <p>access required for entry</p>
+      </div>
+    </div>
+  </body>
+</html>

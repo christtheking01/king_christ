@@ -1,0 +1,959 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if mode == 'single' %}Add New Member{% else %}Add Multiple Members{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-main-wrapper">
+    <div class="dashboard-wrapper">
+        <div class="dashboard-inner">
+            <div class="container-fluid dashboard-content">
+                <!-- Page Header -->
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div class="page-header">
+                            <h2 class="pageheader-title">
+                                <i class="fas {% if mode == 'single' %}fa-user-plus{% else %}fa-users{% endif %} me-2"></i>
+                                {% if mode == 'single' %}Add New Member{% else %}Add Multiple Members{% endif %}
+                            </h2>
+                            <div class="page-breadcrumb">
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="breadcrumb-link">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="{% url 'table_members' %}" class="breadcrumb-link">Members</a></li>
+                                        <li class="breadcrumb-item active" aria-current="page">
+                                            {% if mode == 'single' %}Add Member{% else %}Add Multiple Members{% endif %}
+                                        </li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Main Form Card -->
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas {% if mode == 'single' %}fa-user{% else %}fa-users{% endif %} me-2"></i>
+                                    Member Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" enctype="multipart/form-data" novalidate>
+                                    {% csrf_token %}
+                                    
+                                    {% if mode == 'single' %}
+                                        <!-- Single Member Form -->
+                                        <div class="row">
+                                            <div class="col-xl-8 col-lg-8 col-md-7">
+                                                <div class="member-form-section">
+                                                    {% include 'members/partials/member_form_fields.html' with form=form %}
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-5">
+                                                <!-- Quick Actions Card -->
+                                                <div class="card border-primary mb-4">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quick Info</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="small text-muted mb-2">
+                                                            <i class="fas fa-asterisk text-danger small"></i> Required fields
+                                                        </p>
+                                                        <p class="small text-muted mb-2">
+                                                            <i class="fas fa-phone text-info"></i> Phone format: +255 XXX XXX XXX
+                                                        </p>
+                                                        <p class="small text-muted mb-2">
+                                                            <i class="fas fa-id-card text-warning"></i> Code format: 001PT
+                                                        </p>
+                                                        <hr class="my-3">
+                                                        <p class="small text-muted">
+                                                            <strong>Note:</strong> Ensure all required fields are filled before saving.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Mode Switch Card -->
+                                                <div class="card border-info">
+                                                    <div class="card-body text-center">
+                                                        <p class="mb-2 text-muted">Need to add multiple members?</p>
+                                                        <a href="{% url 'create_member' %}" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-users me-1"></i> Add Multiple Members
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <!-- Multiple Member Forms -->
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            You can add up to 3 members at once. Fill at least the required fields for each member you want to add.
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-xl-4 col-lg-4 col-md-6">
+                                                <div class="card border-primary mb-4">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <h6 class="mb-0">Member 1</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% include 'members/partials/member_form_fields.html' with form=form1 %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-6">
+                                                <div class="card border-success mb-4">
+                                                    <div class="card-header bg-success text-white">
+                                                        <h6 class="mb-0">Member 2</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% include 'members/partials/member_form_fields.html' with form=form2 %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-6">
+                                                <div class="card border-warning mb-4">
+                                                    <div class="card-header bg-warning text-white">
+                                                        <h6 class="mb-0">Member 3</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% include 'members/partials/member_form_fields.html' with form=form3 %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Mode Switch for Multiple -->
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="card border-info">
+                                                    <div class="card-body text-center">
+                                                        <p class="mb-0 text-muted">Only need to add one member? 
+                                                            <a href="{% url 'add_member' %}" class="btn btn-outline-primary btn-sm ms-2">
+                                                                <i class="fas fa-user-plus me-1"></i> Add Single Member
+                                                            </a>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Submit Buttons -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <div class="border-top pt-4">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <a href="{% url 'table_members' %}" class="btn btn-secondary">
+                                                        <i class="fas fa-arrow-left me-2"></i> Back to List
+                                                    </a>
+                                                    <div>
+                                                        {% if mode == 'single' %}
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="fas fa-save me-2"></i> Save Member
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="fas fa-save me-2"></i> Save All Members
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block internal_style %}
+<style>
+/* Modern Minimal CSS with Flutter-like Styling */
+
+:root {
+    /* Color Palette - Material/Flutter inspired */
+    --primary: #6750A4;
+    --primary-container: #EADDFF;
+    --on-primary: #FFFFFF;
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --surface: #FFFFFF;
+    --surface-variant: #F7F2FA;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+    --error: #BA1A1A;
+    --error-container: #FFDAD6;
+    --success: #0D904F;
+    --success-container: #A7F3D0;
+    --warning: #F59E0B;
+    --warning-container: #FEF3C7;
+    --info: #0284C7;
+    --info-container: #E0F2FE;
+    
+    /* Spacing - 4px grid system */
+    --space-0: 0;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-sm: 0.875rem;    /* 14px */
+    --font-size-base: 1rem;      /* 16px */
+    --font-size-lg: 1.125rem;    /* 18px */
+    --font-size-xl: 1.25rem;     /* 20px */
+    --font-size-2xl: 1.5rem;     /* 24px */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    
+    /* Shadows - Material Design elevation */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: #1F2937;
+    background-color: #F9FAFB;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout System */
+.container-fluid {
+    width: 100%;
+    padding: 0 var(--space-4);
+    margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+    .container-fluid {
+        max-width: 640px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container-fluid {
+        max-width: 768px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container-fluid {
+        max-width: 1024px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .container-fluid {
+        max-width: 1280px;
+    }
+}
+
+/* Grid System - Minimal & Efficient */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 calc(-1 * var(--space-2));
+}
+
+.col {
+    flex: 1 0 0%;
+    padding: 0 var(--space-2);
+}
+
+@media (min-width: 640px) {
+    .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+@media (min-width: 768px) {
+    .col-md-5 { flex: 0 0 41.6667%; max-width: 41.6667%; }
+    .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+    .col-md-7 { flex: 0 0 58.3333%; max-width: 58.3333%; }
+    .col-md-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+    .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+@media (min-width: 1024px) {
+    .col-lg-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+    .col-lg-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+    .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+@media (min-width: 1280px) {
+    .col-xl-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+    .col-xl-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+    .col-xl-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* Typography */
+.page-header {
+    padding: var(--space-6) 0;
+    margin-bottom: var(--space-6);
+}
+
+.page-header-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: #111827;
+    margin-bottom: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.page-breadcrumb {
+    font-size: var(--font-size-sm);
+    color: var(--secondary);
+}
+
+.breadcrumb {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.breadcrumb-link {
+    text-decoration: none;
+    color: var(--secondary);
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Cards - Flutter-like Material Design */
+.card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--outline-variant);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    margin-bottom: var(--space-4);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.card.border-primary {
+    border-color: var(--primary-container);
+}
+
+.card.border-success {
+    border-color: var(--success-container);
+}
+
+.card.border-warning {
+    border-color: var(--warning-container);
+}
+
+.card.border-info {
+    border-color: var(--info-container);
+}
+
+.card-header {
+    padding: var(--space-4);
+    background: var(--surface-variant);
+    border-bottom: 1px solid var(--outline-variant);
+}
+
+.card-header.bg-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.card-header.bg-success {
+    background: var(--success);
+    color: white;
+}
+
+.card-header.bg-warning {
+    background: var(--warning);
+    color: #1F2937;
+}
+
+.card-header h5, .card-header h6 {
+    font-weight: var(--font-weight-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.card-body {
+    padding: var(--space-4);
+}
+
+/* Form Elements - Modern & Clean */
+.form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-weight: var(--font-weight-medium);
+    color: #374151;
+    font-size: var(--font-size-sm);
+}
+
+.form-label.required::after {
+    content: " *";
+    color: var(--error);
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: #1F2937;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+}
+
+.form-control::placeholder {
+    color: #9CA3AF;
+}
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2379747E' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-4) center;
+    background-size: 16px;
+    padding-right: var(--space-8);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--outline);
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.form-check-input:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-input:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.form-check-label {
+    font-size: var(--font-size-sm);
+    color: #374151;
+    cursor: pointer;
+}
+
+/* File Input Styling */
+.form-control[type="file"] {
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-variant);
+    border: 2px dashed var(--outline-variant);
+    cursor: pointer;
+}
+
+.form-control[type="file"]:hover {
+    border-color: var(--primary);
+    background: rgba(103, 80, 164, 0.05);
+}
+
+.form-control[type="file"]::-webkit-file-upload-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    margin-right: var(--space-4);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    transition: background-color var(--transition-fast);
+}
+
+.form-control[type="file"]::-webkit-file-upload-button:hover {
+    background: #5A4494;
+}
+
+/* Buttons - Material Design Inspired */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.btn-primary:hover {
+    background: #5A4494;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--secondary-container);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+}
+
+.btn-secondary:hover {
+    background: #D5D3E0;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #0B7A43;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: rgba(103, 80, 164, 0.1);
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-sm);
+}
+
+/* Alerts - Material Design Snackbars */
+.alert {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-dismissible {
+    padding-right: var(--space-10);
+}
+
+.alert-close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: var(--space-1);
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+.alert-primary {
+    background: var(--primary-container);
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+}
+
+.alert-success {
+    background: var(--success-container);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}
+
+.alert-warning {
+    background: var(--warning-container);
+    color: #B45309;
+    border-left: 4px solid var(--warning);
+}
+
+.alert-info {
+    background: var(--info-container);
+    color: var(--info);
+    border-left: 4px solid var(--info);
+}
+
+.alert-danger {
+    background: var(--error-container);
+    color: var(--error);
+    border-left: 4px solid var(--error);
+}
+
+/* Utilities */
+.mb-0 { margin-bottom: 0 !important; }
+.mb-2 { margin-bottom: var(--space-2) !important; }
+.mb-3 { margin-bottom: var(--space-3) !important; }
+.mb-4 { margin-bottom: var(--space-4) !important; }
+.mb-6 { margin-bottom: var(--space-6) !important; }
+
+.mt-2 { margin-top: var(--space-2) !important; }
+.mt-3 { margin-top: var(--space-3) !important; }
+.mt-4 { margin-top: var(--space-4) !important; }
+.mt-6 { margin-top: var(--space-6) !important; }
+
+.ms-2 { margin-left: var(--space-2) !important; }
+
+.me-1 { margin-right: var(--space-1) !important; }
+.me-2 { margin-right: var(--space-2) !important; }
+
+.text-muted { color: var(--secondary) !important; }
+.text-center { text-align: center !important; }
+
+.small {
+    font-size: var(--font-size-sm) !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+    .page-header {
+        padding: var(--space-4) 0;
+    }
+    
+    .page-header-title {
+        font-size: var(--font-size-xl);
+    }
+    
+    .card-header h5 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .row {
+        margin: 0 calc(-1 * var(--space-1));
+    }
+    
+    .col {
+        padding: 0 var(--space-1);
+    }
+    
+    /* Stack columns on mobile */
+    .col-sm-12,
+    .col-md-5,
+    .col-md-6,
+    .col-md-7,
+    .col-md-8,
+    .col-lg-4,
+    .col-lg-8,
+    .col-xl-4,
+    .col-xl-8 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-bottom: var(--space-4);
+    }
+    
+    .card {
+        margin-bottom: var(--space-3);
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .d-flex {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .border-top {
+        border-top: 1px solid var(--outline-variant);
+    }
+    
+    .pt-4 {
+        padding-top: var(--space-4) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --font-size-sm: 0.8125rem;  /* 13px */
+        --font-size-base: 0.875rem; /* 14px */
+        --font-size-lg: 1rem;       /* 16px */
+        --font-size-xl: 1.125rem;   /* 18px */
+    }
+    
+    .container-fluid {
+        padding: 0 var(--space-3);
+    }
+    
+    .card-header,
+    .card-body {
+        padding: var(--space-3);
+    }
+    
+    .form-control,
+    .form-select {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--font-size-sm);
+    }
+    
+    .btn {
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--outline-variant);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Focus States for Accessibility */
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .btn,
+    .alert {
+        display: none !important;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    :root {
+        --primary: #0000FF;
+        --secondary: #000000;
+        --outline: #000000;
+    }
+    
+    .card {
+        border: 2px solid var(--outline);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>
+{% endblock internal_style %}

@@ -1,0 +1,53 @@
+{% extends 'finance/layout.html' %}
+{% load static %}
+
+{% block body %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'financial_dashboard' %}" class="nav-brand">Finance Tracker</a>
+            <div class="nav-links">
+                <a href="{% url 'financial_dashboard' %}">Dashboard</a>
+                <a href="{% url 'transaction_list' %}">Transactions</a>
+                <a href="{% url 'category_list' %}">Categories</a>
+                <a href="{% url 'role_management' %}">Profile</a>
+                <a href="{% url '_logout' %}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Manage Categories</h1>
+                <a href="{% url 'add_categories' %}" class="btn btn-success">+ Add Category</a>
+            </div>
+
+            {% if categories %}
+            <div class="categories-grid">
+                {% for category in categories %}
+                <div class="category-card">
+                    <div class="category-info">
+                        <h3>{{ category.name }}</h3>
+                        <span class="badge badge-{{ category.type|lower }}">{{ category.type }}</span>
+                    </div>
+                    <a href="{% url 'delete_category' category.id %}" class="btn btn-danger btn-small"
+                       onclick="return confirm('Are you sure? This will affect all transactions in this category.')">
+                        Delete
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🏷️</div>
+                <div class="empty-state-text">No categories yet</div>
+                <a href="{% url 'add_categories' %}" class="btn btn-success">Add Your First Category</a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Finance Tracker. All rights reserved.</p>
+    </footer>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-main-wrapper">
+    <div class="dashboard-wrapper">
+        <div class="container-fluid dashboard-content">
+            <!-- Page Header -->
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div class="page-header">
+                        <h2 class="pageheader-title">
+                            <i class="fas fa-exclamation-triangle mr-2 text-warning"></i>Confirm Delete
+                        </h2>
+                        <div class="page-breadcrumb">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="breadcrumb-link">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'tithepayment:tithepayment_list' %}" class="breadcrumb-link">Tithe Payments</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Confirm Delete</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-8 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-header bg-warning text-white">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-exclamation-circle mr-2"></i>Warning
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-danger">
+                                <h5 class="alert-heading">Are you sure you want to delete this tithe payment?</h5>
+                                <p class="mb-0">This action cannot be undone.</p>
+                            </div>
+
+                            <div class="payment-details p-3 border rounded bg-light">
+                                <h6>Payment Details:</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <th width="40%">Member:</th>
+                                        <td>{{ payment.name.get_full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Amount:</th>
+                                        <td><strong class="text-danger">${{ payment.amount }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Payment Method:</th>
+                                        <td>{{ payment.get_status_display }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date:</th>
+                                        <td>{{ payment.date|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <form method="post" class="mt-4">
+                                {% csrf_token %}
+                                <div class="form-group text-right">
+                                    <a href="{% url 'tithepayment:tithepayment_detail' payment.pk %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Yes, Delete Payment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Info -->
+                <div class="col-xl-6 col-lg-6 col-md-4 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-info-circle mr-2"></i>Important Note</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Deleting this payment will:</p>
+                            <ul>
+                                <li>Permanently remove this payment record</li>
+                                <li>Affect financial reports and statistics</li>
+                                <li>Reduce the total contributions for {{ payment.name.get_full_name }}</li>
+                            </ul>
+                            <div class="alert alert-info">
+                                <strong>Consider:</strong> Instead of deleting, you might want to edit the payment if there was an error.
+                            </div>
+                            <a href="{% url 'tithepayment:tithepayment_update' payment.pk %}" class="btn btn-warning btn-block">
+                                <i class="fas fa-edit"></i> Edit Instead of Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

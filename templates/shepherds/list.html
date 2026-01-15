@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+
+{% block internal_style %}
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 25px;
+    }
+
+    .alert-message {
+        padding: 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(251, 188, 4, 0.1), rgba(251, 188, 4, 0.05));
+        border: 1px solid rgba(251, 188, 4, 0.2);
+        color: var(--warning);
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(234, 67, 53, 0.1), rgba(234, 67, 53, 0.05));
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(52, 168, 83, 0.1), rgba(52, 168, 83, 0.05));
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .alert-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        animation: slideUp 0.4s ease;
+    }
+
+    .card-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Table Container */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--divider);
+        background: var(--surface);
+    }
+
+    /* Table Styles */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1200px;
+    }
+
+    .data-table thead {
+        background: var(--background);
+    }
+
+    .data-table th {
+        padding: 16px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+        border-bottom: 2px solid var(--divider);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+        border-bottom: 1px solid var(--divider);
+        transition: all 0.2s;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(var(--primary), 0.02);
+    }
+
+    .data-table td {
+        padding: 16px 12px;
+        color: var(--text-primary);
+        vertical-align: top;
+        font-size: 0.875rem;
+    }
+
+    /* Community Name */
+    .community-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Leader Info */
+    .leader-info {
+        margin-bottom: 6px;
+        line-height: 1.4;
+    }
+
+    .leader-name {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .leader-phone {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .no-leader {
+        color: var(--text-secondary);
+        font-style: italic;
+        font-size: 0.875rem;
+    }
+
+    /* Other Leaders */
+    .other-leader {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    /* Badge */
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: var(--radius-full);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        min-width: 30px;
+        text-align: center;
+    }
+
+    .badge-primary {
+        background: rgba(26, 115, 232, 0.1);
+        color: var(--primary);
+        border: 1px solid rgba(26, 115, 232, 0.2);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-edit:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .action-delete:hover {
+        background: var(--danger);
+        color: white;
+        border-color: var(--danger);
+    }
+
+    /* Add Button */
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--success) 0%, var(--secondary-dark) 100%);
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--text-disabled);
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+    }
+
+    .empty-message {
+        font-size: 1rem;
+        margin-bottom: 24px;
+    }
+
+    /* Modal Styles */
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        padding: 20px;
+    }
+
+    .confirmation-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-dialog {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 500px;
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+
+    .confirmation-modal.show .modal-dialog {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--divider);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-message {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0 0 16px 0;
+    }
+
+    .modal-warning {
+        background: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        color: var(--danger);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modal-footer {
+        padding: 16px 24px 24px;
+        border-top: 1px solid var(--divider);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    /* Modal Buttons */
+    .modal-btn {
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 80px;
+    }
+
+    .modal-btn-cancel {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .modal-btn-cancel:hover {
+        background: var(--surface);
+        border-color: var(--text-secondary);
+    }
+
+    .modal-btn-confirm {
+        background: var(--danger);
+        color: white;
+    }
+
+    .modal-btn-confirm:hover {
+        background: #d32f2f;
+        transform: translateY(-1px);
+    }
+
+    /* Warning Icon */
+    .warning-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(234, 67, 53, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--danger);
+        font-size: 1.25rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 15px;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .btn-add {
+            align-self: flex-start;
+        }
+        
+        .modal-footer {
+            flex-direction: column;
+        }
+        
+        .modal-btn {
+            width: 100%;
+        }
+        
+        .confirmation-modal {
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .modal-dialog {
+            margin: 10px;
+        }
+    }
+
+    /* Animation */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message alert-{{ message.tags }}">
+            <div class="alert-content">
+                <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-people-carry"></i>
+                Community Leaders Table
+            </h2>
+            <a href="{% url 'add_community' %}" class="btn-add">
+                <i class="fas fa-plus"></i> Add Community Leaders
+            </a>
+        </div>
+        
+        <div class="card-body">
+            {% if communities %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Community Name</th>
+                            <th>Chair Person</th>
+                            <th>Vice Chair</th>
+                            <th>Secretary</th>
+                            <th>Vice Secretary</th>
+                            <th>Accountant</th>
+                            <th>Other Leaders</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for community in communities %}
+                        <tr>
+                            <!-- Community Name -->
+                            <td>
+                                <div class="community-name">{{ community.name }}</div>
+                            </td>
+                            
+                            <!-- Chair Person -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader == "CHAIR PERSON" or leader.leader == "CHAIRPERSON" %}
+                                    <div class="leader-info">
+                                        <div class="leader-name">{{ leader.name }}</div>
+                                        <div class="leader-phone">{{ leader.phone|default:"—" }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">Not assigned</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Vice Chair -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader == "VICE CHAIR" %}
+                                    <div class="leader-info">
+                                        <div class="leader-name">{{ leader.name }}</div>
+                                        <div class="leader-phone">{{ leader.phone|default:"—" }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">Not assigned</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Secretary -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader == "SECRETARY" %}
+                                    <div class="leader-info">
+                                        <div class="leader-name">{{ leader.name }}</div>
+                                        <div class="leader-phone">{{ leader.phone|default:"—" }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">Not assigned</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Vice Secretary -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader == "VICE SECRETARY" %}
+                                    <div class="leader-info">
+                                        <div class="leader-name">{{ leader.name }}</div>
+                                        <div class="leader-phone">{{ leader.phone|default:"—" }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">Not assigned</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Accountant -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader == "ACCOUNTANT" %}
+                                    <div class="leader-info">
+                                        <div class="leader-name">{{ leader.name }}</div>
+                                        <div class="leader-phone">{{ leader.phone|default:"—" }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">Not assigned</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Other Leaders -->
+                            <td>
+                                {% for leader in community.leaders.all %}
+                                    {% if leader.leader not in "CHAIR PERSON,CHAIRPERSON,VICE CHAIR,SECRETARY,VICE SECRETARY,ACCOUNTANT" %}
+                                    <span class="other-leader">
+                                        {{ leader.name }} - {{ leader.leader }}
+                                    </span>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="no-leader">None</span>
+                                {% endfor %}
+                            </td>
+                            
+                            <!-- Total Count -->
+                            <td>
+                                <span class="badge badge-primary">{{ community.leaders.count }}</span>
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'edit_community' community.id %}" 
+                                       class="action-btn action-edit" 
+                                       title="Edit Community">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <button type="button" 
+                                            class="action-btn action-delete" 
+                                            title="Delete Community"
+                                            data-community-id="{{ community.id }}"
+                                            data-community-name="{{ community.name }}"
+                                            data-leaders-count="{{ community.leaders.count }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-people-carry"></i>
+                </div>
+                <h3 class="empty-title">No Communities Found</h3>
+                <p class="empty-message">Get started by adding your first community with its leaders.</p>
+                <a href="{% url 'add_community' %}" class="btn-add">
+                    <i class="fas fa-plus"></i> Add First Community
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-modal" id="confirmationModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Delete Community</h3>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-warning">
+                <i class="fas fa-exclamation-circle"></i>
+                This will also delete <span id="leadersCount">0</span> leader(s) in this community!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">
+                Cancel
+            </button>
+            <form method="post" action="" id="deleteForm" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="modal-btn modal-btn-confirm">
+                    Delete Community
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationModal = document.getElementById('confirmationModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const leadersCount = document.getElementById('leadersCount');
+    const deleteForm = document.getElementById('deleteForm');
+    const modalCancel = document.getElementById('modalCancel');
+    
+    let currentDeleteUrl = '';
+    
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert-message').style.display = 'none';
+        });
+    });
+    
+    // Auto-remove alerts after 5 seconds
+    document.querySelectorAll('.alert-message').forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.3s';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.style.display = 'none';
+                }
+            }, 300);
+        }, 5000);
+    });
+    
+    // Delete button click handlers
+    document.querySelectorAll('.action-delete').forEach(button => {
+        button.addEventListener('click', function() {
+            const communityId = this.getAttribute('data-community-id');
+            const communityName = this.getAttribute('data-community-name');
+            const leadersCountValue = this.getAttribute('data-leaders-count');
+            
+            // Set modal content
+            modalMessage.textContent = `Are you sure you want to delete the community "${communityName}"?`;
+            leadersCount.textContent = leadersCountValue;
+            
+            // Set form action
+            currentDeleteUrl = "{% url 'delete_community' 0 %}".replace('0', communityId);
+            deleteForm.action = currentDeleteUrl;
+            
+            // Show modal
+            confirmationModal.classList.add('show');
+            
+            // Focus on cancel button for accessibility
+            modalCancel.focus();
+        });
+    });
+    
+    // Modal close handlers
+    modalCancel.addEventListener('click', function() {
+        confirmationModal.classList.remove('show');
+    });
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && confirmationModal.classList.contains('show')) {
+            confirmationModal.classList.remove('show');
+        }
+    });
+    
+    // Close modal when clicking outside
+    confirmationModal.addEventListener('click', function(e) {
+        if (e.target === confirmationModal) {
+            confirmationModal.classList.remove('show');
+        }
+    });
+    
+    // Add visual feedback to delete button
+    document.querySelectorAll('.action-delete').forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.animation = 'shake 0.5s ease';
+        });
+        
+        button.addEventListener('animationend', function() {
+            this.style.animation = '';
+        });
+    });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + N to add new community
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            document.querySelector('.btn-add').click();
+        }
+    });
+    
+    // Animation for delete button hover
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-2deg); }
+            75% { transform: rotate(2deg); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

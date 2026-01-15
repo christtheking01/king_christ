@@ -1,0 +1,834 @@
+{% extends 'base.html' %}
+
+{% block internal_style %}
+<style>
+    /* Form Container */
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 16px 20px;
+        background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+        color: white;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Form Styles */
+    .form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--warning);
+        box-shadow: 0 0 0 2px rgba(251, 188, 4, 0.1);
+    }
+
+    /* Leaders Container */
+    .leaders-container {
+        margin: 20px 0;
+    }
+
+    .leader-card {
+        background: var(--background);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--divider);
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .leader-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .leader-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Leader Grid */
+    .leader-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .leader-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Select Dropdown */
+    .select-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 14px;
+        padding-right: 35px;
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    .btn-cancel {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .btn-cancel:hover {
+        background: var(--surface);
+        border-color: var(--text-secondary);
+    }
+
+    .btn-submit {
+        background: var(--success);
+        color: white;
+        font-weight: 600;
+    }
+
+    .btn-submit:hover {
+        background: var(--secondary-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Textarea */
+    .form-control.textarea {
+        min-height: 80px;
+        resize: vertical;
+        font-size: 0.875rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--divider);
+    }
+
+    /* Messages */
+    .alert-message {
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.875rem;
+        animation: slideUp 0.3s ease;
+    }
+
+    .alert-success {
+        background: rgba(52, 168, 83, 0.1);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        color: var(--success);
+    }
+
+    .alert-danger {
+        background: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 2px;
+        font-size: 0.875rem;
+        opacity: 0.7;
+        margin-left: auto;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Section Title */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 24px 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--warning);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Phone Input */
+    .phone-input {
+        position: relative;
+    }
+
+    .phone-prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        pointer-events: none;
+    }
+
+    .phone-input .form-control {
+        padding-left: 40px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .leader-card {
+            padding: 12px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Confirmation Modal Styles */
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        padding: 20px;
+    }
+
+    .confirmation-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-dialog {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 400px;
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+
+    .confirmation-modal.show .modal-dialog {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--divider);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-message {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .modal-footer {
+        padding: 16px 24px 24px;
+        border-top: 1px solid var(--divider);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    /* Modal Buttons */
+    .modal-btn {
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 80px;
+    }
+
+    .modal-btn-cancel {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    .modal-btn-cancel:hover {
+        background: var(--surface);
+        border-color: var(--text-secondary);
+    }
+
+    .modal-btn-confirm {
+        background: var(--danger);
+        color: white;
+    }
+
+    .modal-btn-confirm:hover {
+        background: #d32f2f;
+        transform: translateY(-1px);
+    }
+
+    /* Warning Icon */
+    .warning-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(234, 67, 53, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--danger);
+        font-size: 1.25rem;
+    }
+
+    /* Responsive Modal */
+    @media (max-width: 576px) {
+        .modal-dialog {
+            max-width: 100%;
+            margin: 10px;
+        }
+        
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+            padding: 16px;
+        }
+        
+        .modal-footer {
+            flex-direction: column;
+        }
+        
+        .modal-btn {
+            width: 100%;
+        }
+        
+        .confirmation-modal {
+            padding: 10px;
+        }
+    }
+
+    /* Animation for deletion */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+        20%, 40%, 60%, 80% { transform: translateX(2px); }
+    }
+
+    .shaking {
+        animation: shake 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message alert-{{ message.tags }}">
+            <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Edit Community Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-edit"></i>
+                Edit Community: {{ community.name }}
+            </h2>
+        </div>
+        
+        <div class="card-body">
+            <form method="post" class="form" id="editCommunityForm">
+                {% csrf_token %}
+                
+                <!-- Community Name -->
+                <div class="form-group">
+                    <label for="community_name" class="form-label">Community Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="community_name" 
+                           name="community_name" 
+                           value="{{ community.name }}" 
+                           required
+                           placeholder="Enter community name">
+                </div>
+
+                <!-- Leaders List -->
+                <h3 class="section-title">
+                    <i class="fas fa-user-tie"></i>
+                    Community Leaders
+                </h3>
+                
+                <div class="leaders-container" id="leadersContainer">
+                    {% for leader in leaders %}
+                    <div class="leader-card">
+                        <div class="leader-header">
+                            <div class="leader-title">
+                                <i class="fas fa-user"></i>
+                                Leader #{{ forloop.counter }}
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="leader_ids[]" value="{{ leader.id }}">
+                        
+                        <div class="leader-grid">
+                            <!-- Full Name -->
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="leader_names[]" 
+                                       value="{{ leader.name }}" 
+                                       required
+                                       placeholder="Leader's full name">
+                            </div>
+                            
+                            <!-- Position -->
+                            <div class="form-group">
+                                <label class="form-label">Position</label>
+                                <select class="form-control select-control" name="leader_positions[]" required>
+                                    <option value="">Select Position</option>
+                                    <option value="CHAIR PERSON" {% if leader.leader == "CHAIR PERSON" %}selected{% endif %}>Chair Person</option>
+                                    <option value="VICE CHAIR" {% if leader.leader == "VICE CHAIR" %}selected{% endif %}>Vice Chair</option>
+                                    <option value="SECRETARY" {% if leader.leader == "SECRETARY" %}selected{% endif %}>Secretary</option>
+                                    <option value="VICE SECRETARY" {% if leader.leader == "VICE SECRETARY" %}selected{% endif %}>Vice Secretary</option>
+                                    <option value="ACCOUNTANT" {% if leader.leader == "ACCOUNTANT" %}selected{% endif %}>Accountant</option>
+                                    <option value="CHAIRPERSON" {% if leader.leader == "CHAIRPERSON" %}selected{% endif %}>Chairperson</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Phone Number -->
+                            <div class="form-group full-width">
+                                <label class="form-label">Phone Number</label>
+                                <div class="phone-input">
+                                    <span class="phone-prefix">+255</span>
+                                    <input type="tel" 
+                                           class="form-control" 
+                                           name="leader_phones[]" 
+                                           value="{{ leader.phone|default:'' }}" 
+                                           placeholder="XXXXXXXXX" 
+                                           pattern="[0-9]{9}" 
+                                           inputmode="tel">
+                                </div>
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="form-group full-width">
+                                <label class="form-label">Description (Optional)</label>
+                                <textarea class="form-control textarea" 
+                                          name="leader_descriptions[]" 
+                                          rows="2"
+                                          placeholder="Additional information about this leader">{{ leader.description|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert-message alert-warning" style="background: rgba(251, 188, 4, 0.1); border-color: rgba(251, 188, 4, 0.2); color: var(--warning);">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>No leaders added to this community yet.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'list_community' %}" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save"></i> Update Community
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-modal" id="confirmationModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message" id="modalMessage">Are you sure you want to perform this action?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">
+                Cancel
+            </button>
+            <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editCommunityForm');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalConfirm = document.getElementById('modalConfirm');
+    
+    let currentAction = null;
+    
+    // Confirmation Modal Functions
+    function showConfirmation(title, message, onConfirm) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        confirmationModal.classList.add('show');
+        currentAction = onConfirm;
+        
+        // Focus on cancel button for accessibility
+        modalCancel.focus();
+    }
+    
+    function hideConfirmation() {
+        confirmationModal.classList.remove('show');
+        currentAction = null;
+    }
+    
+    // Modal Event Listeners
+    modalCancel.addEventListener('click', hideConfirmation);
+    
+    modalConfirm.addEventListener('click', function() {
+        if (currentAction) {
+            currentAction();
+        }
+        hideConfirmation();
+    });
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && confirmationModal.classList.contains('show')) {
+            hideConfirmation();
+        }
+    });
+    
+    // Close modal when clicking outside
+    confirmationModal.addEventListener('click', function(e) {
+        if (e.target === confirmationModal) {
+            hideConfirmation();
+        }
+    });
+    
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert-message').style.display = 'none';
+        });
+    });
+
+    // Auto-remove alerts after 5 seconds
+    document.querySelectorAll('.alert-message').forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.3s';
+            setTimeout(() => {
+                if (alert.parentNode) alert.style.display = 'none';
+            }, 300);
+        }, 5000);
+    });
+
+    // Phone number formatting
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'leader_phones[]' && e.target.type === 'tel') {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 9) value = value.substring(0, 9);
+            e.target.value = value;
+        }
+    });
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const communityName = document.getElementById('community_name').value.trim();
+        
+        if (!communityName) {
+            e.preventDefault();
+            showNotification('Please enter a community name', 'error');
+            document.getElementById('community_name').focus();
+            return false;
+        }
+
+        // Validate phone numbers
+        let valid = true;
+        const phoneInputs = document.querySelectorAll('input[name="leader_phones[]"]');
+        phoneInputs.forEach(input => {
+            const value = input.value.trim();
+            if (value) {
+                const digits = value.replace(/\D/g, '');
+                if (digits.length !== 9) {
+                    valid = false;
+                    input.style.borderColor = 'var(--danger)';
+                }
+            }
+        });
+        
+        if (!valid) {
+            e.preventDefault();
+            showNotification('Please enter valid 9-digit phone numbers', 'error');
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('.btn-submit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        submitBtn.disabled = true;
+    });
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        // Remove existing notification
+        const existing = document.querySelector('.notification-toast');
+        if (existing) existing.remove();
+
+        // Create notification
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'error' ? 'var(--danger)' : 'var(--success)'};
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+            max-width: 300px;
+            font-size: 0.875rem;
+        `;
+
+        document.body.appendChild(notification);
+
+        // Add close event
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Example: Add confirmation to a delete link (if you have one)
+    const deleteBtn = document.querySelector('.btn-delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.href;
+            
+            showConfirmation(
+                'Delete Community',
+                `Are you sure you want to delete "${community.name}"? This action cannot be undone.`,
+                function() {
+                    // Add visual feedback
+                    deleteBtn.classList.add('shaking');
+                    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                    deleteBtn.disabled = true;
+                    
+                    // Navigate to delete URL after animation
+                    setTimeout(() => {
+                        window.location.href = url;
+                    }, 500);
+                }
+            );
+        });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's' && !confirmationModal.classList.contains('show')) {
+            e.preventDefault();
+            form.requestSubmit();
+        }
+
+        // Escape to cancel
+        if (e.key === 'Escape' && !confirmationModal.classList.contains('show')) {
+            window.history.back();
+        }
+    });
+});
+</script>
+{% endblock %}

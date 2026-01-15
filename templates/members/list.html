@@ -1,0 +1,934 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+:root {
+    /* Flutter/Material Design Color Palette */
+    --primary: #6750A4;
+    --primary-container: #EADDFF;
+    --on-primary: #FFFFFF;
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --surface: #FFFFFF;
+    --surface-variant: #F8F9FA;
+    --background: #FEF7FF;
+    --error: #BA1A1A;
+    --success: #0D904F;
+    --warning: #F59E0B;
+    --info: #0284C7;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+    
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 300ms ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--background);
+    color: #1F2937;
+    line-height: 1.5;
+}
+
+/* Layout Container */
+.dashboard-wrapper {
+    min-height: 100vh;
+    display: flex;
+}
+
+.container-fluid.table {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar */
+.page-aside {
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--outline-variant);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.aside-content {
+    padding: var(--space-4);
+    flex: 1;
+}
+
+.aside-header {
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--outline-variant);
+    margin-bottom: var(--space-4);
+}
+
+.navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+    color: var(--outline);
+}
+
+.aside-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: #111827;
+    display: block;
+    margin-bottom: var(--space-2);
+}
+
+.aside-description {
+    font-size: var(--text-sm);
+    color: var(--outline);
+}
+
+.aside-compose {
+    margin-bottom: var(--space-6);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-6);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    gap: var(--space-2);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-block {
+    display: flex;
+    width: 100%;
+}
+
+.btn-lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-lg);
+}
+
+.btn-secondary {
+    background: var(--secondary-container);
+    color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background: #D5D3E0;
+}
+
+.btn-light {
+    background: var(--surface-variant);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+}
+
+.btn-light:hover {
+    background: var(--outline-variant);
+}
+
+/* Navigation */
+.nav {
+    list-style: none;
+    margin-bottom: var(--space-6);
+}
+
+.nav li {
+    margin-bottom: var(--space-1);
+}
+
+.nav a {
+    display: flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+    color: var(--secondary);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    gap: var(--space-3);
+}
+
+.nav a:hover {
+    background: var(--surface-variant);
+    color: var(--primary);
+}
+
+.nav li.active a {
+    background: var(--primary-container);
+    color: var(--primary);
+    font-weight: var(--font-medium);
+}
+
+.nav-icon {
+    width: 20px;
+    text-align: center;
+    font-size: var(--text-lg);
+}
+
+.nav-text {
+    flex: 1;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-full);
+    min-width: 24px;
+    height: 24px;
+}
+
+.badge-success {
+    background: var(--success);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--warning);
+    color: #1F2937;
+}
+
+.badge-secondary {
+    background: var(--secondary);
+    color: white;
+}
+
+.badge-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--error);
+    color: white;
+}
+
+.badge-info {
+    background: var(--info);
+    color: white;
+}
+
+.float-right {
+    margin-left: auto;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: var(--space-4);
+    max-width: calc(100% - 280px);
+}
+
+/* Header */
+.email-inbox-header {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-sm);
+}
+
+.email-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: #111827;
+}
+
+.new-messages {
+    color: var(--outline);
+    font-weight: var(--font-normal);
+}
+
+.header-link {
+    font-size: var(--text-base);
+    color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.header-link:hover {
+    text-decoration: underline;
+}
+
+/* Search */
+.email-search {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.input-search {
+    display: flex;
+    max-width: 400px;
+}
+
+.form-control {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--outline);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+}
+
+.input-group-btn {
+    display: flex;
+}
+
+.search-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: var(--space-3) var(--space-6);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.search-btn:hover {
+    background: #5A4494;
+}
+
+/* Filters */
+.email-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.email-filters-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+/* Checkbox */
+.custom-control {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.custom-checkbox {
+    padding-left: 28px;
+}
+
+.custom-control-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.custom-control-label {
+    position: absolute;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--outline);
+    border-radius: 4px;
+    background: var(--surface);
+    transition: all var(--transition-fast);
+}
+
+.custom-control-input:checked ~ .custom-control-label {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.custom-control-input:checked ~ .custom-control-label::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+}
+
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid currentColor;
+    margin-left: var(--space-1);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--surface);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    min-width: 180px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    display: none;
+    margin-top: var(--space-1);
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    color: var(--secondary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: var(--surface-variant);
+    color: var(--primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--outline-variant);
+    margin: var(--space-2) 0;
+}
+
+.btn-group {
+    display: inline-flex;
+    gap: var(--space-2);
+}
+
+/* Pagination */
+.email-pagination-indicator {
+    color: var(--outline);
+    font-size: var(--text-sm);
+}
+
+.email-pagination-nav {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.shadow {
+    box-shadow: var(--shadow-sm);
+}
+
+/* Email List */
+.email-list {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.email-list-item {
+    display: flex;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--outline-variant);
+    transition: all var(--transition-fast);
+    gap: var(--space-4);
+}
+
+.email-list-item:hover {
+    background: var(--surface-variant);
+}
+
+.email-list-item:last-child {
+    border-bottom: none;
+}
+
+.email-list-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.favorite {
+    color: var(--outline);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.favorite:hover,
+.favorite.active {
+    color: #F59E0B;
+}
+
+.email-list-detail {
+    flex: 1;
+    min-width: 0;
+}
+
+.date {
+    font-size: var(--text-sm);
+    color: var(--outline);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.from {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: #111827;
+    display: block;
+    margin-bottom: var(--space-2);
+}
+
+.msg {
+    color: var(--outline);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.msg a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.msg a:hover {
+    color: var(--primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+    
+    .page-aside {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--outline-variant);
+    }
+    
+    .navbar-toggle {
+        display: inline-flex;
+    }
+    
+    .aside-nav {
+        display: none;
+    }
+    
+    .aside-nav.show {
+        display: block;
+    }
+    
+    .main-content {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --space-4: 12px;
+        --space-6: 16px;
+    }
+    
+    .email-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .email-filters-left,
+    .email-filters-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .email-search {
+        justify-content: stretch;
+    }
+    
+    .input-search {
+        max-width: 100%;
+    }
+    
+    .email-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+    
+    .email-list-item {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .email-list-actions {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .email-filters-left {
+        justify-content: center;
+    }
+    
+    .nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+    
+    .nav a {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-3);
+    }
+    
+    .nav-text {
+        font-size: var(--text-sm);
+    }
+}
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="container-fluid table">
+        <!-- Sidebar -->
+        <aside class="page-aside">
+            <div class="aside-content">
+                <div class="aside-header">
+                    <button class="navbar-toggle" onclick="toggleNav()">
+                        <span class="nav-icon">▼</span>
+                    </button>
+                    <span class="aside-title">Saved Church</span>
+                    <p class="aside-description">Members list view</p>
+                </div>
+                
+                <div class="aside-compose">
+                    <a class="btn btn-lg btn-secondary btn-block" href="{% url 'add_member' %}">
+                        <span class="nav-icon">+</span>
+                        Add Member
+                    </a>
+                </div>
+                
+                <div class="aside-nav" id="asideNav">
+                    <ul class="nav">
+                        <li class="{% if status %}active{% endif %}">
+                            <a href="{% url 'list_members' %}">
+                                <span class="nav-icon">📋</span>
+                                <span class="nav-text">All</span>
+                                <span class="badge badge-success float-right">{{ total }}</span>
+                            </a>
+                        </li>
+                        <li class="{% if tithe %}active{% endif %}">
+                            <a href="{% url 'get_members_by_statuses' 'tithe' %}">
+                                <span class="nav-icon">💰</span>
+                                <span class="nav-text">Tithe Payers</span>
+                                <span class="badge badge-warning float-right">{{ total_tithe }}</span>
+                            </a>
+                        </li>
+                        <li class="{% if new_believers %}active{% endif %}">
+                            <a href="{% url 'get_members_by_statuses' 'new_believers' %}">
+                                <span class="nav-icon">🙏</span>
+                                <span class="nav-text">New Believers</span>
+                                <span class="badge badge-secondary float-right">{{ total_new_believers }}</span>
+                            </a>
+                        </li>
+                        <li class="{% if working %}active{% endif %}">
+                            <a href="{% url 'get_members_by_statuses' 'working' %}">
+                                <span class="nav-icon">💼</span>
+                                <span class="nav-text">Working</span>
+                                <span class="badge badge-primary float-right">{{ total_working }}</span>
+                            </a>
+                        </li>
+                        <li class="{% if schooling %}active{% endif %}">
+                            <a href="{% url 'get_members_by_statuses' 'schooling' %}">
+                                <span class="nav-icon">🎓</span>
+                                <span class="nav-text">Schooling</span>
+                                <span class="badge badge-danger float-right">{{ total_schooling }}</span>
+                            </a>
+                        </li>
+                        <li class="{{ active }}">
+                            <a href="{% url 'list_deleted_members' %}">
+                                <span class="nav-icon">🗑️</span>
+                                <span class="nav-text">Deleted</span>
+                                <span class="badge badge-info float-right">{{ total_delete }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <span class="aside-title" style="margin-top: var(--space-6);">Shepherds</span>
+                    <ul class="nav">
+                        {% for shepherd in shepherds %}
+                        <li class="{% if shepherd_name %}active{% endif %}">
+                            <a href="{% url 'get_members_by_shepherd' shepherd.name %}" id="{{ shepherd.pk }}">
+                                <span class="nav-icon">👨‍🦳</span>
+                                <span class="nav-text">{{ shepherd.name }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="email-inbox-header">
+                <div class="header-row">
+                    <div class="email-title">
+                        <span class="nav-icon">👥</span>
+                        <span>Members</span>
+                        <span class="new-messages">(list view)</span>
+                        <a href="{% url 'table_members' %}" class="header-link">
+                            <span class="nav-icon">📊</span>
+                            Table View
+                        </a>
+                        <a href="{% url 'thumbnail_members' %}" class="header-link">
+                            <span class="nav-icon">🖼️</span>
+                            Thumbnail View
+                        </a>
+                    </div>
+                    
+                    <div class="email-search">
+                        <form action="{% url 'search_members' %}" method="get">
+                            <div class="input-search">
+                                <input class="form-control" type="text" placeholder="Search member..." name="q">
+                                <button class="search-btn" type="submit">
+                                    <span class="nav-icon">🔍</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="email-filters">
+                <div class="email-filters-left">
+                    <label class="custom-control custom-checkbox">
+                        <input class="custom-control-input chk_all" type="checkbox">
+                        <span class="custom-control-label"></span>
+                        Select All
+                    </label>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button">
+                            With selected
+                            <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Delete</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button">
+                            Order by
+                            <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Date Created</a>
+                            <a class="dropdown-item" href="#">Name</a>
+                            <a class="dropdown-item" href="#">Tithe Paying</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Age</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="email-filters-right">
+                    <span class="email-pagination-indicator">1-50 of {{ total }}</span>
+                    <div class="email-pagination-nav">
+                        <button class="btn btn-light" type="button">
+                            <span class="nav-icon">◀</span>
+                        </button>
+                        <button class="btn btn-light" type="button">
+                            <span class="nav-icon">▶</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members List -->
+            <div class="email-list">
+                {% for member in members %}
+                <div class="email-list-item">
+                    <div class="email-list-actions">
+                        <label class="custom-control custom-checkbox">
+                            <input class="custom-control-input checkboxes" type="checkbox" value="{{ member.id }}">
+                            <span class="custom-control-label"></span>
+                        </label>
+                        <a class="favorite {% if forloop.first %}active{% endif %}" href="#">
+                            <span class="nav-icon">★</span>
+                        </a>
+                    </div>
+                    
+                    <div class="email-list-detail">
+                        <span class="date">
+                            <span class="nav-icon">🏢</span>
+                            {{ member.ministry }}
+                        </span>
+                        <span class="from">{{ member.name }}</span>
+                        <a href="{% url 'detail_member' member.pk %}">
+                            <p class="msg">
+                                {{ member.name }}'s shepherd is <b>{{ member.shepherd }}</b> in the <b>{{ member.ministry }}</b> ministry. 
+                                {{ member.name }} lives at <b>{{ member.location }}</b>...
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleNav() {
+    const nav = document.getElementById('asideNav');
+    nav.classList.toggle('show');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Select all checkboxes
+    const selectAll = document.querySelector('.chk_all');
+    const checkboxes = document.querySelectorAll('.checkboxes');
+    
+    if (selectAll) {
+        selectAll.addEventListener('click', function() {
+            const isChecked = this.checked;
+            checkboxes.forEach(cb => cb.checked = isChecked);
+        });
+    }
+    
+    // Individual checkbox logic
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            if (selectAll) {
+                selectAll.checked = allChecked;
+            }
+        });
+    });
+    
+    // Dropdown toggle
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const menu = this.nextElementSibling;
+            menu.classList.toggle('show');
+        });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    });
+});
+</script>
+{% endblock %}
