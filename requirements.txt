@@ -29,4 +29,5 @@ twilio==9.8.7
 tzdata==2025.2
 urllib3==2.5.0
 whitenoise==6.11.0
+python-decouple
 yarl==1.22.0
