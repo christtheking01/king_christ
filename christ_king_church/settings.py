@@ -69,7 +69,8 @@ INSTALLED_APPS = [
     'tithe',
     'notifications',
     'rest_framework',
-    'finance'
+    'finance',
+    'catechesis'
 ]
 
 LOGIN_URL = 'login_user'  
