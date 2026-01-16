@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Register New Member{% endblock %}
+
+{% block content %}
+<style>
+    .register-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .register-container h2 {
+        color: #333;
+        margin-bottom: 25px;
+        font-size: 28px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .error {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .help-text {
+        color: #666;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    .btn-primary {
+        background-color: #4f46e5;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-primary:hover {
+        background-color: #4338ca;
+    }
+    .btn-secondary {
+        background-color: #e5e7eb;
+        color: #374151;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+</style>
+
+<div class="register-container">
+    <h2>Register New Member</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_first_name">First Name *</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <p class="error">{{ form.first_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_last_name">Last Name *</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <p class="error">{{ form.last_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="id_date_of_birth">Date of Birth *</label>
+            {{ form.date_of_birth }}
+            {% if form.date_of_birth.errors %}
+                <p class="error">{{ form.date_of_birth.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_email">Email *</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <p class="error">{{ form.email.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_phone">Phone *</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <p class="error">{{ form.phone.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_address">Address *</label>
+            {{ form.address }}
+            {% if form.address.errors %}
+                <p class="error">{{ form.address.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_birth_certificate">Birth Certificate</label>
+            <p class="help-text">Required for all sacraments except Baptism</p>
+            {{ form.birth_certificate }}
+            {% if form.birth_certificate.errors %}
+                <p class="error">{{ form.birth_certificate.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Register Member</button>
+            <a href="{% url 'member_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1728,33 +1728,69 @@
                 </a>
               </div>
             </div>
+          
 
-              <!-- Communities Dropdown -->
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if shepherds_active_add or shepherds_active_list %}active{% endif %}" data-target="communities-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-people-carry"></i>
-                  </div>
-                  <div class="nav-text">Communities</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
+              <!-- Catechesis Dropdown -->
+            <div class="nav-item dropdown-menu">
+              <div class="nav-link nav-toggle {% if catechesis_register_active or catechesis_member_list or catechesis_member_detail or catechesis_sacrament_request_create or catechesis_pending_request or catechesis_review_request or catechesis_sacrament_list or catechesis_complete_request %}active{% endif %}" data-target="catechesis-submenu">
+                <div class="nav-icon">
+                  <i class="fas fa-cross"></i>
                 </div>
-                <div class="submenu" id="communities-submenu" {% if community_active_add or community_active_list %}style="max-height: 500px;" {% endif %}>
-                  <a href="{% url 'add_community' %}" class="submenu-link {% if shepherds_active_add %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="submenu-text">Add Community</div>
-                  </a>
-                  <a href="{% url 'list_community' %}" class="submenu-link {% if shepherds_active_list %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
-                    </div>
-                    <div class="submenu-text">List Communities</div>
-                  </a>
+                <div class="nav-text">Catechesis</div>
+                <div class="nav-chevron">
+                  <i class="fas fa-chevron-down"></i>
                 </div>
               </div>
+              
+              <div class="submenu" id="catechesis-submenu" {% if catechesis_register_active or catechesis_member_list or catechesis_member_detail or catechesis_sacrament_request_create or catechesis_pending_request or catechesis_review_request or catechesis_sacrament_list or catechesis_complete_request %}style="max-height: 500px;"{% endif %}>
+                
+                <!-- Register Member -->
+                <a href="{% url 'member_register' %}" class="submenu-link {% if catechesis_register_active %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-user-plus"></i>
+                  </div>
+                  <div class="submenu-text">Register Member</div>
+                </a>
+                
+                <!-- List Members -->
+                <a href="{% url 'member_list' %}" class="submenu-link {% if catechesis_member_list %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <div class="submenu-text">View Members</div>
+                </a>
+                
+                <!-- Request Sacrament for Member -->
+                <a href="{% url 'member_list' %}" class="submenu-link">
+                  <div class="submenu-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                  </div>
+                  <div class="submenu-text">Request Sacrament</div>
+                </a>
+                
+                <!-- Sacraments List -->
+                <a href="{% url 'sacrament_list' %}" class="submenu-link {% if catechesis_sacrament_list %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-scroll"></i>
+                  </div>
+                  <div class="submenu-text">All Sacraments</div>
+                </a>
+                
+                <!-- Pending Requests (For Priests/Admin to approve) -->
+                {% if user.is_approver %}
+                <a href="{% url 'pending_requests' %}" class="submenu-link {% if catechesis_pending_request %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-tasks"></i>
+                  </div>
+                  <div class="submenu-text">Review Requests</div>
+                  {% if pending_requests_count and pending_requests_count > 0 %}
+                  <span class="nav-badge">{{ pending_requests_count }}</span>
+                  {% endif %}
+                </a>
+                {% endif %}
+                
+              </div>
+            </div>
 
               <!-- Members Dropdown -->
               <div class="nav-item dropdown-menu">
@@ -2074,6 +2110,63 @@
         </div>
       </div>
     </div>
+    <!-- Sacrament Request Modal -->
+<div class="modal-overlay" id="sacramentRequestModal">
+  <div class="modal" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3>Request Sacrament</h3>
+      <button class="close-modal" onclick="hideSacramentRequestModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="text-center mb-4">
+        <div class="mb-3">
+          <i class="fas fa-hands-praying fa-3x text-primary"></i>
+        </div>
+        <h4>Select a Member</h4>
+        <p class="text-muted">Choose a member to request sacrament for</p>
+      </div>
+      
+      <!-- Member Search -->
+      <div class="mb-4">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search member by name..." 
+                 id="memberSearch" onkeyup="searchMembers()">
+          <button class="btn btn-primary" type="button">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+        <div id="memberSearchResults" class="mt-3" style="max-height: 250px; overflow-y: auto;">
+          <!-- Search results will appear here -->
+          <p class="text-muted small text-center">Type to search members</p>
+        </div>
+      </div>
+      
+      <!-- Recent Members -->
+      <div class="mb-3">
+        <h6 class="mb-2">Recent Members</h6>
+        <div class="list-group" id="recentMembers">
+          <!-- Will be populated by JavaScript -->
+          <div class="text-center py-3">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="text-muted small mt-2">Loading members...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-4">
+        <a href="{% url 'member_list' %}" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-users"></i> Browse All Members
+        </a>
+        <a href="{% url 'member_register' %}" class="btn btn-outline-success btn-sm ms-2">
+          <i class="fas fa-user-plus"></i> Register New Member
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+    
     {% endif %}
 
     <!-- JavaScript -->
@@ -2240,6 +2333,152 @@
                   }
               });
           });
+
+          // Sacrament Request Modal Functions
+            window.showSacramentRequestModal = function() {
+                const modal = document.getElementById('sacramentRequestModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    loadRecentMembers();
+                }
+            };
+
+            window.hideSacramentRequestModal = function() {
+                const modal = document.getElementById('sacramentRequestModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                }
+            };
+
+            // Load recent members for modal
+            function loadRecentMembers() {
+                const recentMembersContainer = document.getElementById('recentMembers');
+                
+                // You would typically make an AJAX request here
+                // For now, we'll simulate with static data
+                setTimeout(() => {
+                    recentMembersContainer.innerHTML = `
+                        <a href="{% url 'sacrament_request' member_pk=1 %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>John Doe</strong>
+                                    <div class="text-muted small">john@example.com</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <a href="{% url 'sacrament_request' member_pk=2 %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Jane Smith</strong>
+                                    <div class="text-muted small">jane@example.com</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <a href="{% url 'sacrament_request' member_pk=3 %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Robert Johnson</strong>
+                                    <div class="text-muted small">robert@example.com</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <div class="text-center py-2">
+                            <a href="{% url 'member_list' %}" class="btn btn-sm btn-outline-primary">
+                                View All Members
+                            </a>
+                        </div>
+                    `;
+                }, 300);
+            }
+
+            // Member search functionality
+            function searchMembers() {
+                const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
+                const resultsContainer = document.getElementById('memberSearchResults');
+                
+                if (searchTerm.length < 2) {
+                    resultsContainer.innerHTML = '<p class="text-muted small text-center">Type at least 2 characters to search</p>';
+                    return;
+                }
+                
+                resultsContainer.innerHTML = `
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Searching for "${searchTerm}"...</strong>
+                                    <div class="text-muted small">Loading results...</div>
+                                </div>
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Simulate AJAX call (replace with actual AJAX)
+                setTimeout(() => {
+                    // In reality, you would fetch from your API
+                    // For now, show sample results
+                    resultsContainer.innerHTML = `
+                        <div class="list-group">
+                            <a href="{% url 'sacrament_request' member_pk=1 %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>John Doe</strong>
+                                        <div class="text-muted small">john@example.com</div>
+                                    </div>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                            <a href="{% url 'sacrament_request' member_pk=2 %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Jane Smith</strong>
+                                        <div class="text-muted small">jane@example.com</div>
+                                    </div>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                            <a href="{% url 'sacrament_request' member_pk=4 %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>John Smith</strong>
+                                        <div class="text-muted small">john.smith@example.com</div>
+                                    </div>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <a href="{% url 'member_list' %}?q=${searchTerm}" class="btn btn-sm btn-outline-primary">
+                                View all search results
+                            </a>
+                        </div>
+                    `;
+                }, 500);
+            }
+
+            // Close modal when clicking outside
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('sacramentRequestModal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            hideSacramentRequestModal();
+                        }
+                    });
+                }
+                
+                // Close modal with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        hideSacramentRequestModal();
+                    }
+                });
+            });
 
           // Handle nested dropdown menus
           const nestedToggles = document.querySelectorAll('.dropdown-toggle');

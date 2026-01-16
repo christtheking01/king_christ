@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+
+{% block title %}Members List - Catechesis{% endblock %}
+
+{% block content %}
+<style>
+    .members-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .members-header h2 {
+        font-size: 28px;
+        color: #333;
+        margin: 0;
+    }
+    .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .search-box {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        margin-top: 15px;
+    }
+    .search-box input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    .btn-add {
+        background-color: #4f46e5;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-add:hover {
+        background-color: #4338ca;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .btn-search {
+        background-color: #4f46e5;
+        color: white;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-search:hover {
+        background-color: #4338ca;
+    }
+    .members-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .table-container {
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    thead {
+        background-color: #f3f4f6;
+    }
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+        color: #1f2937;
+    }
+    tbody tr {
+        transition: background-color 0.2s;
+    }
+    tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    .badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .btn-view {
+        background-color: #3b82f6;
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    .btn-view:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+    }
+    .btn-request {
+        background-color: #10b981;
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    .btn-request:hover {
+        background-color: #059669;
+        transform: translateY(-1px);
+    }
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+    }
+    .no-data i {
+        font-size: 48px;
+        color: #d1d5db;
+        margin-bottom: 16px;
+    }
+    .no-data h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+        color: #374151;
+    }
+    .no-data p {
+        margin-bottom: 20px;
+        color: #6b7280;
+    }
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .stat-icon.blue {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    .stat-icon.green {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    .stat-icon.red {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .stat-details h4 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+    .stat-details p {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .members-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .header-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+        .btn-add {
+            width: 100%;
+            justify-content: center;
+        }
+        .search-box {
+            flex-direction: column;
+        }
+        .btn-search {
+            width: 100%;
+        }
+        .action-buttons {
+            flex-direction: column;
+        }
+        .btn-view, .btn-request {
+            width: 100%;
+            justify-content: center;
+        }
+        th, td {
+            padding: 10px;
+            font-size: 13px;
+        }
+    }
+</style>
+
+<!-- Statistics Cards -->
+<div class="stats-cards">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-details">
+            <h4>{{ members.count }}</h4>
+            <p>Total Members</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-details">
+            <h4>{{ members|length|add:0 }}</h4>
+            <p>With Birth Cert</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="stat-details">
+            <h4>0</h4>
+            <p>Missing Birth Cert</p>
+        </div>
+    </div>
+</div>
+
+<!-- Header -->
+<div class="members-header">
+    <div>
+        <h2>Registered Members</h2>
+        <p style="color: #6b7280; margin-top: 5px; font-size: 14px;">
+            Manage catechesis members and request sacraments
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'member_register' %}" class="btn-add">
+            <i class="fas fa-user-plus"></i> Register New Member
+        </a>
+    </div>
+</div>
+
+<!-- Search Box -->
+<div class="members-header">
+    <form method="get" class="search-box">
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="Search by name, email, or phone number..." 
+            value="{{ query }}"
+            autocomplete="off"
+        >
+        <button type="submit" class="btn-search">
+            <i class="fas fa-search"></i> Search
+        </button>
+        {% if query %}
+        <a href="{% url 'member_list' %}" class="btn-search" style="background-color: #6b7280;">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Members Table -->
+<div class="members-table">
+    {% if members %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Date of Birth</th>
+                    <th>Birth Certificate</th>
+                    <th>Registration Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <strong>{{ member.first_name }} {{ member.last_name }}</strong>
+                    </td>
+                    <td>{{ member.email }}</td>
+                    <td>{{ member.phone }}</td>
+                    <td>{{ member.date_of_birth|date:"M d, Y" }}</td>
+                    <td>
+                        {% if member.has_birth_certificate %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Uploaded
+                            </span>
+                        {% else %}
+                            <span class="badge badge-danger">
+                                <i class="fas fa-times"></i> Missing
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ member.registration_date|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'member_detail' member.pk %}" class="btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="{% url 'sacrament_request' member_pk=member.pk %}" class="btn-request">
+                                <i class="fas fa-hand-holding-heart"></i> Request Sacrament
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-data">
+        <i class="fas fa-users-slash"></i>
+        {% if query %}
+            <h3>No Members Found</h3>
+            <p>No members match your search for "{{ query }}"</p>
+            <a href="{% url 'member_list' %}" class="btn-add">
+                <i class="fas fa-arrow-left"></i> View All Members
+            </a>
+        {% else %}
+            <h3>No Members Yet</h3>
+            <p>Get started by registering your first catechesis member</p>
+            <a href="{% url 'member_register' %}" class="btn-add">
+                <i class="fas fa-user-plus"></i> Register First Member
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination (if you add pagination later) -->
+{% if members.has_other_pages %}
+<div class="members-header" style="margin-top: 20px;">
+    <div style="display: flex; justify-content: center; gap: 10px; width: 100%;">
+        {% if members.has_previous %}
+            <a href="?page=1{% if query %}&q={{ query }}{% endif %}" class="btn-search">
+                <i class="fas fa-angle-double-left"></i> First
+            </a>
+            <a href="?page={{ members.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-search">
+                <i class="fas fa-angle-left"></i> Previous
+            </a>
+        {% endif %}
+        
+        <span style="padding: 10px 20px; background: white; border-radius: 4px; font-weight: 600;">
+            Page {{ members.number }} of {{ members.paginator.num_pages }}
+        </span>
+        
+        {% if members.has_next %}
+            <a href="?page={{ members.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-search">
+                Next <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ members.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" class="btn-search">
+                Last <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+    // Auto-focus search input on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput && !searchInput.value) {
+            searchInput.focus();
+        }
+    });
+    
+    // Highlight search term in results
+    const searchTerm = "{{ query }}";
+    if (searchTerm) {
+        const cells = document.querySelectorAll('tbody td');
+        cells.forEach(cell => {
+            const text = cell.textContent;
+            if (text.toLowerCase().includes(searchTerm.toLowerCase())) {
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                cell.innerHTML = cell.innerHTML.replace(regex, '<mark style="background-color: #fef3c7; padding: 2px 4px; border-radius: 2px;">$1</mark>');
+            }
+        });
+    }
+</script>
+
+{% endblock %}

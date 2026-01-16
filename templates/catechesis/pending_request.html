@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Requests{% endblock %}
+
+{% block content %}
+<style>
+    .pending-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .pending-header h2 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .filter-tab {
+        padding: 8px 16px;
+        background: #f3f4f6;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #374151;
+    }
+    .filter-tab.active {
+        background: #4f46e5;
+        color: white;
+    }
+    .requests-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    thead {
+        background-color: #f3f4f6;
+    }
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: bold;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    tr:hover {
+        background-color: #f9fafb;
+    }
+    .btn-review {
+        background-color: #4f46e5;
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .btn-review:hover {
+        background-color: #4338ca;
+    }
+    .btn-complete {
+        background-color: #10b981;
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 5px;
+    }
+    .btn-complete:hover {
+        background-color: #059669;
+    }
+    .no-requests {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+</style>
+
+<div class="pending-header">
+    <h2>Sacrament Requests</h2>
+    <p style="color: #666;">Review and manage pending sacrament requests</p>
+    
+    <div class="filter-tabs">
+        <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+        <a href="?status=approved" class="filter-tab {% if status_filter == 'approved' %}active{% endif %}">Approved</a>
+        <a href="?status=completed" class="filter-tab {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="?status=rejected" class="filter-tab {% if status_filter == 'rejected' %}active{% endif %}">Rejected</a>
+    </div>
+</div>
+
+<div class="requests-table">
+    {% if requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Sacrament</th>
+                <th>Request Date</th>
+                <th>Status</th>
+                <th>Scheduled Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in requests %}
+            <tr>
+                <td>{{ request.member.first_name }} {{ request.member.last_name }}</td>
+                <td>{{ request.sacrament }}</td>
+                <td>{{ request.request_date }}</td>
+                <td>{{ request.get_status_display }}</td>
+                <td>{{ request.scheduled_date|default:"Not scheduled" }}</td>
+                <td>
+                    {% if request.status == 'pending' %}
+                        <a href="{% url 'review_request' request.pk %}" class="btn-review">Review</a>
+                    {% elif request.status == 'approved' %}
+                        <a href="{% url 'complete_request' request.pk %}" class="btn-complete">Mark Complete</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-repeat">
+        <p>No {{Status_filter}} request found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Sacrament{% endblock %}
+
+{% block content %}
+<style>
+    .request-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .request-container h2 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+    .member-info {
+        background: #f0f9ff;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 25px;
+        border-left: 4px solid #3b82f6;
+    }
+    .member-info p {
+        margin: 5px 0;
+        color: #1e40af;
+    }
+    .warning {
+        background: #fef3c7;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .sacrament-info {
+        background: #f9fafb;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    .btn-submit {
+        background-color: #10b981;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-submit:hover {
+        background-color: #059669;
+    }
+    .btn-cancel {
+        background-color: #e5e7eb;
+        color: #374151;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .btn-cancel:hover {
+        background-color: #d1d5db;
+    }
+</style>
+
+<div class="request-container">
+    <h2>Request Sacrament</h2>
+    
+    <div class="member-info">
+        <p><strong>Member:</strong> {{ member.first_name }} {{ member.last_name }}</p>
+        <p><strong>Email:</strong> {{ member.email }}</p>
+        <p><strong>Birth Certificate:</strong> 
+            {% if member.has_birth_certificate %}
+                <span style="color: #059669;">✓ Uploaded</span>
+            {% else %}
+                <span style="color: #dc2626;">✗ Not Uploaded</span>
+            {% endif %}
+        </p>
+    </div>
+    
+    {% if not member.has_birth_certificate %}
+    <div class="warning">
+        <strong>⚠ Warning:</strong> Birth certificate is not uploaded. You can only request Baptism without a birth certificate.
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_sacrament">Select Sacrament *</label>
+            {{ form.sacrament }}
+            {% if form.sacrament.errors %}
+                <p style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.sacrament.errors.0 }}</p>
+            {% endif %}
+            <div class="sacrament-info">
+                Available sacraments based on your uploaded documents.
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="id_notes">Additional Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+                <p style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.notes.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Submit Request</button>
+            <a href="{% url 'member_detail' member.pk %}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

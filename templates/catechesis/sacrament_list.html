@@ -1,0 +1,89 @@
+<!-- templates/catechesis/sacrament_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Sacraments List{% endblock %}
+
+{% block content %}
+<style>
+    .sacraments-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .sacraments-header h2 {
+        font-size: 28px;
+        color: #333;
+    }
+    .sacraments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    .sacrament-card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-top: 4px solid #4f46e5;
+    }
+    .sacrament-card h3 {
+        color: #4f46e5;
+        margin-bottom: 15px;
+        font-size: 22px;
+    }
+    .sacrament-card p {
+        color: #666;
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .requirement.required {
+        color: #dc2626;
+    }
+    .requirement.not-required {
+        color: #059669;
+    }
+</style>
+
+<div class="sacraments-header">
+    <h2>Seven Sacraments</h2>
+    <p style="color: #666; margin-top: 10px;">Overview of all sacraments and their requirements</p>
+</div>
+
+<div class="sacraments-grid">
+    {% for sacrament in sacraments %}
+    <div class="sacrament-card">
+        <h3>{{ sacrament.get_name_display }}</h3>
+        <p>{{ sacrament.description }}</p>
+        
+        <div class="requirement {% if sacrament.requires_birth_certificate %}required{% else %}not-required{% endif %}">
+            {% if sacrament.requires_birth_certificate %}
+                <span>⚠</span>
+                <span><strong>Birth Certificate Required</strong></span>
+            {% else %}
+                <span>✓</span>
+                <span><strong>No Birth Certificate Required</strong></span>
+            {% endif %}
+        </div>
+        
+        {% if sacrament.min_age %}
+        <div class="requirement">
+            <span>👤</span>
+            <span><strong>Minimum Age:</strong> {{ sacrament.min_age }} years</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
