@@ -40,7 +40,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 ALLOWED_HOSTS = [
-    'https://www.christtheking.space',
+    'www.christtheking.space',
     'christtheking.space',
     'web-production-593fe1.up.railway.ap', # Your Railway domain
     '127.0.0.1',
@@ -215,6 +215,7 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
 
 
 
