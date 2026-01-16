@@ -29,6 +29,7 @@ urlpatterns = [
     path('tithe/', include('tithe.urls')),
     path('notifications/', include('notifications.urls')),
     path('financial/', include('finance.urls')), 
+    path('catechesis/',include('catechesis.urls')),
     path('', index, name="home"),
 ]
 
