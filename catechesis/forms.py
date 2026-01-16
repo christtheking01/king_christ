@@ -5,7 +5,7 @@ class MemberRegistrationForm(forms.ModelForm):
     class Meta:
         model = CatechesisMember
         fields = ['first_name', 'last_name', 'date_of_birth', 'email', 
-                  'phone', 'address', 'birth_certificate']
+                  'phone', 'address', 'baptism_certificate']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'address': forms.Textarea(attrs={'rows': 3}),
