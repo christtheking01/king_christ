@@ -2,7 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from users.models import User 
 
-from christ_king_church.christ_king_church import settings
+from django.conf import settings
 
 # Create your models here
 class CatechesisMember(models.Model):
