@@ -48,7 +48,7 @@ ALLOWED_HOSTS = [
  # Allow all Render subdomains 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
-    'htps://christtheking.space',
+    'https://christtheking.space',
     'https://www.christtheking.space'
 ]
 
@@ -217,6 +217,7 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
 
 
 
