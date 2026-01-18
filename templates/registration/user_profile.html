@@ -1,215 +1,338 @@
 {% extends 'base.html' %}
 
+{% block title %}My Profile - {{ user_profile.username }}{% endblock %}
+
 {% block content %}
-
-    <div class="dashboard-wrapper">
-        <div class="influence-profile">
-            <div class="container-fluid dashboard-content ">
-                <!-- ============================================================== -->
-                <!-- pageheader -->
-                <!-- ============================================================== -->
-                <div class="row">
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div class="page-header">
-                            <h3 class="mb-2">Account Profile</h3>
-                            <div class="page-breadcrumb">
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Account</a></li>
-                                        <li class="breadcrumb-item active" aria-current="page">Profile</li>
-                                    </ol>
-                                </nav>
-                            </div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Card -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <!-- Avatar/Initials -->
+                    <div class="mb-3">
+                        <div class="avatar-circle" style="
+                            width: 120px;
+                            height: 120px;
+                            background: linear-gradient(45deg, #3498db, #2c3e50);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto;
+                            color: white;
+                            font-size: 3rem;
+                            font-weight: bold;
+                        ">
+                            {{ user.firstname|first|upper }}{{ user.lastname|first|upper }}
                         </div>
                     </div>
+                    
+                    <h4 class="mb-1">{{ user.full_name }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    
+                    <!-- Role Badge -->
+                    <div class="mb-3">
+                        <span class="badge 
+                            {% if user.roles == 'admin' %}bg-danger
+                            {% elif user.roles == 'Chairperson' %}bg-primary
+                            {% elif user.roles == 'Secretary' %}bg-success
+                            {% elif user.roles == 'Priest' %}bg-success
+                            {% elif user.roles == 'Catechesis' %}bg-success
+                            {% elif user.roles == 'Accountant' %}bg-warning
+                            {% else %}bg-secondary{% endif %}
+                            p-2">
+                            {{ user_profile.get_roles_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Status Indicators -->
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <span class="status-indicator {% if user.is_active %}text-success{% else %}text-danger{% endif %}">
+                            <i class="fas fa-circle me-1"></i>
+                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        
+                        <span class="status-indicator {% if user.is_verified %}text-success{% else %}text-warning{% endif %}">
+                            <i class="fas {% if user.is_verified %}fa-check-circle{% else %}fa-clock{% endif %} me-1"></i>
+                            {% if user.is_verified %}Verified{% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Staff Status -->
+                    {% if user.is_staff %}
+                    <div class="alert alert-info py-2">
+                        <small><i class="fas fa-shield-alt me-1"></i> Staff Member</small>
+                    </div>
+                    {% endif %}
                 </div>
-                <!-- ============================================================== -->
-                <!-- end pageheader -->
-                <!-- ============================================================== -->
-                <!-- ============================================================== -->
-                <!-- content -->
-                <!-- ============================================================== -->
-                <div class="row">
-                    <!-- ============================================================== -->
-                    <!-- profile -->
-                    <!-- ============================================================== -->
-                    <div class="col-xl-3 col-lg-3 col-md-5 col-sm-12 col-12">
-                        <!-- ============================================================== -->
-                        <!-- card profile -->
-                        <!-- ============================================================== -->
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="user-avatar text-center d-block">
-                                    <img src="{{ profile.picture.url }}" alt="User Avatar" class="rounded-circle user-avatar-xxl">
-                                </div>
-                                <div class="text-center">
-                                    <h2 class="font-24 mb-0">{{ profile.user.username }}</h2>
-                                    <p>{{ profile.title }}</p>
-                                </div>
-                            </div>
-                            <div class="card-body border-top">
-                                <h3 class="font-16">Contact Information</h3>
-                                <div class="">
-                                    <ul class="list-unstyled mb-0">
-                                    <li class="mb-2"><i class="fas fa-fw fa-envelope mr-2"></i>{{ profile.user.email }}</li>
-                                    <li class="mb-0"><i class="fas fa-fw fa-phone mr-2"></i>{{ profile.telephone }}</li>
-                                </ul>
-                                </div>
-                            </div>
-                            <div class="card-body border-top">
-                                <h3 class="font-16">Priest's Rating</h3>
-                                <h1 class="mb-0">4.8</h1>
-                                <div class="rating-star">
-                                    <i class="fa fa-fw fa-star"></i>
-                                    <i class="fa fa-fw fa-star"></i>
-                                    <i class="fa fa-fw fa-star"></i>
-                                    <i class="fa fa-fw fa-star"></i>
-                                    <i class="fa fa-fw fa-star"></i>
-                                    <p class="d-inline-block text-dark">14 Reviews </p>
-                                </div>
-                            </div>
-                            <div class="card-body border-top">
-                                <h3 class="font-16">Social Channels</h3>
-                                <div class="">
-                                    <ul class="mb-0 list-unstyled">
-                                    <li class="mb-1"><a href="#"><i class="fab fa-fw fa-facebook-square mr-1 facebook-color"></i>fb.me/{{ profile.user }}</a></li>
-                                    <li class="mb-1"><a href="#"><i class="fab fa-fw fa-twitter-square mr-1 twitter-color"></i>twitter.com/{{ profile.user }}</a></li>
-                                    <li class="mb-1"><a href="#"><i class="fab fa-fw fa-instagram mr-1 instagram-color"></i>instagram.com/{{ profile.user }}</a></li>
-                                    <li class="mb-1"><a href="#"><i class="fab fa-fw fa-whatsapp mr-1 text-success"></i>{{ profile.whatsapp_line }}</a></li>
-                                </ul>
-                                </div>
-                            </div>
-                           
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h6 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Account Info</h6>
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h5 class="mb-1">{{ user.date_joined|date:"M Y" }}</h5>
+                            <small class="text-muted">Joined</small>
                         </div>
-                        <!-- ============================================================== -->
-                        <!-- end card profile -->
-                        <!-- ============================================================== -->
-                    </div>
-                    <!-- ============================================================== -->
-                    <!-- end profile -->
-                    <!-- ============================================================== -->
-                    <!-- ============================================================== -->
-                    <!-- campaign data -->
-                    <!-- ============================================================== -->
-                    <div class="col-xl-9 col-lg-9 col-md-7 col-sm-12 col-12">
-                        <!-- ============================================================== -->
-                        <!-- campaign tab one -->
-                        <!-- ============================================================== -->
-                        <div class="influence-profile-content pills-regular">
-                            <ul class="nav nav-pills mb-3 nav-justified" id="pills-tab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="pills-campaign-tab" data-toggle="pill" href="#pills-campaign" role="tab" aria-controls="pills-campaign" aria-selected="true">Works</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="pills-msg-tab" data-toggle="pill" href="#pills-msg" role="tab" aria-controls="pills-msg" aria-selected="false">Send Messages</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="pills-tabContent">
-                                <div class="tab-pane fade show active" id="pills-campaign" role="tabpanel" aria-labelledby="pills-campaign-tab">
-                                    <div class="row">
-                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                            <div class="section-block">
-                                                <h3 class="section-title">Souls</h3>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                            <div class="card">
-                                                <h5 class="card-header">Members</h5>
-                                                {% if shepherd %}
-                                                    {% if members %}
-                                                        {% for member in members %}
-                                                            <div class="card-body border-top">
-                                                                <div class="review-block">
-                                                                    <p class="review-text font-italic m-0">
-                                                                        “{{ member.name }}'s user is <b>{{ member.shepherd }}</b> and is in the <b>{{ member.ministry }}</b> ministry. {{ member.name }}
-                                                                        lives at <b>{{ member.location }}</b> and parent name are {% if member.fathers_name %} Mr. {{ member.fathers_name }} {% endif %}
-                                                                        {% if member.mothers_name %} and Mrs. {{ member.mothers_name }}{% endif %} and lives with <b> {{ member.guardians_name }}
-                                                                    </b>. {{ member.name }} can be reached on <b>{{ member.telephone }}</b>”
-                                                                    </p>
-                                                                    <div class="rating-star mb-4">
-                                                                        <i class="fa fa-fw fa-star"></i>
-                                                                        <i class="fa fa-fw fa-star"></i>
-                                                                        <i class="fa fa-fw fa-star"></i>
-                                                                        <i class="fa fa-fw fa-star"></i>
-                                                                        <i class="fa fa-fw fa-star"></i>
-                                                                    </div>
-                                                                    <span class="text-dark font-weight-bold">{{ member.name }} ({{ member.ministry }})</span><small class="text-mute"></small>
-                                                                </div>
-                                                            </div>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        <div class="card-body border-top">
-                                                            <div class="review-block">
-                                                                <p class="review-text font-italics m-0">
-                                                                    <p>You happen to have no member recorded in the system<br>If you think
-                                                                    there is a problem somewhere see the system Administrator or your Parish priest.<br>
-                                                                    Thank You.
-                                                                </p>
-                                                        </div>
-                                                    </div>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <div class="card-body border-top">
-                                                        <div class="review-block">
-                                                            <p class="review-text font-italics m-0">
-                                                                <p>You happen not to be a shepherd in this church.<br>If you think there is a problem with identification see the system Administrator or your Parish priest.<br>
-                                                                Thank You.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="tab-pane fade" id="pills-msg" role="tabpanel" aria-labelledby="pills-msg-tab">
-                                    <div class="card">
-                                        <h5 class="card-header">Send Messages To The Parish Priest</h5>
-                                        <div class="card-body">
-                                            <form>
-                                                <div class="row">
-                                                    <div class="offset-xl-3 col-xl-6 offset-lg-3 col-lg-3 col-md-12 col-sm-12 col-12 p-4">
-                                                        <div class="form-group">
-                                                            <label for="name">Your Name</label>
-                                                            <input type="text" class="form-control form-control-lg" id="name" placeholder="">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="email">Your Email</label>
-                                                            <input type="email" class="form-control form-control-lg" id="email" placeholder="">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="subject">Subject</label>
-                                                            <input type="text" class="form-control form-control-lg" id="subject" placeholder="">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="messages">Messgaes</label>
-                                                            <textarea class="form-control" id="messages" rows="3"></textarea>
-                                                        </div>
-                                                        <button type="submit" class="btn btn-primary float-right">Send Message</button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">
+                                {% if user.last_login %}
+                                    {{ user.last_login|timesince }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </h5>
+                            <small class="text-muted">Last Login</small>
                         </div>
-                        <!-- ============================================================== -->
-                        <!-- end campaign tab one -->
-                        <!-- ============================================================== -->
                     </div>
-                    <!-- ============================================================== -->
-                    <!-- end campaign data -->
-                    <!-- ============================================================== -->
                 </div>
             </div>
         </div>
-        <!-- ============================================================== -->
-        <!-- end content -->
+        
+        <div class="col-md-8">
+            <!-- User Details Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Personal Details -->
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Basic Details</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Username:</th>
+                                    <td>{{ user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Full Name:</th>
+                                    <td>{{ user.full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>First Name:</th>
+                                    <td>{{ user.firstname|default:"Not provided" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Name:</th>
+                                    <td>{{ user.lastname|default:"Not provided" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Contact Information -->
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Contact Information</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Email:</th>
+                                    <td>
+                                        {{ user.email|default:"Not provided" }}
+                                        {% if user.email %}
+                                        <br><small class="text-muted">Primary contact email</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td>{{ user.phone|default:"Not provided" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account Information Card -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="50%">User Role:</th>
+                                    <td>
+                                        <span class="badge 
+                                            {% if user.roles == 'admin' %}bg-danger
+                                            {% elif user.roles == 'Chairperson' %}bg-primary
+                                            {% elif user.roles == 'Secretary' %}bg-success
+                                            {% elif user.roles == 'Accountant' %}bg-warning
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ user.get_roles_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Account Status:</th>
+                                    <td>
+                                        {% if user_profile.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Verification:</th>
+                                    <td>
+                                        {% if user.is_verified %}
+                                        <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending Verification</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="50%">Staff Status:</th>
+                                    <td>
+                                        {% if user.is_staff %}
+                                        <span class="badge bg-primary">Staff Member</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Regular User</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date Joined:</th>
+                                    <td>{{ user.date_joined|date:"F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Password Status:</th>
+                                    <td>
+                                        {% if user.force_password_change %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Change Required
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Up to Date
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div class="alert alert-light mt-3">
+                        <h6><i class="fas fa-info-circle me-2"></i>About This Account</h6>
+                        <p class="mb-0">
+                            This user account was created on {{ user.date_joined|date:"F d, Y" }}.
+                            {% if user.is_active %}
+                            The account is currently active and can access the system.
+                            {% else %}
+                            This account is currently inactive and cannot access the system.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Alert if Password Change Required -->
+            {% if user_profile.force_password_change and user_profile == request.user %}
+            <div class="alert alert-warning mt-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-key fa-2x"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="alert-heading">Password Update Required</h5>
+                        <p class="mb-0">You are required to change your password. Please update it from your account settings.</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
 
+      <div class="modal">
+        <div class="modal-header">
+          <h3 style="font-weight: 600">Logout</h3>
+          <button class="close-modal" style="background: none; border: none; cursor: pointer">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Do you want to logout?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="cancelLogout">
+            Cancel
+          </button>
+          <form method="post" action="{% url '_logout' %}" id="logoutForm" style="display: inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
 
-
-{% endblock content %}
+<style>
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-bottom: 2px solid #f8f9fa;
+        padding: 1rem 1.5rem;
+    }
+    
+    .table-borderless td, .table-borderless th {
+        border: none;
+        padding: 8px 0;
+    }
+    
+    .table-borderless th {
+        font-weight: 600;
+        color: #555;
+        vertical-align: top;
+    }
+    
+    .table-borderless tr:not(:last-child) td,
+    .table-borderless tr:not(:last-child) th {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .avatar-circle {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .avatar-circle:hover {
+        transform: scale(1.05);
+    }
+    
+    .status-indicator {
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    h6.border-bottom {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

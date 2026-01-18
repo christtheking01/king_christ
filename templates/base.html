@@ -1979,7 +1979,9 @@
           <div class="sidebar-footer">
             <div class="user-info">
               <div class="user-avatar-sm">
+                <a href="{% url 'role_management' %}?status={% if user_active %}active{% else %}inactive{% endif %}">
                 <img src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}" alt="{{ user.username }}" />
+                </a>
               </div>
               <div class="user-details">
                 <div class="user-name">
@@ -1988,6 +1990,8 @@
                 <div class="user-role">
                   {% if user.is_superuser %}Administrator 
                   {% elif user.roles == 'Accountant' %}Accountant
+                  {% elif user.roles == 'Priest' %} Priest 
+                  {% elif user.roles == 'Catechesis' %} Catechesis
                   {% elif user.roles == 'Admin' %} Admin
                   {% elif user.is_staff %}Staff 
                   {% else %}Member {% endif %}

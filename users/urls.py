@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import ( _login, login_user, _logout, signup, signup_user, user_profile, 
-                    login_api,create_user, change_password,edit_user,list_users,delete_user)
+                    login_api,create_user, change_password,edit_user,view_user,list_users,delete_user)
 
 urlpatterns = [
     # Login URLConfs
@@ -8,6 +8,7 @@ urlpatterns = [
     path("_login_/", _login, name="_login"),
     path('logout/', _logout, name="_logout"),
     path('profile/', user_profile, name="role_management"),
+    path('profile/<int:user_id>/', view_user, name='view_user'),
     path('api/users/', create_user, name='add_user'),
 
     #profile url

@@ -102,21 +102,36 @@ def signup_user(request):
         return render(request, "registration/signup.html", {"form": form})
     
 
-
+@login_required
 def user_profile(request):
-    # SLTGhana = 030 223 1886
-    template = "registration/user_profile.html"
-    profile = UserProfile.objects.get_or_create(user=request.user)
-    try:
-        shepherd = CommunityLeader.objects.get(name=request.user.username)
-        members = CommunityLeader.member_set.active()
-        # import pdb; pdb.set_trace()
-    except:
-        shepherd = None
-        members = None
-    # import pdb; pdb.set_trace()
-    context = {"profile": profile, "members": members, "shepherd": shepherd}
-    return render(request, template, context)
+    """
+    Display the logged-in user's profile information
+    """
+    user = request.user
+    context = {
+        'user_profile': user,
+        'user_active':True,
+        'user_profile':True,
+    }
+    return render(request, 'registration/user_profile.html', context)
+
+@login_required
+def view_user(request, user_id):
+    """
+    View another user's profile (admin only or for specific use cases)
+    """
+    user_profile = get_object_or_404(User, id=user_id)
+    
+    # Add permission logic if needed
+    # if not request.user.is_admin and request.user != user_profile:
+    #     return redirect('home')
+    
+    context = {
+        'user_profile': user_profile,
+        'is_active':True,
+        'user_view':True
+    }
+    return render(request, 'registration/user_profile.html', context)
 
 def is_admin(user):
     return user.is_authenticated and user.roles == 'Admin' or user.is_superuser
