@@ -2068,7 +2068,9 @@
           <!-- User Menu -->
           <div class="user-menu">
             <div class="user-avatar-sm" id="userMenuButton">
+                <a href="{% url 'role_management' %}?status={% if user_active %}active{% else %}inactive{% endif %}">
               <img src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}" alt="{{ user.username }}" />
+                </a>
             </div>
           </div>
         </div>
