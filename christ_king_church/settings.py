@@ -37,6 +37,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+SESSION_COOKIE_AGE = 1200
+SESSION_SAVE_EVERY_REQUEST = True
 
 
 ALLOWED_HOSTS = [
@@ -217,6 +219,7 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
 
 
 
