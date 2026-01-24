@@ -663,11 +663,11 @@ def create_shepherd(request):
             messages.error(request, error)
         
         if success_count == 0 and error_messages:
-            return redirect('add_shepherd')
+            return redirect('add_community')
         else:
-            return redirect('list_shepherds')
+            return redirect('list_community')
     
-    return redirect('add_shepherd')
+    return redirect('add_community')
 
 
 @login_required
@@ -882,6 +882,7 @@ def api_create_ministry(request):
         else:
             data = {"STATUS": "INVALID"}
             return JsonResponse(data, content_type="Application/json", safe=False)
+
 
 
 # def api_get_members_status(request, status)
