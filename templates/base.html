@@ -1730,31 +1730,35 @@
             </div>
 
               <!-- communities -->
-              <div class = "nav-item dropdown menu " >
-                <div class = "nav-link nav toogle {% if shepherds_active_add or shepherds_active_list} active {endif}" >
-                  <div class="nav-icon">
-                    <i class="fas fa-building"></i>
-                  </div>
-                  <div class="nav-text">Community</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
+            <!-- communities -->
+            <div class="nav-item dropdown menu">
+              <!-- Fixed logic: added missing % and changed '||' to 'or' -->
+              <div class="nav-link nav toogle {% if shepherds_active_add or shepherds_active_list %} active {% endif %}">
+                <div class="nav-icon">
+                  <i class="fas fa-building"></i>
                 </div>
-                <div class="submenu" id="ministries-submenu" {% if shepherds_active_add or shepherds_active_list%} style="max-height: 500px;" {% endif %} >
-                  <a href="{% url 'create_shepherd' %}" class="submenu-link {% if shepherds_active_add %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="submenu-text">Add Communities</div>
-                  </a>
-                  <a href="{% url 'list_community' %}" class="submenu-link {% if shepherds_active_list %}active{% endif %}" >
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
-                    </div>
-                    <div class="submenu-text">List Communities</div>
-                  </a>
+                <div class="nav-text">Community</div>
+                <div class="nav-chevron">
+                  <i class="fas fa-chevron-down"></i>
                 </div>
               </div>
+              
+              <!-- Changed ID to match context and fixed logic -->
+              <div class="submenu" id="community-submenu" {% if shepherds_active_add or shepherds_active_list %} style="max-height: 500px;" {% endif %}>
+                <a href="{% url 'create_shepherd' %}" class="submenu-link {% if shepherds_active_add %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-plus"></i>
+                  </div>
+                  <div class="submenu-text">Add Communities</div>
+                </a>
+                <a href="{% url 'list_community' %}" class="submenu-link {% if shepherds_active_list %}active{% endif %}">
+                  <div class="submenu-icon">
+                    <i class="fas fa-list"></i>
+                  </div>
+                  <div class="submenu-text">List Communities</div>
+                </a>
+              </div>
+            </div>
           
 
               <!-- Catechesis Dropdown -->
