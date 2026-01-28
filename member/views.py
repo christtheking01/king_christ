@@ -319,7 +319,7 @@ class CreateMembersView(BaseMemberView, TemplateView):
         
         if saved_count > 0:
             messages.success(request, f'Successfully added {saved_count} member(s)!')
-            return redirect('member_list')
+            return redirect('list_members')
         else:
             messages.error(request, 'Please fill at least one member form completely.')
             return self.render_to_response({
@@ -886,3 +886,4 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
