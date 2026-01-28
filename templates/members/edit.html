@@ -2,230 +2,715 @@
 {% load static %}
 
 {% block internal_style %}
-    <style>
-        .container {
-            max-width: 960px;
-            margin: 30px auto;
-            padding: 20px;
-        }
+<style>
+:root {
+    /* Material 3 Color Palette */
+    --md-sys-color-primary: #6750A4;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #EADDFF;
+    --md-sys-color-on-primary-container: #21005D;
+    
+    --md-sys-color-secondary: #625B71;
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-secondary-container: #E8DEF8;
+    --md-sys-color-on-secondary-container: #1D192B;
+    
+    --md-sys-color-surface: #FEF7FF;
+    --md-sys-color-on-surface: #1C1B1F;
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-on-surface-variant: #49454F;
+    
+    --md-sys-color-error: #BA1A1A;
+    --md-sys-color-error-container: #FFDAD6;
+    
+    --md-sys-color-success: #0D904F;
+    
+    /* Border Radius */
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 28px;
+    --md-sys-shape-corner-full: 9999px;
+}
 
-        h1 {
-            font-size: 20px;
-            text-align: center;
-            margin: 20px 0 20px;
-        }
-        h1 small {
-            display: block;
-            font-size: 15px;
-            padding-top: 8px;
-            color: gray;
-        }
+.dashboard-wrapper {
+    min-height: 100vh;
+    padding: 24px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
 
-        .avatar-upload {
-            position: relative;
-            max-width: 205px;
-            margin: 30px auto;
-        }
-        .avatar-upload .avatar-edit {
-            position: absolute;
-            right: 12px;
-            z-index: 1;
-            top: 10px;
-        }
-        .avatar-upload .avatar-edit input {
-            display: none;
-        }
-        .avatar-upload .avatar-edit input + label {
-            display: inline-block;
-            width: 34px;
-            height: 34px;
-            margin-bottom: 0;
-            border-radius: 100%;
-            background: #FFFFFF;
-            border: 1px solid transparent;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
-            cursor: pointer;
-            font-weight: normal;
-            transition: all .2s ease-in-out;
-        }
-        .avatar-upload .avatar-edit input + label:hover {
-            background: #f1f1f1;
-            border-color: #d6d6d6;
-        }
-        .avatar-upload .avatar-edit input + label:after {
-            content: "\f040";
-            font-family: 'FontAwesome';
-            color: #757575;
-            position: absolute;
-            top: 7px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            margin: auto;
-        }
-        .avatar-upload .avatar-preview {
-            width: 192px;
-            height: 192px;
-            position: relative;
-            border-radius: 100%;
-            border: 6px solid #F8F8F8;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
-        }
-        .avatar-upload .avatar-preview > div {
-            width: 100%;
-            height: 100%;
-            border-radius: 100%;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-    </style>
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
+/* Header */
+.form-header {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-large);
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid var(--md-sys-color-surface-variant);
+    text-align: center;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 8px;
+}
+
+.form-subtitle {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 1rem;
+}
+
+/* Form Card */
+.form-card {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-large);
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid var(--md-sys-color-surface-variant);
+}
+
+/* Avatar Upload */
+.avatar-section {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.avatar-upload {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+.avatar-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--md-sys-color-primary-container);
+    margin: 0 auto 16px;
+    background: var(--md-sys-color-surface-variant);
+    position: relative;
+}
+
+#imagePreview {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.avatar-edit {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
+.avatar-edit label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--md-sys-color-primary);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.avatar-edit label:hover {
+    transform: scale(1.1);
+    background: var(--md-sys-color-on-primary-container);
+}
+
+.avatar-edit input {
+    display: none;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Select Styles */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2349454F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 40px;
+}
+
+/* Form Row */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+    padding: 24px;
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--md-sys-color-outline);
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+    background: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
+}
+
+.checkbox-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-item label {
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface);
+    font-weight: 500;
+}
+
+/* Submit Button */
+.submit-button {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-large);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 32px;
+}
+
+.submit-button:hover {
+    background: var(--md-sys-color-on-primary-container);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+}
+
+/* Alert Messages */
+.alert {
+    padding: 16px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+}
+
+.alert-warning {
+    background: #FFF3CD;
+    border: 1px solid #FFEAA7;
+    color: #856404;
+}
+
+.alert-success {
+    background: #D4EDDA;
+    border: 1px solid #C3E6CB;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #F8D7DA;
+    border: 1px solid #F5C6CB;
+    color: #721C24;
+}
+
+.alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error States */
+.form-control.is-invalid {
+    border-color: var(--md-sys-color-error);
+}
+
+.invalid-feedback {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: var(--md-sys-color-error);
+}
+
+/* Loading State */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--md-sys-color-surface-variant);
+    border-top-color: var(--md-sys-color-primary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+</style>
 {% endblock internal_style %}
 
 {% block script %}
-    <script>
-        function readURL(input) {
+<script>
+function readURL(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            $('#imagePreview').css('background-image', 'url('+e.target.result +')');
-            $('#imagePreview').hide();
-            $('#imagePreview').fadeIn(650);
+            var preview = document.getElementById('imagePreview');
+            preview.style.backgroundImage = 'url(' + e.target.result + ')';
+            preview.style.opacity = '0';
+            setTimeout(function() {
+                preview.style.opacity = '1';
+            }, 100);
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
-$("#{{ form.picture.id_for_label }}").change(function() {
-    readURL(this);
-});
-    </script>
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Picture upload preview
+    var pictureInput = document.getElementById('{{ form.picture.id_for_label }}');
+    if (pictureInput) {
+        pictureInput.addEventListener('change', function() {
+            readURL(this);
+        });
+    }
+    
+    // Form submission handling
+    var form = document.querySelector('form');
+    var submitButton = document.querySelector('.submit-button');
+    
+    if (form && submitButton) {
+        form.addEventListener('submit', function(e) {
+            // Optional: Add loading state
+            submitButton.classList.add('loading');
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Updating...';
+        });
+    }
+    
+    // Close alerts
+    document.querySelectorAll('.alert-close').forEach(function(button) {
+        button.addEventListener('click', function() {
+            this.closest('.alert').style.display = 'none';
+        });
+    });
+    
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(function(alert) {
+            alert.style.display = 'none';
+        });
+    }, 5000);
+});
+</script>
 {% endblock script %}
 
-
 {% block content %}
-    <div class="dashboard-wrapper">
-        <div class="container-fluid dashboard-content">
-            <div class="col-xl-7 col-lg-7 col-md-6 col-sm-6 col-xl-7 mx-auto">
+<div class="dashboard-wrapper">
+    <div class="container">
+        <!-- Alert Messages -->
         {% if messages %}
             {% for message in messages %}
-                <div class="col-lg-12 mr-auto ml-auto alert bg-warning alert-dismissable pb-0 pt-0" role="alert">
-                    <button type="button" class="close p-2" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true" class="text-danger text-light"><b>&times;</b></span>
-                    </button>
-                    <div class="row">
-                        <div class="mr-auto ml-auto">
-                        <p class="h5 mr-auto ml-auto p-2 text-light">
-                             <b>
-                                {% if message.tags ==  "alert-danger" %}
-                                    <i class="fa fa-exclamation-triangle mr-3 text-danger"></i> {{ message }}
-                                {% else %}
-                                    <i class="fa fa-check"></i> {{ message }}
-                                {% endif %}
-                            </b>
-                        </p>
-                    </div>
-                    </div>
+                <div class="alert alert-{{ message.tags|default:'warning' }}">
+                    <span>
+                        {% if message.tags == "alert-danger" %}
+                            ⚠️ {{ message }}
+                        {% else %}
+                            ✅ {{ message }}
+                        {% endif %}
+                    </span>
+                    <button class="alert-close">×</button>
                 </div>
             {% endfor %}
         {% endif %}
-        <div class="card">
-            <h5 class="card-header"><p class="h5">Edit Member Information </p></h5>
-            <div class="card-body">
-                <form enctype="multipart/form-data" action="{% url 'update_member' member.pk %}" method="post" class="mb-5" novalidate>
-                    {% csrf_token %}
-                    <div class="container">
-                        <h1>Upload Your Image
-                            <small>and preview</small>
-                        </h1>
-                        <div class="avatar-upload">
-                            <div class="avatar-edit">
-                                <input type='file' id="{{ form.picture.id_for_label }}" name="{{ form.picture.name }}" accept="image/*" />
-                                <label for="{{ form.picture.id_for_label }}"></label>
-                            </div>
-                            <div class="avatar-preview">
-                                <div id="imagePreview" style="background-image: url({{ member.picture}}); background-size: 120%;">
-                                </div>
-                            </div>
+        
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">Edit Member Information</h1>
+            <p class="form-subtitle">Update {{ member.name }}'s details</p>
+        </div>
+        
+        <!-- Form Card -->
+        <div class="form-card">
+            <form enctype="multipart/form-data" action="{% url 'update_member' member.pk %}" method="post" novalidate>
+                {% csrf_token %}
+                
+                <!-- Avatar Section -->
+                <div class="avatar-section">
+                    <div class="avatar-upload">
+                        <div class="avatar-preview">
+                            <div id="imagePreview" style="background-image: url('{{ member.picture_url }}');"></div>
+                        </div>
+                        <div class="avatar-edit">
+                            <input type='file' id="{{ form.picture.id_for_label }}" name="{{ form.picture.name }}" accept="image/*" />
+                            <label for="{{ form.picture.id_for_label }}">📷</label>
                         </div>
                     </div>
-                    <div class="form-row mb-3">
-                        <div class="col">
-                            <label for="{{ form.name.id_for_label }}">Member Name</label>
-                            <input type="text" class="form-control" id="{{ form.name.id_for_label }}" name="{{ form.name.name }}" value="{{ member.name }}" autofocus required>
-                        </div>
-                        <div class="col">
-                            <label for="{{ form.telephone.id_for_label }}">Phone Number</label>
-                            <input type="text" name="{{ form.telephone.name }}" id="{{ form.telephone.id_for_label }}" class="form-control" value="{{ member.telephone }}">
-                        </div>
-                    </div>
+                </div>
+                
+                <!-- Name and Code (REQUIRED FIELDS) -->
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.shepherd.id_for_label }}">Community</label>
-                        <select name="{{ form.shepherd.name }}" id="{{ form.shepherd.id_for_label }}" class="form-control">
-                            <option value="{{ member.shepherd.pk }}" selected>{{ member.shepherd.name }}</option>
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Member Name *</label>
+                        <input type="text" 
+                               class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
+                               id="{{ form.name.id_for_label }}" 
+                               name="{{ form.name.name }}" 
+                               value="{{ form.name.value|default:member.name }}" 
+                               required
+                               autofocus>
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.code.id_for_label }}" class="form-label">Member Code *</label>
+                        <input type="text" 
+                               class="form-control {% if form.code.errors %}is-invalid{% endif %}" 
+                               id="{{ form.code.id_for_label }}" 
+                               name="{{ form.code.name }}" 
+                               value="{{ form.code.value|default:member.code }}"
+                               placeholder="e.g., 001PT"
+                               required>
+                        {% if form.code.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.code.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Phone and Location -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.telephone.id_for_label }}" class="form-label">Phone Number</label>
+                        <input type="tel" 
+                               class="form-control {% if form.telephone.errors %}is-invalid{% endif %}" 
+                               name="{{ form.telephone.name }}" 
+                               id="{{ form.telephone.id_for_label }}" 
+                               value="{{ form.telephone.value|default:member.telephone }}"
+                               placeholder="Eg. +255">
+                        {% if form.telephone.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.telephone.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}" class="form-label">Location</label>
+                        <input type="text" 
+                               class="form-control {% if form.location.errors %}is-invalid{% endif %}" 
+                               name="{{ form.location.name }}" 
+                               id="{{ form.location.id_for_label }}" 
+                               value="{{ form.location.value|default:member.location }}">
+                        {% if form.location.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.location.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Community and Ministry -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.shepherd.id_for_label }}" class="form-label">Community</label>
+                        <select name="{{ form.shepherd.name }}" 
+                                id="{{ form.shepherd.id_for_label }}" 
+                                class="form-control {% if form.shepherd.errors %}is-invalid{% endif %}">
+                            {% if member.shepherd %}
+                                <option value="{{ member.shepherd.pk }}" selected>{{ member.shepherd.name }}</option>
+                            {% else %}
+                                <option value="" selected disabled>Select Community...</option>
+                            {% endif %}
                             {% for shepherd in communityleader %}
+                                {% if member.shepherd and shepherd.pk != member.shepherd.pk %}
                                 <option value="{{ shepherd.pk }}">{{ shepherd.name }}</option>
+                                {% elif not member.shepherd %}
+                                <option value="{{ shepherd.pk }}">{{ shepherd.name }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
+                        {% if form.shepherd.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.shepherd.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
+                    
                     <div class="form-group">
-                        <label for="{{ form.ministry.id_for_label }}">Ministry</label>
-                        <select name="{{ form.ministry.name }}" id="{{ form.ministry.id_for_label }}" class="form-control">
-                            <option value="{{ member.ministry.pk }}" selected>{{ member.ministry.name }}</option>
+                        <label for="{{ form.ministry.id_for_label }}" class="form-label">Ministry</label>
+                        <select name="{{ form.ministry.name }}" 
+                                id="{{ form.ministry.id_for_label }}" 
+                                class="form-control {% if form.ministry.errors %}is-invalid{% endif %}">
+                            {% if member.ministry %}
+                                <option value="{{ member.ministry.pk }}" selected>{{ member.ministry.name }}</option>
+                            {% else %}
+                                <option value="" selected disabled>Select Ministry...</option>
+                            {% endif %}
                             {% for ministry in ministries %}
+                                {% if member.ministry and ministry.pk != member.ministry.pk %}
                                 <option value="{{ ministry.pk }}">{{ ministry.name }}</option>
+                                {% elif not member.ministry %}
+                                <option value="{{ ministry.pk }}">{{ ministry.name }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
+                        {% if form.ministry.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.ministry.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="{{ form.location.id_for_label }}">Location</label>
-                            <input type="text" name="{{ form.location.name }}" id="{{ form.location.id_for_label }}" class="form-control" value="{{ member.location }}">
-                        </div>
-                        <div class="col">
-                            <label for="{{ form.guardians_name.id_for_label }}">Guardian's Name</label>
-                            <input type="text" id="{{ form.guardians_name.id_for_label }}" class="form-control" name="{{ form.guardians_name.name }}" value="{{ member.guardians_name }}">
-                        </div>
+                </div>
+                
+                <!-- Parents -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.fathers_name.id_for_label }}" class="form-label">Father's Name</label>
+                        <input type="text" 
+                               class="form-control {% if form.fathers_name.errors %}is-invalid{% endif %}" 
+                               id="{{ form.fathers_name.id_for_label }}" 
+                               name="{{ form.fathers_name.name }}" 
+                               value="{{ form.fathers_name.value|default:member.fathers_name }}">
+                        {% if form.fathers_name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.fathers_name.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="form-row mt-3">
-                        <div class="col">
-                            <label for="{{ form.fathers_name.id_for_label }}">Father's Name</label>
-                            <input type="text" id="{{ form.fathers_name.id_for_label }}" class="form-control" name="{{ form.fathers_name.name }}" value="{{ member.fathers_name }}">
-                        </div>
-                        <div class="col">
-                            <label for="{{ form.mothers_name.id_for_label }}">Mother's Name</label>
-                            <input type="text" id="{{ form.mothers_name.id_for_label }}" class="form-control" name="{{ form.mothers_name.name }}" value="{{ member.mothers_name }}">
-                        </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.mothers_name.id_for_label }}" class="form-label">Mother's Name</label>
+                        <input type="text" 
+                               class="form-control {% if form.mothers_name.errors %}is-invalid{% endif %}" 
+                               id="{{ form.mothers_name.id_for_label }}" 
+                               name="{{ form.mothers_name.name }}" 
+                               value="{{ form.mothers_name.value|default:member.mothers_name }}">
+                        {% if form.mothers_name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.mothers_name.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <br>
-                    <hr>
-                    <div class="form-group mt-3">
-                        <label class="custom-control custom-checkbox custom-control-inline">
-                            <input type="checkbox" class="custom-control-input" id="{{ form.new_believer_school.id_for_label }}" name="{{ form.new_believer_school.name }}" {% if member.new_believer_school %}checked{% endif %}>
-                            <span class="custom-control-label mr-3">New Believer's School</span>
-                        </label>
-                        <label class="custom-control custom-checkbox custom-control-inline">
-                            <input type="checkbox" class="custom-control-input" id="{{ form.pays_tithe.id_for_label }}" name="{{ form.pays_tithe.name }}" {% if member.pays_tithe %}checked{% endif %}>
-                            <span class="custom-control-label mr-5">Pay's Tithe</span>
-                        </label>
-                        <label class="custom-control custom-checkbox custom-control-inline">
-                            <input type="checkbox" class="custom-control-input" id="{{ form.working.id_for_label }}" name="{{ form.working.name }}" {% if member.working %}checked{% endif %}>
-                            <span class="custom-control-label mr-5">Working</span>
-                        </label>
-                        <label class="custom-control custom-checkbox custom-control-inline">
-                            <input type="checkbox" class="custom-control-input" id="{{ form.schooling.id_for_label }}" name="{{ form.schooling.name }}" {% if member.schooling %}checked{% endif %}>
-                            <span class="custom-control-label">Schooling</span>
-                        </label>
+                </div>
+                
+                <!-- Guardian and Transfer Details -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.guardians_name.id_for_label }}" class="form-label">Guardian's Name</label>
+                        <input type="text" 
+                               class="form-control {% if form.guardians_name.errors %}is-invalid{% endif %}" 
+                               id="{{ form.guardians_name.id_for_label }}" 
+                               name="{{ form.guardians_name.name }}" 
+                               value="{{ form.guardians_name.value|default:member.guardians_name }}">
+                        {% if form.guardians_name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.guardians_name.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <hr>
-
-                    <button class="btn btn-warning mt-5 text-light btn-sm shadow">Update Member Information</button>
-                </form>
-            </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.transfer_update.id_for_label }}" class="form-label">Transfer Details</label>
+                        <input type="text" 
+                               class="form-control {% if form.transfer_update.errors %}is-invalid{% endif %}" 
+                               id="{{ form.transfer_update.id_for_label }}" 
+                               name="{{ form.transfer_update.name }}" 
+                               value="{{ form.transfer_update.value|default:member.transfer_update }}"
+                               placeholder="Enter transfer details">
+                        {% if form.transfer_update.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.transfer_update.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Checkbox Section -->
+                <div class="checkbox-group">
+                    <!-- Active Status (Hidden for regular members) -->
+                    {% if form.active %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.active.id_for_label }}" 
+                               name="{{ form.active.name }}" 
+                               {% if form.active.value|default:member.active %}checked{% endif %}>
+                        <label for="{{ form.active.id_for_label }}">Active Member</label>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.new_believer_school.id_for_label }}" 
+                               name="{{ form.new_believer_school.name }}" 
+                               {% if form.new_believer_school.value|default:member.new_believer_school %}checked{% endif %}>
+                        <label for="{{ form.new_believer_school.id_for_label }}">New Believer's School</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.pays_tithe.id_for_label }}" 
+                               name="{{ form.pays_tithe.name }}" 
+                               {% if form.pays_tithe.value|default:member.pays_tithe %}checked{% endif %}>
+                        <label for="{{ form.pays_tithe.id_for_label }}">Pays Tithe</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.working.id_for_label }}" 
+                               name="{{ form.working.name }}" 
+                               {% if form.working.value|default:member.working %}checked{% endif %}>
+                        <label for="{{ form.working.id_for_label }}">Working</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.schooling.id_for_label }}" 
+                               name="{{ form.schooling.name }}" 
+                               {% if form.schooling.value|default:member.schooling %}checked{% endif %}>
+                        <label for="{{ form.schooling.id_for_label }}">Schooling</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="{{ form.transfered.id_for_label }}" 
+                               name="{{ form.transfered.name }}" 
+                               {% if form.transfered.value|default:member.transfered %}checked{% endif %}>
+                        <label for="{{ form.transfered.id_for_label }}">Transferred</label>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button">
+                    Update Member Information
+                </button>
+            </form>
         </div>
     </div>
-        </div>
-
+</div>
 {% endblock content %}
-
