@@ -86,29 +86,54 @@ def detail_member(request, pk):
 def edit_member(request, pk):
     template = "members/edit.html"
     member = get_object_or_404(Member, pk=pk)
-    form = MemberForm()
-    shepherds = CommunityLeader.objects.all()
+    
+    # Create form with instance
+    form = MemberForm(instance=member)
+    
+    # Debug: Check if form has all fields
+    print("Form fields:", list(form.fields.keys()))
+    print("Member new_believer_school value:", member.new_believer_school)
+    
+    community = Community.objects.all()
     ministries = Ministry.objects.all()
-    profile = UserProfile.objects.get_or_create(user=request.user)
-    picture = Member.objects.get(pk=pk).picture
-    context = {"member": member, "form": form, "shepherds": shepherds, "ministries": ministries, "profile": profile,"picture": picture}
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    context = {
+        "member": member, 
+        "form": form, 
+        "communityleader": community,  
+        "ministries": ministries, 
+        "profile": profile
+    }
     return render(request, template, context)
-
 
 @login_required
 def update_member(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+    
     if request.method == "POST":
-        member = get_object_or_404(Member, pk=pk)
+        # Debug: Print POST data
+        print("POST data:", dict(request.POST))
+        
         form = MemberForm(request.POST, request.FILES, instance=member)
-        # import pdb; pdb.set_trace()
+        
         if form.is_valid():
             form.save()
             messages.success(request, "Member Information Updated Successfully")
             return redirect("detail_member", pk=pk)
         else:
-            messages.error(request, "Member Information Not Updated")
+            # Print form errors to console
+            print("Form errors:", form.errors)
+            print("Form non-field errors:", form.non_field_errors())
+            
+            # Show specific errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            
             return redirect("edit_member", pk=pk)
-
+    
+    return redirect("edit_member", pk=pk)
 
 @login_required
 def delete_member(request, pk):
@@ -886,5 +911,6 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
