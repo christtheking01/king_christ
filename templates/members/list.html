@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -515,6 +516,43 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+/* Shepherd Group Header */
+.shepherd-group {
+    margin-bottom: var(--space-6);
+}
+
+.shepherd-header {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.shepherd-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: #111827;
+}
+
+.shepherd-count {
+    background: var(--primary-container);
+    color: var(--primary);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.no-shepherd-title {
+    color: var(--outline);
+    font-style: italic;
+}
+
 /* Email List */
 .email-list {
     background: var(--surface);
@@ -561,6 +599,76 @@ body {
     min-width: 0;
 }
 
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.member-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: #111827;
+}
+
+.member-code {
+    background: var(--surface-variant);
+    color: var(--secondary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-family: monospace;
+}
+
+.member-status {
+    display: flex;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-2);
+}
+
+.status-badge {
+    font-size: var(--text-sm);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.badge-tithe {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-believer {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badge-working {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-schooling {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
+.badge-transferred {
+    background: #FCE7F3;
+    color: #9D174D;
+}
+
+.member-details {
+    font-size: var(--text-sm);
+    color: var(--secondary);
+    line-height: 1.6;
+}
+
+.member-details strong {
+    color: #111827;
+}
+
 .date {
     font-size: var(--text-sm);
     color: var(--outline);
@@ -591,6 +699,29 @@ body {
 
 .msg a:hover {
     color: var(--primary);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--space-10) var(--space-4);
+}
+
+.empty-icon {
+    font-size: 48px;
+    color: var(--outline-variant);
+    margin-bottom: var(--space-4);
+}
+
+.empty-title {
+    font-size: var(--text-xl);
+    color: var(--outline);
+    margin-bottom: var(--space-2);
+}
+
+.empty-description {
+    color: var(--outline);
+    margin-bottom: var(--space-6);
 }
 
 /* Responsive Design */
@@ -662,6 +793,12 @@ body {
     
     .email-list-actions {
         justify-content: space-between;
+    }
+    
+    .member-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-1);
     }
 }
 
@@ -852,36 +989,107 @@ body {
                 </div>
             </div>
 
-            <!-- Members List -->
-            <div class="email-list">
-                {% for member in members %}
-                <div class="email-list-item">
-                    <div class="email-list-actions">
-                        <label class="custom-control custom-checkbox">
-                            <input class="custom-control-input checkboxes" type="checkbox" value="{{ member.id }}">
-                            <span class="custom-control-label"></span>
-                        </label>
-                        <a class="favorite {% if forloop.first %}active{% endif %}" href="#">
-                            <span class="nav-icon">★</span>
-                        </a>
+            <!-- Members List Sorted by Shepherd -->
+            {% regroup members|dictsort:"shepherd.name" by shepherd as shepherd_groups %}
+            
+            {% if shepherd_groups %}
+                {% for shepherd_group in shepherd_groups %}
+                    <!-- Shepherd Group Header -->
+                    <div class="shepherd-group">
+                        <div class="shepherd-header">
+                            <div class="shepherd-title">
+                                {% if shepherd_group.grouper %}
+                                    <span class="nav-icon">👨‍🦳</span>
+                                    {{ shepherd_group.grouper.name }}
+                                    <span class="shepherd-count">{{ shepherd_group.list|length }} members</span>
+                                {% else %}
+                                    <span class="no-shepherd-title">
+                                        <span class="nav-icon">❓</span>
+                                        No Community Assigned
+                                        <span class="shepherd-count">{{ shepherd_group.list|length }} members</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Members List for this Shepherd -->
+                        <div class="email-list">
+                            {% for member in shepherd_group.list %}
+                            <div class="email-list-item">
+                                <div class="email-list-actions">
+                                    <label class="custom-control custom-checkbox">
+                                        <input class="custom-control-input checkboxes" type="checkbox" value="{{ member.id }}">
+                                        <span class="custom-control-label"></span>
+                                    </label>
+                                    <a class="favorite {% if forloop.first %}active{% endif %}" href="#">
+                                        <span class="nav-icon">★</span>
+                                    </a>
+                                </div>
+                                
+                                <div class="email-list-detail">
+                                    <div class="member-info">
+                                        <span class="member-name">{{ member.name }}</span>
+                                        {% if member.code %}
+                                        <span class="member-code">{{ member.code }}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="member-status">
+                                        {% if member.pays_tithe %}
+                                            <span class="status-badge badge-tithe">💰 Pays Tithe</span>
+                                        {% endif %}
+                                        {% if member.new_believer_school %}
+                                            <span class="status-badge badge-believer">🙏 New Believer</span>
+                                        {% endif %}
+                                        {% if member.working %}
+                                            <span class="status-badge badge-working">💼 Working</span>
+                                        {% endif %}
+                                        {% if member.schooling %}
+                                            <span class="status-badge badge-schooling">🎓 Schooling</span>
+                                        {% endif %}
+                                        {% if member.transfered %}
+                                            <span class="status-badge badge-transferred">🔄 Transferred</span>
+                                        {% endif %}
+                                        {% if not member.active %}
+                                            <span class="status-badge badge-danger">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="member-details">
+                                        <span class="date">
+                                            <span class="nav-icon">🏢</span>
+                                            {% if member.ministry %}{{ member.ministry.name }}{% else %}No Ministry{% endif %}
+                                        </span>
+                                        <p class="msg">
+                                            {% if member.shepherd %}
+                                                Member of <b>{{ member.shepherd.name }}</b> community
+                                            {% else %}
+                                                No community assigned
+                                            {% endif %}
+                                            • Lives at <b>{{ member.location|default:"No location" }}</b>
+                                            {% if member.telephone %}
+                                                • Contact: <b>{{ member.telephone }}</b>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    
-                    <div class="email-list-detail">
-                        <span class="date">
-                            <span class="nav-icon">🏢</span>
-                            {{ member.ministry }}
-                        </span>
-                        <span class="from">{{ member.name }}</span>
-                        <a href="{% url 'detail_member' member.pk %}">
-                            <p class="msg">
-                                {{ member.name }}'s shepherd is <b>{{ member.shepherd }}</b> in the <b>{{ member.ministry }}</b> ministry. 
-                                {{ member.name }} lives at <b>{{ member.location }}</b>...
-                            </p>
-                        </a>
-                    </div>
-                </div>
                 {% endfor %}
-            </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon">👤</div>
+                    <h3 class="empty-title">No members found</h3>
+                    <p class="empty-description">Try adding some members or adjust your filters</p>
+                    <a href="{% url 'add_member' %}" class="btn btn-lg btn-secondary">
+                        <span class="nav-icon">+</span>
+                        Add Member
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
