@@ -163,7 +163,7 @@ class Member(models.Model):
     fathers_name = models.CharField(max_length=255, null=True, blank=True)
     mothers_name = models.CharField(max_length=255, null=True, blank=True)
     guardians_name = models.CharField(max_length=255, null=True, blank=True)
-    new_believer_school = models.BooleanField()
+    new_believer_school = models.BooleanField(default = False)
     pays_tithe = models.BooleanField(default=False)
     working = models.BooleanField(default=False)
     schooling = models.BooleanField(default=False)
@@ -187,3 +187,4 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
