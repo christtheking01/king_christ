@@ -36,7 +36,7 @@ def thumbnail_members(request):
 def list_members(request):
     template = "members/list.html"
     members = Member.objects.active()
-    shepherds = CommunityLeader.objects.all()
+    shepherds = Community.objects.all.order_by('community__name')
     ministries = Ministry.objects.all()
     profile = UserProfile.objects.get_or_create(user=request.user)
     context = {
@@ -911,6 +911,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
