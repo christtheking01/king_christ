@@ -156,7 +156,7 @@ def search_members(request):
 @login_required
 def get_members_by_statuses(request, status):
     template = "members/list.html"
-    shepherds = CommunityLeader.objects.all()
+    shepherds = Community.objects.all()
     ministries = Ministry.objects.all()
     profile = UserProfile.objects.get_or_create(user=request.user)
     members = None
@@ -886,4 +886,5 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
