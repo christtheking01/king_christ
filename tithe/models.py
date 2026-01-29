@@ -18,7 +18,7 @@ class TithePayment(models.Model):
 
     date = models.DateTimeField(default=timezone.now, verbose_name='Invoice Date')
     name = models.ForeignKey(Member, verbose_name="Member", on_delete=models.CASCADE)  # Direct reference
-    contact_number = models.CharField(max_length=13, blank='True' null='True')
+    contact_number = models.CharField(max_length=13, blank='True', null='True')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=50, 
@@ -109,3 +109,4 @@ class TitheReceipt(models.Model):
         self.print_attempts += 1
 
         self.save()
+
