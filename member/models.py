@@ -158,7 +158,7 @@ class Member(models.Model):
     active = models.BooleanField(default= True)
     shepherd = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)
     ministry = models.ForeignKey(Ministry, on_delete=models.CASCADE, null=True, blank=True)
-    telephone =PhoneNumberField(max_length=255, null=True, help_text=' Eg. +255 ')
+    telephone =PhoneNumberField(max_length=255, null=True, blank='True', help_text=' Eg. +255 ')
     location = models.CharField(max_length=255)
     fathers_name = models.CharField(max_length=255, null=True, blank=True)
     mothers_name = models.CharField(max_length=255, null=True, blank=True)
@@ -187,4 +187,5 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
 
