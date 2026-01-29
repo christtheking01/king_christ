@@ -18,7 +18,7 @@ class TithePayment(models.Model):
 
     date = models.DateTimeField(default=timezone.now, verbose_name='Invoice Date')
     name = models.ForeignKey(Member, verbose_name="Member", on_delete=models.CASCADE)  # Direct reference
-    contact_number = models.CharField(max_length=13)
+    contact_number = models.CharField(max_length=13, blank='True' null='True')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=50, 
@@ -53,7 +53,7 @@ class TitheReceipt(models.Model):
     # Church Information (Customize as needed)
     church_name = models.CharField(max_length=255, default="Your Church Name")
     church_address = models.TextField(default="Your Church Address")
-    church_phone = models.CharField(max_length=20, default="+255 XXX XXX XXX")
+    church_phone = models.CharField(max_length=20, default="+255 XXX XXX XXX", null='True', blank='True')
     
     class Meta:
         ordering = ['-generated_at']
@@ -107,4 +107,5 @@ class TitheReceipt(models.Model):
         self.is_printed = True
         self.printed_at = timezone.now()
         self.print_attempts += 1
+
         self.save()
