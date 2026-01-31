@@ -18,7 +18,8 @@ def home(request):
         'ministry_count': ministry_count,
         'community_count': community_count,
         'committee_count': committee_count,
-        'recent_activities':Member.objects.order_by('id')[:5]
+        'recent_activities':Member.objects.order_by('-id')[:5]
 
     }
     return render(request, 'index.html', context)
+
