@@ -55,7 +55,7 @@ def _login(request):
             if user.force_password_change:
                 messages.info(request, 'You must change your password before continuing.')
                 return redirect('change_password')
-            return redirect('dashboard')
+            return redirect('home')
         else:
             messages.error(request, 'Invalid username or password')
     
@@ -337,3 +337,4 @@ def signup_api(request):
         else:
             response = {"STATUS": "ERROR", "CODE": -1}
             return JsonResponse(response, content_type="Application/json", safe=False)
+
