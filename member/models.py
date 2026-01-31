@@ -153,7 +153,7 @@ class MemberManager(models.Manager):
 
 
 class Member(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,unique='True')
     code = models.TextField(help_text="001PT", null= True)
     active = models.BooleanField(default= True)
     shepherd = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)
@@ -187,5 +187,6 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
 
 
