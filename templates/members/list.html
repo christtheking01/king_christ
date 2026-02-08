@@ -188,6 +188,15 @@ body {
     background: var(--outline-variant);
 }
 
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5A4494;
+}
+
 /* Navigation */
 .nav {
     list-style: none;
@@ -300,6 +309,7 @@ body {
     font-size: var(--text-xl);
     font-weight: var(--font-bold);
     color: #111827;
+    flex-wrap: wrap;
 }
 
 .new-messages {
@@ -314,21 +324,52 @@ body {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
+    white-space: nowrap;
 }
 
 .header-link:hover {
     text-decoration: underline;
 }
 
+/* Search Results Info */
+.search-results-info {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--primary-container);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary);
+}
+
+.search-results-info p {
+    margin: 0;
+    color: var(--primary);
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.search-results-info a {
+    color: var(--primary);
+    text-decoration: underline;
+    font-weight: var(--font-medium);
+}
+
+.search-results-info a:hover {
+    text-decoration: none;
+}
+
 /* Search */
 .email-search {
     display: flex;
     justify-content: flex-end;
+    margin-top: var(--space-4);
 }
 
 .input-search {
     display: flex;
     max-width: 400px;
+    width: 100%;
 }
 
 .form-control {
@@ -501,19 +542,141 @@ body {
     gap: var(--space-2);
 }
 
-/* Pagination */
-.email-pagination-indicator {
-    color: var(--outline);
+/* Pagination Container */
+.pagination-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.pagination-info {
+    color: var(--secondary);
     font-size: var(--text-sm);
 }
 
-.email-pagination-nav {
-    display: flex;
-    gap: var(--space-1);
+.pagination-info strong {
+    color: var(--primary);
+    font-weight: var(--font-semibold);
 }
 
-.shadow {
-    box-shadow: var(--shadow-sm);
+.pagination-controls {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    background: var(--surface-variant);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    min-width: 36px;
+    height: 36px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--outline-variant);
+    transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-dots {
+    color: var(--outline);
+    padding: 0 var(--space-2);
+}
+
+/* Next Page Suggestion */
+.next-page-suggestion {
+    background: linear-gradient(135deg, var(--primary-container), #F3E8FF);
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin: var(--space-6) 0;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0 rgba(103, 80, 164, 0.2);
+    }
+    50% {
+        border-color: #8A74D3;
+        box-shadow: 0 0 0 10px rgba(103, 80, 164, 0);
+    }
+}
+
+.suggestion-icon {
+    font-size: 48px;
+    color: var(--primary);
+    margin-bottom: var(--space-3);
+}
+
+.suggestion-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+}
+
+.suggestion-description {
+    color: var(--secondary);
+    margin-bottom: var(--space-4);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.suggestion-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    display: block;
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--outline);
 }
 
 /* Shepherd Group Header */
@@ -724,6 +887,35 @@ body {
     margin-bottom: var(--space-6);
 }
 
+/* No Results State */
+.no-results {
+    text-align: center;
+    padding: var(--space-10) var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    margin: var(--space-6) 0;
+}
+
+.no-results-icon {
+    font-size: 64px;
+    color: var(--outline-variant);
+    margin-bottom: var(--space-4);
+}
+
+.no-results-title {
+    font-size: var(--text-xl);
+    color: var(--outline);
+    margin-bottom: var(--space-2);
+}
+
+.no-results-description {
+    color: var(--outline);
+    margin-bottom: var(--space-4);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .dashboard-wrapper {
@@ -774,6 +966,7 @@ body {
     
     .email-search {
         justify-content: stretch;
+        margin-top: var(--space-2);
     }
     
     .input-search {
@@ -800,6 +993,16 @@ body {
         align-items: flex-start;
         gap: var(--space-1);
     }
+    
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .suggestion-stats {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
 }
 
 @media (max-width: 480px) {
@@ -825,6 +1028,11 @@ body {
     
     .nav-text {
         font-size: var(--text-sm);
+    }
+    
+    .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 </style>
@@ -917,8 +1125,20 @@ body {
                 <div class="header-row">
                     <div class="email-title">
                         <span class="nav-icon">👥</span>
-                        <span>Members</span>
+                        <span>
+                            {% if search_query %}
+                                Search Results for "{{ search_query }}"
+                            {% else %}
+                                Members
+                            {% endif %}
+                        </span>
                         <span class="new-messages">(list view)</span>
+                        {% if search_query %}
+                            <a href="{% url 'list_members' %}" class="header-link">
+                                <span class="nav-icon">❌</span>
+                                Clear Search
+                            </a>
+                        {% endif %}
                         <a href="{% url 'table_members' %}" class="header-link">
                             <span class="nav-icon">📊</span>
                             Table View
@@ -928,17 +1148,33 @@ body {
                             Thumbnail View
                         </a>
                     </div>
-                    
-                    <div class="email-search">
-                        <form action="{% url 'search_members' %}" method="get">
-                            <div class="input-search">
-                                <input class="form-control" type="text" placeholder="Search member..." name="q">
-                                <button class="search-btn" type="submit">
-                                    <span class="nav-icon">🔍</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                </div>
+
+                <!-- Search Results Info -->
+                {% if search_query %}
+                <div class="search-results-info">
+                    <p>
+                        <strong>{{ page_obj.paginator.count }}</strong> result{{ page_obj.paginator.count|pluralize }} found for "{{ search_query }}"
+                        {% if page_obj.paginator.count == 0 %}
+                            - <a href="{% url 'list_members' %}">View all members</a>
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Search -->
+                <div class="email-search">
+                    <form action="{% url 'list_members' %}" method="get" id="search-form">
+                        <div class="input-search">
+                            <input class="form-control" type="text" 
+                                   placeholder="Search by name, phone, location, community..." 
+                                   name="q" value="{{ search_query|default:'' }}" id="search-input"
+                                   aria-label="Search members">
+                            <button class="search-btn" type="submit">
+                                <span class="nav-icon">🔍</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -977,36 +1213,84 @@ body {
                 </div>
                 
                 <div class="email-filters-right">
-                    <span class="email-pagination-indicator">1-50 of {{ total }}</span>
-                    <div class="email-pagination-nav">
-                        <button class="btn btn-light" type="button">
-                            <span class="nav-icon">◀</span>
-                        </button>
-                        <button class="btn btn-light" type="button">
-                            <span class="nav-icon">▶</span>
-                        </button>
-                    </div>
+                    <span class="email-pagination-indicator">
+                        Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} members
+                        (Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }})
+                    </span>
                 </div>
             </div>
 
+            <!-- Main Pagination (Top) -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    <strong>{{ page_obj.start_index }}-{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> members
+                    <span class="text-muted">(23 per page)</span>
+                </div>
+                
+                <div class="pagination-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page=1" class="pagination-btn" title="First Page">
+                            <span class="nav-icon">⏮</span>
+                        </a>
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                            <span class="nav-icon">◀</span>
+                        </a>
+                    {% else %}
+                        <button class="pagination-btn" disabled title="First Page">
+                            <span class="nav-icon">⏮</span>
+                        </button>
+                        <button class="pagination-btn" disabled title="Previous Page">
+                            <span class="nav-icon">◀</span>
+                        </button>
+                    {% endif %}
+                    
+                    <!-- Page numbers -->
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if i == page_obj.number %}
+                            <span class="pagination-btn active">{{ i }}</span>
+                        {% elif i == 1 or i == page_obj.paginator.num_pages or i >= page_obj.number|add:"-2" and i <= page_obj.number|add:"2" %}
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ i }}" class="pagination-btn">{{ i }}</a>
+                        {% elif i == page_obj.number|add:"-3" or i == page_obj.number|add:"3" %}
+                            <span class="pagination-dots">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                            <span class="nav-icon">▶</span>
+                        </a>
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                            <span class="nav-icon">⏭</span>
+                        </a>
+                    {% else %}
+                        <button class="pagination-btn" disabled title="Next Page">
+                            <span class="nav-icon">▶</span>
+                        </button>
+                        <button class="pagination-btn" disabled title="Last Page">
+                            <span class="nav-icon">⏭</span>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Members List Sorted by Shepherd -->
-            {% regroup members|dictsort:"shepherd.name" by shepherd as shepherd_groups %}
-            
-            {% if shepherd_groups %}
-                {% for shepherd_group in shepherd_groups %}
+            {% if grouped_members %}
+                {% for group in grouped_members %}
                     <!-- Shepherd Group Header -->
                     <div class="shepherd-group">
                         <div class="shepherd-header">
                             <div class="shepherd-title">
-                                {% if shepherd_group.grouper %}
+                                {% if group.shepherd %}
                                     <span class="nav-icon">👨‍🦳</span>
-                                    {{ shepherd_group.grouper.name }}
-                                    <span class="shepherd-count">{{ shepherd_group.list|length }} members</span>
+                                    {{ group.shepherd.name }}
+                                    <span class="shepherd-count">{{ group.count }} members</span>
                                 {% else %}
                                     <span class="no-shepherd-title">
                                         <span class="nav-icon">❓</span>
                                         No Community Assigned
-                                        <span class="shepherd-count">{{ shepherd_group.list|length }} members</span>
+                                        <span class="shepherd-count">{{ group.count }} members</span>
                                     </span>
                                 {% endif %}
                             </div>
@@ -1014,7 +1298,7 @@ body {
 
                         <!-- Members List for this Shepherd -->
                         <div class="email-list">
-                            {% for member in shepherd_group.list %}
+                            {% for member in group.members %}
                             <div class="email-list-item">
                                 <div class="email-list-actions">
                                     <label class="custom-control custom-checkbox">
@@ -1078,7 +1362,41 @@ body {
                         </div>
                     </div>
                 {% endfor %}
-            {% else %}
+                
+                <!-- No Search Results -->
+                {% elif search_query %}
+                <div class="no-results">
+                    <div class="no-results-icon">🔍</div>
+                    <h3 class="no-results-title">No members found</h3>
+                    <p class="no-results-description">
+                        No members match your search for "<strong>{{ search_query }}</strong>". 
+                        Try different keywords or check the spelling.
+                    </p>
+                    <div class="suggestion-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ total }}</span>
+                            <span class="stat-label">Total Members</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ total_tithe }}</span>
+                            <span class="stat-label">Tithe Payers</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ total_working }}</span>
+                            <span class="stat-label">Working</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ total_schooling }}</span>
+                            <span class="stat-label">Schooling</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'list_members' %}" class="btn btn-primary btn-lg mt-4">
+                        <span class="nav-icon">👥</span>
+                        View All Members
+                    </a>
+                </div>
+                
+                {% else %}
                 <!-- Empty State -->
                 <div class="empty-state">
                     <div class="empty-icon">👤</div>
@@ -1089,7 +1407,96 @@ body {
                         Add Member
                     </a>
                 </div>
-            {% endif %}
+                {% endif %}
+                
+                <!-- Next Page Suggestion -->
+                {% if page_obj.has_next and grouped_members %}
+                <div class="next-page-suggestion">
+                    <div class="suggestion-icon">📄</div>
+                    <h3 class="suggestion-title">More Members Available!</h3>
+                    <p class="suggestion-description">
+                        You've viewed {{ page_obj.object_list|length }} members on this page. 
+                        There are <strong id="remaining-members">0</strong> more members to explore on the next pages.
+                    </p>
+                    
+                    <div class="suggestion-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="total-members">{{ page_obj.paginator.count }}</span>
+                            <span class="stat-label">Total Members</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="showing-now">{{ page_obj.object_list|length }}</span>
+                            <span class="stat-label">Showing Now</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="remaining-count">0</span>
+                            <span class="stat-label">Remaining</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="more-pages">0</span>
+                            <span class="stat-label">More Pages</span>
+                        </div>
+                    </div>
+                    
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="btn btn-primary btn-lg">
+                        <span class="nav-icon">▶</span>
+                        Go to Page {{ page_obj.next_page_number }} of {{ page_obj.paginator.num_pages }}
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Bottom Pagination -->
+                {% if page_obj.paginator.num_pages > 1 and grouped_members %}
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                        <span class="text-muted">(23 items per page)</span>
+                    </div>
+                    
+                    <div class="pagination-controls">
+                        {% if page_obj.has_previous %}
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page=1" class="pagination-btn" title="First Page">
+                                <span class="nav-icon">⏮</span>
+                            </a>
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                                <span class="nav-icon">◀</span>
+                            </a>
+                        {% else %}
+                            <button class="pagination-btn" disabled title="First Page">
+                                <span class="nav-icon">⏮</span>
+                            </button>
+                            <button class="pagination-btn" disabled title="Previous Page">
+                                <span class="nav-icon">◀</span>
+                            </button>
+                        {% endif %}
+                        
+                        <select class="pagination-btn" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}page='+this.value" style="min-width: 80px;">
+                            <option value="">Jump to...</option>
+                            {% for i in page_obj.paginator.page_range %}
+                                <option value="{{ i }}" {% if i == page_obj.number %}selected{% endif %}>
+                                    Page {{ i }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                                <span class="nav-icon">▶</span>
+                            </a>
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                                <span class="nav-icon">⏭</span>
+                            </a>
+                        {% else %}
+                            <button class="pagination-btn" disabled title="Next Page">
+                                <span class="nav-icon">▶</span>
+                            </button>
+                            <button class="pagination-btn" disabled title="Last Page">
+                                <span class="nav-icon">⏭</span>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
         </div>
     </div>
 </div>
@@ -1098,6 +1505,64 @@ body {
 function toggleNav() {
     const nav = document.getElementById('asideNav');
     nav.classList.toggle('show');
+}
+
+// Calculate remaining members and pages using JavaScript
+function calculateStats() {
+    const totalItems = {{ page_obj.paginator.count }};
+    const endIndex = {{ page_obj.end_index }};
+    const showingNow = {{ page_obj.object_list|length }};
+    const currentPage = {{ page_obj.number }};
+    const totalPages = {{ page_obj.paginator.num_pages }};
+    
+    // Calculate remaining members
+    const remaining = totalItems - endIndex;
+    const morePages = totalPages - currentPage;
+    
+    // Update all elements with calculated values
+    document.querySelectorAll('#remaining-members').forEach(el => {
+        el.textContent = remaining > 0 ? remaining : 0;
+    });
+    
+    document.querySelectorAll('#remaining-count').forEach(el => {
+        el.textContent = remaining > 0 ? remaining : 0;
+    });
+    
+    document.querySelectorAll('#more-pages').forEach(el => {
+        el.textContent = morePages > 0 ? morePages : 0;
+    });
+}
+
+// Search form handling
+function setupSearch() {
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchForm && searchInput) {
+        // Clear search when X button is clicked in the input (modern browsers)
+        searchInput.addEventListener('search', function(e) {
+            if (this.value === '') {
+                window.location.href = "{% url 'list_members' %}";
+            }
+        });
+        
+        // Handle Enter key with empty input
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim() === '') {
+                e.preventDefault();
+                window.location.href = "{% url 'list_members' %}";
+            }
+        });
+        
+        // Quick search shortcut (Ctrl+F)
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1137,6 +1602,30 @@ document.addEventListener('DOMContentLoaded', function() {
             menu.classList.remove('show');
         });
     });
+    
+    // Auto-scroll to top on page change
+    const paginationLinks = document.querySelectorAll('.pagination-btn:not(:disabled)');
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.tagName === 'A') {
+                // Smooth scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Calculate and update stats
+    calculateStats();
+    
+    // Setup search functionality
+    setupSearch();
+    
+    // Auto-focus search input if there's a search query
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.value) {
+        searchInput.focus();
+        searchInput.select();
+    }
 });
 </script>
 {% endblock %}
