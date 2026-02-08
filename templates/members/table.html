@@ -1,71 +1,960 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+<style>
+:root {
+    --primary: #6750A4;
+    --primary-container: #EADDFF;
+    --on-primary: #FFFFFF;
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --surface: #FFFFFF;
+    --surface-variant: #F8F9FA;
+    --background: #FEF7FF;
+    --error: #BA1A1A;
+    --success: #0D904F;
+    --warning: #F59E0B;
+    --info: #0284C7;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+    
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 300ms ease;
+}
 
-    <div class="dashboard-wrapper">
-        <div class="container-fluid dashboard-content">
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="col-lg-12 mr-auto ml-auto alert bg-warning alert-dismissable pb-0 pt-0" role="alert">
-                    <button type="button" class="close p-2" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true" class="text-light font-weight-bold"><b>&times;</b></span>
-                    </button>
-                    <div class="row">
-                        <div class="mr-auto ml-auto">
-                        <p class="h5 mr-auto ml-auto p-2 text-light">
-                             <b>
-                                {% if message.tags ==  "alert-danger" %}
-                                    <i class="fa fa-exclamation-triangle mr-3 text-danger"></i> {{ message }}
-                                {% else %}
-                                    <i class="fa fa-check"></i> {{ message }}
-                                {% endif %}
-                            </b>
-                        </p>
+body {
+    font-family: var(--font-sans);
+    background: var(--background);
+    color: #1F2937;
+    line-height: 1.5;
+}
+
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+    min-height: 100vh;
+    padding: 20px;
+    background: var(--background);
+}
+
+.container-fluid.dashboard-content {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Messages Alerts */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    margin-bottom: var(--space-4);
+}
+
+.alert.bg-warning {
+    background: linear-gradient(135deg, var(--warning), #FBBF24) !important;
+}
+
+.alert .close {
+    color: white;
+    opacity: 0.8;
+}
+
+.alert .close:hover {
+    opacity: 1;
+}
+
+/* Card Styles */
+.card {
+    background: var(--surface);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-6);
+    overflow: hidden;
+}
+
+.card-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--outline-variant);
+    padding: var(--space-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.card-header h5 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.card-header a {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--secondary);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-fast);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+}
+
+.card-header a:hover {
+    background: var(--surface-variant);
+    color: var(--primary);
+}
+
+.card-header a i {
+    margin-right: var(--space-2);
+}
+
+.card-body {
+    padding: var(--space-6);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-6);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    gap: var(--space-2);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #0B7A41;
+}
+
+.btn-shadow {
+    box-shadow: var(--shadow-md);
+}
+
+.float-right {
+    margin-left: auto;
+}
+
+.text-light {
+    color: white !important;
+}
+
+/* Table Styles */
+.table-responsive {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+}
+
+.table thead {
+    background: var(--surface-variant);
+}
+
+.table th {
+    padding: var(--space-4);
+    text-align: left;
+    font-weight: var(--font-semibold);
+    color: var(--secondary);
+    border-bottom: 2px solid var(--outline-variant);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--outline-variant);
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: all var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background: var(--surface-variant);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-bordered {
+    border: 1px solid var(--outline-variant);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--outline-variant);
+}
+
+/* Table Actions */
+.text-center {
+    text-align: center;
+}
+
+.text-center a {
+    color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: var(--surface-variant);
+    transition: all var(--transition-fast);
+}
+
+.text-center a:hover {
+    background: var(--primary-container);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Pagination Container */
+.pagination-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.pagination-info {
+    color: var(--secondary);
+    font-size: var(--text-sm);
+}
+
+.pagination-info strong {
+    color: var(--primary);
+    font-weight: var(--font-semibold);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    background: var(--surface-variant);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    min-width: 36px;
+    height: 36px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--outline-variant);
+    transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-dots {
+    color: var(--outline);
+    padding: 0 var(--space-2);
+}
+
+/* Next Page Suggestion */
+.next-page-suggestion {
+    background: linear-gradient(135deg, var(--primary-container), #F3E8FF);
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin: var(--space-6) 0;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0 rgba(103, 80, 164, 0.2);
+    }
+    50% {
+        border-color: #8A74D3;
+        box-shadow: 0 0 0 10px rgba(103, 80, 164, 0);
+    }
+}
+
+.suggestion-icon {
+    font-size: 48px;
+    color: var(--primary);
+    margin-bottom: var(--space-3);
+}
+
+.suggestion-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+}
+
+.suggestion-description {
+    color: var(--secondary);
+    margin-bottom: var(--space-4);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.suggestion-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    display: block;
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--outline);
+}
+
+/* Status badges */
+.status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.badge-tithe {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-believer {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badge-working {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-schooling {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
+.badge-transferred {
+    background: #FCE7F3;
+    color: #9D174D;
+}
+
+.badge-inactive {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Shepherd Group Header */
+.shepherd-group {
+    margin-bottom: var(--space-6);
+}
+
+.shepherd-header {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.shepherd-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: #111827;
+}
+
+.shepherd-count {
+    background: var(--primary-container);
+    color: var(--primary);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.no-shepherd-title {
+    color: var(--outline);
+    font-style: italic;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--space-10) var(--space-4);
+}
+
+.empty-icon {
+    font-size: 48px;
+    color: var(--outline-variant);
+    margin-bottom: var(--space-4);
+}
+
+.empty-title {
+    font-size: var(--text-xl);
+    color: var(--outline);
+    margin-bottom: var(--space-2);
+}
+
+.empty-description {
+    color: var(--outline);
+    margin-bottom: var(--space-6);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-wrapper {
+        padding: var(--space-4);
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+    
+    .card-header h5 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+    
+    .float-right {
+        margin-left: 0;
+        margin-top: var(--space-2);
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .suggestion-stats {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header a {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: var(--space-2);
+    }
+    
+    .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .table th, .table td {
+        padding: var(--space-3);
+        font-size: var(--text-sm);
+    }
+}
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="container-fluid dashboard-content">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="col-lg-12 mr-auto ml-auto alert bg-warning alert-dismissable pb-0 pt-0" role="alert">
+                        <button type="button" class="close p-2" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true" class="text-light font-weight-bold"><b>&times;</b></span>
+                        </button>
+                        <div class="row">
+                            <div class="mr-auto ml-auto">
+                            <p class="h5 mr-auto ml-auto p-2 text-light">
+                                 <b>
+                                    {% if message.tags ==  "alert-danger" %}
+                                        <i class="fa fa-exclamation-triangle mr-3 text-danger"></i> {{ message }}
+                                    {% else %}
+                                        <i class="fa fa-check"></i> {{ message }}
+                                    {% endif %}
+                                </b>
+                            </p>
+                        </div>
+                        </div>
                     </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Card Header -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>
+                        <a href="{% url 'list_members' %}" class="mr-4">
+                            <i class="fas fa-fw fa-list mr-2"></i>List View
+                        </a>
+                        <a href="{% url 'thumbnail_members' %}">
+                            <i class="fas fa-fw fa-th mr-2"></i>Thumbnail View
+                        </a>
+                    </h5>
+                    <a href="{% url 'add_member' %}" class="btn btn-success shadow float-right text-light">
+                        <i class="fa fa-plus mr-2"></i>Add Member
+                    </a>
+                </div>
+                
+                <!-- Pagination Info -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination-container" style="margin: 0; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--outline-variant);">
+                    <div class="pagination-info">
+                        Showing <strong>{{ page_obj.start_index }}-{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> members
+                        <span class="text-muted">(Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</span>
+                    </div>
+                    
+                    <div class="pagination-controls">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="pagination-btn" title="First Page">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        {% else %}
+                            <button class="pagination-btn" disabled title="First Page">
+                                <i class="fas fa-angle-double-left"></i>
+                            </button>
+                            <button class="pagination-btn" disabled title="Previous Page">
+                                <i class="fas fa-angle-left"></i>
+                            </button>
+                        {% endif %}
+                        
+                        <select class="pagination-btn" onchange="location.href='?page='+this.value" style="min-width: 100px;">
+                            <option value="">Page {{ page_obj.number }}</option>
+                            {% for i in page_obj.paginator.page_range %}
+                                <option value="{{ i }}" {% if i == page_obj.number %}selected{% endif %}>
+                                    Page {{ i }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        {% else %}
+                            <button class="pagination-btn" disabled title="Next Page">
+                                <i class="fas fa-angle-right"></i>
+                            </button>
+                            <button class="pagination-btn" disabled title="Last Page">
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
-            {% endfor %}
-        {% endif %}
-            <div class="card">
-                <h5 class="card-header">
-                    <a href="{% url 'add_member' %}" class="btn btn-sm btn-success shadow float-right text-light ml-5">Add Member <i class="fa fa-plus ml-2"></i></a>
-                    <a href="{% url 'list_members' %}" class="mr-4"><i class="fas fa-fw fa-list mr-2"></i>List View</a>
-                    <a href="{% url 'thumbnail_members' %}">Thumbnail View <i class="ml-2 fas fa-fw fa-th"></i></a></h5>
+                {% endif %}
+                
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered first">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Community</th>
-                                    <th>Ministry</th>
-                                    <th>Telephone</th>
-                                    <th>Location</th>
-                                    <th>Guardian</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for member in members %}
-                                <tr>
-                                    <td>{{ member.name }}</td>
-                                    <td>{{ member.shepherd }}</td>
-                                    <td>{{ member.ministry }}</td>
-                                    <td>{{ member.telephone }}</td>
-                                    <td>{{ member.location }}</td>
-                                    <td>{{ member.guardians_name }}</td>
-                                    <td class="text-center"><a href="{% url 'detail_member' member.pk %}"><i class="fa fa-eye"></i></a></td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Members Table Sorted by Shepherd -->
+                    {% if grouped_members %}
+                        {% for group in grouped_members %}
+                            <!-- Shepherd Group Header -->
+                            <div class="shepherd-group">
+                                <div class="shepherd-header">
+                                    <div class="shepherd-title">
+                                        {% if group.shepherd %}
+                                            <i class="fas fa-user-friends"></i>
+                                            {{ group.shepherd.name }}
+                                            <span class="shepherd-count">{{ group.count }} members</span>
+                                        {% else %}
+                                            <span class="no-shepherd-title">
+                                                <i class="fas fa-question-circle"></i>
+                                                No Community Assigned
+                                                <span class="shepherd-count">{{ group.count }} members</span>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Table for this Shepherd -->
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Community</th>
+                                                <th>Ministry</th>
+                                                <th>Telephone</th>
+                                                <th>Location</th>
+                                                <th>Guardian</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for member in group.members %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ member.name }}</strong>
+                                                    {% if member.code %}
+                                                    <br><small class="text-muted">{{ member.code }}</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if member.shepherd %}
+                                                    {{ member.shepherd.name }}
+                                                    {% else %}
+                                                    <span class="text-muted">None</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if member.ministry %}
+                                                    {{ member.ministry.name }}
+                                                    {% else %}
+                                                    <span class="text-muted">None</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if member.telephone %}
+                                                    {{ member.telephone }}
+                                                    {% else %}
+                                                    <span class="text-muted">No contact</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if member.location %}
+                                                    {{ member.location }}
+                                                    {% else %}
+                                                    <span class="text-muted">None</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if member.guardians_name %}
+                                                    {{ member.guardians_name }}
+                                                    {% else %}
+                                                    <span class="text-muted">None</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="status-badges">
+                                                        {% if member.pays_tithe %}
+                                                            <span class="status-badge badge-tithe">Tithe</span>
+                                                        {% endif %}
+                                                        {% if member.new_believer_school %}
+                                                            <span class="status-badge badge-believer">Believer</span>
+                                                        {% endif %}
+                                                        {% if member.working %}
+                                                            <span class="status-badge badge-working">Working</span>
+                                                        {% endif %}
+                                                        {% if member.schooling %}
+                                                            <span class="status-badge badge-schooling">Schooling</span>
+                                                        {% endif %}
+                                                        {% if member.transfered %}
+                                                            <span class="status-badge badge-transferred">Transferred</span>
+                                                        {% endif %}
+                                                        {% if not member.active %}
+                                                            <span class="status-badge badge-inactive">Inactive</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{% url 'detail_member' member.pk %}" title="View Details">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <!-- Next Page Suggestion -->
+                        {% if page_obj.has_next %}
+                        <div class="next-page-suggestion">
+                            <div class="suggestion-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3 class="suggestion-title">More Members Available!</h3>
+                            <p class="suggestion-description" id="suggestion-text">
+                                You've viewed {{ page_obj.object_list|length }} members on this page. 
+                                There are <strong id="remaining-members">0</strong> more members to explore on the next pages.
+                            </p>
+                            
+                            <div class="suggestion-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value" id="total-members">{{ page_obj.paginator.count }}</span>
+                                    <span class="stat-label">Total Members</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="showing-now">{{ page_obj.object_list|length }}</span>
+                                    <span class="stat-label">Showing Now</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="remaining-count">0</span>
+                                    <span class="stat-label">Remaining</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="more-pages">0</span>
+                                    <span class="stat-label">More Pages</span>
+                                </div>
+                            </div>
+                            
+                            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-success btn-lg mt-3">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Go to Page {{ page_obj.next_page_number }} of {{ page_obj.paginator.num_pages }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Bottom Pagination -->
+                        {% if page_obj.paginator.num_pages > 1 %}
+                        <div class="pagination-container">
+                            <div class="pagination-info">
+                                Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                                <span class="text-muted">(23 items per page)</span>
+                            </div>
+                            
+                            <div class="pagination-controls">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1" class="pagination-btn" title="First Page">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="pagination-btn" disabled title="First Page">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </button>
+                                    <button class="pagination-btn" disabled title="Previous Page">
+                                        <i class="fas fa-angle-left"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <span class="pagination-btn active">{{ page_obj.number }}</span>
+                                
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="pagination-btn" disabled title="Next Page">
+                                        <i class="fas fa-angle-right"></i>
+                                    </button>
+                                    <button class="pagination-btn" disabled title="Last Page">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-user-slash"></i>
+                            </div>
+                            <h3 class="empty-title">No members found</h3>
+                            <p class="empty-description">Try adding some members or adjust your filters</p>
+                            <a href="{% url 'add_member' %}" class="btn btn-success btn-lg">
+                                <i class="fa fa-plus mr-2"></i>
+                                Add Member
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-     </div>
         </div>
+    </div>
+</div>
+
+<script>
+// Calculate remaining members and pages using JavaScript
+function calculateStats() {
+    const totalItems = {{ page_obj.paginator.count }};
+    const endIndex = {{ page_obj.end_index }};
+    const showingNow = {{ page_obj.object_list|length }};
+    const currentPage = {{ page_obj.number }};
+    const totalPages = {{ page_obj.paginator.num_pages }};
+    
+    // Calculate remaining members
+    const remaining = totalItems - endIndex;
+    const morePages = totalPages - currentPage;
+    
+    // Update all elements with calculated values
+    document.querySelectorAll('#remaining-members').forEach(el => {
+        el.textContent = remaining > 0 ? remaining : 0;
+    });
+    
+    document.querySelectorAll('#remaining-count').forEach(el => {
+        el.textContent = remaining > 0 ? remaining : 0;
+    });
+    
+    document.querySelectorAll('#more-pages').forEach(el => {
+        el.textContent = morePages > 0 ? morePages : 0;
+    });
+    
+    // Update suggestion description text
+    document.querySelectorAll('#suggestion-text').forEach(el => {
+        el.innerHTML = `You've viewed <strong>${showingNow}</strong> members on this page. There are <strong>${remaining}</strong> more members to explore on the next pages.`;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate and update stats
+    calculateStats();
+    
+    // Auto-scroll to top on page change
+    const paginationLinks = document.querySelectorAll('.pagination-btn:not(:disabled)');
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.tagName === 'A') {
+                // Smooth scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+});
+</script>
 {% endblock content %}
 
 {% block footer %}{% endblock footer %}
