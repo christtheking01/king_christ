@@ -11,15 +11,61 @@ from .models import Community, Member, Ministry, CommunityLeader
 from users.models import UserProfile
 from .forms import MemberForm, MinistryForm, MinistryLeaderFormSet, ShepherdForm,Committee
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from itertools import groupby
 
-@login_required
 def table_members(request):
     template = "members/table.html"
     members = Member.objects.active()
-    profile = UserProfile.objects.get_or_create(user=request.user)
-    context = {"members": members, "members_active_list": "active", "profile": profile}
-    return render(request, template, context)
+    
+    # Fix: Get profile correctly
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    paginator = Paginator(members, 23)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)  # Fix: paginator.num_pages
+    
+    grouped_members = []
+    current_member = list(page_obj.object_list)
+    
+    # Sort by shepherd name for grouping
+    def get_shepherd_name(member):
+        return member.shepherd.name if member.shepherd else ""
+    
+    current_member.sort(key=get_shepherd_name)
+    
+    # Group by shepherd
+    for shepherd, members in groupby(current_member, key=lambda x: x.shepherd):
+        members_list = list(members)
+        grouped_members.append({
+            'shepherd': shepherd,
+            'members': members_list,
+            'count': len(members_list)
+        })
 
+    shepherds = CommunityLeader.objects.all()
+
+    context = {
+        "profile": profile,
+        "grouped_members": grouped_members,
+        "page_obj": page_obj,
+        "total": paginator.count,  # Fix: paginator.count, not Paginator.count
+        "shepherds":shepherds,
+        "total_tithe": Member.objects.pays_tithe().count(),
+        "total_new_believers": Member.objects.new_believer_school().count(),
+        "total_schooling": Member.objects.schooling().count(),
+        "total_working": Member.objects.working().count(),
+        "total_delete": Member.objects.filter(active=False).count(),
+        "status": "all",
+    }
+    
+    return render(request, template, context)
 
 @login_required
 def thumbnail_members(request):
@@ -31,24 +77,79 @@ def thumbnail_members(request):
     context = {"members": members, "members_active_list": "active", "ministries": ministries, "shepherds": shepherds, "profile": profile}
     return render(request, template, context)
 
-
 @login_required
 def list_members(request):
     template = "members/list.html"
-    members = Member.objects.active()
-    shepherds = Community.objects.all().order_by('name')
+    
+    # Get search query
+    search_query = request.GET.get('q', '')
+    
+    # Get all members ordered by shepherd and name
+    if search_query:
+        # If search query exists, filter members
+        all_members = Member.objects.active().filter(
+            Q(name__icontains=search_query) |
+            Q(code__icontains=search_query) |
+            Q(telephone__icontains=search_query) |
+            Q(location__icontains=search_query) |
+            Q(shepherd__name__icontains=search_query) |
+            Q(ministry__name__icontains=search_query) |
+            Q(guardians_name__icontains=search_query)
+        ).order_by('shepherd__name', 'name')
+    else:
+        # If no search query, get all members
+        all_members = Member.objects.active().order_by('shepherd__name', 'name')
+    
+    # Create paginator with 23 items per page
+    paginator = Paginator(all_members, 23)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)
+    
+    # Group members on current page by shepherd
+    grouped_members = []
+    current_members = list(page_obj.object_list)
+    
+    # Sort by shepherd name for grouping
+    def get_shepherd_name(member):
+        return member.shepherd.name if member.shepherd else ""
+    
+    current_members.sort(key=get_shepherd_name)
+    
+    # Group by shepherd
+    for shepherd, members in groupby(current_members, key=lambda x: x.shepherd):
+        members_list = list(members)
+        grouped_members.append({
+            'shepherd': shepherd,
+            'members': members_list,
+            'count': len(members_list)
+        })
+    
+    shepherds = CommunityLeader.objects.all()
     ministries = Ministry.objects.all()
-    profile = UserProfile.objects.get_or_create(user=request.user)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
     context = {
         "profile": profile,
-        "members": members, "shepherds": shepherds, "ministries": ministries, "total": len(members),
-        "total_tithe": len(Member.objects.pays_tithe()),
-        "total_new_believers": len(Member.objects.new_believer_school()),
-        "total_schooling": len(Member.objects.schooling()),
-        "total_working": len(Member.objects.working()),
-        "total_delete": len(members),
-        "status": "all"
+        "grouped_members": grouped_members,
+        "page_obj": page_obj,
+        "shepherds": shepherds, 
+        "ministries": ministries, 
+        "total": paginator.count,
+        "total_tithe": Member.objects.pays_tithe().count(),
+        "total_new_believers": Member.objects.new_believer_school().count(),
+        "total_schooling": Member.objects.schooling().count(),
+        "total_working": Member.objects.working().count(),
+        "total_delete": Member.objects.filter(active=False).count(),
+        "status": "all",
+        "search_query": search_query,  # Pass search query to template
     }
+    
     return render(request, template, context)
 
 
@@ -911,6 +1012,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
