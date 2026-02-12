@@ -110,15 +110,19 @@ class Committee(models.Model):
     description = models.CharField (max_length=50, help_text ='Write the Functions of your commitee ', blank=True, null=True)
     phone = PhoneNumberField(max_length=255, null=True, blank=True, help_text=' Eg. +255 ')
 
+    class Meta:
+        unique_together = ['committee_name', 'position']  # Prevent duplicate positions in same committee
+
     def __str__(self):
-        return f'{self.Commitee_name}'
+        return f'{self.Commitee_name} - {self.position}'
     
-    def clean_name(self):
-        name = self.cleaned_data.get('name')
-        if Ministry.objects.filter(name=name).exists():
-            if not self.instance or self.instance.name != name:
-                raise ("A ministry with this name already exists.")
-        return name
+    def clean(self):
+        # Ensure no duplicate positions in the same committee
+        if Committee.objects.filter(
+            Commitee_name=self.Commitee_name, 
+            position=self.position
+        ).exclude(pk=self.pk).exists():
+            raise ValidationError(f"Position '{self.position}' already exists in this committee.")
 
 
 class MemberManager(models.Manager):
@@ -187,6 +191,7 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
 
 
 
