@@ -473,58 +473,92 @@ def list_committees(request):
 @transaction.atomic
 def create_committee(request):
     if request.method == 'POST':
-        comm_name = request.POST.get('Commitee_name')
-        desc = request.POST.get('description')
+        # FIXED: Use correct field name 'Commitee_name'
+        committee_name = request.POST.get('Commitee_name')
+        description = request.POST.get('description', '')
         
-        # Validate committee name
-        if not comm_name:
+        if not committee_name:
             messages.error(request, "Committee name is required.")
             return redirect('create_committee')
         
-        # Get dynamic lists
+        # FIXED: Get ALL submitted members (not just first 3)
         member_names = request.POST.getlist('members[]')
         positions = request.POST.getlist('positions[]')
         phones = request.POST.getlist('phones[]')
         
+        # Filter out empty entries
+        valid_entries = []
+        for i in range(len(member_names)):
+            if member_names[i] and positions[i] and positions[i] != '':
+                valid_entries.append({
+                    'member_name': member_names[i],
+                    'position': positions[i],
+                    'phone': phones[i] if i < len(phones) else ''
+                })
+        
+        if not valid_entries:
+            messages.error(request, "No valid member assignments provided.")
+            return redirect('create_committee')
+        
         created_count = 0
-        for m_name, pos, ph in zip(member_names, positions, phones):
-            if m_name and pos:
-                try:
-                    # Look up member by name
-                    member_obj = Member.objects.get(name=m_name)
-                    
-                    # Unique Position Check within same committee
-                    if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
-                        messages.warning(request, f"The position '{pos}' is already taken in this committee. Skipped.")
-                        continue
-                    
-                    Committee.objects.create(
-                        Commitee_name=comm_name,
-                        description=desc,
-                        member=member_obj,
-                        position=pos,
-                        phone=ph
+        skipped_count = 0
+        
+        for entry in valid_entries:
+            try:
+                member_obj = Member.objects.get(name=entry['member_name'])
+                
+                # Check for duplicate position in same committee
+                if Committee.objects.filter(
+                    Commitee_name=committee_name, 
+                    position=entry['position']
+                ).exists():
+                    messages.warning(
+                        request, 
+                        f"Position '{entry['position']}' is already taken. Skipped {entry['member_name']}."
                     )
-                    created_count += 1
-                    
-                except Member.DoesNotExist:
-                    messages.error(request, f"Member '{m_name}' not found.")
+                    skipped_count += 1
+                    continue
+                
+                # Create committee member record
+                Committee.objects.create(
+                    Commitee_name=committee_name,
+                    description=description,
+                    member=member_obj,
+                    position=entry['position'],
+                    phone=entry['phone'] if entry['phone'] != 'No phone on record' else ''
+                )
+                created_count += 1
+                
+            except Member.DoesNotExist:
+                messages.error(
+                    request, 
+                    f"Member '{entry['member_name']}' not found in database."
+                )
+                skipped_count += 1
+            except Exception as e:
+                messages.error(request, f"Error adding {entry['member_name']}: {str(e)}")
+                skipped_count += 1
         
         if created_count > 0:
-            messages.success(request, f"Committee '{comm_name}' created successfully with {created_count} member(s)!")
+            messages.success(
+                request, 
+                f"✅ Committee '{committee_name}' created successfully! "
+                f"Added {created_count} member(s). "
+                f"{f'Skipped {skipped_count} invalid entry(s).' if skipped_count > 0 else ''}"
+            )
         else:
-            messages.error(request, "No members were added to the committee.")
+            messages.error(request, "❌ Failed to create committee. No valid members were added.")
             
         return redirect('list_committees')
 
-    # GET request - pass data to template
+    # GET request - display form
     context = {
         'members': Member.objects.all(),
-        'positions': Committee.POSITION_CHOICES,
+        'positions': Committee.position,
         'committee_active_add': True
     }
     return render(request, 'committees/create.html', context)
-
+    
 @transaction.atomic
 def edit_committee(request, name):
     # Get all records sharing the same committee name
@@ -568,7 +602,7 @@ def edit_committee(request, name):
         'name': name,
         'committee_members': committee_members,
         'members': Member.objects.all(),
-        'positions': Committee.POSITION_CHOICES,
+        'positions': Committee.position,
         'desc': committee_members.first().description if committee_members.exists() else ""
     }
     return render(request, 'committees/edit.html', context)
@@ -1072,6 +1106,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
