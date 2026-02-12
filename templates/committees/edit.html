@@ -1,19 +1,24 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 
 <style>
+    /* Keep your existing styles, add these fixes */
     :root {
         --primary: #4f46e5;
         --bg: #f8fafc;
         --card: #ffffff;
         --border: #e2e8f0;
         --text: #1e293b;
+        --error: #ef4444;
+        --success: #10b981;
     }
 
     .edit-wrapper { padding: 2rem 1.5rem; font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; }
     .edit-card { background: var(--card); max-width: 950px; margin: 0 auto; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     
     .header { border-bottom: 2px solid var(--border); margin-bottom: 2rem; padding-bottom: 1rem; }
+    .header h2 { color: var(--text); font-weight: 700; }
     
     .main-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
     
@@ -29,6 +34,24 @@
         position: relative;
     }
 
+    /* Fix: Add delete button style */
+    .delete-row {
+        position: absolute;
+        right: -10px;
+        top: -10px;
+        background: var(--error);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
     label { font-size: 0.8rem; font-weight: 700; color: var(--text); text-transform: uppercase; }
     
@@ -39,6 +62,13 @@
         font-size: 1rem;
         width: 100%;
         background: white;
+        transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
     .btn-add {
@@ -51,6 +81,11 @@
         cursor: pointer;
         font-weight: 600;
         margin-bottom: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-add:hover {
+        background: #e0e7ff;
     }
 
     .btn-update {
@@ -64,43 +99,82 @@
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        transition: transform 0.2s;
     }
+
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.5);
+    }
+
+    /* Fix: Messages styling */
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert-error { background: #fee2e2; color: var(--error); border: 1px solid #fecaca; }
+    .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .alert-warning { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
 </style>
 
 <div class="edit-wrapper">
     <div class="edit-card">
         <div class="header">
-            <h2>Edit Committee: {{ name }}</h2>
-            <p>Modify members or add new positions to this group.</p>
+            <h2>✏️ Edit Committee: {{ name }}</h2>
+            <p>Modify members, add new positions, or remove existing assignments.</p>
         </div>
 
-        <form method="POST">
+        <!-- Fix: Add messages display -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Fix: Add enctype for any file uploads if needed, and fix form action -->
+        <form method="POST" action="{% url 'edit_committee' name %}" id="committee-form">
             {% csrf_token %}
 
-            <!-- Committee Global Details -->
+            <!-- Committee Global Details - Fix: Changed name="commitee_name" to match model field -->
             <div class="main-fields">
                 <div class="form-group">
                     <label>Committee Name</label>
-                    <input type="text" name="commitee_name" value="{{ name }}" class="input-field" required>
+                    <input type="text" name="Commitee_name" value="{{ name }}" class="input-field" required>
+                    <!-- Fix: Add hidden input to preserve original name if changed -->
+                    <input type="hidden" name="original_name" value="{{ name }}">
                 </div>
                 <div class="form-group">
                     <label>Functions / Description</label>
-                    <input type="text" name="description" value="{{ desc }}" class="input-field">
+                    <input type="text" name="description" value="{{ desc }}" class="input-field" placeholder="e.g., Financial oversight, Event planning">
                 </div>
             </div>
 
-            <label style="margin-bottom: 1rem; display: block;">Members & Assignments</label>
+            <label style="margin-bottom: 1rem; display: block; font-weight: 700;">👥 Members & Assignments</label>
             
             <div id="row-container">
                 {% for entry in committee_members %}
-                <div class="member-row">
+                <div class="member-row" data-member-id="{{ entry.id }}">
+                    <!-- Fix: Add delete button for existing members -->
+                    <button type="button" class="delete-row" onclick="deleteMember(this, {{ entry.id }})" title="Remove member">×</button>
+                    
                     <div class="form-group">
                         <label>Member Name</label>
-                        <input type="text" name="members[]" list="member-list" value="{{ entry.member.name }}" class="input-field member-search" placeholder="Search Member..." required>
+                        <input type="text" name="members[]" list="member-list" value="{{ entry.member.name }}" class="member-search input-field" placeholder="Search member..." required>
                     </div>
                     <div class="form-group">
                         <label>Position</label>
                         <select name="positions[]" class="input-field" required>
+                            <option value="">Select Position</option>
                             {% for val, label in positions %}
                             <option value="{{ val }}" {% if entry.position == val %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
@@ -108,27 +182,55 @@
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" name="phones[]" value="{{ entry.phone|default:'' }}" class="input-field phone-display" readonly>
+                        <input type="text" name="phones[]" value="{{ entry.phone|default:'' }}" class="phone-display input-field" readonly>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Fix: Handle empty committee -->
+                <div class="member-row" id="empty-row-template">
+                    <div class="form-group">
+                        <label>Member Name</label>
+                        <input type="text" name="members[]" list="member-list" class="member-search input-field" placeholder="Search member..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select name="positions[]" class="input-field" required>
+                            <option value="">Select Position</option>
+                            {% for val, label in positions %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phones[]" class="phone-display input-field" readonly>
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <!-- Global Datalist Source -->
+            <!-- Global Datalist Source - Fix: Include member IDs for better reference -->
             <datalist id="member-list">
                 {% for m in members %}
-                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}">
+                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}" data-id="{{ m.id }}">
                 {% endfor %}
             </datalist>
 
-            <button type="button" class="btn-add" id="add-row-btn">+ Add Another Position to Committee</button>
-            <button type="submit" class="btn-update">UPDATE COMMITTEE RECORDS</button>
+            <button type="button" class="btn-add" id="add-row-btn">➕ Add Another Position to Committee</button>
+            <button type="submit" class="btn-update">💾 UPDATE COMMITTEE RECORDS</button>
         </form>
+        
+        <!-- Fix: Add navigation back to list -->
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="{% url 'list_committees' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                ← Back to Committees List
+            </a>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. AUTO-POPULATE PHONE LOGIC
+    // 1. AUTO-POPULATE PHONE LOGIC - FIX: Better error handling
     document.addEventListener('input', function (e) {
         if (e.target.classList.contains('member-search')) {
             const input = e.target;
@@ -136,31 +238,118 @@
             const datalist = document.getElementById('member-list');
             
             const parentRow = input.closest('.member-row');
+            if (!parentRow) return;
+            
             const phoneField = parentRow.querySelector('.phone-display');
+            if (!phoneField) return;
 
-            const option = Array.from(datalist.options).find(opt => opt.value === typedName);
+            // FIX: Case-insensitive search
+            const option = Array.from(datalist.options).find(opt => 
+                opt.value.toLowerCase() === typedName.toLowerCase()
+            );
 
             if (option) {
                 const phone = option.getAttribute('data-phone');
-                phoneField.value = phone ? phone : "---";
+                phoneField.value = phone && phone !== 'None' ? phone : "No phone on record";
+            } else if (typedName === '') {
+                phoneField.value = '';
             }
         }
     });
 
-    // 2. DYNAMIC ROW CLONING LOGIC
+    // 2. DYNAMIC ROW CLONING LOGIC - FIX: Better cloning without using first row
     document.getElementById('add-row-btn').addEventListener('click', function() {
         const container = document.getElementById('row-container');
-        const rows = container.getElementsByClassName('member-row');
+        let template;
         
-        // Clone the first row as template
-        const newRow = rows[0].cloneNode(true);
+        if (container.children.length > 0) {
+            // Use first row as template
+            template = container.children[0].cloneNode(true);
+            // Remove any delete button data-id from template
+            const deleteBtn = template.querySelector('.delete-row');
+            if (deleteBtn) {
+                deleteBtn.removeAttribute('onclick');
+                deleteBtn.setAttribute('onclick', 'removeRow(this)');
+            }
+        } else {
+            // Use empty template
+            template = document.getElementById('empty-row-template').cloneNode(true);
+            template.id = '';
+        }
         
-        // Reset values for new row
-        newRow.querySelectorAll('input').forEach(i => i.value = '');
-        newRow.querySelector('select').selectedIndex = 0;
-
-        container.appendChild(newRow);
+        // Reset all input values
+        template.querySelectorAll('input:not([readonly])').forEach(i => i.value = '');
+        template.querySelectorAll('input[readonly]').forEach(i => i.value = '');
+        template.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        
+        container.appendChild(template);
     });
+
+    // 3. DELETE MEMBER FUNCTION - FIX: AJAX delete for existing members
+    function deleteMember(button, memberId) {
+        if (confirm('Are you sure you want to remove this member from the committee?')) {
+            // FIX: Use AJAX to delete without page reload
+            fetch(`/committees/member/${memberId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = button.closest('.member-row');
+                    row.remove();
+                    // Show success message
+                    showMessage(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error removing member');
+            });
+        }
+    }
+    
+    // 4. REMOVE ROW FUNCTION - For newly added rows (not yet saved)
+    function removeRow(button) {
+        const row = button.closest('.member-row');
+        row.remove();
+    }
+
+    // 5. FORM VALIDATION - FIX: Prevent empty submissions
+    document.getElementById('committee-form').addEventListener('submit', function(e) {
+        const memberInputs = document.querySelectorAll('input[name="members[]"]');
+        let hasValidMember = false;
+        
+        memberInputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                hasValidMember = true;
+            }
+        });
+        
+        if (!hasValidMember) {
+            e.preventDefault();
+            alert('Please add at least one member to the committee.');
+        }
+    });
+    
+    // 6. SHOW MESSAGE FUNCTION
+    function showMessage(message, type) {
+        const messagesDiv = document.querySelector('.messages');
+        if (!messagesDiv) return;
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        messagesDiv.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => alertDiv.remove(), 5000);
+    }
 </script>
 
 {% endblock %}
