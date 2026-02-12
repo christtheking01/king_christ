@@ -573,6 +573,13 @@ def edit_committee(request, name):
     }
     return render(request, 'committees/edit.html', context)
 
+def delete_committee_member(request, pk):
+    committee_member = get_object_or_404(Committee, pk=pk)
+    committee_name = committee_member.Commitee_name
+    committee_member.delete()
+    messages.success(request, f"Member removed from '{committee_name}' committee.")
+    return redirect('list_committees')
+
 def delete_committee_member_ajax(request, pk):
     if request.method == 'POST':
         try:
@@ -1065,6 +1072,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
