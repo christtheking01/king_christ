@@ -573,12 +573,20 @@ def edit_committee(request, name):
     }
     return render(request, 'committees/edit.html', context)
 
-def delete_committee_member(request, pk):
-    committee_member = get_object_or_404(Committee, pk=pk)
-    committee_name = committee_member.Commitee_name
-    committee_member.delete()
-    messages.success(request, f"Member removed from '{committee_name}' committee.")
-    return redirect('list_committees')
+def delete_committee_member_ajax(request, pk):
+    if request.method == 'POST':
+        try:
+            committee_member = get_object_or_404(Committee, pk=pk)
+            member_name = committee_member.member.name
+            committee_name = committee_member.Commitee_name
+            committee_member.delete()
+            return JsonResponse({
+                'success': True, 
+                'message': f"{member_name} removed from '{committee_name}' committee."
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 
@@ -1057,6 +1065,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
