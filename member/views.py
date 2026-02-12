@@ -470,27 +470,34 @@ def list_committees(request):
         'committee_active_list': True
     })
 
+@transaction.atomic
 def create_committee(request):
     if request.method == 'POST':
         comm_name = request.POST.get('Commitee_name')
         desc = request.POST.get('description')
         
+        # Validate committee name
+        if not comm_name:
+            messages.error(request, "Committee name is required.")
+            return redirect('create_committee')
+        
         # Get dynamic lists
         member_names = request.POST.getlist('members[]')
         positions = request.POST.getlist('positions[]')
         phones = request.POST.getlist('phones[]')
-
+        
+        created_count = 0
         for m_name, pos, ph in zip(member_names, positions, phones):
             if m_name and pos:
                 try:
-                    # Look up member by name (since Datalist sends text)
+                    # Look up member by name
                     member_obj = Member.objects.get(name=m_name)
                     
-                    # Unique Position Check
+                    # Unique Position Check within same committee
                     if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
-                        messages.error(request, f"The position {pos} is already taken.")
+                        messages.warning(request, f"The position '{pos}' is already taken in this committee. Skipped.")
                         continue
-
+                    
                     Committee.objects.create(
                         Commitee_name=comm_name,
                         description=desc,
@@ -498,52 +505,90 @@ def create_committee(request):
                         position=pos,
                         phone=ph
                     )
+                    created_count += 1
+                    
                 except Member.DoesNotExist:
                     messages.error(request, f"Member '{m_name}' not found.")
-
-        messages.success(request, "Committee created successfully!")
+        
+        if created_count > 0:
+            messages.success(request, f"Committee '{comm_name}' created successfully with {created_count} member(s)!")
+        else:
+            messages.error(request, "No members were added to the committee.")
+            
         return redirect('list_committees')
 
-    # Pass data to template
+    # GET request - pass data to template
     context = {
         'members': Member.objects.all(),
-        'positions': Committee.Position,
+        'positions': Committee.POSITION_CHOICES,
         'committee_active_add': True
     }
     return render(request, 'committees/create.html', context)
 
-
-    members = Member.objects.all()
-    positions = Committee.Position
-    return render(request, 'committees/create.html', {'members': members, 'positions': positions})
-
+@transaction.atomic
 def edit_committee(request, name):
     # Get all records sharing the same committee name
     committee_members = Committee.objects.filter(Commitee_name=name)
+    
     if request.method == 'POST':
-        committee_members.delete() # Simple update strategy: replace records
-        # Re-use the creation logic here...
-        return redirect('list_committees')
+        comm_name = request.POST.get('Commitee_name', name)
+        desc = request.POST.get('description')
         
+        # Delete existing records (simple update strategy)
+        committee_members.delete()
+        
+        # Re-use creation logic
+        member_names = request.POST.getlist('members[]')
+        positions = request.POST.getlist('positions[]')
+        phones = request.POST.getlist('phones[]')
+        
+        created_count = 0
+        for m_name, pos, ph in zip(member_names, positions, phones):
+            if m_name and pos:
+                try:
+                    member_obj = Member.objects.get(name=m_name)
+                    
+                    Committee.objects.create(
+                        Commitee_name=comm_name,
+                        description=desc,
+                        member=member_obj,
+                        position=pos,
+                        phone=ph
+                    )
+                    created_count += 1
+                    
+                except Member.DoesNotExist:
+                    messages.error(request, f"Member '{m_name}' not found.")
+        
+        messages.success(request, f"Committee '{comm_name}' updated successfully with {created_count} member(s)!")
+        return redirect('list_committees')
+    
+    # GET request - display edit form
     context = {
         'name': name,
         'committee_members': committee_members,
         'members': Member.objects.all(),
-        'positions': Committee.Position,
+        'positions': Committee.POSITION_CHOICES,
         'desc': committee_members.first().description if committee_members.exists() else ""
     }
     return render(request, 'committees/edit.html', context)
 
 def delete_committee_member(request, pk):
-    member = get_object_or_404(Committee, pk=pk)
-    name = member.Commitee_name
-    member.delete()
-    messages.success(request, "Member removed from committee.")
+    committee_member = get_object_or_404(Committee, pk=pk)
+    committee_name = committee_member.Commitee_name
+    committee_member.delete()
+    messages.success(request, f"Member removed from '{committee_name}' committee.")
     return redirect('list_committees')
+
+
+
 
 """
 ministries views 
 """
+
+
+
 
 @login_required
 def create_ministry(request):
@@ -1012,6 +1057,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
