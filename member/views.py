@@ -554,7 +554,7 @@ def create_committee(request):
     # GET request - display form
     context = {
         'members': Member.objects.all(),
-        'positions': Committee.position,
+        'positions': Committee.POSITION_CHOICES,
         'committee_active_add': True
     }
     return render(request, 'committees/create.html', context)
@@ -602,7 +602,7 @@ def edit_committee(request, name):
         'name': name,
         'committee_members': committee_members,
         'members': Member.objects.all(),
-        'positions': Committee.position,
+        'positions': Committee.POSITION_CHOICES,  # Use the CONSTANT, not the field
         'desc': committee_members.first().description if committee_members.exists() else ""
     }
     return render(request, 'committees/edit.html', context)
@@ -1106,6 +1106,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
