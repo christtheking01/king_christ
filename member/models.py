@@ -111,7 +111,7 @@ class Committee(models.Model):
     phone = PhoneNumberField(max_length=255, null=True, blank=True, help_text=' Eg. +255 ')
 
     class Meta:
-        unique_together = ['committee_name', 'position']  # Prevent duplicate positions in same committee
+        unique_together = ['Commitee_name', 'position']  # Prevent duplicate positions in same committee
 
     def __str__(self):
         return f'{self.Commitee_name} - {self.position}'
@@ -191,6 +191,7 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
 
 
 
