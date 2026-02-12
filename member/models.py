@@ -104,6 +104,7 @@ class Committee(models.Model):
         ('MEMBER','Member')
     ]
 
+    POSITION_CHOICES = Position
     Commitee_name = models.CharField(max_length=250, blank=False, null=True)
     position = models.CharField(max_length=50, choices=Position, null=True, blank=True)
     member = models.ForeignKey("Member", verbose_name="commitee_names", on_delete=models.CASCADE)
@@ -191,6 +192,7 @@ class Member(models.Model):
 class TestDb(models.Model):
 
     field = models.CharField(max_length=120)
+
 
 
 
