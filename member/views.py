@@ -14,9 +14,19 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from itertools import groupby
 
+@login_required
 def table_members(request):
     template = "members/table.html"
+    
+    # Get filter parameters from request
+    community_filter = request.GET.get('community', '')
+    
+    # Start with active members
     members = Member.objects.active()
+    
+    # Apply community filter if provided
+    if community_filter:
+        members = members.filter(shepherd__name__icontains=community_filter)
     
     # Fix: Get profile correctly
     profile, created = UserProfile.objects.get_or_create(user=request.user)
@@ -29,7 +39,7 @@ def table_members(request):
     except PageNotAnInteger:
         page_obj = paginator.get_page(1)
     except EmptyPage:
-        page_obj = paginator.get_page(paginator.num_pages)  # Fix: paginator.num_pages
+        page_obj = paginator.get_page(paginator.num_pages)
     
     grouped_members = []
     current_member = list(page_obj.object_list)
@@ -50,13 +60,18 @@ def table_members(request):
         })
 
     shepherds = CommunityLeader.objects.all()
+    
+    # Get all communities for the filter dropdown
+    communities = Community.objects.all().order_by('name')
 
     context = {
         "profile": profile,
         "grouped_members": grouped_members,
         "page_obj": page_obj,
-        "total": paginator.count,  # Fix: paginator.count, not Paginator.count
-        "shepherds":shepherds,
+        "total": paginator.count,
+        "shepherds": shepherds,
+        "communities": communities,
+        "selected_community": community_filter,
         "total_tithe": Member.objects.pays_tithe().count(),
         "total_new_believers": Member.objects.new_believer_school().count(),
         "total_schooling": Member.objects.schooling().count(),
@@ -66,6 +81,7 @@ def table_members(request):
     }
     
     return render(request, template, context)
+
 
 @login_required
 def thumbnail_members(request):
@@ -1106,6 +1122,7 @@ def api_create_ministry(request):
 
 
 # def api_get_members_status(request, status)
+
 
 
 
