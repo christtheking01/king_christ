@@ -96,6 +96,18 @@ body {
     background: linear-gradient(135deg, var(--warning), #FBBF24) !important;
 }
 
+.alert.bg-success {
+    background: linear-gradient(135deg, var(--success), #10B981) !important;
+}
+
+.alert.bg-danger {
+    background: linear-gradient(135deg, var(--error), #EF4444) !important;
+}
+
+.alert.bg-info {
+    background: linear-gradient(135deg, var(--info), #3B82F6) !important;
+}
+
 .alert .close {
     color: white;
     opacity: 0.8;
@@ -134,9 +146,10 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
-.card-header a {
+.card-header h5 a {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
@@ -147,17 +160,128 @@ body {
     border-radius: var(--radius-md);
 }
 
-.card-header a:hover {
+.card-header h5 a:hover {
     background: var(--surface-variant);
     color: var(--primary);
+    text-decoration: none;
 }
 
-.card-header a i {
+.card-header h5 a i {
     margin-right: var(--space-2);
 }
 
-.card-body {
-    padding: var(--space-6);
+/* Filter Section */
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.filter-form {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: #1F2937;
+    background-color: var(--surface);
+    cursor: pointer;
+    min-width: 200px;
+    transition: all var(--transition-fast);
+    height: 40px;
+}
+
+.filter-select:hover {
+    border-color: var(--primary);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-container);
+}
+
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    height: 40px;
+}
+
+.filter-btn:hover {
+    background: #584b8c;
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.filter-btn i {
+    font-size: var(--text-sm);
+}
+
+.filter-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--surface-variant);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-fast);
+    height: 40px;
+}
+
+.filter-clear:hover {
+    background: var(--outline-variant);
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    background: var(--primary-container);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.filter-badge a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.filter-badge a:hover {
+    color: var(--error);
 }
 
 /* Buttons */
@@ -175,10 +299,14 @@ body {
     transition: all var(--transition-fast);
     text-decoration: none;
     gap: var(--space-2);
+    height: 44px;
 }
 
 .btn:hover {
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    color: white;
 }
 
 .btn:active {
@@ -188,6 +316,7 @@ body {
 .btn-sm {
     padding: var(--space-2) var(--space-4);
     font-size: var(--text-sm);
+    height: 36px;
 }
 
 .btn-success {
@@ -197,21 +326,10 @@ body {
 
 .btn-success:hover {
     background: #0B7A41;
+    color: white;
 }
 
-.btn-shadow {
-    box-shadow: var(--shadow-md);
-}
-
-.float-right {
-    margin-left: auto;
-}
-
-.text-light {
-    color: white !important;
-}
-
-/* IMPORTANT: FIXED TABLE SCROLLING AND ACTION COLUMN */
+/* Table Styles */
 .table-scroll-container {
     position: relative;
     width: 100%;
@@ -219,6 +337,7 @@ body {
     -webkit-overflow-scrolling: touch;
     border-radius: var(--radius-md);
     margin-bottom: var(--space-6);
+    border: 1px solid var(--outline-variant);
 }
 
 .table-scroll-container::-webkit-scrollbar {
@@ -244,7 +363,7 @@ body {
     border-collapse: separate;
     border-spacing: 0;
     background: var(--surface);
-    min-width: 1200px; /* Ensure table has enough width */
+    min-width: 1200px;
 }
 
 .table thead {
@@ -266,79 +385,22 @@ body {
     letter-spacing: 0.05em;
     white-space: nowrap;
     position: relative;
-    min-width: 120px;
 }
 
-/* Fixed column widths for better scrolling */
-.table th:nth-child(1) { /* NAME */
-    min-width: 180px;
-    max-width: 200px;
-    position: sticky;
-    left: 0;
-    background: var(--surface-variant);
-    z-index: 15;
-}
-
-.table th:nth-child(2) { /* COMMUNITY */
-    min-width: 150px;
-}
-
-.table th:nth-child(3) { /* MINISTRY */
-    min-width: 150px;
-}
-
-.table th:nth-child(4) { /* TELEPHONE */
-    min-width: 140px;
-}
-
-.table th:nth-child(5) { /* LOCATION */
-    min-width: 150px;
-}
-
-.table th:nth-child(6) { /* GUARDIAN */
-    min-width: 150px;
-}
-
-.table th:nth-child(7) { /* STATUS */
-    min-width: 200px;
-    max-width: 250px;
-}
-
-.table th:nth-child(8) { /* ACTION - FIXED POSITION */
-    min-width: 180px;
-    max-width: 200px;
-    position: sticky;
-    right: 0;
-    background: var(--surface-variant);
-    z-index: 15;
-    box-shadow: -1px 0 0 var(--outline-variant);
-}
+/* Fixed column widths */
+.table th:nth-child(1) { min-width: 200px; } /* Name */
+.table th:nth-child(2) { min-width: 150px; } /* Community */
+.table th:nth-child(3) { min-width: 150px; } /* Ministry */
+.table th:nth-child(4) { min-width: 140px; } /* Telephone */
+.table th:nth-child(5) { min-width: 150px; } /* Location */
+.table th:nth-child(6) { min-width: 150px; } /* Guardian */
+.table th:nth-child(7) { min-width: 250px; } /* Status */
+.table th:nth-child(8) { min-width: 200px; } /* Actions */
 
 .table td {
     padding: var(--space-4) var(--space-3);
     border-bottom: 1px solid var(--outline-variant);
     vertical-align: middle;
-    word-break: break-word;
-    position: relative;
-}
-
-/* Sticky name column */
-.table td:nth-child(1) {
-    position: sticky;
-    left: 0;
-    background: var(--surface);
-    z-index: 10;
-    box-shadow: 1px 0 0 var(--outline-variant);
-}
-
-/* Sticky action column - ALWAYS VISIBLE */
-.table td:last-child {
-    position: sticky;
-    right: 0;
-    background: var(--surface);
-    z-index: 10;
-    box-shadow: -1px 0 0 var(--outline-variant);
-    text-align: center;
 }
 
 .table tbody tr {
@@ -349,43 +411,17 @@ body {
     background: var(--surface-variant);
 }
 
-.table tbody tr:hover td {
-    background: var(--surface-variant);
-}
-
-.table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.table-striped tbody tr:nth-of-type(odd) td {
+.table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
-.table-striped tbody tr:nth-of-type(odd) td:first-child,
-.table-striped tbody tr:nth-of-type(odd) td:last-child {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-.table-striped tbody tr:nth-of-type(odd):hover td {
-    background-color: var(--surface-variant) !important;
-}
-
-.table-bordered {
-    border: 1px solid var(--outline-variant);
-}
-
-.table-bordered th,
-.table-bordered td {
-    border-right: 1px solid var(--outline-variant);
-}
-
-/* ACTION BUTTONS - IMPROVED VISIBILITY */
+/* Action Buttons */
 .action-buttons {
     display: flex;
     gap: var(--space-2);
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .action-btn {
@@ -393,7 +429,7 @@ body {
     align-items: center;
     justify-content: center;
     min-width: 44px;
-    height: 36px;
+    height: 38px;
     padding: 0 var(--space-3);
     border-radius: var(--radius-md);
     background: var(--surface);
@@ -405,12 +441,13 @@ body {
     flex-shrink: 0;
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
+    gap: var(--space-1);
 }
 
 .action-btn:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
-    background: var(--surface-variant);
+    text-decoration: none;
 }
 
 .action-btn.view {
@@ -446,39 +483,39 @@ body {
     color: #B91C1C;
 }
 
-.action-btn i {
+/* Member Info */
+.member-info-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-name {
+    font-weight: var(--font-semibold);
+    color: #111827;
     font-size: var(--text-base);
-    margin-right: var(--space-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 
-/* Scroll indicator for mobile */
-.scroll-hint {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--primary);
-    color: white;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-full);
+.member-code {
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    animation: bounce 2s infinite;
+    color: var(--outline);
+    font-family: monospace;
+    background: var(--surface-variant);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-10px); }
-}
-
-/* Status badges */
+/* Status Badges */
 .status-badges {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
-    max-width: 200px;
 }
 
 .status-badge {
@@ -526,35 +563,45 @@ body {
     border: 1px solid #FECACA;
 }
 
-/* Member info in table cells */
-.member-info-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+/* Shepherd Group */
+.shepherd-group {
+    margin-bottom: var(--space-6);
 }
 
-.member-name {
+.shepherd-header {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.shepherd-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-lg);
     font-weight: var(--font-semibold);
     color: #111827;
-    font-size: var(--text-base);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
+    flex-wrap: wrap;
 }
 
-.member-code {
+.shepherd-count {
+    background: var(--primary-container);
+    color: var(--primary);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
     font-size: var(--text-sm);
-    color: var(--outline);
-    font-family: monospace;
-    background: var(--surface-variant);
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
+    font-weight: var(--font-medium);
 }
 
-/* Pagination Container */
+.no-shepherd-title {
+    color: var(--outline);
+    font-style: italic;
+}
+
+/* Pagination */
 .pagination-container {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -582,6 +629,7 @@ body {
     display: flex;
     gap: var(--space-2);
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .pagination-btn {
@@ -599,13 +647,15 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     text-decoration: none;
-    min-width: 36px;
-    height: 36px;
+    min-width: 40px;
+    height: 40px;
 }
 
 .pagination-btn:hover:not(:disabled) {
     background: var(--outline-variant);
     transform: translateY(-1px);
+    text-decoration: none;
+    color: var(--primary);
 }
 
 .pagination-btn:disabled {
@@ -619,11 +669,6 @@ body {
     border-color: var(--primary);
 }
 
-.pagination-dots {
-    color: var(--outline);
-    padding: 0 var(--space-2);
-}
-
 /* Next Page Suggestion */
 .next-page-suggestion {
     background: linear-gradient(135deg, var(--primary-container), #F3E8FF);
@@ -632,100 +677,12 @@ body {
     padding: var(--space-6);
     margin: var(--space-6) 0;
     text-align: center;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0 rgba(103, 80, 164, 0.2);
-    }
-    50% {
-        border-color: #8A74D3;
-        box-shadow: 0 0 0 10px rgba(103, 80, 164, 0);
-    }
 }
 
 .suggestion-icon {
     font-size: 48px;
     color: var(--primary);
     margin-bottom: var(--space-3);
-}
-
-.suggestion-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    color: var(--primary);
-    margin-bottom: var(--space-2);
-}
-
-.suggestion-description {
-    color: var(--secondary);
-    margin-bottom: var(--space-4);
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.suggestion-stats {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-6);
-    margin-bottom: var(--space-4);
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-value {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--primary);
-    display: block;
-}
-
-.stat-label {
-    font-size: var(--text-sm);
-    color: var(--outline);
-}
-
-/* Shepherd Group Header */
-.shepherd-group {
-    margin-bottom: var(--space-6);
-}
-
-.shepherd-header {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    margin-bottom: var(--space-3);
-    border-left: 4px solid var(--primary);
-    box-shadow: var(--shadow-sm);
-}
-
-.shepherd-title {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: #111827;
-}
-
-.shepherd-count {
-    background: var(--primary-container);
-    color: var(--primary);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-}
-
-.no-shepherd-title {
-    color: var(--outline);
-    font-style: italic;
 }
 
 /* Empty State */
@@ -740,27 +697,38 @@ body {
     margin-bottom: var(--space-4);
 }
 
-.empty-title {
-    font-size: var(--text-xl);
-    color: var(--outline);
-    margin-bottom: var(--space-2);
+/* Scroll Hint */
+.scroll-hint {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    animation: bounce 2s infinite;
+    align-items: center;
+    gap: var(--space-2);
 }
 
-.empty-description {
-    color: var(--outline);
-    margin-bottom: var(--space-6);
+@keyframes bounce {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-10px); }
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
     .table {
-        min-width: 1000px;
+        min-width: 1200px;
     }
     
     .scroll-hint {
         display: flex;
-        align-items: center;
-        gap: var(--space-2);
     }
 }
 
@@ -772,76 +740,86 @@ body {
     .card-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--space-3);
+    }
+    
+    .filter-section {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .filter-form {
+        width: 100%;
+    }
+    
+    .filter-select {
+        flex: 1;
+        min-width: 150px;
     }
     
     .card-header h5 {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-2);
-    }
-    
-    .float-right {
-        margin-left: 0;
-        margin-top: var(--space-2);
-    }
-    
-    .table {
-        min-width: 900px;
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
 @media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-select {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .filter-btn,
+    .filter-clear {
+        width: 100%;
+    }
+    
     .pagination-container {
         flex-direction: column;
         text-align: center;
     }
     
-    .suggestion-stats {
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-    
-    .table th, .table td {
-        padding: var(--space-3);
-        font-size: var(--text-sm);
+    .pagination-controls {
+        justify-content: center;
     }
     
     .action-btn {
-        min-width: 36px;
-        height: 32px;
+        min-width: 40px;
         padding: 0 var(--space-2);
-    }
-    
-    .action-btn i {
-        margin-right: 0;
-        font-size: var(--text-sm);
     }
     
     .action-btn span {
         display: none;
     }
+    
+    .action-btn i {
+        margin-right: 0;
+        font-size: 1.1rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .card-header a {
-        width: 100%;
-        justify-content: center;
-        margin-bottom: var(--space-2);
-    }
-    
-    .pagination-controls {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
     .table {
-        min-width: 800px;
+        min-width: 1100px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn,
+    .filter-btn,
+    .filter-clear,
+    .btn,
+    .pagination-btn {
+        min-height: 44px;
     }
     
-    .status-badge {
-        font-size: 0.7rem;
-        padding: 3px 8px;
+    .filter-select {
+        height: 44px;
     }
 }
 </style>
@@ -849,24 +827,34 @@ body {
 <div class="dashboard-wrapper">
     <div class="container-fluid dashboard-content">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <!-- Messages -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="col-lg-12 mr-auto ml-auto alert bg-warning alert-dismissable pb-0 pt-0" role="alert">
+                    <div class="col-lg-12 mr-auto ml-auto alert 
+                        {% if message.tags == 'success' %}bg-success
+                        {% elif message.tags == 'error' %}bg-danger
+                        {% elif message.tags == 'warning' %}bg-warning
+                        {% else %}bg-info{% endif %} 
+                        alert-dismissable pb-0 pt-0" role="alert">
                         <button type="button" class="close p-2" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true" class="text-light font-weight-bold"><b>&times;</b></span>
                         </button>
                         <div class="row">
                             <div class="mr-auto ml-auto">
-                            <p class="h5 mr-auto ml-auto p-2 text-light">
-                                 <b>
-                                    {% if message.tags ==  "alert-danger" %}
-                                        <i class="fa fa-exclamation-triangle mr-3 text-danger"></i> {{ message }}
-                                    {% else %}
-                                        <i class="fa fa-check"></i> {{ message }}
-                                    {% endif %}
-                                </b>
-                            </p>
-                        </div>
+                                <p class="h5 mr-auto ml-auto p-2 text-light">
+                                    <b>
+                                        {% if message.tags == 'error' %}
+                                            <i class="fa fa-exclamation-triangle mr-3"></i> {{ message }}
+                                        {% elif message.tags == 'success' %}
+                                            <i class="fa fa-check-circle mr-3"></i> {{ message }}
+                                        {% elif message.tags == 'warning' %}
+                                            <i class="fa fa-exclamation-circle mr-3"></i> {{ message }}
+                                        {% else %}
+                                            <i class="fa fa-info-circle mr-3"></i> {{ message }}
+                                        {% endif %}
+                                    </b>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
@@ -883,12 +871,50 @@ body {
                             <i class="fas fa-fw fa-th mr-2"></i>Thumbnail View
                         </a>
                     </h5>
-                    <a href="{% url 'add_member' %}" class="btn btn-success shadow float-right text-light">
+                    
+                    <!-- Community Filter Section -->
+                    <div class="filter-section">
+                        <form method="get" action="{% url 'table_members' %}" class="filter-form">
+                            <select name="community" class="filter-select">
+                                <option value="">All Communities</option>
+                                {% for community in communities %}
+                                    <option value="{{ community.name }}" {% if selected_community == community.name %}selected{% endif %}>
+                                        {{ community.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="filter-btn">
+                                <i class="fa fa-filter"></i>
+                                <span>Filter</span>
+                            </button>
+                            {% if selected_community %}
+                                <a href="{% url 'table_members' %}" class="filter-clear">
+                                    <i class="fa fa-times"></i>
+                                    <span>Clear</span>
+                                </a>
+                            {% endif %}
+                        </form>
+                    </div>
+                    
+                    <a href="{% url 'add_member' %}" class="btn btn-success shadow text-light">
                         <i class="fa fa-plus mr-2"></i>Add Member
                     </a>
                 </div>
                 
-                <!-- Pagination Info -->
+                <!-- Filter Badge -->
+                {% if selected_community %}
+                <div class="px-4 pb-2">
+                    <span class="filter-badge">
+                        <i class="fa fa-filter"></i>
+                        Filtered by: {{ selected_community }}
+                        <a href="{% url 'table_members' %}" class="ml-2">
+                            <i class="fa fa-times-circle"></i>
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+                
+                <!-- Top Pagination -->
                 {% if page_obj.paginator.num_pages > 1 %}
                 <div class="pagination-container" style="margin: 0; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--outline-variant);">
                     <div class="pagination-info">
@@ -898,22 +924,22 @@ body {
                     
                     <div class="pagination-controls">
                         {% if page_obj.has_previous %}
-                            <a href="?page=1" class="pagination-btn" title="First Page">
+                            <a href="?page=1{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="First Page">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
-                            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                            <a href="?page={{ page_obj.previous_page_number }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Previous Page">
                                 <i class="fas fa-angle-left"></i>
                             </a>
                         {% else %}
-                            <button class="pagination-btn" disabled title="First Page">
+                            <button class="pagination-btn" disabled>
                                 <i class="fas fa-angle-double-left"></i>
                             </button>
-                            <button class="pagination-btn" disabled title="Previous Page">
+                            <button class="pagination-btn" disabled>
                                 <i class="fas fa-angle-left"></i>
                             </button>
                         {% endif %}
                         
-                        <select class="pagination-btn" onchange="location.href='?page='+this.value" style="min-width: 100px;">
+                        <select class="pagination-btn" onchange="location.href='?page='+this.value+'{% if selected_community %}&community={{ selected_community }}{% endif %}'" style="min-width: 100px;">
                             <option value="">Page {{ page_obj.number }}</option>
                             {% for i in page_obj.paginator.page_range %}
                                 <option value="{{ i }}" {% if i == page_obj.number %}selected{% endif %}>
@@ -923,17 +949,17 @@ body {
                         </select>
                         
                         {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                            <a href="?page={{ page_obj.next_page_number }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Next Page">
                                 <i class="fas fa-angle-right"></i>
                             </a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                            <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Last Page">
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         {% else %}
-                            <button class="pagination-btn" disabled title="Next Page">
+                            <button class="pagination-btn" disabled>
                                 <i class="fas fa-angle-right"></i>
                             </button>
-                            <button class="pagination-btn" disabled title="Last Page">
+                            <button class="pagination-btn" disabled>
                                 <i class="fas fa-angle-double-right"></i>
                             </button>
                         {% endif %}
@@ -942,16 +968,15 @@ body {
                 {% endif %}
                 
                 <div class="card-body">
-                    <!-- Scroll hint for mobile -->
+                    <!-- Scroll hint -->
                     <div class="scroll-hint" id="scrollHint">
                         <i class="fas fa-arrow-left"></i>
-                        <span>Scroll to see actions</span>
+                        <span>Scroll to see all actions</span>
                     </div>
                     
-                    <!-- Members Table Sorted by Shepherd -->
+                    <!-- Members Table -->
                     {% if grouped_members %}
                         {% for group in grouped_members %}
-                            <!-- Shepherd Group Header -->
                             <div class="shepherd-group">
                                 <div class="shepherd-header">
                                     <div class="shepherd-title">
@@ -969,7 +994,6 @@ body {
                                     </div>
                                 </div>
 
-                                <!-- Table for this Shepherd with improved scrolling -->
                                 <div class="table-scroll-container">
                                     <table class="table table-striped table-bordered">
                                         <thead>
@@ -1064,7 +1088,7 @@ body {
                                                             <i class="fa fa-edit"></i>
                                                             <span class="desktop-only">Edit</span>
                                                         </a>
-                                                        <a href="{% url 'delete_member' member.pk %}" class="action-btn delete" title="Delete">
+                                                        <a href="{% url 'delete_member' member.pk %}" class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete {{ member.name }}? This action cannot be undone.');">
                                                             <i class="fa fa-trash"></i>
                                                             <span class="desktop-only">Delete</span>
                                                         </a>
@@ -1085,33 +1109,16 @@ body {
                                 <i class="fas fa-file-alt"></i>
                             </div>
                             <h3 class="suggestion-title">More Members Available!</h3>
-                            <p class="suggestion-description" id="suggestion-text">
+                            <p class="suggestion-description">
                                 You've viewed {{ page_obj.object_list|length }} members on this page. 
-                                There are <strong id="remaining-members">0</strong> more members to explore on the next pages.
+                                There are <strong>{{ page_obj.paginator.count|add:"-"|add:page_obj.end_index }}</strong> 
+                                more members to explore.
                             </p>
                             
-                            <div class="suggestion-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value" id="total-members">{{ page_obj.paginator.count }}</span>
-                                    <span class="stat-label">Total Members</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="showing-now">{{ page_obj.object_list|length }}</span>
-                                    <span class="stat-label">Showing Now</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="remaining-count">0</span>
-                                    <span class="stat-label">Remaining</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="more-pages">0</span>
-                                    <span class="stat-label">More Pages</span>
-                                </div>
-                            </div>
-                            
-                            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-success btn-lg mt-3">
+                            <a href="?page={{ page_obj.next_page_number }}{% if selected_community %}&community={{ selected_community }}{% endif %}" 
+                               class="btn btn-success btn-lg">
                                 <i class="fas fa-arrow-right mr-2"></i>
-                                Go to Page {{ page_obj.next_page_number }} of {{ page_obj.paginator.num_pages }}
+                                Next Page ({{ page_obj.next_page_number }} of {{ page_obj.paginator.num_pages }})
                             </a>
                         </div>
                         {% endif %}
@@ -1126,17 +1133,17 @@ body {
                             
                             <div class="pagination-controls">
                                 {% if page_obj.has_previous %}
-                                    <a href="?page=1" class="pagination-btn" title="First Page">
+                                    <a href="?page=1{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="First">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
-                                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Previous">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 {% else %}
-                                    <button class="pagination-btn" disabled title="First Page">
+                                    <button class="pagination-btn" disabled>
                                         <i class="fas fa-angle-double-left"></i>
                                     </button>
-                                    <button class="pagination-btn" disabled title="Previous Page">
+                                    <button class="pagination-btn" disabled>
                                         <i class="fas fa-angle-left"></i>
                                     </button>
                                 {% endif %}
@@ -1144,17 +1151,17 @@ body {
                                 <span class="pagination-btn active">{{ page_obj.number }}</span>
                                 
                                 {% if page_obj.has_next %}
-                                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
+                                    <a href="?page={{ page_obj.next_page_number }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Next">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
-                                    <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
+                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_community %}&community={{ selected_community }}{% endif %}" class="pagination-btn" title="Last">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 {% else %}
-                                    <button class="pagination-btn" disabled title="Next Page">
+                                    <button class="pagination-btn" disabled>
                                         <i class="fas fa-angle-right"></i>
                                     </button>
-                                    <button class="pagination-btn" disabled title="Last Page">
+                                    <button class="pagination-btn" disabled>
                                         <i class="fas fa-angle-double-right"></i>
                                     </button>
                                 {% endif %}
@@ -1169,10 +1176,17 @@ body {
                                 <i class="fas fa-user-slash"></i>
                             </div>
                             <h3 class="empty-title">No members found</h3>
-                            <p class="empty-description">Try adding some members or adjust your filters</p>
+                            <p class="empty-description">
+                                {% if selected_community %}
+                                    No members in <strong>"{{ selected_community }}"</strong> community.
+                                    <br>
+                                    <a href="{% url 'table_members' %}" class="text-primary">Clear filter</a> to see all members.
+                                {% else %}
+                                    Get started by adding your first member.
+                                {% endif %}
+                            </p>
                             <a href="{% url 'add_member' %}" class="btn btn-success btn-lg">
-                                <i class="fa fa-plus mr-2"></i>
-                                Add Member
+                                <i class="fa fa-plus mr-2"></i>Add Member
                             </a>
                         </div>
                     {% endif %}
@@ -1183,47 +1197,8 @@ body {
 </div>
 
 <script>
-// Calculate remaining members and pages using JavaScript
-function calculateStats() {
-    const totalItems = {{ page_obj.paginator.count }};
-    const endIndex = {{ page_obj.end_index }};
-    const showingNow = {{ page_obj.object_list|length }};
-    const currentPage = {{ page_obj.number }};
-    const totalPages = {{ page_obj.paginator.num_pages }};
-    
-    // Calculate remaining members
-    const remaining = totalItems - endIndex;
-    const morePages = totalPages - currentPage;
-    
-    // Update all elements with calculated values
-    document.querySelectorAll('#remaining-members').forEach(el => {
-        el.textContent = remaining > 0 ? remaining : 0;
-    });
-    
-    document.querySelectorAll('#remaining-count').forEach(el => {
-        el.textContent = remaining > 0 ? remaining : 0;
-    });
-    
-    document.querySelectorAll('#more-pages').forEach(el => {
-        el.textContent = morePages > 0 ? morePages : 0;
-    });
-}
-
-// Confirm delete actions
-function setupDeleteConfirmation() {
-    const deleteButtons = document.querySelectorAll('.action-btn.delete');
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this member? This action cannot be undone.')) {
-                e.preventDefault();
-            }
-        });
-    });
-}
-
-// Show/hide scroll hint based on screen size
-function setupScrollHint() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Scroll hint functionality
     const scrollHint = document.getElementById('scrollHint');
     const tableContainers = document.querySelectorAll('.table-scroll-container');
     
@@ -1240,65 +1215,26 @@ function setupScrollHint() {
             updateHint();
             window.addEventListener('resize', updateHint);
             
-            // Hide hint when user scrolls
             container.addEventListener('scroll', () => {
                 scrollHint.style.opacity = '0.5';
                 setTimeout(() => {
                     scrollHint.style.display = 'none';
-                }, 1000);
+                }, 2000);
             });
         });
     }
-}
-
-// Make table columns more visible
-function enhanceTableScroll() {
-    const tables = document.querySelectorAll('.table');
     
-    tables.forEach(table => {
-        const tbody = table.querySelector('tbody');
-        if (tbody && tbody.children.length > 0) {
-            // Ensure action column is always visible
-            const lastCells = table.querySelectorAll('td:last-child');
-            lastCells.forEach(cell => {
-                cell.style.backgroundColor = 'var(--surface)';
-            });
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Calculate and update stats
-    calculateStats();
-    
-    // Setup delete confirmation
-    setupDeleteConfirmation();
-    
-    // Setup scroll hint
-    setupScrollHint();
-    
-    // Enhance table scrolling
-    enhanceTableScroll();
-    
-    // Auto-scroll to top on page change
+    // Smooth scroll to top on page change
     const paginationLinks = document.querySelectorAll('.pagination-btn:not(:disabled)');
     paginationLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            if (this.tagName === 'A') {
-                // Smooth scroll to top
+            if (this.tagName === 'A' && !this.hasAttribute('disabled')) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
     });
     
-    // Make telephone numbers clickable on mobile
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
-            link.style.cursor = 'pointer';
-        });
-    }
-    
-    // Add CSS for desktop-only text
+    // Add responsive class for desktop-only text
     const style = document.createElement('style');
     style.textContent = `
         @media (max-width: 768px) {
