@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ family.name }} - Family Details{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="card-title">{{ family.name }}</h3>
+                    <p class="text-muted">Family details and members</p>
+                </div>
+                <div>
+                    <a href="{% url 'family_list' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Families
+                    </a>
+                    {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
+                    <a href="{% url 'family_update' family.pk %}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit"></i> Edit Family
+                    </a>
+                    <a href="{% url 'family_membership_create' %}" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> Add Member
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Family Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Family Information</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Family Name:</strong></p>
+                                    <p><strong>Head of Family:</strong></p>
+                                    <p><strong>Total Members:</strong></p>
+                                    <p><strong>Created Date:</strong></p>
+                                </div>
+                                <div class="col-6">
+                                    <p>{{ family.name }}</p>
+                                    <p>
+                                        {% if family.head_family %}
+                                            {{ family.head_family.get_full_name|default:family.head_family.username }}
+                                        {% else %}
+                                            <span class="text-muted">Not assigned</span>
+                                        {% endif %}
+                                    </p>
+                                    <p>
+                                        <span class="badge bg-info">{{ family.member_count }} members</span>
+                                    </p>
+                                    <p>{{ family.created_at|date:"M d, Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Members -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Family Members</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if memberships %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Member</th>
+                                            <th>Role</th>
+                                            <th>Date Joined</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for membership in memberships %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-avatar-sm me-2">
+                                                        <img src="{% static 'assets/images/avatar01.png' %}" alt="{{ membership.user.username }}" />
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong><br>
+                                                        <small class="text-muted">{{ membership.user.email }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if membership.role == 'head' %}
+                                                    <span class="badge bg-warning">Head</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Member</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ membership.date_joined|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'family_membership_update' membership.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'family_membership_delete' membership.pk %}" class="btn btn-sm btn-outline-danger" title="Remove">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                                <h5 class="text-muted">No members in this family yet</h5>
+                                <p class="text-muted">Add members to this family to get started.</p>
+                                {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
+                                <a href="{% url 'family_membership_create' %}" class="btn btn-success">
+                                    <i class="fas fa-user-plus"></i> Add First Member
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

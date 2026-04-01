@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, NotificationLog
+from .models import Notification, NotificationLog,NotificationReadStatus
     
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
@@ -64,3 +64,5 @@ class NotificationLogAdmin(admin.ModelAdmin):
     list_filter = ['status', 'created_at']
     search_fields = ['member__name', 'phone_number', 'notification__title']
     readonly_fields = ['created_at']
+
+    admin.site.register(NotificationReadStatus)

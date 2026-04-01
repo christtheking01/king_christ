@@ -922,6 +922,99 @@
                     </div>
 
                     <div class="permission-grid">
+                        <!-- Role Selection -->
+                        <div class="permission-card" style="grid-column: 1 / -1;">
+                            <div class="permission-header">
+                                <div class="permission-icon icon-active" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                                    <i class="fas fa-user-tag"></i>
+                                </div>
+                                <div class="permission-info">
+                                    <h3>User Role</h3>
+                                    <p>Assign a role to define the user's permissions and responsibilities</p>
+                                </div>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label class="form-label">
+                                    <span class="label-text">Select Role <span class="required">*</span></span>
+                                    {% if form.roles.errors %}
+                                    <span class="error-count">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.roles.errors|length }} error{{ form.roles.errors|length|pluralize }}
+                                    </span>
+                                    {% endif %}
+                                </label>
+                                <div class="input-container">
+                                    <i class="fas fa-id-badge input-icon"></i>
+                                    <select name="roles" 
+                                            id="id_roles"
+                                            class="form-input {% if form.roles.errors %}error{% endif %}"
+                                            required>
+                                        {% for role_value, role_display in form.fields.roles.choices %}
+                                        <option value="{{ role_value }}" {% if form.roles.value == role_value %}selected{% endif %}>
+                                            {{ role_display }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% if form.roles.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.roles.errors %}
+                                    <div class="field-error">
+                                        <i class="fas fa-times error-icon-small"></i>
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <p class="help-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Choose the appropriate role for this user
+                                </p>
+                            </div>
+
+                            <!-- Priest Type - Only shown when role is 'priest' -->
+                            <div id="priestTypeContainer" class="form-group mt-3" style="display: none; border-top: 1px solid var(--gray-200); padding-top: 16px;">
+                                <div class="alert alert-info mb-3" style="background: #eef2ff; border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px;">
+                                    <i class="fas fa-church me-2" style="color: var(--primary);"></i>
+                                    <strong>Priest Role Selected</strong>
+                                    <p class="mb-0 mt-1 text-muted" style="font-size: 13px;">
+                                        Please specify the priest type. Note: Only 1 Parish Priest and 1 Assistant Priest can be assigned.
+                                    </p>
+                                </div>
+                                <label class="form-label">
+                                    <span class="label-text">Priest Type <span class="required">*</span></span>
+                                    {% if form.priest_type.errors %}
+                                    <span class="error-count">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.priest_type.errors|length }} error{{ form.priest_type.errors|length|pluralize }}
+                                    </span>
+                                    {% endif %}
+                                </label>
+                                <div class="input-container">
+                                    <i class="fas fa-cross input-icon"></i>
+                                    <select name="priest_type" 
+                                            id="id_priest_type"
+                                            class="form-input {% if form.priest_type.errors %}error{% endif %}">
+                                        {% for type_value, type_display in form.fields.priest_type.choices %}
+                                        <option value="{{ type_value }}" {% if form.priest_type.value == type_value %}selected{% endif %}>
+                                            {{ type_display }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% if form.priest_type.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.priest_type.errors %}
+                                    <div class="field-error">
+                                        <i class="fas fa-times error-icon-small"></i>
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
                         <!-- Active Status -->
                         <div class="permission-card">
                             <div class="permission-header">
@@ -934,16 +1027,13 @@
                                 </div>
                             </div>
                             <div class="toggle-container">
-                                <label class="toggle-label">
+                                <label class="toggle-label" style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                                     <input type="checkbox" 
                                            name="is_active" 
-                                           {% if form.is_active.value %}checked{% endif %}
-                                           style="display: none;">
-                                    <div class="toggle-switch">
-                                        <span class="toggle-slider"></span>
-                                    </div>
-                                    <span class="toggle-text" id="activeStatus">
-                                        {% if form.is_active.value %}Active{% else %}Inactive{% endif %}
+                                           {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}
+                                           style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span class="toggle-text" id="activeStatus" style="font-weight: 500;">
+                                        {% if form.is_active.value or form.is_active.value is None %}Active{% else %}Inactive{% endif %}
                                     </span>
                                 </label>
                             </div>
@@ -961,15 +1051,12 @@
                                 </div>
                             </div>
                             <div class="toggle-container">
-                                <label class="toggle-label">
+                                <label class="toggle-label" style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                                     <input type="checkbox" 
                                            name="is_staff" 
                                            {% if form.is_staff.value %}checked{% endif %}
-                                           style="display: none;">
-                                    <div class="toggle-switch">
-                                        <span class="toggle-slider"></span>
-                                    </div>
-                                    <span class="toggle-text" id="staffStatus">
+                                           style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span class="toggle-text" id="staffStatus" style="font-weight: 500;">
                                         {% if form.is_staff.value %}Staff Member{% else %}Regular User{% endif %}
                                     </span>
                                 </label>
@@ -1030,6 +1117,37 @@
         const staffToggle = document.querySelector('input[name="is_staff"]');
         const activeStatus = document.getElementById('activeStatus');
         const staffStatus = document.getElementById('staffStatus');
+        
+        // Role and Priest Type elements
+        const roleSelect = document.getElementById('id_roles');
+        const priestTypeContainer = document.getElementById('priestTypeContainer');
+        const priestTypeSelect = document.getElementById('id_priest_type');
+
+        // Function to toggle priest type visibility
+        function togglePriestType() {
+            if (roleSelect && priestTypeContainer) {
+                if (roleSelect.value === 'priest') {
+                    priestTypeContainer.style.display = 'block';
+                    if (priestTypeSelect) {
+                        priestTypeSelect.required = true;
+                    }
+                } else {
+                    priestTypeContainer.style.display = 'none';
+                    if (priestTypeSelect) {
+                        priestTypeSelect.required = false;
+                        priestTypeSelect.value = ''; // Clear selection
+                    }
+                }
+            }
+        }
+
+        // Initial check for priest type visibility
+        togglePriestType();
+
+        // Listen for role changes
+        if (roleSelect) {
+            roleSelect.addEventListener('change', togglePriestType);
+        }
 
         function validatePasswords() {
             if (password.value && confirm.value) {
@@ -1075,6 +1193,15 @@
                 confirm.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 confirm.focus();
                 setTimeout(() => confirm.classList.remove('shake'), 300);
+                return false;
+            }
+
+            // Check priest type is selected when role is priest
+            if (roleSelect.value === 'priest' && (!priestTypeSelect || !priestTypeSelect.value)) {
+                e.preventDefault();
+                if (priestTypeContainer) {
+                    priestTypeContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return false;
             }
 

@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from itertools import groupby
 
+
 @login_required
 def table_members(request):
     template = "members/table.html"
@@ -93,6 +94,7 @@ def thumbnail_members(request):
     context = {"members": members, "members_active_list": "active", "ministries": ministries, "shepherds": shepherds, "profile": profile}
     return render(request, template, context)
 
+
 @login_required
 def list_members(request):
     template = "members/list.html"
@@ -167,7 +169,6 @@ def list_members(request):
     }
     
     return render(request, template, context)
-
 
 @login_required
 def list_deleted_members(request):
@@ -298,7 +299,7 @@ def search_members(request):
 @login_required
 def get_members_by_statuses(request, status):
     template = "members/list.html"
-    shepherds = Community.objects.all()
+    shepherds = CommunityLeader.objects.all()
     ministries = Ministry.objects.all()
     profile = UserProfile.objects.get_or_create(user=request.user)
     members = None
@@ -461,7 +462,7 @@ class CreateMembersView(BaseMemberView, TemplateView):
         
         if saved_count > 0:
             messages.success(request, f'Successfully added {saved_count} member(s)!')
-            return redirect('list_members')
+            return redirect('member_list')
         else:
             messages.error(request, 'Please fill at least one member form completely.')
             return self.render_to_response({
@@ -486,118 +487,27 @@ def list_committees(request):
         'committee_active_list': True
     })
 
-@transaction.atomic
 def create_committee(request):
     if request.method == 'POST':
-        # FIXED: Use correct field name 'Commitee_name'
-        committee_name = request.POST.get('Commitee_name')
-        description = request.POST.get('description', '')
-        
-        if not committee_name:
-            messages.error(request, "Committee name is required.")
-            return redirect('create_committee')
-        
-        # FIXED: Get ALL submitted members (not just first 3)
-        member_names = request.POST.getlist('members[]')
-        positions = request.POST.getlist('positions[]')
-        phones = request.POST.getlist('phones[]')
-        
-        # Filter out empty entries
-        valid_entries = []
-        for i in range(len(member_names)):
-            if member_names[i] and positions[i] and positions[i] != '':
-                valid_entries.append({
-                    'member_name': member_names[i],
-                    'position': positions[i],
-                    'phone': phones[i] if i < len(phones) else ''
-                })
-        
-        if not valid_entries:
-            messages.error(request, "No valid member assignments provided.")
-            return redirect('create_committee')
-        
-        created_count = 0
-        skipped_count = 0
-        
-        for entry in valid_entries:
-            try:
-                member_obj = Member.objects.get(name=entry['member_name'])
-                
-                # Check for duplicate position in same committee
-                if Committee.objects.filter(
-                    Commitee_name=committee_name, 
-                    position=entry['position']
-                ).exists():
-                    messages.warning(
-                        request, 
-                        f"Position '{entry['position']}' is already taken. Skipped {entry['member_name']}."
-                    )
-                    skipped_count += 1
-                    continue
-                
-                # Create committee member record
-                Committee.objects.create(
-                    Commitee_name=committee_name,
-                    description=description,
-                    member=member_obj,
-                    position=entry['position'],
-                    phone=entry['phone'] if entry['phone'] != 'No phone on record' else ''
-                )
-                created_count += 1
-                
-            except Member.DoesNotExist:
-                messages.error(
-                    request, 
-                    f"Member '{entry['member_name']}' not found in database."
-                )
-                skipped_count += 1
-            except Exception as e:
-                messages.error(request, f"Error adding {entry['member_name']}: {str(e)}")
-                skipped_count += 1
-        
-        if created_count > 0:
-            messages.success(
-                request, 
-                f"✅ Committee '{committee_name}' created successfully! "
-                f"Added {created_count} member(s). "
-                f"{f'Skipped {skipped_count} invalid entry(s).' if skipped_count > 0 else ''}"
-            )
-        else:
-            messages.error(request, "❌ Failed to create committee. No valid members were added.")
-            
-        return redirect('list_committees')
-
-    # GET request - display form
-    context = {
-        'members': Member.objects.all(),
-        'positions': Committee.POSITION_CHOICES,
-        'committee_active_add': True
-    }
-    return render(request, 'committees/create.html', context)
-    
-@transaction.atomic
-def edit_committee(request, name):
-    # Get all records sharing the same committee name
-    committee_members = Committee.objects.filter(Commitee_name=name)
-    
-    if request.method == 'POST':
-        comm_name = request.POST.get('Commitee_name', name)
+        comm_name = request.POST.get('Commitee_name')
         desc = request.POST.get('description')
         
-        # Delete existing records (simple update strategy)
-        committee_members.delete()
-        
-        # Re-use creation logic
+        # Get dynamic lists
         member_names = request.POST.getlist('members[]')
         positions = request.POST.getlist('positions[]')
         phones = request.POST.getlist('phones[]')
-        
-        created_count = 0
+
         for m_name, pos, ph in zip(member_names, positions, phones):
             if m_name and pos:
                 try:
+                    # Look up member by name (since Datalist sends text)
                     member_obj = Member.objects.get(name=m_name)
                     
+                    # Unique Position Check
+                    if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
+                        messages.error(request, f"The position {pos} is already taken.")
+                        continue
+
                     Committee.objects.create(
                         Commitee_name=comm_name,
                         description=desc,
@@ -605,55 +515,52 @@ def edit_committee(request, name):
                         position=pos,
                         phone=ph
                     )
-                    created_count += 1
-                    
                 except Member.DoesNotExist:
                     messages.error(request, f"Member '{m_name}' not found.")
-        
-        messages.success(request, f"Committee '{comm_name}' updated successfully with {created_count} member(s)!")
+
+        messages.success(request, "Committee created successfully!")
         return redirect('list_committees')
-    
-    # GET request - display edit form
+
+    # Pass data to template
+    context = {
+        'members': Member.objects.all(),
+        'positions': Committee.Position,
+        'committee_active_add': True
+    }
+    return render(request, 'committees/create.html', context)
+
+
+    members = Member.objects.all()
+    positions = Committee.Position
+    return render(request, 'committees/create.html', {'members': members, 'positions': positions})
+
+def edit_committee(request, name):
+    # Get all records sharing the same committee name
+    committee_members = Committee.objects.filter(Commitee_name=name)
+    if request.method == 'POST':
+        committee_members.delete() # Simple update strategy: replace records
+        # Re-use the creation logic here...
+        return redirect('list_committees')
+        
     context = {
         'name': name,
         'committee_members': committee_members,
         'members': Member.objects.all(),
-        'positions': Committee.POSITION_CHOICES,  # Use the CONSTANT, not the field
+        'positions': Committee.Position,
         'desc': committee_members.first().description if committee_members.exists() else ""
     }
     return render(request, 'committees/edit.html', context)
 
 def delete_committee_member(request, pk):
-    committee_member = get_object_or_404(Committee, pk=pk)
-    committee_name = committee_member.Commitee_name
-    committee_member.delete()
-    messages.success(request, f"Member removed from '{committee_name}' committee.")
+    member = get_object_or_404(Committee, pk=pk)
+    name = member.Commitee_name
+    member.delete()
+    messages.success(request, "Member removed from committee.")
     return redirect('list_committees')
-
-def delete_committee_member_ajax(request, pk):
-    if request.method == 'POST':
-        try:
-            committee_member = get_object_or_404(Committee, pk=pk)
-            member_name = committee_member.member.name
-            committee_name = committee_member.Commitee_name
-            committee_member.delete()
-            return JsonResponse({
-                'success': True, 
-                'message': f"{member_name} removed from '{committee_name}' committee."
-            })
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
-
-
-
 
 """
 ministries views 
 """
-
-
-
 
 @login_required
 def create_ministry(request):
@@ -899,11 +806,11 @@ def create_shepherd(request):
             messages.error(request, error)
         
         if success_count == 0 and error_messages:
-            return redirect('add_community')
+            return redirect('add_shepherd')
         else:
-            return redirect('list_community')
+            return redirect('list_shepherds')
     
-    return redirect('add_community')
+    return redirect('add_shepherd')
 
 
 @login_required
@@ -1120,18 +1027,4 @@ def api_create_ministry(request):
             return JsonResponse(data, content_type="Application/json", safe=False)
 
 
-
 # def api_get_members_status(request, status)
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'priest_role_management' %}">Priest Roles</a></li>
+                    <li class="breadcrumb-item active">Assign Role</li>
+                </ol>
+            </nav>
+            <h2 class="mb-1">
+                <i class="fas fa-user-tag text-primary me-2"></i>Assign Priest Role
+            </h2>
+            <p class="text-muted">Assign a specific role to {{ priest.full_name|default:priest.username }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Priest Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-shrink-0">
+                            {% if priest.userprofile and priest.userprofile.picture %}
+                            <img src="{{ priest.userprofile.picture.url }}" alt="{{ priest.username }}" 
+                                 class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-user fa-2x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ priest.full_name|default:priest.username }}</h5>
+                            <p class="text-muted mb-1">{{ priest.email|default:"No email" }}</p>
+                            <p class="text-muted mb-0">{{ priest.phone|default:"No phone" }}</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="priest_role" class="form-label fw-bold">
+                                <i class="fas fa-id-badge me-2"></i>Select Priest Role
+                            </label>
+                            <select name="priest_role" id="priest_role" class="form-select form-select-lg" required>
+                                <option value="">-- Select Role --</option>
+                                {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
+                                    {% if role_value in available_role_values %}
+                                    <option value="{{ role_value }}" {% if current_role == role_value %}selected{% endif %}>
+                                        {{ role_display }}
+                                    </option>
+                                    {% else %}
+                                    <option value="{{ role_value }}" disabled>
+                                        {{ role_display }} (Already assigned to another priest)
+                                    </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Note:</strong> Parish Priest and Assistant Priest roles can only be assigned to one person each.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Role Descriptions</h6>
+                            <ul class="mb-0">
+                                <li><strong>Parish Priest:</strong> The head of the parish (1 only)</li>
+                                <li><strong>Assistant Priest:</strong> Supports the Parish Priest (1 only)</li>
+                                <li><strong>Normal Priest:</strong> Other priests serving in the parish (multiple)</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'priest_role_management' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Assign Role
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Current Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted">Current Role:</label>
+                        <p class="mb-0">
+                            {% if current_role %}
+                                {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
+                                    {% if role_value == current_role %}
+                                    <span class="badge bg-success">{{ role_display }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Not Assigned</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <i class="fas fa-church fa-3x text-muted mb-3"></i>
+                        <p class="text-muted small">
+                            Proper role assignment ensures clear leadership structure within the parish.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -101,51 +101,23 @@ MinistryLeaderFormSet = inlineformset_factory(
     min_num=1,  # Minimum number of leaders required
     validate_min=True
 )
-
-
-class CommitteeForm(forms.ModelForm):
+    
+class CommiteeForm(forms.ModelForm):
     class Meta:
         model = Committee
         fields = ['Commitee_name', 'description', 'member', 'position', 'phone']
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Fix: Add proper styling and make fields optional
-        self.fields['Commitee_name'].widget.attrs.update({
-            'class': 'input-field committee-name',
-            'placeholder': 'Enter committee name',
-            'required': 'required'
+        # Add classes so the JavaScript can find the fields
+        self.fields['member'].widget.attrs.update({
+            'class': 'member-input', 
+            'list': 'member-data',   # Connects to <datalist id="member-data">
+            'autocomplete': 'off'
         })
-        
-        self.fields['description'].widget.attrs.update({
-            'class': 'input-field',
-            'placeholder': 'Write the functions of your committee'
-        })
-        
-        # Fix: Use TextInput with datalist instead of Select
-        self.fields['member'].widget = forms.TextInput(attrs={
-            'class': 'member-search input-field',
-            'list': 'member-list',
-            'autocomplete': 'off',
-            'placeholder': 'Search member...',
-            'required': 'required'
-        })
-        
-        self.fields['position'].widget.attrs.update({
-            'class': 'input-field',
-            'required': 'required'
-        })
-        
         self.fields['phone'].widget.attrs.update({
-            'class': 'phone-display input-field',
-            'readonly': 'readonly',
-            'placeholder': 'Phone will auto-populate'
+            'class': 'phone-input'
         })
-        
-        # Fix: Make phone not required since it auto-populates
-        self.fields['phone'].required = False
-
 
 
 class ShepherdForm(forms.ModelForm):
@@ -155,4 +127,3 @@ class ShepherdForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
-

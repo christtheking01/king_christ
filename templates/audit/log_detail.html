@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-eye"></i> Audit Log Detail
+        </h1>
+        <a href="{% url 'audit_log_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Logs
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Log Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td width="30%"><strong>ID:</strong></td>
+                            <td>{{ log.id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Timestamp:</strong></td>
+                            <td>{{ log.timestamp|date:"Y-m-d H:i:s.u" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User:</strong></td>
+                            <td>
+                                {% if log.user %}
+                                    <a href="{% url 'view_user' log.user.id %}">{{ log.user.username }}</a>
+                                    ({{ log.user.get_full_name }})
+                                {% else %}
+                                    <span class="text-muted">System/Anonymous</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Action:</strong></td>
+                            <td>
+                                <span class="badge badge-{% if log.action == 'CREATE' %}success{% elif log.action == 'UPDATE' %}info{% elif log.action == 'DELETE' %}danger{% else %}primary{% endif %}" style="font-size: 1em;">
+                                    {{ log.action }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Model:</strong></td>
+                            <td>{{ log.model_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Object ID:</strong></td>
+                            <td>{{ log.object_id|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Object Representation:</strong></td>
+                            <td>{{ log.object_repr|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IP Address:</strong></td>
+                            <td>{{ log.ip_address|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Path:</strong></td>
+                            <td><code>{{ log.path|default:"-" }}</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if log.status == 'SUCCESS' %}
+                                    <span class="text-success"><i class="fas fa-check-circle"></i> Success</span>
+                                {% else %}
+                                    <span class="text-danger"><i class="fas fa-times-circle"></i> Failed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if log.error_message %}
+                        <tr>
+                            <td><strong>Error Message:</strong></td>
+                            <td class="text-danger">{{ log.error_message }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">User Agent</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted" style="word-break: break-all;">{{ log.user_agent|default:"No user agent recorded" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if log.old_values or log.new_values %}
+    <div class="row mt-4">
+        {% if log.old_values %}
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Old Values</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0"><code>{{ log.old_values|pprint }}</code></pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if log.new_values %}
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">New Values</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0"><code>{{ log.new_values|pprint }}</code></pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

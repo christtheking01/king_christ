@@ -142,11 +142,11 @@
         </div>
         
         <div class="form-group">
-            <label for="id_birth_certificate">Baptism Certificate</label>
+            <label for="id_birth_certificate">Birth Certificate</label>
             <p class="help-text">Required for all sacraments except Baptism</p>
-            {{ form.baptism_certificate }}
-            {% if form.baptism_certificate %}
-                <p class="error">{{ form.baptism_certificate.errors.0 }}</p>
+            {{ form.birth_certificate }}
+            {% if form.birth_certificate.errors %}
+                <p class="error">{{ form.birth_certificate.errors.0 }}</p>
             {% endif %}
         </div>
         

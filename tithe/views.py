@@ -150,7 +150,7 @@ class TithePaymentCreateView(LoginRequiredMixin, CreateView):
         # Auto-populate contact number from selected member
         member = form.cleaned_data['name']
         tithe_payment = form.save(commit=False)
-        tithe_payment.contact_number = member.telephone
+        tithe_payment.contact_number = str(member.telephone) if member.telephone else ''
         
         messages.success(
             self.request, 
@@ -179,7 +179,7 @@ class TithePaymentUpdateView(LoginRequiredMixin, UpdateView):
         # Auto-populate contact number if member is changed
         member = form.cleaned_data['name']
         tithe_payment = form.save(commit=False)
-        tithe_payment.contact_number = member.telephone
+        tithe_payment.contact_number = str(member.telephone) if member.telephone else ''
         
         messages.success(
             self.request, 
@@ -333,7 +333,7 @@ def get_member_details(request, member_id):
         return JsonResponse({
             'id': member.id,
             'name': member.name,
-            'telephone': member.telephone,
+            'telephone': str(member.telephone) if member.telephone else '',
             'full_name': member.name,
         })
     except Member.DoesNotExist:
@@ -368,7 +368,7 @@ def quick_add_tithe_payment(request):
             # Create tithe payment
             tithe_payment = TithePayment(
                 name=member,
-                contact_number=member.telephone,
+                contact_number=str(member.telephone) if member.telephone else '',
                 amount=amount,
                 status=payment_method,
                 date=timezone.now()

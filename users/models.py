@@ -31,10 +31,10 @@ class ManagerUser(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         
-        if not email and not username:
+        if  not username:
             raise ValueError("Superuser must have an email address or username")
         
-        return self.create_user(email=email, username=username, password=password, **extra_fields)
+        return self.create_user(username=username, password=password, **extra_fields)
     
     def create_user_as_admin(self, admin_user, email=None, username=None, password= None, **extra_fields):
         """only allows adm/super to create users"""
@@ -53,6 +53,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('Secretary','Secretary'),
         ('Accountant','Accountant'),
         ('Member','Member'),
+        ('active_member', 'Active Member'),
+        ('priest', 'Priest'),
+        ('catechist', 'Catechist'),
+        ('treasurer', 'Treasurer'),
+        ('vice_chairperson', 'Vice Chairperson'),
+        ('coordinator', 'Coordinator'),
+        ('liturgical', 'Liturgical'),
+        ('evangelization', 'Evangelization'),
+        ('youth', 'Youth'),
+        ('choir', 'Choir'),
+        ('reader', 'Reader'),
     ]
     username = models.CharField(max_length=255, blank=True, unique=True)
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
@@ -103,3 +114,51 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class family(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    def head_family(self):
+        membership = self.membership_set_filter(role = "head").select_related("user").first()
+        return membership.user if membership else None
+
+    def member_count(self):
+        return self.membership_set.count()
+    
+    class Meta:
+        verbose_name = "Family"
+        verbose_name_plural = "Families"
+
+class FamilyMembership(models.Model):
+    ROLE_CHOICES = [
+        ('head', 'Head'),
+        ('member', 'Member'),
+    ]
+    user = models.OneToOneField(  # one user can only belong to one family
+        User,
+        on_delete=models.CASCADE,
+        related_name='family_membership'
+    )
+    family = models.ForeignKey(
+        family,
+        on_delete=models.CASCADE,
+        related_name='memberships'
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member')
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.family.name} ({self.role})"
+
+    def is_head(self):
+        return self.role == 'head'
+
+    class Meta:
+        verbose_name_plural = "Family Memberships"
+

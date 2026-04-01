@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Receipt #{{ receipt.receipt_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Receipt #{{ receipt.receipt_number }}</h1>
+            <p class="text-muted">Tithe payment receipt details</p>
+        </div>
+        <div>
+            <a href="{% url 'receipt_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Receipts
+            </a>
+            <a href="{% url 'download_receipt' receipt.pk %}" class="btn btn-success">
+                <i class="fas fa-download"></i> Download
+            </a>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="card shadow" id="receiptCard">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">Christ The King Church</h4>
+                    <p class="mb-0">Tithe Payment Receipt</p>
+                </div>
+                <div class="text-end">
+                    <h5 class="mb-0">{{ receipt.receipt_number }}</h5>
+                    <p class="mb-0">{{ receipt.date|date:"F d, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Member Information -->
+                <div class="col-md-6">
+                    <h6 class="text-muted">Member Information</h6>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ receipt.member.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Telephone:</strong></td>
+                            <td>{{ receipt.member.telephone|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Location:</strong></td>
+                            <td>{{ receipt.member.location }}</td>
+                        </tr>
+                        {% if receipt.member.shepherd %}
+                        <tr>
+                            <td><strong>Shepherd:</strong></td>
+                            <td>{{ receipt.member.shepherd.name }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="col-md-6">
+                    <h6 class="text-muted">Payment Information</h6>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Amount:</strong></td>
+                            <td class="fw-bold text-success fs-5">${{ receipt.amount|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Method:</strong></td>
+                            <td>
+                                {% if receipt.payment_method == 'cash' %}
+                                    <span class="badge bg-success">Cash</span>
+                                {% elif receipt.payment_method == 'bank' %}
+                                    <span class="badge bg-info">Bank Transfer</span>
+                                {% elif receipt.payment_method == 'mobile' %}
+                                    <span class="badge bg-warning">Mobile Money</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Cheque</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date:</strong></td>
+                            <td>{{ receipt.date|date:"F d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Time:</strong></td>
+                            <td>{{ receipt.date|date:"H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if receipt.notes %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6 class="text-muted">Notes</h6>
+                    <div class="alert alert-info">
+                        {{ receipt.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Church Information -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <hr>
+                    <div class="text-center">
+                        <h6 class="text-muted">Christ The King Church</h6>
+                        <p class="text-muted mb-0">
+                            "Bring the whole tithe into the storehouse... Test me in this," says the LORD Almighty, 
+                            "and see if I will not throw open the floodgates of heaven and pour out so much blessing 
+                            that there will not be room enough to store it." - Malachi 3:10
+                        </p>
+                        <small class="text-muted">Thank you for your faithful giving!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card shadow mt-4 d-print-none">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'receipt_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'download_receipt' receipt.pk %}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .d-print-none {
+        display: none !important;
+    }
+    
+    #receiptCard {
+        border: 2px solid #000 !important;
+    }
+    
+    .card-header {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+    
+    .badge {
+        border: 1px solid #000 !important;
+    }
+}
+</style>
+{% endblock %}

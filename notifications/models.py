@@ -16,6 +16,7 @@ class Notification(models.Model):
         ('MINISTRY', 'Ministry Members'),
         ('COMMUNITY', 'Community Members'),
         ('ALL', 'All Active Members'),
+        ('Staff','all active staff'),
     ]
     
     title = models.CharField(max_length=255)
@@ -114,3 +115,18 @@ class NotificationLog(models.Model):
     
     def __str__(self):
         return f"{self.notification.title} -> {self.member.name}"
+    
+
+class NotificationReadStatus(models.Model):
+    """Track which users have read which notifications"""
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='read_status')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_reads')
+    read_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=True)  # Since this is created when read
+    
+    class Meta:
+        unique_together = ['notification', 'user']  # One read status per user per notification
+        ordering = ['-read_at']
+    
+    def __str__(self):
+        return f"{self.user.username} read {self.notification.title}"

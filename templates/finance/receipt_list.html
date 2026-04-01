@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Receipt Management{% endblock %}
+
+{% block internal_style %}
+<style>
+/* Finance App Custom Styles - Plain CSS */
+.finance-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.finance-page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e0e0e0; }
+.finance-page-header h1 { margin: 0; font-size: 24px; font-weight: 600; color: #333; }
+.finance-page-header p { margin: 4px 0 0 0; color: #666; font-size: 14px; }
+.finance-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 14px; font-weight: 500; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s ease; }
+.finance-btn-primary { background-color: #007bff; color: white; }
+.finance-btn-primary:hover { background-color: #0056b3; }
+.finance-btn-secondary { background-color: #6c757d; color: white; }
+.finance-btn-secondary:hover { background-color: #545b62; }
+.finance-btn-success { background-color: #28a745; color: white; }
+.finance-btn-success:hover { background-color: #1e7e34; }
+.finance-btn-outline { background-color: transparent; border: 1px solid #007bff; color: #007bff; }
+.finance-btn-outline:hover { background-color: #007bff; color: white; }
+.finance-btn-sm { padding: 6px 12px; font-size: 12px; }
+.finance-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.finance-stat-card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 20px; display: flex; align-items: center; gap: 16px; border-left: 4px solid #ddd; }
+.finance-stat-card.primary { border-left-color: #007bff; }
+.finance-stat-card.success { border-left-color: #28a745; }
+.finance-stat-card.warning { border-left-color: #ffc107; }
+.finance-stat-card.info { border-left-color: #17a2b8; }
+.finance-stat-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 8px; font-size: 20px; }
+.finance-stat-content { flex: 1; }
+.finance-stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 4px; }
+.finance-stat-value { font-size: 24px; font-weight: 700; color: #333; }
+.finance-card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 24px; }
+.finance-card-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+.finance-card-header h6 { margin: 0; font-size: 16px; font-weight: 600; color: #333; }
+.finance-card-body { padding: 20px; }
+.finance-filters { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.finance-filter-group { display: flex; flex-direction: column; gap: 6px; }
+.finance-filter-group label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; }
+.finance-filter-group select, .finance-filter-group input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; min-width: 150px; }
+.finance-table { width: 100%; border-collapse: collapse; }
+.finance-table th, .finance-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+.finance-table th { background: #f8f9fa; font-weight: 600; font-size: 12px; text-transform: uppercase; color: #666; }
+.finance-progress { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+.finance-progress-bar { height: 100%; border-radius: 10px; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 600; }
+.finance-progress-bar.success { background: #28a745; }
+.finance-progress-bar.warning { background: #ffc107; color: #333; }
+.finance-progress-bar.danger { background: #dc3545; }
+.finance-badge { display: inline-block; padding: 4px 8px; font-size: 12px; font-weight: 600; border-radius: 4px; text-transform: uppercase; }
+.finance-badge-success { background: #d4edda; color: #155724; }
+.finance-badge-warning { background: #fff3cd; color: #856404; }
+.finance-badge-danger { background: #f8d7da; color: #721c24; }
+.finance-badge-info { background: #d1ecf1; color: #0c5460; }
+.finance-badge-primary { background: #cce5ff; color: #004085; }
+.finance-btn-group { display: flex; gap: 8px; }
+.finance-empty-state { text-align: center; padding: 48px 20px; }
+.finance-empty-state i { font-size: 48px; color: #ddd; margin-bottom: 16px; }
+.finance-empty-state h5 { margin: 0 0 8px 0; color: #666; }
+.finance-empty-state p { color: #999; margin-bottom: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finance-container">
+    <!-- Page Header -->
+    <div class="finance-page-header">
+        <div>
+            <h1>Receipt Management</h1>
+            <p>Manage and view all tithe receipts</p>
+        </div>
+        <a href="{% url 'financial_dashboard' %}" class="finance-btn finance-btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="finance-stats-grid">
+        <div class="finance-stat-card primary">
+            <div class="finance-stat-icon"><i class="fas fa-receipt"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Total Receipts</div>
+                <div class="finance-stat-value">{{ total_count|default:0 }}</div>
+            </div>
+        </div>
+        <div class="finance-stat-card success">
+            <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Total Amount</div>
+                <div class="finance-stat-value">${{ total_amount|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="finance-stat-card info">
+            <div class="finance-stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Average</div>
+                <div class="finance-stat-value">
+                    {% if total_count > 0 %}${{ total_amount|div:total_count|floatformat:2 }}{% else %}$0.00{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="finance-card">
+        <div class="finance-card-header"><h6>Filters</h6></div>
+        <div class="finance-card-body">
+            <form method="get" class="finance-filters">
+                <div class="finance-filter-group">
+                    <label for="member">Member</label>
+                    <select name="member" id="member">
+                        <option value="">All Members</option>
+                        {% for member in members %}
+                            <option value="{{ member.id }}" {% if request.GET.member == member.id|stringformat:"s" %}selected{% endif %}>{{ member.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="finance-filter-group">
+                    <label for="payment_method">Payment Method</label>
+                    <select name="payment_method" id="payment_method">
+                        <option value="">All Methods</option>
+                        <option value="cash" {% if request.GET.payment_method == 'cash' %}selected{% endif %}>Cash</option>
+                        <option value="bank" {% if request.GET.payment_method == 'bank' %}selected{% endif %}>Bank Transfer</option>
+                        <option value="mobile" {% if request.GET.payment_method == 'mobile' %}selected{% endif %}>Mobile Money</option>
+                        <option value="cheque" {% if request.GET.payment_method == 'cheque' %}selected{% endif %}>Cheque</option>
+                    </select>
+                </div>
+                <div class="finance-filter-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date }}">
+                </div>
+                <div class="finance-filter-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}">
+                </div>
+                <div class="finance-filter-group" style="justify-content: flex-end;">
+                    <label>&nbsp;</label>
+                    <div class="finance-btn-group">
+                        <button type="submit" class="finance-btn finance-btn-primary">Filter</button>
+                        <a href="{% url 'receipt_list' %}" class="finance-btn finance-btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Receipts List -->
+    <div class="finance-card">
+        <div class="finance-card-header">
+            <h6>All Receipts</h6>
+            <div class="finance-btn-group">
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportReceipts()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printReceipts()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="finance-card-body">
+            {% if receipts %}
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Receipt #</th>
+                            <th>Member</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receipt in receipts %}
+                        <tr>
+                            <td><span class="finance-badge finance-badge-primary">{{ receipt.receipt_number }}</span></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    {% if receipt.member.picture %}
+                                        <img src="{{ receipt.member.picture.url }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" alt="{{ receipt.member.name }}">
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-weight: 600;">{{ receipt.member.name }}</div>
+                                        <small style="color: #666;">{{ receipt.member.telephone }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #28a745; font-weight: 600;">${{ receipt.amount|floatformat:2 }}</td>
+                            <td>
+                                {% if receipt.payment_method == 'cash' %}<span class="finance-badge finance-badge-success">Cash</span>
+                                {% elif receipt.payment_method == 'bank' %}<span class="finance-badge finance-badge-info">Bank Transfer</span>
+                                {% elif receipt.payment_method == 'mobile' %}<span class="finance-badge finance-badge-warning">Mobile Money</span>
+                                {% else %}<span class="finance-badge finance-badge-secondary">Cheque</span>{% endif %}
+                            </td>
+                            <td>{{ receipt.date|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <div class="finance-btn-group">
+                                    <a href="{% url 'receipt_detail' receipt.pk %}" class="finance-btn finance-btn-sm finance-btn-outline"><i class="fas fa-eye"></i> View</a>
+                                    <a href="{% url 'download_receipt' receipt.pk %}" class="finance-btn finance-btn-sm finance-btn-outline"><i class="fas fa-download"></i> Download</a>
+                                    <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printReceipt({{ receipt.pk }})"><i class="fas fa-print"></i> Print</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="finance-empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <h5>No receipts found</h5>
+                    <p>Receipts will appear here when tithe payments are recorded.</p>
+                    <a href="{% url 'financial_dashboard' %}" class="finance-btn finance-btn-primary">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportReceipts() { alert('Export functionality would be implemented here'); }
+function printReceipts() { window.print(); }
+function printReceipt(receiptId) { window.open('/financial/receipts/' + receiptId + '/download/', '_blank'); }
+</script>
+{% endblock %}

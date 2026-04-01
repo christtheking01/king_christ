@@ -29,12 +29,11 @@ urlpatterns = [
     path('tithe/', include('tithe.urls')),
     path('notifications/', include('notifications.urls')),
     path('financial/', include('finance.urls')), 
-    path('catechesis/',include('catechesis.urls')),
+    path('catechesis/', include('catechesis.urls')),
+    path('audit/', include('audits.urls')),
     path('', include('home.urls')),
-    
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

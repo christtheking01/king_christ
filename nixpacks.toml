@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs =['python39', 'postgresql']
+
+[phases.install]
+cmds = ['pip install -r requirements.txt']
+
+[phases.build]
+cmds = [
+    'python manage.py migrate',
+    'python manage.py collectstatic --noinput'
+]
+
+cmd = 'gunicorn christ_king_church.wsgi'

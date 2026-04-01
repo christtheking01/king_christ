@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if employee %}Edit Employee{% else %}Add Employee{% endif %}{% endblock %}
+
+{% block internal_style %}
+<style>
+/* Finance App Custom Styles - Plain CSS */
+.finance-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.finance-page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e0e0e0; }
+.finance-page-header h1 { margin: 0; font-size: 24px; font-weight: 600; color: #333; }
+.finance-page-header p { margin: 4px 0 0 0; color: #666; font-size: 14px; }
+.finance-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 14px; font-weight: 500; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s ease; }
+.finance-btn-primary { background-color: #007bff; color: white; }
+.finance-btn-primary:hover { background-color: #0056b3; }
+.finance-btn-secondary { background-color: #6c757d; color: white; }
+.finance-btn-secondary:hover { background-color: #545b62; }
+.finance-btn-success { background-color: #28a745; color: white; }
+.finance-btn-success:hover { background-color: #1e7e34; }
+.finance-btn-outline { background-color: transparent; border: 1px solid #007bff; color: #007bff; }
+.finance-btn-outline:hover { background-color: #007bff; color: white; }
+.finance-btn-sm { padding: 6px 12px; font-size: 12px; }
+.finance-card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 24px; }
+.finance-card-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+.finance-card-header h6 { margin: 0; font-size: 16px; font-weight: 600; color: #333; }
+.finance-card-body { padding: 20px; }
+.finance-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+.finance-form-group { display: flex; flex-direction: column; gap: 6px; }
+.finance-form-group label { font-size: 14px; font-weight: 600; color: #333; }
+.finance-form-group input, .finance-form-group select, .finance-form-group textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+.finance-alert { padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+.finance-alert-info { background: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finance-container">
+    <!-- Page Header -->
+    <div class="finance-page-header">
+        <div>
+            <h1>{% if employee %}Edit Employee{% else %}Add Employee{% endif %}</h1>
+            <p>{% if employee %}Update employee information{% else %}Add a new employee to the system{% endif %}</p>
+        </div>
+        <a href="{% url 'employee_list' %}" class="finance-btn finance-btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Employees
+        </a>
+    </div>
+
+    <!-- Employee Form -->
+    <div class="finance-card">
+        <div class="finance-card-header"><h6>Employee Information</h6></div>
+        <div class="finance-card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="finance-form-row">
+                    <!-- Basic Information -->
+                    <div>
+                        <h6 style="color: #666; margin-bottom: 16px;">Basic Information</h6>
+                        
+                        {% if not employee %}
+                        <div class="finance-form-group">
+                            <label for="member">Select Member *</label>
+                            <select name="member" id="member" required>
+                                <option value="">Choose a member...</option>
+                                {% for member in members %}
+                                    <option value="{{ member.id }}">{{ member.name }} - {{ member.location }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="finance-form-group">
+                            <label for="employee_id">Employee ID *</label>
+                            <input type="text" name="employee_id" id="employee_id" value="{% if employee %}{{ employee.employee_id }}{% endif %}" required>
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="position">Position *</label>
+                            <input type="text" name="position" id="position" value="{% if employee %}{{ employee.position }}{% endif %}" required>
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="department">Department</label>
+                            <input type="text" name="department" id="department" value="{% if employee %}{{ employee.department }}{% endif %}">
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="hire_date">Hire Date *</label>
+                            <input type="date" name="hire_date" id="hire_date" value="{% if employee %}{{ employee.hire_date|date:'Y-m-d' }}{% endif %}" required>
+                        </div>
+                        
+                        {% if employee %}
+                        <div class="finance-form-group">
+                            <label for="status">Status</label>
+                            <select name="status" id="status">
+                                <option value="ACTIVE" {% if employee.status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                                <option value="INACTIVE" {% if employee.status == 'INACTIVE' %}selected{% endif %}>Inactive</option>
+                                <option value="ON_LEAVE" {% if employee.status == 'ON_LEAVE' %}selected{% endif %}>On Leave</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Salary Information -->
+                    <div>
+                        <h6 style="color: #666; margin-bottom: 16px;">Salary Information</h6>
+                        
+                        <div class="finance-form-group">
+                            <label for="base_salary">Base Salary ($) *</label>
+                            <input type="number" name="base_salary" id="base_salary" value="{% if employee %}{{ employee.base_salary }}{% endif %}" step="0.01" min="0" required>
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="housing_allowance">Housing Allowance (Tsh)</label>
+                            <input type="number" name="housing_allowance" id="housing_allowance" value="{% if employee %}{{ employee.housing_allowance }}{% else %}0{% endif %}" step="0.01" min="0">
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="transport_allowance">Transport Allowance (Tsh)</label>
+                            <input type="number" name="transport_allowance" id="transport_allowance" value="{% if employee %}{{ employee.transport_allowance }}{% else %}0{% endif %}" step="0.01" min="0">
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="other_allowance">Other Allowances (Tsh)</label>
+                            <input type="number" name="other_allowances" id="other_allowance" value="{% if employee %}{{ employee.other_allowances }}{% else %}0{% endif %}" step="0.01" min="0">
+                        </div>
+                        
+                        <div class="finance-form-group">
+                            <label for="payment_type">Payment Type</label>
+                            <select name="payment_type" id="payment_type">
+                                <option value="MONTHLY" {% if employee.payment_type == 'MONTHLY' %}selected{% endif %}>Monthly</option>
+                                <option value="WEEKLY" {% if employee.payment_type == 'WEEKLY' %}selected{% endif %}>Weekly</option>
+                                <option value="BI_WEEKLY" {% if employee.payment_type == 'BI_WEEKLY' %}selected{% endif %}>Bi-Weekly</option>
+                            </select>
+                        </div>
+                        
+                        <div class="finance-alert finance-alert-info">
+                            <strong>Total Monthly Salary: $<span id="total_salary">0.00</span></strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bank Information -->
+                <div style="margin-top: 24px;">
+                    <h6 style="color: #666; margin-bottom: 16px;">Bank Information</h6>
+                    <div class="finance-form-row" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="finance-form-group">
+                            <label for="bank_name">Bank Name</label>
+                            <input type="text" name="bank_name" id="bank_name" value="{% if employee %}{{ employee.bank_name }}{% endif %}">
+                        </div>
+                        <div class="finance-form-group">
+                            <label for="bank_account">Bank Account Number</label>
+                            <input type="text" name="bank_account" id="bank_account" value="{% if employee %}{{ employee.bank_account }}{% endif %}">
+                        </div>
+                        <div class="finance-form-group">
+                            <label for="tax_id">Tax ID</label>
+                            <input type="text" name="tax_id" id="tax_id" value="{% if employee %}{{ employee.tax_id }}{% endif %}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                    <a href="{% url 'employee_list' %}" class="finance-btn finance-btn-secondary">Cancel</a>
+                    <button type="submit" class="finance-btn finance-btn-primary">
+                        <i class="fas fa-save"></i> {% if employee %}Update Employee{% else %}Add Employee{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculateTotalSalary() {
+    const baseSalary = parseFloat(document.getElementById('base_salary').value) || 0;
+    const housingAllowance = parseFloat(document.getElementById('housing_allowance').value) || 0;
+    const transportAllowance = parseFloat(document.getElementById('transport_allowance').value) || 0;
+    const otherAllowance = parseFloat(document.getElementById('other_allowance').value) || 0;
+    const total = baseSalary + housingAllowance + transportAllowance + otherAllowance;
+    document.getElementById('total_salary').textContent = total.toFixed(2);
+}
+
+document.getElementById('base_salary').addEventListener('input', calculateTotalSalary);
+document.getElementById('housing_allowance').addEventListener('input', calculateTotalSalary);
+document.getElementById('transport_allowance').addEventListener('input', calculateTotalSalary);
+document.getElementById('other_allowance').addEventListener('input', calculateTotalSalary);
+calculateTotalSalary();
+</script>
+{% endblock %}

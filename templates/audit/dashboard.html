@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-shield-alt"></i> Audit & Security Dashboard
+        </h1>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats.total_logs_today }}</h3>
+                    <p>Actions Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats.total_logs_month }}</h3>
+                    <p>Actions This Month</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats.failed_logins_today }}</h3>
+                    <p>Failed Logins Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats.alerts_count }}</h3>
+                    <p>Active Alerts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list-alt"></i> Recent Activity</h5>
+                    <a href="{% url 'audit_log_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Model</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_logs %}
+                                <tr>
+                                    <td>
+                                        {% if log.user %}
+                                            {{ log.user.username }}
+                                        {% else %}
+                                            <span class="text-muted">System</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{% if log.action == 'CREATE' %}success{% elif log.action == 'UPDATE' %}info{% elif log.action == 'DELETE' %}danger{% else %}secondary{% endif %}">
+                                            {{ log.action }}
+                                        </span>
+                                    </td>
+                                    <td>{{ log.model_name|default:"-" }}</td>
+                                    <td>{{ log.timestamp|timesince }} ago</td>
+                                    <td>
+                                        {% if log.status == 'SUCCESS' %}
+                                            <span class="text-success"><i class="fas fa-check-circle"></i></span>
+                                        {% else %}
+                                            <span class="text-danger"><i class="fas fa-times-circle"></i></span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No recent activity</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Alerts -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bell"></i> Security Alerts</h5>
+                    <a href="{% url 'security_alerts' %}" class="btn btn-sm btn-outline-danger">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for alert in recent_alerts %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ alert.title }}</h6>
+                                <small class="text-muted">{{ alert.created_at|timesince }} ago</small>
+                            </div>
+                            <p class="mb-1 text-muted small">{{ alert.description|truncatechars:60 }}</p>
+                            <span class="badge badge-{% if alert.severity == 'CRITICAL' %}danger{% elif alert.severity == 'HIGH' %}warning{% elif alert.severity == 'MEDIUM' %}info{% else %}secondary{% endif %}">
+                                {{ alert.severity }}
+                            </span>
+                            <span class="badge badge-light">{{ alert.alert_type }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center py-4 text-muted">
+                            No security alerts
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'audit_log_list' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-search"></i> Search Logs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'login_history_list' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-user-clock"></i> Login History
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'security_alerts' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-exclamation-triangle"></i> Manage Alerts
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'backup_list' %}" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-database"></i> Backups
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

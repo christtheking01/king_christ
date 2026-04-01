@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payroll Management{% endblock %}
+
+{% block internal_style %}
+<link rel="stylesheet" href="{% static 'style/css/finance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="finance-container">
+    <!-- Page Header -->
+    <div class="finance-page-header">
+        <div>
+            <h1>Payroll Management</h1>
+            <p>Generate and manage employee payroll</p>
+        </div>
+        <div class="finance-btn-group">
+            <a href="{% url 'generate_payroll' %}" class="finance-btn finance-btn-primary">
+                <i class="fas fa-plus"></i> Generate Payroll
+            </a>
+            <a href="{% url 'employee_list' %}" class="finance-btn finance-btn-outline">
+                <i class="fas fa-users"></i> Manage Employees
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="finance-card">
+        <div class="finance-card-header"><h6>Filters</h6></div>
+        <div class="finance-card-body">
+            <form method="get" class="finance-filters">
+                <div class="finance-filter-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">All Status</option>
+                        <option value="PENDING" {% if request.GET.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="PROCESSED" {% if request.GET.status == 'PROCESSED' %}selected{% endif %}>Processed</option>
+                        <option value="PAID" {% if request.GET.status == 'PAID' %}selected{% endif %}>Paid</option>
+                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="finance-filter-group">
+                    <label for="month">Month</label>
+                    <select name="month" id="month">
+                        <option value="">All Months</option>
+                        {% for i in "123456789101112"|make_list %}
+                            <option value="{{ i }}" {% if request.GET.month == i %}selected{% endif %}>Month {{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="finance-filter-group" style="justify-content: flex-end;">
+                    <label>&nbsp;</label>
+                    <div class="finance-btn-group">
+                        <button type="submit" class="finance-btn finance-btn-primary">Filter</button>
+                        <a href="{% url 'payroll_list' %}" class="finance-btn finance-btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payroll Statistics -->
+    <div class="finance-stats-grid">
+        <div class="finance-stat-card warning">
+            <div class="finance-stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Pending</div>
+                <div class="finance-stat-value">{{ pending_count }}</div>
+            </div>
+        </div>
+        <div class="finance-stat-card info">
+            <div class="finance-stat-icon"><i class="fas fa-cogs"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Processed</div>
+                <div class="finance-stat-value">{{ processed_count }}</div>
+            </div>
+        </div>
+        <div class="finance-stat-card success">
+            <div class="finance-stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Paid</div>
+                <div class="finance-stat-value">{{ paid_count }}</div>
+            </div>
+        </div>
+        <div class="finance-stat-card primary">
+            <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="finance-stat-content">
+                <div class="finance-stat-label">Total Amount</div>
+                <div class="finance-stat-value">Tsh {{ total_net_salary|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payroll List -->
+    <div class="finance-card">
+        <div class="finance-card-header">
+            <h6>All Payroll Records</h6>
+            <div class="finance-btn-group">
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportPayroll()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printPayroll()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="finance-card-body">
+            {% if payrolls %}
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Period</th>
+                            <th>Gross Salary</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payroll in payrolls %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    {% if payroll.employee.member.picture %}
+                                        <img src="{{ payroll.employee.member.picture.url }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="{{ payroll.employee.member.name }}">
+                                    {% else %}
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user" style="color: #999;"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-weight: 600;">{{ payroll.employee.member.name }}</div>
+                                        <small style="color: #666;">{{ payroll.employee.position }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>{{ payroll.pay_period_start|date:"M d, Y" }}</div>
+                                <small style="color: #666;">to {{ payroll.pay_period_end|date:"M d, Y" }}</small>
+                            </td>
+                            <td style="font-weight: 600;">${{ payroll.gross_salary|floatformat:2 }}</td>
+                            <td style="color: #dc3545;">${{ payroll.tax_deduction|add:payroll.other_deductions|floatformat:2 }}</td>
+                            <td style="color: #28a745; font-weight: 600;">Tsh{{ payroll.net_salary|floatformat:2 }}</td>
+                            <td>
+                                {% if payroll.status == 'PENDING' %}<span class="finance-badge finance-badge-warning">Pending</span>
+                                {% elif payroll.status == 'PROCESSED' %}<span class="finance-badge finance-badge-info">Processed</span>
+                                {% elif payroll.status == 'PAID' %}<span class="finance-badge finance-badge-success">Paid</span>
+                                {% else %}<span class="finance-badge finance-badge-danger">Cancelled</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="finance-btn-group">
+                                    {% if payroll.status == 'PENDING' %}
+                                        <a href="{% url 'process_payroll' payroll.pk %}" class="finance-btn finance-btn-sm finance-btn-success" onclick="return confirm('Process this payroll?')">
+                                            <i class="fas fa-check"></i> Process
+                                        </a>
+                                    {% endif %}
+                                    <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="viewPayroll({{ payroll.pk }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printPayslip({{ payroll.pk }})">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="finance-empty-state">
+                    <i class="fas fa-calculator"></i>
+                    <h5>No payroll records found</h5>
+                    <p>Generate your first payroll to start processing employee payments.</p>
+                    <a href="{% url 'generate_payroll' %}" class="finance-btn finance-btn-primary">
+                        <i class="fas fa-plus"></i> Generate Payroll
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportPayroll() { alert('Export functionality would be implemented here'); }
+function printPayroll() { window.print(); }
+function viewPayroll(id) { alert('View payroll ' + id); }
+function printPayslip(id) { alert('Print payslip ' + id); }
+</script>
+{% endblock %}

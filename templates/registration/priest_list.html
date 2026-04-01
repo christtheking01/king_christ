@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-users text-primary me-2"></i>All Priests
+                    </h2>
+                    <p class="text-muted mb-0">View and manage all priests in the system</p>
+                </div>
+                <div>
+                    <a href="{% url 'priest_role_management' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Role Management
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="role" class="form-label">Filter by Role</label>
+                            <select name="role" id="role" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if role_filter == 'all' %}selected{% endif %}>All Priests</option>
+                                <option value="parish_priest" {% if role_filter == 'parish_priest' %}selected{% endif %}>Parish Priest</option>
+                                <option value="assistant_priest" {% if role_filter == 'assistant_priest' %}selected{% endif %}>Assistant Priest</option>
+                                <option value="normal_priest" {% if role_filter == 'normal_priest' %}selected{% endif %}>Normal Priest</option>
+                                <option value="unassigned" {% if role_filter == 'unassigned' %}selected{% endif %}>Not Assigned</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>Apply Filter
+                            </button>
+                            <a href="{% url 'priest_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-1"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priests List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Priests
+                        <span class="badge bg-primary ms-2">{{ priests|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if priests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Priest</th>
+                                    <th>Contact</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for priest in priests %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if priest.profile and priest.profile.picture %}
+                                            <img src="{{ priest.profile.picture.url }}" alt="{{ priest.user.username }}" 
+                                                 class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user text-muted fa-lg"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ priest.user.full_name|default:priest.user.username }}</h6>
+                                                <small class="text-muted">@{{ priest.user.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <small class="text-muted d-block">{{ priest.user.email|default:"No email" }}</small>
+                                            <small class="text-muted">{{ priest.user.phone|default:"No phone" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if priest.priest_type == 'parish_priest' %}
+                                        <span class="badge bg-primary">{{ priest.role_display }}</span>
+                                        {% elif priest.priest_type == 'assistant_priest' %}
+                                        <span class="badge bg-info">{{ priest.role_display }}</span>
+                                        {% elif priest.priest_type == 'normal_priest' %}
+                                        <span class="badge bg-secondary">{{ priest.role_display }}</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">{{ priest.role_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if priest.user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'assign_priest_role' priest.user.id %}" class="btn btn-sm btn-outline-primary" title="Edit Role">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if priest.priest_type %}
+                                        <a href="{% url 'remove_priest_role' priest.user.id %}" class="btn btn-sm btn-outline-danger" title="Remove Role">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No priests found</h5>
+                        <p class="text-muted mb-0">
+                            {% if role_filter != 'all' %}
+                            No priests match the selected filter. 
+                            <a href="{% url 'priest_list' %}">View all priests</a>
+                            {% else %}
+                            No priests have been added to the system yet.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

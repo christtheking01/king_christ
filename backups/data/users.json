@@ -1,0 +1,2231 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2026-01-15T17:04:03.105Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "1",
+    "object_repr": "UWAKA",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2026-01-15T17:04:34.674Z",
+    "user": 1,
+    "content_type": 6,
+    "object_id": "1",
+    "object_repr": "LAURENT",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2026-01-15T17:05:22.316Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "1",
+    "object_repr": "LAMECK LEONARD - CHAIR PERSON (UWAKA) - LAURENT",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2026-01-18T14:50:14.154Z",
+    "user": 1,
+    "content_type": 13,
+    "object_id": "1",
+    "object_repr": "example@admin.com",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Email\", \"Firstname\", \"Lastname\", \"Roles\", \"Is verified\", \"Phone\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2026-01-29T11:44:01.321Z",
+    "user": 1,
+    "content_type": 15,
+    "object_id": "1",
+    "object_repr": "gerge bantu - 2000 - 2026-01-29",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2026-04-01T11:28:52.876Z",
+    "user": 1,
+    "content_type": 13,
+    "object_id": "3",
+    "object_repr": "Dr.changwe",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Is active\", \"Roles\"]}}]"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 2,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 2,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 2,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 2,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 3,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 3,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 3,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 3,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 4,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 4,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 4,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 4,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 5,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 5,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 5,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 5,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add community",
+    "content_type": 6,
+    "codename": "add_community"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change community",
+    "content_type": 6,
+    "codename": "change_community"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete community",
+    "content_type": 6,
+    "codename": "delete_community"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view community",
+    "content_type": 6,
+    "codename": "view_community"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add ministry",
+    "content_type": 7,
+    "codename": "add_ministry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change ministry",
+    "content_type": 7,
+    "codename": "change_ministry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete ministry",
+    "content_type": 7,
+    "codename": "delete_ministry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view ministry",
+    "content_type": 7,
+    "codename": "view_ministry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add test db",
+    "content_type": 8,
+    "codename": "add_testdb"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change test db",
+    "content_type": 8,
+    "codename": "change_testdb"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete test db",
+    "content_type": 8,
+    "codename": "delete_testdb"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view test db",
+    "content_type": 8,
+    "codename": "view_testdb"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add community leader",
+    "content_type": 9,
+    "codename": "add_communityleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change community leader",
+    "content_type": 9,
+    "codename": "change_communityleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete community leader",
+    "content_type": 9,
+    "codename": "delete_communityleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view community leader",
+    "content_type": 9,
+    "codename": "view_communityleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add member",
+    "content_type": 10,
+    "codename": "add_member"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change member",
+    "content_type": 10,
+    "codename": "change_member"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete member",
+    "content_type": 10,
+    "codename": "delete_member"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view member",
+    "content_type": 10,
+    "codename": "view_member"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add committee",
+    "content_type": 11,
+    "codename": "add_committee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change committee",
+    "content_type": 11,
+    "codename": "change_committee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete committee",
+    "content_type": 11,
+    "codename": "delete_committee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view committee",
+    "content_type": 11,
+    "codename": "view_committee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add ministry leader",
+    "content_type": 12,
+    "codename": "add_ministryleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change ministry leader",
+    "content_type": 12,
+    "codename": "change_ministryleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete ministry leader",
+    "content_type": 12,
+    "codename": "delete_ministryleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view ministry leader",
+    "content_type": 12,
+    "codename": "view_ministryleader"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 13,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 13,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 13,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 13,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add user profile",
+    "content_type": 14,
+    "codename": "add_userprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change user profile",
+    "content_type": 14,
+    "codename": "change_userprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete user profile",
+    "content_type": 14,
+    "codename": "delete_userprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view user profile",
+    "content_type": 14,
+    "codename": "view_userprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add tithe payment",
+    "content_type": 15,
+    "codename": "add_tithepayment"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change tithe payment",
+    "content_type": 15,
+    "codename": "change_tithepayment"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete tithe payment",
+    "content_type": 15,
+    "codename": "delete_tithepayment"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view tithe payment",
+    "content_type": 15,
+    "codename": "view_tithepayment"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 61,
+  "fields": {
+    "name": "Can add Tithe Receipt",
+    "content_type": 16,
+    "codename": "add_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 62,
+  "fields": {
+    "name": "Can change Tithe Receipt",
+    "content_type": 16,
+    "codename": "change_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 63,
+  "fields": {
+    "name": "Can delete Tithe Receipt",
+    "content_type": 16,
+    "codename": "delete_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 64,
+  "fields": {
+    "name": "Can view Tithe Receipt",
+    "content_type": 16,
+    "codename": "view_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 65,
+  "fields": {
+    "name": "Can add Notification",
+    "content_type": 17,
+    "codename": "add_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 66,
+  "fields": {
+    "name": "Can change Notification",
+    "content_type": 17,
+    "codename": "change_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 67,
+  "fields": {
+    "name": "Can delete Notification",
+    "content_type": 17,
+    "codename": "delete_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 68,
+  "fields": {
+    "name": "Can view Notification",
+    "content_type": 17,
+    "codename": "view_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 69,
+  "fields": {
+    "name": "Can add notification log",
+    "content_type": 18,
+    "codename": "add_notificationlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 70,
+  "fields": {
+    "name": "Can change notification log",
+    "content_type": 18,
+    "codename": "change_notificationlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 71,
+  "fields": {
+    "name": "Can delete notification log",
+    "content_type": 18,
+    "codename": "delete_notificationlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 72,
+  "fields": {
+    "name": "Can view notification log",
+    "content_type": 18,
+    "codename": "view_notificationlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 73,
+  "fields": {
+    "name": "Can add category",
+    "content_type": 19,
+    "codename": "add_category"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 74,
+  "fields": {
+    "name": "Can change category",
+    "content_type": 19,
+    "codename": "change_category"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 75,
+  "fields": {
+    "name": "Can delete category",
+    "content_type": 19,
+    "codename": "delete_category"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 76,
+  "fields": {
+    "name": "Can view category",
+    "content_type": 19,
+    "codename": "view_category"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 77,
+  "fields": {
+    "name": "Can add transaction",
+    "content_type": 20,
+    "codename": "add_transaction"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 78,
+  "fields": {
+    "name": "Can change transaction",
+    "content_type": 20,
+    "codename": "change_transaction"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 79,
+  "fields": {
+    "name": "Can delete transaction",
+    "content_type": 20,
+    "codename": "delete_transaction"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 80,
+  "fields": {
+    "name": "Can view transaction",
+    "content_type": 20,
+    "codename": "view_transaction"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 81,
+  "fields": {
+    "name": "Can add sacrament",
+    "content_type": 21,
+    "codename": "add_sacrament"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 82,
+  "fields": {
+    "name": "Can change sacrament",
+    "content_type": 21,
+    "codename": "change_sacrament"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 83,
+  "fields": {
+    "name": "Can delete sacrament",
+    "content_type": 21,
+    "codename": "delete_sacrament"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 84,
+  "fields": {
+    "name": "Can view sacrament",
+    "content_type": 21,
+    "codename": "view_sacrament"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 85,
+  "fields": {
+    "name": "Can add catechesis member",
+    "content_type": 22,
+    "codename": "add_catechesismember"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 86,
+  "fields": {
+    "name": "Can change catechesis member",
+    "content_type": 22,
+    "codename": "change_catechesismember"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 87,
+  "fields": {
+    "name": "Can delete catechesis member",
+    "content_type": 22,
+    "codename": "delete_catechesismember"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 88,
+  "fields": {
+    "name": "Can view catechesis member",
+    "content_type": 22,
+    "codename": "view_catechesismember"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 89,
+  "fields": {
+    "name": "Can add sacrament request",
+    "content_type": 23,
+    "codename": "add_sacramentrequest"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 90,
+  "fields": {
+    "name": "Can change sacrament request",
+    "content_type": 23,
+    "codename": "change_sacramentrequest"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 91,
+  "fields": {
+    "name": "Can delete sacrament request",
+    "content_type": 23,
+    "codename": "delete_sacramentrequest"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 92,
+  "fields": {
+    "name": "Can view sacrament request",
+    "content_type": 23,
+    "codename": "view_sacramentrequest"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 93,
+  "fields": {
+    "name": "Can add notification read status",
+    "content_type": 24,
+    "codename": "add_notificationreadstatus"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 94,
+  "fields": {
+    "name": "Can change notification read status",
+    "content_type": 24,
+    "codename": "change_notificationreadstatus"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 95,
+  "fields": {
+    "name": "Can delete notification read status",
+    "content_type": 24,
+    "codename": "delete_notificationreadstatus"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 96,
+  "fields": {
+    "name": "Can view notification read status",
+    "content_type": 24,
+    "codename": "view_notificationreadstatus"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 97,
+  "fields": {
+    "name": "Can add family membership",
+    "content_type": 25,
+    "codename": "add_familymembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 98,
+  "fields": {
+    "name": "Can change family membership",
+    "content_type": 25,
+    "codename": "change_familymembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 99,
+  "fields": {
+    "name": "Can delete family membership",
+    "content_type": 25,
+    "codename": "delete_familymembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 100,
+  "fields": {
+    "name": "Can view family membership",
+    "content_type": 25,
+    "codename": "view_familymembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 101,
+  "fields": {
+    "name": "Can add Family",
+    "content_type": 26,
+    "codename": "add_family"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 102,
+  "fields": {
+    "name": "Can change Family",
+    "content_type": 26,
+    "codename": "change_family"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 103,
+  "fields": {
+    "name": "Can delete Family",
+    "content_type": 26,
+    "codename": "delete_family"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 104,
+  "fields": {
+    "name": "Can view Family",
+    "content_type": 26,
+    "codename": "view_family"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 105,
+  "fields": {
+    "name": "Can add budget",
+    "content_type": 27,
+    "codename": "add_budget"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 106,
+  "fields": {
+    "name": "Can change budget",
+    "content_type": 27,
+    "codename": "change_budget"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 107,
+  "fields": {
+    "name": "Can delete budget",
+    "content_type": 27,
+    "codename": "delete_budget"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 108,
+  "fields": {
+    "name": "Can view budget",
+    "content_type": 27,
+    "codename": "view_budget"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 109,
+  "fields": {
+    "name": "Can add employee",
+    "content_type": 28,
+    "codename": "add_employee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 110,
+  "fields": {
+    "name": "Can change employee",
+    "content_type": 28,
+    "codename": "change_employee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 111,
+  "fields": {
+    "name": "Can delete employee",
+    "content_type": 28,
+    "codename": "delete_employee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 112,
+  "fields": {
+    "name": "Can view employee",
+    "content_type": 28,
+    "codename": "view_employee"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 113,
+  "fields": {
+    "name": "Can add expense report",
+    "content_type": 29,
+    "codename": "add_expensereport"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 114,
+  "fields": {
+    "name": "Can change expense report",
+    "content_type": 29,
+    "codename": "change_expensereport"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 115,
+  "fields": {
+    "name": "Can delete expense report",
+    "content_type": 29,
+    "codename": "delete_expensereport"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 116,
+  "fields": {
+    "name": "Can view expense report",
+    "content_type": 29,
+    "codename": "view_expensereport"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 117,
+  "fields": {
+    "name": "Can add expense item",
+    "content_type": 30,
+    "codename": "add_expenseitem"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 118,
+  "fields": {
+    "name": "Can change expense item",
+    "content_type": 30,
+    "codename": "change_expenseitem"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 119,
+  "fields": {
+    "name": "Can delete expense item",
+    "content_type": 30,
+    "codename": "delete_expenseitem"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 120,
+  "fields": {
+    "name": "Can view expense item",
+    "content_type": 30,
+    "codename": "view_expenseitem"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 121,
+  "fields": {
+    "name": "Can add budget allocation",
+    "content_type": 31,
+    "codename": "add_budgetallocation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 122,
+  "fields": {
+    "name": "Can change budget allocation",
+    "content_type": 31,
+    "codename": "change_budgetallocation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 123,
+  "fields": {
+    "name": "Can delete budget allocation",
+    "content_type": 31,
+    "codename": "delete_budgetallocation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 124,
+  "fields": {
+    "name": "Can view budget allocation",
+    "content_type": 31,
+    "codename": "view_budgetallocation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 125,
+  "fields": {
+    "name": "Can add payroll",
+    "content_type": 32,
+    "codename": "add_payroll"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 126,
+  "fields": {
+    "name": "Can change payroll",
+    "content_type": 32,
+    "codename": "change_payroll"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 127,
+  "fields": {
+    "name": "Can delete payroll",
+    "content_type": 32,
+    "codename": "delete_payroll"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 128,
+  "fields": {
+    "name": "Can view payroll",
+    "content_type": 32,
+    "codename": "view_payroll"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 129,
+  "fields": {
+    "name": "Can add tithe receipt",
+    "content_type": 33,
+    "codename": "add_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 130,
+  "fields": {
+    "name": "Can change tithe receipt",
+    "content_type": 33,
+    "codename": "change_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 131,
+  "fields": {
+    "name": "Can delete tithe receipt",
+    "content_type": 33,
+    "codename": "delete_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 132,
+  "fields": {
+    "name": "Can view tithe receipt",
+    "content_type": 33,
+    "codename": "view_tithereceipt"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 133,
+  "fields": {
+    "name": "Can add audit log",
+    "content_type": 34,
+    "codename": "add_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 134,
+  "fields": {
+    "name": "Can change audit log",
+    "content_type": 34,
+    "codename": "change_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 135,
+  "fields": {
+    "name": "Can delete audit log",
+    "content_type": 34,
+    "codename": "delete_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 136,
+  "fields": {
+    "name": "Can view audit log",
+    "content_type": 34,
+    "codename": "view_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 137,
+  "fields": {
+    "name": "Can add login history",
+    "content_type": 35,
+    "codename": "add_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 138,
+  "fields": {
+    "name": "Can change login history",
+    "content_type": 35,
+    "codename": "change_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 139,
+  "fields": {
+    "name": "Can delete login history",
+    "content_type": 35,
+    "codename": "delete_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 140,
+  "fields": {
+    "name": "Can view login history",
+    "content_type": 35,
+    "codename": "view_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 141,
+  "fields": {
+    "name": "Can add data backup",
+    "content_type": 36,
+    "codename": "add_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 142,
+  "fields": {
+    "name": "Can change data backup",
+    "content_type": 36,
+    "codename": "change_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 143,
+  "fields": {
+    "name": "Can delete data backup",
+    "content_type": 36,
+    "codename": "delete_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 144,
+  "fields": {
+    "name": "Can view data backup",
+    "content_type": 36,
+    "codename": "view_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 145,
+  "fields": {
+    "name": "Can add security alert",
+    "content_type": 37,
+    "codename": "add_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 146,
+  "fields": {
+    "name": "Can change security alert",
+    "content_type": 37,
+    "codename": "change_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 147,
+  "fields": {
+    "name": "Can delete security alert",
+    "content_type": 37,
+    "codename": "delete_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 148,
+  "fields": {
+    "name": "Can view security alert",
+    "content_type": 37,
+    "codename": "view_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 149,
+  "fields": {
+    "name": "Can add audit log",
+    "content_type": 38,
+    "codename": "add_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 150,
+  "fields": {
+    "name": "Can change audit log",
+    "content_type": 38,
+    "codename": "change_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 151,
+  "fields": {
+    "name": "Can delete audit log",
+    "content_type": 38,
+    "codename": "delete_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 152,
+  "fields": {
+    "name": "Can view audit log",
+    "content_type": 38,
+    "codename": "view_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 153,
+  "fields": {
+    "name": "Can add data backup",
+    "content_type": 39,
+    "codename": "add_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 154,
+  "fields": {
+    "name": "Can change data backup",
+    "content_type": 39,
+    "codename": "change_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 155,
+  "fields": {
+    "name": "Can delete data backup",
+    "content_type": 39,
+    "codename": "delete_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 156,
+  "fields": {
+    "name": "Can view data backup",
+    "content_type": 39,
+    "codename": "view_databackup"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 157,
+  "fields": {
+    "name": "Can add login history",
+    "content_type": 40,
+    "codename": "add_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 158,
+  "fields": {
+    "name": "Can change login history",
+    "content_type": 40,
+    "codename": "change_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 159,
+  "fields": {
+    "name": "Can delete login history",
+    "content_type": 40,
+    "codename": "delete_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 160,
+  "fields": {
+    "name": "Can view login history",
+    "content_type": 40,
+    "codename": "view_loginhistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 161,
+  "fields": {
+    "name": "Can add security alert",
+    "content_type": 41,
+    "codename": "add_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 162,
+  "fields": {
+    "name": "Can change security alert",
+    "content_type": 41,
+    "codename": "change_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 163,
+  "fields": {
+    "name": "Can delete security alert",
+    "content_type": 41,
+    "codename": "delete_securityalert"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 164,
+  "fields": {
+    "name": "Can view security alert",
+    "content_type": 41,
+    "codename": "view_securityalert"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "member",
+    "model": "community"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "member",
+    "model": "ministry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "member",
+    "model": "testdb"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 9,
+  "fields": {
+    "app_label": "member",
+    "model": "communityleader"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 10,
+  "fields": {
+    "app_label": "member",
+    "model": "member"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 11,
+  "fields": {
+    "app_label": "member",
+    "model": "committee"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 12,
+  "fields": {
+    "app_label": "member",
+    "model": "ministryleader"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 13,
+  "fields": {
+    "app_label": "users",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 14,
+  "fields": {
+    "app_label": "users",
+    "model": "userprofile"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 15,
+  "fields": {
+    "app_label": "tithe",
+    "model": "tithepayment"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 16,
+  "fields": {
+    "app_label": "tithe",
+    "model": "tithereceipt"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 17,
+  "fields": {
+    "app_label": "notifications",
+    "model": "notification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 18,
+  "fields": {
+    "app_label": "notifications",
+    "model": "notificationlog"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 19,
+  "fields": {
+    "app_label": "finance",
+    "model": "category"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 20,
+  "fields": {
+    "app_label": "finance",
+    "model": "transaction"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 21,
+  "fields": {
+    "app_label": "catechesis",
+    "model": "sacrament"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 22,
+  "fields": {
+    "app_label": "catechesis",
+    "model": "catechesismember"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 23,
+  "fields": {
+    "app_label": "catechesis",
+    "model": "sacramentrequest"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 24,
+  "fields": {
+    "app_label": "notifications",
+    "model": "notificationreadstatus"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 25,
+  "fields": {
+    "app_label": "users",
+    "model": "familymembership"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 26,
+  "fields": {
+    "app_label": "users",
+    "model": "family"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 27,
+  "fields": {
+    "app_label": "finance",
+    "model": "budget"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 28,
+  "fields": {
+    "app_label": "finance",
+    "model": "employee"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 29,
+  "fields": {
+    "app_label": "finance",
+    "model": "expensereport"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 30,
+  "fields": {
+    "app_label": "finance",
+    "model": "expenseitem"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 31,
+  "fields": {
+    "app_label": "finance",
+    "model": "budgetallocation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 32,
+  "fields": {
+    "app_label": "finance",
+    "model": "payroll"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 33,
+  "fields": {
+    "app_label": "finance",
+    "model": "tithereceipt"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 34,
+  "fields": {
+    "app_label": "audit",
+    "model": "auditlog"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 35,
+  "fields": {
+    "app_label": "audit",
+    "model": "loginhistory"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 36,
+  "fields": {
+    "app_label": "audit",
+    "model": "databackup"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 37,
+  "fields": {
+    "app_label": "audit",
+    "model": "securityalert"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 38,
+  "fields": {
+    "app_label": "audits",
+    "model": "auditlog"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 39,
+  "fields": {
+    "app_label": "audits",
+    "model": "databackup"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 40,
+  "fields": {
+    "app_label": "audits",
+    "model": "loginhistory"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 41,
+  "fields": {
+    "app_label": "audits",
+    "model": "securityalert"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "026ve7byd1zk3cugyoi199irotdjvmdh",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1w0iyD:bevbEiuFHE_qOxPSAVlKZ42_P94ikdWP3x_KNrzf_KY",
+    "expire_date": "2026-03-26T16:33:09.278Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "2vtvppqm1592qdo0arfzv781sq8kf57c",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1vgQkY:fKxmrcZM2FZXGQGMVGTwWmurdR8ODCPbNSz9UkbmYuU",
+    "expire_date": "2026-01-29T17:03:10.860Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "2wpy8xtxmfgl6ue0gkbfj0zr0kabmbbt",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1vmEV5:G70OXFuhSyzS0DnpohWmh6KBrgcFLVy2H4dApEeWg-4",
+    "expire_date": "2026-02-14T17:11:11.184Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "gc7jh2yqef76rnq4he2bi6hqeb1ojfni",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1w7dLF:omn0kuAtjuJG7MFQstIIvr0zhy04Qotxd01lSNB8VFg",
+    "expire_date": "2026-04-14T17:57:29.874Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "kskorbh6j9vicewje8lmz6s4r28ostt2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1w7uep:2aLM2804oQz5o0HtptuRSLFqFM1t7Fn_P7-APolRGhA",
+    "expire_date": "2026-04-15T12:26:51.603Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "txtav4j37o30lxu0byosn3qalp3936y2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1vmxmA:gZ4syYDF3NlmpS0lgTJXSNxaxUH0mBLXO2Ofk4zVOWE",
+    "expire_date": "2026-02-16T17:31:50.536Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "zirsffczx20ms09x2a1uhhk2mi6h9k3u",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBgEDou3fcMZIBRqgaS0q6MdzckXej2v_f-WwTatxL2zmtYsrgILU6_W6T05DpAflC9N5la3dYlyqHIg3Y5t8yv6-H-HRTqZdQKUFtNKVnjvMngHaLJFjMzRFCGTWSLNwRASC5N3tJ5Yuuc0mS0Fp8vxzI25A:1vs17F:Z9hGkKR8f15K4CaiciSdb_vkfHPgjH2kHGUurcUCwto",
+    "expire_date": "2026-03-02T16:06:29.261Z"
+  }
+},
+{
+  "model": "member.ministry",
+  "pk": 1,
+  "fields": {
+    "name": "UWAKA",
+    "feast_name": "MARY THE V",
+    "feast_date": null,
+    "created_at": "2026-01-15T17:03:40Z",
+    "updated_at": "2026-01-15T17:07:41.613Z"
+  }
+},
+{
+  "model": "member.ministryleader",
+  "pk": 1,
+  "fields": {
+    "ministry": 1,
+    "leader_name": "LAMECK LEONARD",
+    "position": "CHAIR PERSON",
+    "community": 1,
+    "phone": "+255621765124",
+    "email": "lameck@gmail.com",
+    "is_active": true,
+    "appointed_date": "2026-01-14"
+  }
+},
+{
+  "model": "member.ministryleader",
+  "pk": 2,
+  "fields": {
+    "ministry": 1,
+    "leader_name": "SHAIBU CONSTANTINE",
+    "position": "VICE CHAIR",
+    "community": 1,
+    "phone": "+255754890378",
+    "email": "shaibuconstantine@gmail.com",
+    "is_active": true,
+    "appointed_date": "2026-01-15"
+  }
+},
+{
+  "model": "member.community",
+  "pk": 1,
+  "fields": {
+    "name": "LAURENT",
+    "created_at": "2026-01-15T17:04:34.673Z",
+    "updated_at": "2026-01-15T17:04:34.673Z"
+  }
+},
+{
+  "model": "member.member",
+  "pk": 1,
+  "fields": {
+    "name": "gerge bantu",
+    "code": "008bmin",
+    "active": true,
+    "shepherd": 1,
+    "ministry": 1,
+    "telephone": "+255694818132",
+    "location": "Rwamlimi Kati",
+    "fathers_name": "None",
+    "mothers_name": "None",
+    "guardians_name": "None",
+    "new_believer_school": false,
+    "pays_tithe": true,
+    "working": true,
+    "schooling": false,
+    "picture": "",
+    "transfered": false,
+    "transfer_update": "None"
+  }
+},
+{
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$YD16ELyLqE6K72P0AS2D6S$P9yNzJsMGoOeP8VUeUQnr4rrOUxrNX2SIWItOfawtKE=",
+    "last_login": "2026-04-01T12:26:50.768Z",
+    "is_superuser": true,
+    "username": "example@admin.com",
+    "email": "emmaleonard3008@gmail.com",
+    "firstname": "emmanuel",
+    "lastname": "simwimba",
+    "is_active": true,
+    "roles": "admin",
+    "date_joined": "2026-01-15T17:02:02Z",
+    "is_staff": true,
+    "is_verified": true,
+    "phone": "+255621765124",
+    "force_password_change": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$Pu9EcPnyyO4wejgagPSzeG$ORZyjW5rvxvpHfD3dJShrYKW6EtAd7T5ZH2xqow5qz0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vicent",
+    "email": "example@yahoo.com",
+    "firstname": "vicent",
+    "lastname": "vicent",
+    "is_active": true,
+    "roles": "Member",
+    "date_joined": "2026-01-15T18:15:52.109Z",
+    "is_staff": false,
+    "is_verified": false,
+    "phone": "+255767074425",
+    "force_password_change": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$aJWaKyB3XIrhNokAMHdMna$bllVObHwR3EqBAo9TpGntW5NBd1M2am5kSbtJKGDjF8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Dr.changwe",
+    "email": "changwe@gmail.com",
+    "firstname": "constantine",
+    "lastname": "changwe",
+    "is_active": true,
+    "roles": "priest",
+    "date_joined": "2026-04-01T11:27:53Z",
+    "is_staff": true,
+    "is_verified": false,
+    "phone": "+255767259453",
+    "force_password_change": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.userprofile",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "title": null,
+    "about": null,
+    "telephone": null,
+    "whatsapp_line": null,
+    "facebook_link": null,
+    "twitter_link": null,
+    "instagram_link": null,
+    "picture": ""
+  }
+},
+{
+  "model": "users.userprofile",
+  "pk": 2,
+  "fields": {
+    "user": 3,
+    "title": "parish_priest",
+    "about": null,
+    "telephone": null,
+    "whatsapp_line": null,
+    "facebook_link": null,
+    "twitter_link": null,
+    "instagram_link": null,
+    "picture": ""
+  }
+},
+{
+  "model": "tithe.tithepayment",
+  "pk": 1,
+  "fields": {
+    "sms_sent": false,
+    "sms_sent_at": null,
+    "sms_message_id": null,
+    "sms_failure_count": 0,
+    "last_sms_error": "",
+    "date": "2026-01-29T11:43:52Z",
+    "name": 1,
+    "contact_number": null,
+    "amount": "2000.00",
+    "status": "cash"
+  }
+},
+{
+  "model": "audits.auditlog",
+  "pk": "034360f1-8cbd-4d89-b5d7-2c31c1bcf466",
+  "fields": {
+    "user": null,
+    "action": "UPDATE",
+    "model_name": "users.User",
+    "object_id": "1",
+    "object_repr": "example@admin.com",
+    "old_values": null,
+    "new_values": {
+      "id": "1",
+      "password": "pbkdf2_sha256$1000000$YD16ELyLqE6K72P0AS2D6S$P9yNzJsMGoOeP8VUeUQnr4rrOUxrNX2SIWItOfawtKE=",
+      "last_login": "2026-04-01 12:26:50.768253+00:00",
+      "is_superuser": "True",
+      "username": "example@admin.com",
+      "email": "emmaleonard3008@gmail.com",
+      "firstname": "emmanuel",
+      "lastname": "simwimba",
+      "is_active": "True",
+      "roles": "admin",
+      "date_joined": "2026-01-15 17:02:02+00:00",
+      "is_staff": "True",
+      "is_verified": "True",
+      "phone": "+255621765124",
+      "force_password_change": "True"
+    },
+    "ip_address": null,
+    "user_agent": "",
+    "path": "",
+    "timestamp": "2026-04-01T12:26:50.953Z",
+    "status": "SUCCESS",
+    "error_message": ""
+  }
+},
+{
+  "model": "audits.auditlog",
+  "pk": "077ed70a-99a8-4e5c-b399-9745da4bb4f9",
+  "fields": {
+    "user": 1,
+    "action": "UPDATE",
+    "model_name": "",
+    "object_id": "",
+    "object_repr": "",
+    "old_values": null,
+    "new_values": null,
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+    "path": "/accounts/_login_/",
+    "timestamp": "2026-04-01T12:26:51.391Z",
+    "status": "SUCCESS",
+    "error_message": ""
+  }
+},
+{
+  "model": "audits.auditlog",
+  "pk": "2629e1a3-11b0-4e65-9e08-1cdce74d701f",
+  "fields": {
+    "user": 1,
+    "action": "BACKUP",
+    "model_name": "",
+    "object_id": "",
+    "object_repr": "",
+    "old_values": null,
+    "new_values": null,
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+    "path": "/audit/backups/",
+    "timestamp": "2026-04-01T12:27:10.895Z",
+    "status": "SUCCESS",
+    "error_message": ""
+  }
+},
+{
+  "model": "audits.loginhistory",
+  "pk": "e0505abf-2a4d-46d1-aa24-0a1ef48456f5",
+  "fields": {
+    "user": 1,
+    "username_attempted": "example@admin.com",
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+    "location": "Local Network",
+    "device_info": "Desktop",
+    "browser": "Firefox",
+    "os": "Linux",
+    "status": "SUCCESS",
+    "timestamp": "2026-04-01T12:26:51.171Z",
+    "failure_reason": "",
+    "session_key": "kskorbh6j9vicewje8lmz6s4r28ostt2"
+  }
+},
+{
+  "model": "audits.databackup",
+  "pk": "d3a9d711-6d82-4dbe-8de9-bab75e386634",
+  "fields": {
+    "name": "users",
+    "description": "opojj",
+    "file_path": "",
+    "file_size": null,
+    "tables_backed_up": [],
+    "created_by": 1,
+    "status": "IN_PROGRESS",
+    "created_at": "2026-04-01T12:27:42.245Z",
+    "completed_at": null,
+    "error_message": "",
+    "checksum": ""
+  }
+}
+]

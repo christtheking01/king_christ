@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Family Membership{% else %}Add Family Membership{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="card-title">
+                        {% if object %}Edit Family Membership{% else %}Add Family Membership{% endif %}
+                    </h3>
+                    <p class="text-muted">
+                        {% if object %}Update family member assignment{% else %}Assign a user to a family{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'family_membership_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Memberships
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="{{ form.user.id_for_label }}" class="form-label">
+                                User <span class="text-danger">*</span>
+                            </label>
+                            {{ form.user }}
+                            {% if form.user.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.user.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select the user to add to family</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="{{ form.family.id_for_label }}" class="form-label">
+                                Family <span class="text-danger">*</span>
+                            </label>
+                            {{ form.family }}
+                            {% if form.family.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.family.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select the family</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="{{ form.role.id_for_label }}" class="form-label">
+                                Role <span class="text-danger">*</span>
+                            </label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.role.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select the role in the family</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'family_membership_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 
+                        {% if object %}Update Membership{% else %}Add Membership{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

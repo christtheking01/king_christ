@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Budget{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Create Budget</h1>
+            <p class="text-muted">Set up a new budget for financial planning</p>
+        </div>
+        <div>
+            <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Budgets
+            </a>
+        </div>
+    </div>
+
+    <!-- Budget Form -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Budget Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Basic Information -->
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Basic Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Budget Name *</label>
+                            <input type="text" name="name" id="name" class="form-control" 
+                                   placeholder="e.g., Q1 2024 Budget" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="total_amount" class="form-label">Total Amount ($) *</label>
+                            <input type="number" name="total_amount" id="total_amount" class="form-control" 
+                                   placeholder="0.00" step="0.01" min="0" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-control" rows="4" 
+                                      placeholder="Enter budget description..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Date Information -->
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Budget Period</h6>
+                        
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date *</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date *</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" required>
+                        </div>
+                        
+                        <!-- Budget Duration Display -->
+                        <div class="alert alert-info">
+                            <h6>Budget Duration</h6>
+                            <p class="mb-0">
+                                <strong>Start:</strong> <span id="display_start_date">Not set</span><br>
+                                <strong>End:</strong> <span id="display_end_date">Not set</span><br>
+                                <strong>Duration:</strong> <span id="duration">Not calculated</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Budget Status Preview -->
+                        <div class="alert alert-success">
+                            <h6>Budget Status</h6>
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle"></i> 
+                                Budget will be created as <strong>ACTIVE</strong> and can be managed from the budget list.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Budget Categories Preview -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-3">Budget Categories</h6>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note:</strong> After creating the budget, you can allocate funds to specific categories from the budget detail page.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'budget_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Budget
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Date change handlers
+document.getElementById('start_date').addEventListener('change', updateDateDisplay);
+document.getElementById('end_date').addEventListener('change', updateDateDisplay);
+
+// Update date display and calculate duration
+function updateDateDisplay() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    
+    if (startDate) {
+        const start = new Date(startDate);
+        document.getElementById('display_start_date').textContent = start.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    if (endDate) {
+        const end = new Date(endDate);
+        document.getElementById('display_end_date').textContent = end.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Calculate duration
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffMonths = Math.floor(diffDays / 30);
+        const remainingDays = diffDays % 30;
+        
+        let durationText = '';
+        if (diffMonths > 0) {
+            durationText = `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+            if (remainingDays > 0) {
+                durationText += ` and ${remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+            }
+        } else {
+            durationText = `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+        }
+        
+        document.getElementById('duration').textContent = durationText;
+        
+        // Validate dates
+        if (end < start) {
+            document.getElementById('duration').innerHTML = '<span class="text-danger">End date must be after start date!</span>';
+            document.querySelector('button[type="submit"]').disabled = true;
+        } else {
+            document.querySelector('button[type="submit"]').disabled = false;
+        }
+    }
+}
+
+// Set default dates (current month)
+function setDefaultDates() {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('end_date').value = lastDay.toISOString().split('T')[0];
+    
+    updateDateDisplay();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setDefaultDates();
+});
+</script>
+{% endblock %}

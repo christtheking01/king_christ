@@ -107,7 +107,4 @@ class TitheReceipt(models.Model):
         self.is_printed = True
         self.printed_at = timezone.now()
         self.print_attempts += 1
-
         self.save()
-
-

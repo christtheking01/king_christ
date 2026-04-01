@@ -104,26 +104,21 @@ class Committee(models.Model):
         ('MEMBER','Member')
     ]
 
-    POSITION_CHOICES = Position
     Commitee_name = models.CharField(max_length=250, blank=False, null=True)
     position = models.CharField(max_length=50, choices=Position, null=True, blank=True)
     member = models.ForeignKey("Member", verbose_name="commitee_names", on_delete=models.CASCADE)
     description = models.CharField (max_length=50, help_text ='Write the Functions of your commitee ', blank=True, null=True)
     phone = PhoneNumberField(max_length=255, null=True, blank=True, help_text=' Eg. +255 ')
 
-    class Meta:
-        unique_together = ['Commitee_name', 'position']  # Prevent duplicate positions in same committee
-
     def __str__(self):
-        return f'{self.Commitee_name} - {self.position}'
+        return f'{self.Commitee_name}'
     
-    def clean(self):
-        # Ensure no duplicate positions in the same committee
-        if Committee.objects.filter(
-            Commitee_name=self.Commitee_name, 
-            position=self.position
-        ).exclude(pk=self.pk).exists():
-            raise ValidationError(f"Position '{self.position}' already exists in this committee.")
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if Ministry.objects.filter(name=name).exists():
+            if not self.instance or self.instance.name != name:
+                raise ("A ministry with this name already exists.")
+        return name
 
 
 class MemberManager(models.Manager):
@@ -158,17 +153,17 @@ class MemberManager(models.Manager):
 
 
 class Member(models.Model):
-    name = models.CharField(max_length=255,unique='True')
+    name = models.CharField(max_length=255)
     code = models.TextField(help_text="001PT", null= True)
     active = models.BooleanField(default= True)
     shepherd = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)
     ministry = models.ForeignKey(Ministry, on_delete=models.CASCADE, null=True, blank=True)
-    telephone =PhoneNumberField(max_length=255, null=True, blank='True', help_text=' Eg. +255 ')
+    telephone =PhoneNumberField(max_length=255, null=True, help_text=' Eg. +255 ')
     location = models.CharField(max_length=255)
     fathers_name = models.CharField(max_length=255, null=True, blank=True)
     mothers_name = models.CharField(max_length=255, null=True, blank=True)
     guardians_name = models.CharField(max_length=255, null=True, blank=True)
-    new_believer_school = models.BooleanField(default = False)
+    new_believer_school = models.BooleanField(default=False)
     pays_tithe = models.BooleanField(default=False)
     working = models.BooleanField(default=False)
     schooling = models.BooleanField(default=False)
@@ -190,11 +185,4 @@ class Member(models.Model):
 
 
 class TestDb(models.Model):
-
     field = models.CharField(max_length=120)
-
-
-
-
-
-

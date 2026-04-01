@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
 from dotenv import load_dotenv,find_dotenv
 import africastalking
 import dj_database_url
@@ -32,26 +31,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+]
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = True
+"""DEBUG = config('DEBUG', default=False, cast=bool)"""
 
 
 DATABASE_URL = os.getenv('DATABASE_URL')
-SESSION_COOKIE_AGE = 1200
-SESSION_SAVE_EVERY_REQUEST = True
 
+
+
+"""ALLOWED_HOSTS = config('ALLOWED_HOST',default=''.split(',') )
+ # Allow all Render subdomains """
 
 ALLOWED_HOSTS = [
-    'www.christtheking.space',
-    'christtheking.space',
-    'web-production-593fe1.up.railway.ap', # Your Railway domain
+    'calm-connection-production.up.railway.app',  # Your Railway domain
+    'localhost',
     '127.0.0.1',
-]
- # Allow all Render subdomains 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-    'https://christtheking.space',
-    'https://www.christtheking.space'
 ]
 
 
@@ -72,7 +72,8 @@ INSTALLED_APPS = [
     'notifications',
     'rest_framework',
     'finance',
-    'catechesis'
+    'catechesis',
+    'audits',
 ]
 
 LOGIN_URL = 'login_user'  
@@ -92,6 +93,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'audits.middleware.AuditMiddleware',
+    'audits.middleware.LoginHistoryMiddleware',
     #'users.middleware.ForcePasswordChangeMiddleware',
 ]
 
@@ -108,6 +111,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'catechesis.context_processors.get_catechesis_context', 
+                'notifications.context_processors.notification_context',
             ],
         },
     },
@@ -119,18 +123,14 @@ WSGI_APPLICATION = 'christ_king_church.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-"""DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}"""
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL',default='sqlite:///db.sqlite3')
-    )
 }
+
+
 
 
 # Password validation
@@ -219,14 +219,3 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
-
-
-
-
-
-
-
-
-
-
-

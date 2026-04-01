@@ -10,7 +10,6 @@
         --text-main: #1e293b;
         --text-muted: #64748b;
         --border-color: #e2e8f0;
-        --error-color: #ef4444;
         --radius: 12px;
         --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
@@ -43,34 +42,6 @@
         font-size: 1.75rem;
     }
 
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    
-    .alert {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .alert-error {
-        background: #fee2e2;
-        color: var(--error-color);
-        border: 1px solid #fecaca;
-    }
-    
-    .alert-success {
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-    }
-    
-    .alert-warning {
-        background: #ffedd5;
-        color: #9a3412;
-        border: 1px solid #fed7aa;
-    }
-
     .form-grid-top {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -82,9 +53,6 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        max-height: 500px;
-        overflow-y: auto;
-        padding-right: 0.5rem;
     }
 
     .member-row {
@@ -92,29 +60,10 @@
         grid-template-columns: 2fr 1.5fr 1.5fr;
         gap: 1rem;
         background: #f1f5f9;
-        padding: 1.5rem;
+        padding: 1.25rem;
         border-radius: var(--radius);
         border: 1px solid var(--border-color);
         animation: fadeIn 0.3s ease;
-        position: relative;
-    }
-
-    .remove-row {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        background: var(--error-color);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 1.2rem;
     }
 
     @keyframes fadeIn {
@@ -133,7 +82,6 @@
         font-weight: 700;
         color: var(--text-main);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
     .input-field {
@@ -143,19 +91,12 @@
         font-size: 1rem;
         width: 100%;
         box-sizing: border-box;
-        transition: all 0.2s;
     }
 
     .input-field:focus {
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    }
-
-    .input-field[readonly] {
-        background-color: #f8fafc;
-        color: var(--text-muted);
-        cursor: not-allowed;
     }
 
     .btn-add {
@@ -169,13 +110,9 @@
         cursor: pointer;
         margin-top: 1rem;
         transition: 0.2s;
-        font-size: 1rem;
     }
 
-    .btn-add:hover { 
-        background: #e0e7ff;
-        transform: translateY(-1px);
-    }
+    .btn-add:hover { background: #e0e7ff; }
 
     .btn-save {
         background: var(--primary-color);
@@ -189,269 +126,111 @@
         cursor: pointer;
         margin-top: 2rem;
         box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
-        transition: all 0.2s;
     }
 
-    .btn-save:hover { 
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.5);
-    }
-
-    .btn-save:disabled {
-        background: var(--text-muted);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .loading-spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 8px;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
+    .btn-save:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
     @media (max-width: 768px) {
-        .form-grid-top, .member-row { 
-            grid-template-columns: 1fr; 
-        }
-        
-        .form-card {
-            padding: 1.5rem;
-        }
+        .form-grid-top, .member-row { grid-template-columns: 1fr; }
     }
 </style>
 
 <div class="form-wrapper">
     <div class="form-card">
         <div class="header-section">
-            <h2>🏛️ Committee Registration</h2>
+            <h2>Committee Registration</h2>
             <p style="color: var(--text-muted);">Assign members to a committee and define their roles.</p>
         </div>
 
-        <!-- Display messages -->
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form method="POST" id="committeeForm">
+        <form method="POST">
             {% csrf_token %}
             
-            <!-- Committee Main Details - FIXED: Use correct field name 'Commitee_name' -->
+            <!-- Committee Main Details -->
             <div class="form-grid-top">
                 <div class="form-group">
-                    <label>Committee Name <span style="color: var(--error-color);">*</span></label>
-                    <input type="text" name="Commitee_name" class="input-field" 
-                           placeholder="e.g. Finance Board" 
-                           value="{{ request.POST.Commitee_name|default:'' }}"
-                           required>
-                    <small style="color: var(--text-muted);">Unique committee identifier</small>
+                    <label>Committee Name</label>
+                    <input type="text" name="commitee_name" class="input-field" placeholder="e.g. Finance Board" required>
                 </div>
                 <div class="form-group">
                     <label>Functions / Description</label>
-                    <input type="text" name="description" class="input-field" 
-                           placeholder="e.g. Oversees budget and audits"
-                           value="{{ request.POST.description|default:'' }}">
+                    <input type="text" name="description" class="input-field" placeholder="e.g. Oversees budget and audits">
                 </div>
             </div>
 
-            <label style="margin-bottom: 1rem; display: block; font-weight: 700;">
-                👥 Members & Assignments <span style="color: var(--error-color);">*</span>
-            </label>
+            <label style="margin-bottom: 1rem; display: block;">Members & Assignments</label>
             
             <div id="row-container" class="row-container">
-                <!-- Initial Member Row -->
+                <!-- Member Row Template -->
                 <div class="member-row">
-                    <button type="button" class="remove-row" onclick="removeRow(this)" style="display: none;">×</button>
                     <div class="form-group">
-                        <label>Member Name <span style="color: var(--error-color);">*</span></label>
-                        <input list="member-data" name="members[]" 
-                               class="input-field member-input" 
-                               placeholder="Search or type member name..."
-                               autocomplete="off"
-                               required>
+                        <label>Member Name</label>
+                        <input list="member-data" name="members[]" class="input-field member-input" placeholder="Search Member..." required>
                     </div>
                     <div class="form-group">
-                        <label>Position <span style="color: var(--error-color);">*</span></label>
+                        <label>Position</label>
                         <select name="positions[]" class="input-field" required>
-                            <option value="">-- Select Role --</option>
+                            <option value="">Select Role</option>
                             {% for val, label in positions %}
                             <option value="{{ val }}">{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Phone (Auto-filled)</label>
-                        <input type="tel" name="phones[]" class="input-field phone-input" 
-                               placeholder="Auto-populates from member" 
-                               readonly>
+                        <label>Phone (Auto)</label>
+                        <input type="tel" name="phones[]" class="input-field phone-input" placeholder="0xxx-xxx-xxx">
                     </div>
                 </div>
             </div>
 
-            <!-- Datalist for Member Search -->
+            <!-- Datalist for Search -->
             <datalist id="member-data">
                 {% for m in members %}
-                <option value="{{ m.name }}" 
-                        data-phone="{{ m.phone|default:'' }}"
-                        data-id="{{ m.id }}">
+                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}">
                 {% endfor %}
             </datalist>
 
             <button type="button" id="add-row-btn" class="btn-add">
-                ➕ Add Another Member Position
+                + Add Another Member Position
             </button>
 
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button type="submit" class="btn-save" id="submitBtn">
-                    💾 SUBMIT COMMITTEE RECORDS
-                </button>
-                <a href="{% url 'list_committees' %}" 
-                   style="background: #f1f5f9; color: var(--text-main); padding: 1.25rem 2rem; 
-                          border-radius: var(--radius); text-decoration: none; font-weight: 600;
-                          text-align: center; flex: 1;">
-                    Cancel
-                </a>
-            </div>
+            <button type="submit" class="btn-save">SUBMIT COMMITTEE RECORDS</button>
         </form>
     </div>
 </div>
 
 <script>
-    // FIXED: Better phone autopopulation with case-insensitive matching
+    // 1. Autopopulate Phone Number logic
     document.addEventListener('input', function (e) {
         if (e.target.classList.contains('member-input')) {
             const input = e.target;
-            const value = input.value.trim();
+            const value = input.value;
             const datalist = document.getElementById('member-data');
             const parentRow = input.closest('.member-row');
-            
-            if (!parentRow) return;
-            
             const phoneField = parentRow.querySelector('.phone-input');
 
-            // Case-insensitive search
-            const option = Array.from(datalist.options).find(opt => 
-                opt.value.toLowerCase() === value.toLowerCase()
-            );
+            // Look for matching name in datalist
+            const option = Array.from(datalist.options).find(opt => opt.value === value);
 
             if (option) {
                 const phone = option.getAttribute('data-phone');
-                phoneField.value = phone && phone !== 'None' ? phone : 'No phone on record';
-                phoneField.style.color = phone && phone !== 'None' ? 'var(--text-main)' : '#94a3b8';
-            } else {
-                phoneField.value = '';
+                phoneField.value = phone ? phone : '';
             }
         }
     });
 
-    // FIXED: Dynamic row cloning with proper cleanup
+    // 2. Add Dynamic Rows logic
     document.getElementById('add-row-btn').addEventListener('click', function() {
         const container = document.getElementById('row-container');
         const firstRow = container.querySelector('.member-row');
         
-        // Clone the first row
+        // Clone row
         const newRow = firstRow.cloneNode(true);
         
-        // Clear all input values
-        newRow.querySelectorAll('input:not([readonly])').forEach(input => {
-            input.value = '';
-            input.removeAttribute('required');
-        });
-        
-        // Clear readonly phone field
-        newRow.querySelectorAll('input[readonly]').forEach(input => {
-            input.value = '';
-        });
-        
-        // Reset select
-        const select = newRow.querySelector('select');
-        if (select) select.selectedIndex = 0;
-        
-        // Show remove button for additional rows
-        const removeBtn = newRow.querySelector('.remove-row');
-        if (removeBtn) {
-            removeBtn.style.display = 'flex';
-        }
+        // Reset values in new row
+        newRow.querySelectorAll('input').forEach(input => input.value = '');
+        newRow.querySelector('select').selectedIndex = 0;
 
         container.appendChild(newRow);
-        
-        // Scroll to new row
-        newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    });
-
-    // Remove row function
-    window.removeRow = function(button) {
-        const container = document.getElementById('row-container');
-        const row = button.closest('.member-row');
-        
-        // Don't remove if it's the last row
-        if (container.children.length > 1) {
-            row.remove();
-        } else {
-            alert('At least one member row is required.');
-        }
-    };
-
-    // FIXED: Form validation before submit
-    document.getElementById('committeeForm').addEventListener('submit', function(e) {
-        const submitBtn = document.getElementById('submitBtn');
-        const committeeName = document.querySelector('input[name="Commitee_name"]').value.trim();
-        
-        // Validate committee name
-        if (!committeeName) {
-            e.preventDefault();
-            alert('Please enter a committee name.');
-            return;
-        }
-        
-        // Validate at least one member is selected
-        const memberInputs = document.querySelectorAll('input[name="members[]"]');
-        let hasValidMember = false;
-        
-        memberInputs.forEach(input => {
-            if (input.value.trim() !== '') {
-                hasValidMember = true;
-            }
-        });
-        
-        if (!hasValidMember) {
-            e.preventDefault();
-            alert('Please add at least one member to the committee.');
-            return;
-        }
-        
-        // Disable submit button to prevent double submission
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span> SUBMITTING...';
-    });
-
-    // Add remove button to existing rows (except first)
-    document.addEventListener('DOMContentLoaded', function() {
-        const rows = document.querySelectorAll('.member-row');
-        rows.forEach((row, index) => {
-            if (index > 0) {
-                const removeBtn = row.querySelector('.remove-row');
-                if (removeBtn) {
-                    removeBtn.style.display = 'flex';
-                }
-            }
-        });
     });
 </script>
 

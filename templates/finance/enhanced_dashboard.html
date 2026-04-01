@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financial Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Financial Dashboard</h1>
+            <p class="text-muted">Comprehensive financial overview and management</p>
+        </div>
+        <div>
+            <a href="{% url 'add_transaction' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Transaction
+            </a>
+            <a href="{% url 'generate_payroll' %}" class="btn btn-success">
+                <i class="fas fa-calculator"></i> Generate Payroll
+            </a>
+        </div>
+    </div>
+
+    <!-- Financial Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Income</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_income|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Total Expenses</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_expenses|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Balance</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ balance|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Monthly Payroll</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_monthly_payroll|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Metrics Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient-primary text-white shadow">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h1 mb-0">{{ employees_count }}</div>
+                        <div class="small">Active Employees</div>
+                        <a href="{% url 'employee_list' %}" class="btn btn-sm btn-light mt-2">Manage</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient-success text-white shadow">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h1 mb-0">{{ active_budgets_count }}</div>
+                        <div class="small">Active Budgets</div>
+                        <a href="{% url 'budget_list' %}" class="btn btn-sm btn-light mt-2">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient-warning text-white shadow">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h1 mb-0">{{ pending_expenses_count }}</div>
+                        <div class="small">Pending Expenses</div>
+                        <a href="{% url 'expense_report_list' %}" class="btn btn-sm btn-light mt-2">Review</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient-info text-white shadow">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h1 mb-0">{{ upcoming_payroll_count }}</div>
+                        <div class="small">Upcoming Payroll</div>
+                        <a href="{% url 'payroll_list' %}" class="btn btn-sm btn-light mt-2">Process</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables Row -->
+    <div class="row">
+        <!-- Financial Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Financial Overview - Last 6 Months</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                            <a class="dropdown-item" href="#">Export Data</a>
+                            <a class="dropdown-item" href="#">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="financialChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Transactions</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                {% if transaction.type == 'Income' %}
+                                    <i class="fas fa-arrow-up text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-arrow-down text-danger"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="small text-gray-500">{{ transaction.date|date:"M d, Y" }}</div>
+                                <div class="fw-bold">{{ transaction.description|truncatechars:30 }}</div>
+                            </div>
+                            <div class="flex-shrink-0 text-end">
+                                <div class="fw-bold {% if transaction.type == 'Income' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if transaction.type == 'Income' %}+{% endif %}${{ transaction.amount|floatformat:2 }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No recent transactions</p>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-primary">View All Transactions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{% url 'add_transaction' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-plus-circle"></i> Add Transaction
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{% url 'add_employee' %}" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-user-plus"></i> Add Employee
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{% url 'generate_payroll' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-calculator"></i> Generate Payroll
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{% url 'create_budget' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-chart-pie"></i> Create Budget
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Financial Chart
+const ctx = document.getElementById('financialChart').getContext('2d');
+const financialChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Income',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            },
+            {
+                label: 'Expenses',
+                data: [],
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '$' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Load financial data
+fetch('/finance/api/financial-summary/')
+    .then(response => response.json())
+    .then(data => {
+        financialChart.data.labels = data.monthly_data.map(item => item.month);
+        financialChart.data.datasets[0].data = data.monthly_data.map(item => item.income);
+        financialChart.data.datasets[1].data = data.monthly_data.map(item => item.expenses);
+        financialChart.update();
+    })
+    .catch(error => console.error('Error loading financial data:', error));
+</script>
+{% endblock %}
