@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics & Reporting{% endblock %}
+
+{% block content %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Analytics & Reporting Dashboard</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Analytics</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Range Filter -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-calendar-alt mr-2"></i>Date Range
+              </h3>
+            </div>
+            <div class="card-body">
+              <form method="get" class="form-inline" id="dateFilterForm">
+                <div class="form-group mr-3">
+                  <label for="period" class="mr-2">Period:</label>
+                  <select name="period" id="period" class="form-control">
+                    <option value="week" {% if request.GET.period == 'week' %}selected{% endif %}>Last 7 Days</option>
+                    <option value="month" {% if request.GET.period == 'month' %}selected{% endif %}>Last Month</option>
+                    <option value="quarter" {% if request.GET.period == 'quarter' %}selected{% endif %}>Last Quarter</option>
+                    <option value="year" {% if not request.GET.period or request.GET.period == 'year' %}selected{% endif %}>Last Year</option>
+                    <option value="custom" {% if request.GET.period == 'custom' %}selected{% endif %}>Custom Range</option>
+                  </select>
+                </div>
+                <div class="form-group mr-3" id="customDateRange" style="display: none;">
+                  <input type="date" name="start_date" class="form-control mr-2" value="{{ start_date }}">
+                  <span class="mr-2">to</span>
+                  <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-filter mr-1"></i> Apply
+                </button>
+                <a href="{% url 'tithing_report' %}?{{ request.GET.urlencode }}" class="btn btn-success ml-2">
+                  <i class="fas fa-file-alt mr-1"></i> Tithing Report
+                </a>
+                <a href="{% url 'financial_report' %}?{{ request.GET.urlencode }}" class="btn btn-info ml-2">
+                  <i class="fas fa-chart-line mr-1"></i> Financial Report
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="row">
+        <!-- Tithe Summary -->
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3 id="titheTotal">Loading...</h3>
+              <p>Total Tithes</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-donate"></i>
+            </div>
+            <span class="small-box-footer">
+              <span id="titheYoY">-</span> vs last year
+            </span>
+          </div>
+        </div>
+
+        <!-- Income Summary -->
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3 id="incomeTotal">Loading...</h3>
+              <p>Total Income</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-arrow-up"></i>
+            </div>
+            <span class="small-box-footer">
+              <i class="fas fa-chart-line"></i> Income Overview
+            </span>
+          </div>
+        </div>
+
+        <!-- Expense Summary -->
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3 id="expenseTotal">Loading...</h3>
+              <p>Total Expenses</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+            <span class="small-box-footer">
+              <span id="netBalance">-</span> Net
+            </span>
+          </div>
+        </div>
+
+        <!-- Member Summary -->
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-primary">
+            <div class="inner">
+              <h3 id="memberTotal">Loading...</h3>
+              <p>Active Members</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <span class="small-box-footer">
+              <span id="memberGrowth">-</span> growth
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="row">
+        <!-- Tithe Trends Chart -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-chart-line mr-2"></i>Tithe Trends
+              </h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="titheTrendsChart" style="height: 300px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Contributors -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-trophy mr-2"></i>Top Contributors
+              </h3>
+            </div>
+            <div class="card-body p-0">
+              <ul class="products-list product-list-in-card pl-2 pr-2" id="topContributors">
+                <li class="item text-center text-muted">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="row">
+        <!-- Finance Overview -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-chart-bar mr-2"></i>Income vs Expense
+              </h3>
+            </div>
+            <div class="card-body">
+              <canvas id="financeChart" style="height: 250px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-chart-pie mr-2"></i>Category Breakdown
+              </h3>
+            </div>
+            <div class="card-body">
+              <canvas id="categoryChart" style="height: 250px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 3 -->
+      <div class="row">
+        <!-- Member Distribution -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-users mr-2"></i>Ministry Distribution
+              </h3>
+            </div>
+            <div class="card-body">
+              <canvas id="ministryChart" style="height: 250px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member Growth -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-user-plus mr-2"></i>Membership Growth
+              </h3>
+            </div>
+            <div class="card-body">
+              <canvas id="growthChart" style="height: 250px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget Utilization Table -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-wallet mr-2"></i>Budget Utilization
+              </h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Budget Name</th>
+                    <th>Total Amount</th>
+                    <th>Spent</th>
+                    <th>Remaining</th>
+                    <th>Utilization</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody id="budgetTable">
+                  <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// Date range filter toggle
+document.getElementById('period').addEventListener('change', function() {
+  const customRange = document.getElementById('customDateRange');
+  if (this.value === 'custom') {
+    customRange.style.display = 'block';
+  } else {
+    customRange.style.display = 'none';
+  }
+});
+
+// Format currency
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0
+  }).format(amount);
+}
+
+// Load Tithe Analytics
+function loadTitheData() {
+  console.log('Loading tithe data...');
+  fetch('/analytics/api/tithes/?' + new URLSearchParams(window.location.search))
+    .then(response => {
+      console.log('Tithe API response:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Tithe data received:', data);
+      
+      // Handle empty data
+      if (!data.summary || data.summary.total_tithes === 0) {
+        document.getElementById('titheTotal').textContent = '$0';
+        document.getElementById('titheYoY').innerHTML = '<span class="text-muted">No data</span>';
+        document.getElementById('topContributors').innerHTML = '<li class="item text-center text-muted">No tithe data available</li>';
+        
+        // Show empty chart
+        new Chart(document.getElementById('titheTrendsChart'), {
+          type: 'line',
+          data: {
+            labels: ['No Data'],
+            datasets: [{
+              label: 'Tithe Amount',
+              data: [0],
+              borderColor: '#28a745',
+              backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+          }
+        });
+        return;
+      }
+      
+      // Update summary cards
+      document.getElementById('titheTotal').textContent = formatCurrency(data.summary.total_tithes);
+      const yoyClass = data.summary.yoy_change >= 0 ? 'text-success' : 'text-danger';
+      const yoyIcon = data.summary.yoy_change >= 0 ? '↑' : '↓';
+      document.getElementById('titheYoY').innerHTML = `<span class="${yoyClass}">${yoyIcon} ${Math.abs(data.summary.yoy_change)}%</span>`;
+      
+      // Update Top Contributors
+      if (data.top_contributors && data.top_contributors.length > 0) {
+        const contributorsHtml = data.top_contributors.map((c, index) => `
+          <li class="item">
+            <div class="product-img">
+              <span class="badge badge-${index < 3 ? 'success' : 'secondary'}">${index + 1}</span>
+            </div>
+            <div class="product-info">
+              <span class="product-title">${c.name__name || 'Unknown'}</span>
+              <span class="product-description">${c.payments || 0} payments</span>
+            </div>
+            <div class="product-price">${formatCurrency(c.total || 0)}</div>
+          </li>
+        `).join('');
+        document.getElementById('topContributors').innerHTML = contributorsHtml;
+      } else {
+        document.getElementById('topContributors').innerHTML = '<li class="item text-center text-muted">No contributors found</li>';
+      }
+      
+      // Tithe Trends Chart
+      if (data.monthly_labels && data.monthly_labels.length > 0) {
+        new Chart(document.getElementById('titheTrendsChart'), {
+          type: 'line',
+          data: {
+            labels: data.monthly_labels,
+            datasets: [{
+              label: 'Tithe Amount',
+              data: data.monthly_amounts,
+              borderColor: '#28a745',
+              backgroundColor: 'rgba(40, 167, 69, 0.1)',
+              tension: 0.4,
+              fill: true
+            }, {
+              label: 'Number of Payments',
+              data: data.monthly_counts,
+              borderColor: '#17a2b8',
+              backgroundColor: 'rgba(23, 162, 184, 0.1)',
+              tension: 0.4,
+              fill: true,
+              yAxisID: 'y1'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                ticks: {
+                  callback: function(value) {
+                    return formatCurrency(value);
+                  }
+                }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: {
+                  drawOnChartArea: false,
+                },
+              }
+            }
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error loading tithe data:', error);
+      document.getElementById('titheTotal').textContent = 'Error';
+      document.getElementById('topContributors').innerHTML = '<li class="item text-center text-danger">Failed to load data</li>';
+    });
+}
+
+// Load Finance Analytics
+function loadFinanceData() {
+  console.log('Loading finance data...');
+  fetch('/analytics/api/finance/?' + new URLSearchParams(window.location.search))
+    .then(response => {
+      console.log('Finance API response:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Finance data received:', data);
+      
+      // Handle empty data
+      if (!data.summary || (data.summary.total_income === 0 && data.summary.total_expense === 0)) {
+        document.getElementById('incomeTotal').textContent = '$0';
+        document.getElementById('expenseTotal').textContent = '$0';
+        document.getElementById('netBalance').innerHTML = '<span class="text-muted">$0</span>';
+        document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-muted">No financial data available</td></tr>';
+        
+        // Show empty charts
+        new Chart(document.getElementById('financeChart'), {
+          type: 'bar',
+          data: {
+            labels: ['No Data'],
+            datasets: [{ label: 'Income', data: [0], backgroundColor: '#17a2b8' }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        
+        new Chart(document.getElementById('categoryChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['No Data'],
+            datasets: [{ data: [1], backgroundColor: ['#d2d6de'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        return;
+      }
+      
+      // Update summary cards
+      document.getElementById('incomeTotal').textContent = formatCurrency(data.summary.total_income || 0);
+      document.getElementById('expenseTotal').textContent = formatCurrency(data.summary.total_expense || 0);
+      const netClass = (data.summary.net || 0) >= 0 ? 'text-success' : 'text-danger';
+      document.getElementById('netBalance').innerHTML = `<span class="${netClass}">${formatCurrency(data.summary.net || 0)}</span>`;
+      
+      // Finance Chart
+      new Chart(document.getElementById('financeChart'), {
+        type: 'bar',
+        data: {
+          labels: data.monthly_labels,
+          datasets: [{
+            label: 'Income',
+            data: data.monthly_income,
+            backgroundColor: '#17a2b8'
+          }, {
+            label: 'Expense',
+            data: data.monthly_expense,
+            backgroundColor: '#ffc107'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              ticks: {
+                callback: function(value) {
+                  return formatCurrency(value);
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Category Chart
+      const categories = Object.keys(data.category_breakdown || {});
+      if (categories.length > 0) {
+        const expenseData = categories.map(c => data.category_breakdown[c].expense || 0);
+        
+        new Chart(document.getElementById('categoryChart'), {
+          type: 'doughnut',
+          data: {
+            labels: categories,
+            datasets: [{
+              data: expenseData,
+              backgroundColor: [
+                '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc',
+                '#d2d6de', '#605ca8', '#ff851b', '#39cccc', '#01ff70'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right'
+              }
+            }
+          }
+        });
+      }
+      
+      // Budget Table
+      if (data.budget_utilization && data.budget_utilization.length > 0) {
+        const budgetHtml = data.budget_utilization.map(b => `
+          <tr>
+            <td>${b.name || 'N/A'}</td>
+            <td>${formatCurrency(b.total || 0)}</td>
+            <td>${formatCurrency(b.spent || 0)}</td>
+            <td>${formatCurrency(b.remaining || 0)}</td>
+            <td>${b.utilization || 0}%</td>
+            <td>
+              <div class="progress progress-sm">
+                <div class="progress-bar ${(b.utilization || 0) > 80 ? 'bg-danger' : (b.utilization || 0) > 50 ? 'bg-warning' : 'bg-success'}" 
+                     style="width: ${b.utilization || 0}%"></div>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+        document.getElementById('budgetTable').innerHTML = budgetHtml;
+      } else {
+        document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-muted">No budget data available</td></tr>';
+      }
+    })
+    .catch(error => {
+      console.error('Error loading finance data:', error);
+      document.getElementById('incomeTotal').textContent = 'Error';
+      document.getElementById('expenseTotal').textContent = 'Error';
+      document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load data</td></tr>';
+    });
+}
+
+// Load Member Analytics
+function loadMemberData() {
+  console.log('Loading member data...');
+  fetch('/analytics/api/members/')
+    .then(response => {
+      console.log('Member API response:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Member data received:', data);
+      
+      // Handle empty data
+      if (!data.summary || data.summary.active_members === 0) {
+        document.getElementById('memberTotal').textContent = '0';
+        document.getElementById('memberGrowth').textContent = '0';
+        
+        // Show empty charts
+        new Chart(document.getElementById('ministryChart'), {
+          type: 'pie',
+          data: {
+            labels: ['No Data'],
+            datasets: [{ data: [1], backgroundColor: ['#d2d6de'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        
+        new Chart(document.getElementById('growthChart'), {
+          type: 'bar',
+          data: {
+            labels: ['No Data'],
+            datasets: [{ label: 'New Members', data: [0], backgroundColor: '#3c8dbc' }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        return;
+      }
+      
+      // Update summary card
+      document.getElementById('memberTotal').textContent = (data.summary.active_members || 0).toLocaleString();
+      const growthCount = (data.growth && data.growth.counts) ? data.growth.counts.reduce((a, b) => a + b, 0) : 0;
+      document.getElementById('memberGrowth').textContent = '+' + growthCount;
+      
+      // Ministry Chart
+      if (data.ministry_distribution && data.ministry_distribution.length > 0) {
+        new Chart(document.getElementById('ministryChart'), {
+          type: 'pie',
+          data: {
+            labels: data.ministry_distribution.map(m => m.name || 'Unknown'),
+            datasets: [{
+              data: data.ministry_distribution.map(m => m.member_count || 0),
+              backgroundColor: [
+                '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc',
+                '#d2d6de', '#605ca8', '#ff851b', '#39cccc', '#01ff70'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right'
+              }
+            }
+          }
+        });
+      }
+      
+      // Growth Chart
+      if (data.growth && data.growth.months && data.growth.months.length > 0) {
+        new Chart(document.getElementById('growthChart'), {
+          type: 'bar',
+          data: {
+            labels: data.growth.months,
+            datasets: [{
+              label: 'New Members',
+              data: data.growth.counts || [],
+              backgroundColor: '#3c8dbc'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error loading member data:', error);
+      document.getElementById('memberTotal').textContent = 'Error';
+      document.getElementById('memberGrowth').textContent = 'Error';
+    });
+}
+
+// Load all data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  loadTitheData();
+  loadFinanceData();
+  loadMemberData();
+});
+</script>
+
+<style>
+.small-box {
+  border-radius: 0.25rem;
+  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+  display: block;
+  margin-bottom: 20px;
+  position: relative;
+}
+.small-box > .inner {
+  padding: 10px;
+}
+.small-box h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  padding: 0;
+  white-space: nowrap;
+  color: #fff;
+}
+.small-box p {
+  font-size: 1rem;
+  color: #fff;
+}
+.small-box .icon {
+  color: rgba(0,0,0,.15);
+  z-index: 0;
+}
+.small-box .icon > i {
+  font-size: 90px;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  transition: transform .3s linear;
+}
+.small-box > .small-box-footer {
+  background-color: rgba(0,0,0,.1);
+  color: #fff;
+  display: block;
+  padding: 3px 0;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  z-index: 10;
+}
+.bg-success { background-color: #28a745 !important; }
+.bg-info { background-color: #17a2b8 !important; }
+.bg-warning { background-color: #ffc107 !important; color: #1f2d3d !important; }
+.bg-primary { background-color: #007bff !important; }
+.products-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.products-list > .item {
+  border-radius: 3px;
+  background-color: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #f4f4f4;
+  display: flex;
+  align-items: center;
+}
+.product-img {
+  margin-right: 10px;
+}
+.product-info {
+  flex: 1;
+}
+.product-title {
+  font-weight: 600;
+  display: block;
+}
+.product-description {
+  font-size: 0.85rem;
+  color: #666;
+}
+.product-price {
+  font-weight: 700;
+  color: #28a745;
+}
+</style>
+{% endblock %}

@@ -46,6 +46,59 @@
                 </a>
               </div>
 
+              <!-- Events & Calendar Dropdown -->
+              <div class="nav-item dropdown-menu">
+                <div class="nav-link nav-toggle {% if events_active %}active{% endif %}" data-target="events-submenu">
+                  <div class="nav-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                  </div>
+                  <div class="nav-text">Events & Calendar</div>
+                  <div class="nav-chevron">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <div class="submenu" id="events-submenu" {% if events_active %}style="max-height: 500px;"{% endif %}>
+                  <a href="{% url 'calendar' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="submenu-text">Calendar View</div>
+                  </a>
+                  <a href="{% url 'event_list' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-list"></i>
+                    </div>
+                    <div class="submenu-text">All Events</div>
+                  </a>
+                  <a href="{% url 'liturgical_calendar' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-church"></i>
+                    </div>
+                    <div class="submenu-text">Liturgical Calendar</div>
+                  </a>
+                  <a href="{% url 'events_dashboard' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="submenu-text">Events Dashboard</div>
+                  </a>
+                  {% if user.is_authenticated %}
+                  <a href="{% url 'my_registrations' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="submenu-text">My Registrations</div>
+                  </a>
+                  <a href="{% url 'event_create' %}" class="submenu-link">
+                    <div class="submenu-icon">
+                      <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="submenu-text">Create Event</div>
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+
               <!-- Ministries Dropdown -->
               <div class="nav-item dropdown-menu">
                 <div class="nav-link nav-toggle {% if ministries_active_add or ministries_active_list %}active{% endif %}" data-target="ministries-submenu">
@@ -315,17 +368,14 @@
                     </div>
                     <div class="submenu-text">Budgets</div>
                   </a>
+                  <a href="{% url 'pledge_list' %}" class="submenu-link {% if pledge_list_active %}active{% endif %}">
+                    <div class="submenu-icon">
+                      <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="submenu-text">Event Pledges</div>
+                  </a>
                 </div>
               </div>
-
-            <div class="nav-item">
-                <a href="{% url 'financial_dashboard' %}" class="nav-link {% if finance_active_page %}active{% endif %}">
-                    <div class="nav-icon">
-                        <i class="fas fa-money-check-alt"></i>
-                    </div>
-                    <div class="nav-text">Financial Tracker</div>
-                </a>
-            </div>
 
               {% endif %}
 
@@ -435,6 +485,39 @@
                         <i class="fas fa-database"></i>
                       </div>
                       <div class="submenu-text">Data Backups</div>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Analytics & Reports Dropdown -->
+                <div class="nav-item dropdown-menu">
+                  <div class="nav-link nav-toggle {% if analytics_active or analytics_tithe_active or analytics_finance_active or analytics_member_active %}active{% endif %}" data-target="analytics-submenu">
+                    <div class="nav-icon">
+                      <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="nav-text">Analytics & Reports</div>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-down"></i>
+                    </div>
+                  </div>
+                  <div class="submenu" id="analytics-submenu" {% if analytics_active or analytics_tithe_active or analytics_finance_active or analytics_member_active %}style="max-height: 500px;" {% endif %}>
+                    <a href="{% url 'analytics_dashboard' %}" class="submenu-link {% if analytics_active %}active{% endif %}">
+                      <div class="submenu-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                      </div>
+                      <div class="submenu-text">Analytics Dashboard</div>
+                    </a>
+                    <a href="{% url 'tithing_report' %}" class="submenu-link {% if analytics_tithe_active %}active{% endif %}">
+                      <div class="submenu-icon">
+                        <i class="fas fa-donate"></i>
+                      </div>
+                      <div class="submenu-text">Tithing Reports</div>
+                    </a>
+                    <a href="{% url 'financial_report' %}" class="submenu-link {% if analytics_finance_active %}active{% endif %}">
+                      <div class="submenu-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                      </div>
+                      <div class="submenu-text">Financial Reports</div>
                     </a>
                   </div>
                 </div>

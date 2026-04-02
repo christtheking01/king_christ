@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tithing Report{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Tithing Report</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'analytics_dashboard' %}">Analytics</a></li>
+            <li class="breadcrumb-item active">Tithing Report</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Summary Cards -->
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <h3>Total Tithes</h3>
+              <h2>${{ summary.total|default:"0.00" }}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-info text-white">
+            <div class="card-body">
+              <h3>Total Payments</h3>
+              <h2>{{ summary.count|default:"0" }}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h3>Average Tithe</h3>
+              <h2>${{ summary.avg|default:"0.00" }}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-secondary text-white">
+            <div class="card-body">
+              <h3>Date Range</h3>
+              <h6>{{ start_date|date:"M d, Y" }} - {{ end_date|date:"M d, Y" }}</h6>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Breakdown -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Monthly Breakdown</h3>
+            </div>
+            <div class="card-body table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Amount</th>
+                    <th>Payments</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for month in monthly_data %}
+                  <tr>
+                    <td>{{ month.month|date:"F Y" }}</td>
+                    <td>${{ month.total }}</td>
+                    <td>{{ month.count }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method Breakdown -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Payment Methods</h3>
+            </div>
+            <div class="card-body table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Amount</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for method in by_method %}
+                  <tr>
+                    <td>{{ method.status|title }}</td>
+                    <td>${{ method.total }}</td>
+                    <td>{{ method.count }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Tithes Table -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">All Tithe Payments</h3>
+              <div class="card-tools">
+                <a href="?export=excel" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+                <a href="?export=pdf" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+              </div>
+            </div>
+            <div class="card-body table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Member</th>
+                    <th>Phone</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for tithe in tithes %}
+                  <tr>
+                    <td>{{ tithe.date|date:"Y-m-d" }}</td>
+                    <td>{{ tithe.name.name }}</td>
+                    <td>{{ tithe.contact_number }}</td>
+                    <td>${{ tithe.amount }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ tithe.get_status_display }}</span>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="5" class="text-center">No tithes found for this period</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

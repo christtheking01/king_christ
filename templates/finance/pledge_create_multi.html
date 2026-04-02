@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Event Pledges{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hand-holding-heart me-2 text-primary"></i>
+                        Create Event Pledges
+                    </h4>
+                    <p class="text-muted mb-0">Add pledges for members or external supporters with individual amounts</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="pledgeForm">
+                        {% csrf_token %}
+                        
+                        <!-- Event Selection -->
+                        <div class="mb-4">
+                            <label for="event" class="form-label fw-bold">Event <span class="text-danger">*</span></label>
+                            <select name="event" id="event" class="form-select form-select-lg" required>
+                                <option value="">Select Event</option>
+                                {% for event in events %}
+                                <option value="{{ event.id }}">
+                                    {{ event.title }} ({{ event.start_date|date:'M d, Y' }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Common Due Date -->
+                        <div class="mb-4">
+                            <label for="due_date" class="form-label fw-bold">Due Date (Common for all pledges)</label>
+                            <input type="date" name="due_date" id="due_date" class="form-control">
+                            <div class="form-text">Optional deadline that applies to all pledges below</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Pledge Entries -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Pledge Entries</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPledgeEntry()">
+                                <i class="fas fa-plus me-1"></i>Add Entry
+                            </button>
+                        </div>
+
+                        <div id="pledgeEntries">
+                            <!-- Pledge entry rows will be added here -->
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="alert alert-info mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-calculator me-2"></i>Total Promised Amount:</span>
+                                <span class="h4 mb-0" id="totalAmount">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Number of pledges:</span>
+                                <span id="pledgeCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'pledge_list' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Create Pledges
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>How to Add Pledges</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-search me-2 text-primary"></i>For Church Members</h6>
+                        <p class="text-muted small">Type the member's name to search. Select from the dropdown. Their phone number from the system will be used for SMS.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-user-plus me-2 text-success"></i>For External Supporters</h6>
+                        <p class="text-muted small">Leave the member field empty and enter the person's name and phone number manually.</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-dollar-sign me-2 text-warning"></i>Individual Amounts</h6>
+                        <p class="text-muted small">Each person can have a different pledge amount. Enter the specific amount for each person.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template for pledge entry row -->
+<template id="pledgeEntryTemplate">
+    <div class="pledge-entry border rounded p-3 mb-3 bg-light">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge bg-secondary entry-number">#<span class="num">1</span></span>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEntry(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        
+        <div class="row g-3">
+            <!-- Member Search -->
+            <div class="col-md-6">
+                <label class="form-label small text-muted">Search Member (optional)</label>
+                <div class="position-relative">
+                    <input type="text" 
+                           class="form-control member-search" 
+                           placeholder="Type to search members..."
+                           autocomplete="off"
+                           oninput="searchMembers(this)">
+                    <input type="hidden" class="member-id" name="member_ids[]" value="">
+                    <div class="dropdown-menu w-100 member-results" style="display: none; position: absolute; z-index: 1000;">
+                        <!-- Search results -->
+                    </div>
+                </div>
+                <div class="form-text selected-member" style="display: none;">
+                    <span class="text-success"><i class="fas fa-check me-1"></i>Member selected</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 ms-2" onclick="clearMember(this)">Clear</button>
+                </div>
+            </div>
+
+            <!-- Amount -->
+            <div class="col-md-6">
+                <label class="form-label small text-muted">Pledge Amount <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" name="amounts[]" class="form-control pledge-amount" 
+                           step="0.01" min="0.01" required
+                           onchange="updateTotal()">
+                </div>
+            </div>
+
+            <!-- External Name (shown when no member selected) -->
+            <div class="col-md-6 external-fields">
+                <label class="form-label small text-muted">External Name</label>
+                <input type="text" name="external_names[]" class="form-control external-name" 
+                       placeholder="Enter name for non-members">
+            </div>
+
+            <!-- External Phone -->
+            <div class="col-md-6 external-fields">
+                <label class="form-label small text-muted">Phone Number</label>
+                <input type="tel" name="external_phones[]" class="form-control external-phone" 
+                       placeholder="+255...">
+                <div class="form-text">Required for SMS notifications</div>
+            </div>
+
+            <!-- Notes -->
+            <div class="col-12">
+                <label class="form-label small text-muted">Notes (optional)</label>
+                <input type="text" name="entry_notes[]" class="form-control" 
+                       placeholder="Any special notes for this pledge...">
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+let entryCount = 0;
+
+function addPledgeEntry() {
+    const template = document.getElementById('pledgeEntryTemplate');
+    const container = document.getElementById('pledgeEntries');
+    const clone = template.content.cloneNode(true);
+    
+    entryCount++;
+    clone.querySelector('.entry-number .num').textContent = entryCount;
+    
+    container.appendChild(clone);
+    updateEntryNumbers();
+    
+    // Focus on the search input of the new entry
+    const newEntry = container.lastElementChild;
+    newEntry.querySelector('.member-search').focus();
+}
+
+function removeEntry(btn) {
+    const entry = btn.closest('.pledge-entry');
+    entry.remove();
+    entryCount--;
+    updateEntryNumbers();
+    updateTotal();
+}
+
+function updateEntryNumbers() {
+    const entries = document.querySelectorAll('.pledge-entry');
+    entries.forEach((entry, index) => {
+        entry.querySelector('.entry-number .num').textContent = index + 1;
+    });
+}
+
+function updateTotal() {
+    const amounts = document.querySelectorAll('.pledge-amount');
+    let total = 0;
+    let count = 0;
+    
+    amounts.forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        if (val > 0) {
+            total += val;
+            count++;
+        }
+    });
+    
+    document.getElementById('totalAmount').textContent = '$' + total.toFixed(2);
+    document.getElementById('pledgeCount').textContent = count;
+}
+
+// Member search function
+let searchTimeout;
+function searchMembers(input) {
+    clearTimeout(searchTimeout);
+    const query = input.value.trim();
+    const entry = input.closest('.pledge-entry');
+    const resultsDiv = entry.querySelector('.member-results');
+    
+    if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/finance/api/member-search/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="dropdown-item text-muted">No members found</div>';
+                } else {
+                    data.forEach(member => {
+                        const item = document.createElement('a');
+                        item.className = 'dropdown-item';
+                        item.href = '#';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${member.name}</strong>
+                                    ${member.telephone ? `<small class="text-muted d-block">📱 ${member.telephone}</small>` : ''}
+                                </div>
+                                ${member.active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>'}
+                            </div>
+                        `;
+                        item.onclick = (e) => {
+                            e.preventDefault();
+                            selectMember(entry, member);
+                        };
+                        resultsDiv.appendChild(item);
+                    });
+                }
+                
+                resultsDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }, 300);
+}
+
+function selectMember(entry, member) {
+    const searchInput = entry.querySelector('.member-search');
+    const memberIdInput = entry.querySelector('.member-id');
+    const resultsDiv = entry.querySelector('.member-results');
+    const selectedDiv = entry.querySelector('.selected-member');
+    const externalFields = entry.querySelectorAll('.external-fields input');
+    
+    searchInput.value = member.name;
+    memberIdInput.value = member.id;
+    resultsDiv.style.display = 'none';
+    selectedDiv.style.display = 'block';
+    
+    // Disable external fields when member is selected
+    externalFields.forEach(field => {
+        field.disabled = true;
+        field.placeholder = 'Using member from database';
+    });
+}
+
+function clearMember(btn) {
+    const entry = btn.closest('.pledge-entry');
+    const searchInput = entry.querySelector('.member-search');
+    const memberIdInput = entry.querySelector('.member-id');
+    const selectedDiv = entry.querySelector('.selected-member');
+    const externalFields = entry.querySelectorAll('.external-fields input');
+    
+    searchInput.value = '';
+    memberIdInput.value = '';
+    selectedDiv.style.display = 'none';
+    
+    // Enable external fields
+    externalFields.forEach(field => {
+        field.disabled = false;
+        field.placeholder = field.classList.contains('external-name') ? 'Enter name for non-members' : '+255...';
+    });
+    
+    searchInput.focus();
+}
+
+// Hide dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.position-relative')) {
+        document.querySelectorAll('.member-results').forEach(div => {
+            div.style.display = 'none';
+        });
+    }
+});
+
+// Form validation
+document.getElementById('pledgeForm').addEventListener('submit', function(e) {
+    const entries = document.querySelectorAll('.pledge-entry');
+    let valid = true;
+    
+    entries.forEach(entry => {
+        const memberId = entry.querySelector('.member-id').value;
+        const externalName = entry.querySelector('.external-name').value.trim();
+        const amount = entry.querySelector('.pledge-amount').value;
+        
+        // Must have either member OR external name
+        if (!memberId && !externalName) {
+            alert('Each pledge entry must have either a selected member or an external name.');
+            valid = false;
+            return false;
+        }
+        
+        // Must have amount
+        if (!amount || parseFloat(amount) <= 0) {
+            alert('Each pledge must have a valid amount.');
+            valid = false;
+            return false;
+        }
+    });
+    
+    if (!valid) {
+        e.preventDefault();
+    }
+});
+
+// Add first entry on page load
+addPledgeEntry();
+</script>
+
+<style>
+.pledge-entry {
+    transition: all 0.3s ease;
+}
+.pledge-entry:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.member-results {
+    max-height: 200px;
+    overflow-y: auto;
+}
+.member-results .dropdown-item {
+    cursor: pointer;
+    padding: 10px 15px;
+}
+.member-results .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

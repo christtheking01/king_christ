@@ -5,8 +5,11 @@ from django.db.models import Sum, Count, Q
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from datetime import datetime, date, timedelta
-from .models import Category, Transaction, TitheReceipt, Employee, Payroll, Budget, BudgetAllocation, ExpenseReport, ExpenseItem
+from .models import (
+    Category, Transaction, TitheReceipt, Employee, Payroll, Budget, BudgetAllocation, 
+    ExpenseReport, ExpenseItem, EventPledge, PledgePayment )
 from member.models import Member
+from events.models import Event
 from django.db.models import ExpressionWrapper, FloatField,F
 import csv
 
@@ -681,3 +684,334 @@ def financial_summary_api(request):
         'balance': float(transactions.filter(type='Income').aggregate(total=Sum('amount'))['total'] or 0 - 
                       transactions.filter(type='Expense').aggregate(total=Sum('amount'))['total'] or 0)
     })
+
+
+# ====== PLEDGE VIEWS ======
+
+@login_required
+def pledge_list(request):
+    """List all event pledges with filtering"""
+    
+    # Filter parameters
+    status = request.GET.get('status')
+    event_id = request.GET.get('event')
+    member_id = request.GET.get('member')
+    overdue_only = request.GET.get('overdue') == '1'
+    
+    # Base query
+    pledges = EventPledge.objects.select_related('event', 'member').order_by('-created_at')
+    
+    # Apply filters
+    if status and status.strip():
+        pledges = pledges.filter(status=status)
+    if event_id and event_id.strip():
+        pledges = pledges.filter(event_id=event_id)
+    if member_id and member_id.strip():
+        pledges = pledges.filter(member_id=member_id)
+    if overdue_only:
+        from django.utils import timezone
+        pledges = pledges.filter(status='OVERDUE') | pledges.filter(
+            due_date__lt=timezone.now().date(),
+            status__in=['PENDING', 'PARTIAL']
+        )
+    
+    # Statistics
+    total_promised = pledges.aggregate(total=Sum('promised_amount'))['total'] or 0
+    total_paid = pledges.aggregate(total=Sum('paid_amount'))['total'] or 0
+    total_remaining = total_promised - total_paid
+    
+    # Status counts
+    status_counts = {
+        'PENDING': EventPledge.objects.filter(status='PENDING').count(),
+        'PARTIAL': EventPledge.objects.filter(status='PARTIAL').count(),
+        'COMPLETED': EventPledge.objects.filter(status='COMPLETED').count(),
+        'OVERDUE': EventPledge.objects.filter(status='OVERDUE').count(),
+    }
+    
+    # Get events and members for filter dropdowns
+    events = Event.objects.filter(pledges__isnull=False).distinct()
+    members = Member.objects.filter(pledges__isnull=False).distinct()
+    
+    context = {
+        'pledges': pledges,
+        'total_promised': total_promised,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining,
+        'status_counts': status_counts,
+        'events': events,
+        'members': members,
+        'selected_status': status,
+        'selected_event': event_id,
+        'selected_member': member_id,
+        'overdue_only': overdue_only,
+    }
+    return render(request, 'finance/pledge_list.html', context)
+
+
+@login_required
+def pledge_detail(request, pk):
+    """View pledge details and payment history """
+    from django.db.models import Sum
+    
+    pledge = get_object_or_404(EventPledge.objects.select_related('event', 'member', 'user'), pk=pk)
+    payments = pledge.payments.select_related('received_by').order_by('-payment_date')
+    
+    context = {
+        'pledge': pledge,
+        'payments': payments,
+        'remaining': pledge.remaining_amount,
+        'progress': pledge.progress_percentage,
+    }
+    return render(request, 'finance/pledge_detail.html', context)
+
+
+@login_required
+def pledge_create(request):
+    """Create new pledge(s) - supports bulk creation with individual amounts and external pledgers"""
+    
+    if request.method == 'POST':
+        event_id = request.POST.get('event')
+        due_date = request.POST.get('due_date') or None
+        
+        # Get arrays of data
+        member_ids = request.POST.getlist('member_ids[]')
+        amounts = request.POST.getlist('amounts[]')
+        external_names = request.POST.getlist('external_names[]')
+        external_phones = request.POST.getlist('external_phones[]')
+        entry_notes = request.POST.getlist('entry_notes[]')
+        
+        created_count = 0
+        skipped_count = 0
+        error_messages = []
+        
+        # Process each pledge entry
+        for i in range(len(amounts)):
+            amount = amounts[i] if i < len(amounts) else None
+            if not amount or float(amount) <= 0:
+                continue
+            
+            member_id = member_ids[i] if i < len(member_ids) else ''
+            external_name = external_names[i].strip() if i < len(external_names) else ''
+            external_phone = external_phones[i].strip() if i < len(external_phones) else ''
+            notes = entry_notes[i] if i < len(entry_notes) else ''
+            
+            # Check if pledge already exists
+            if member_id:
+                if EventPledge.objects.filter(event_id=event_id, member_id=member_id).exists():
+                    skipped_count += 1
+                    continue
+            elif external_name:
+                if EventPledge.objects.filter(
+                    event_id=event_id, 
+                    member__isnull=True,
+                    external_name__iexact=external_name,
+                    external_phone=external_phone
+                ).exists():
+                    skipped_count += 1
+                    continue
+            else:
+                error_messages.append(f'Entry #{i+1}: Must have member or external name')
+                continue
+            
+            try:
+                EventPledge.objects.create(
+                    user=request.user,
+                    event_id=event_id,
+                    member_id=member_id if member_id else None,
+                    external_name=external_name if not member_id else None,
+                    external_phone=external_phone if not member_id else None,
+                    promised_amount=amount,
+                    due_date=due_date,
+                    notes=notes,
+                    status='PENDING'
+                )
+                created_count += 1
+            except Exception as e:
+                error_messages.append(f'Entry #{i+1}: {str(e)}')
+        
+        if created_count > 0:
+            messages.success(request, f'{created_count} pledge(s) created successfully!')
+        if skipped_count > 0:
+            messages.warning(request, f'{skipped_count} pledge(s) skipped (already exist)')
+        if error_messages:
+            for msg in error_messages[:5]:  # Show first 5 errors
+                messages.error(request, msg)
+        
+        return redirect('pledge_list')
+    
+    # Get available events
+
+    events = Event.objects.filter(
+        status__in=['PUBLISHED', 'COMPLETED'],
+        start_date__gte=timezone.now().date() - timedelta(days=30)
+    ).order_by('-start_date')
+    
+    context = {
+        'events': events,
+    }
+    return render(request, 'finance/pledge_create_multi.html', context)
+
+
+@login_required
+def member_search_api(request):
+    """API endpoint for member search autocomplete"""
+    
+    query = request.GET.get('q', '').strip()
+    
+    if len(query) < 2:
+        return JsonResponse([], safe=False)
+    
+    members = Member.objects.filter(
+        models.Q(name__icontains=query) | 
+        models.Q(telephone__icontains=query)
+    ).values('id', 'name', 'telephone', 'active')[:10]
+    
+    return JsonResponse(list(members), safe=False)
+
+
+@login_required
+def pledge_edit(request, pk):
+    """Edit an existing pledge"""
+    from .models import EventPledge
+    from events.models import Event
+    from member.models import Member
+    
+    pledge = get_object_or_404(EventPledge, pk=pk)
+    
+    if request.method == 'POST':
+        pledge.promised_amount = request.POST.get('promised_amount')
+        pledge.due_date = request.POST.get('due_date') or None
+        pledge.notes = request.POST.get('notes')
+        pledge.status = request.POST.get('status', pledge.status)
+        pledge.save()
+        
+        messages.success(request, 'Pledge updated successfully!')
+        return redirect('pledge_detail', pk=pledge.pk)
+    
+    events = Event.objects.filter(status__in=['PUBLISHED', 'COMPLETED'])
+    members = Member.objects.filter(active=True)
+    
+    context = {
+        'pledge': pledge,
+        'events': events,
+        'members': members,
+    }
+    return render(request, 'finance/pledge_form.html', context)
+
+
+@login_required
+def pledge_delete(request, pk):
+    """Delete a pledge"""
+    from .models import EventPledge
+    
+    pledge = get_object_or_404(EventPledge, pk=pk)
+    
+    if request.method == 'POST':
+        pledge.delete()
+        messages.success(request, 'Pledge deleted successfully!')
+        return redirect('pledge_list')
+    
+    context = {'pledge': pledge}
+    return render(request, 'finance/pledge_delete.html', context)
+
+
+@login_required
+def pledge_payment_add(request, pledge_pk):
+    """Add a payment to a pledge"""
+    from .models import EventPledge, PledgePayment
+    
+    pledge = get_object_or_404(EventPledge, pk=pledge_pk)
+    
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        payment_method = request.POST.get('payment_method', 'CASH')
+        payment_date = request.POST.get('payment_date')
+        notes = request.POST.get('notes')
+        
+        payment = PledgePayment.objects.create(
+            pledge=pledge,
+            amount=amount,
+            payment_method=payment_method,
+            payment_date=payment_date,
+            received_by=request.user,
+            notes=notes
+        )
+        
+        messages.success(request, f'Payment of {amount} recorded successfully! SMS notification sent.')
+        return redirect('pledge_detail', pk=pledge.pk)
+    
+    context = {
+        'pledge': pledge,
+        'remaining': pledge.remaining_amount,
+    }
+    return render(request, 'finance/pledge_payment_form.html', context)
+
+
+@login_required
+def pledge_payment_delete(request, pk):
+    """Delete a pledge payment"""
+    
+    payment = get_object_or_404(PledgePayment, pk=pk)
+    pledge_pk = payment.pledge.pk
+    
+    if request.method == 'POST':
+        payment.delete()
+        # Recalculate pledge paid amount
+        pledge = payment.pledge
+        pledge.paid_amount = pledge.payments.aggregate(total=Sum('amount'))['total'] or 0
+        pledge.update_status()
+        
+        messages.success(request, 'Payment deleted successfully!')
+        return redirect('pledge_detail', pk=pledge_pk)
+    
+    context = {'payment': payment}
+    return render(request, 'finance/pledge_payment_delete.html', context)
+
+
+@login_required
+def pledge_send_reminder(request, pk):
+    """Send SMS reminder for a pledge"""
+    
+    pledge = get_object_or_404(EventPledge, pk=pk)
+    
+    if pledge.remaining_amount <= 0:
+        messages.warning(request, 'This pledge is already fully paid!')
+        return redirect('pledge_detail', pk=pk)
+    
+    success = pledge.send_reminder_sms()
+    
+    if success:
+        messages.success(request, f'Reminder SMS sent to {pledge.member.name}!')
+    else:
+        messages.error(request, 'Failed to send SMS. Check if member has a valid phone number.')
+    
+    return redirect('pledge_detail', pk=pk)
+
+
+@login_required
+def pledge_bulk_reminder(request):
+    """Send reminders to all members with overdue or pending pledges"""
+    
+    if request.method == 'POST':
+        # Get overdue and pending pledges
+        pledges = EventPledge.objects.filter(
+            Q(status='OVERDUE') | 
+            Q(status='PENDING', due_date__lt=timezone.now().date()) |
+            Q(status='PARTIAL'),
+            paid_amount__lt=models.F('promised_amount')
+        )
+        
+        sent_count = 0
+        failed_count = 0
+        
+        for pledge in pledges:
+            success = pledge.send_reminder_sms()
+            if success:
+                sent_count += 1
+            else:
+                failed_count += 1
+        
+        messages.success(request, f'Reminders sent: {sent_count} successful, {failed_count} failed.')
+        return redirect('pledge_list')
+    
+    return redirect('pledge_list')

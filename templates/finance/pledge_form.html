@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if pledge %}Edit{% else %}Create{% endif %} Pledge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hand-holding-heart me-2 text-primary"></i>
+                        {% if pledge %}Edit Pledge{% else %}Create New Pledge{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="members" class="form-label">Members <span class="text-danger">*</span></label>
+                                <select name="members" id="members" class="form-select" multiple required size="8" {% if pledge %}disabled{% endif %}>
+                                    {% for member in members %}
+                                    <option value="{{ member.id }}" 
+                                            {% if pledge and pledge.member_id == member.id %}selected{% endif %}
+                                            data-phone="{{ member.telephone|default:'' }}">
+                                        {{ member.name }}
+                                        {% if member.telephone %}📱{{ member.telephone }}{% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if pledge %}
+                                <input type="hidden" name="members" value="{{ pledge.member_id }}">
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Hold Ctrl (Cmd on Mac) to select multiple members. 
+                                    SMS will be sent to members with phone numbers.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="event" class="form-label">Event <span class="text-danger">*</span></label>
+                                <select name="event" id="event" class="form-select" required {% if pledge %}disabled{% endif %}>
+                                    <option value="">Select Event</option>
+                                    {% for event in events %}
+                                    <option value="{{ event.id }}" 
+                                            {% if pledge and pledge.event_id == event.id %}selected{% endif %}>
+                                        {{ event.title }} ({{ event.start_date|date:'M d, Y' }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if pledge %}
+                                <input type="hidden" name="event" value="{{ pledge.event_id }}">
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="promised_amount" class="form-label">Promised Amount <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" name="promised_amount" id="promised_amount" 
+                                           class="form-control" step="0.01" min="0.01" required
+                                           value="{{ pledge.promised_amount|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="due_date" 
+                                       class="form-control"
+                                       value="{{ pledge.due_date|date:'Y-m-d'|default:'' }}">
+                                <div class="form-text">Optional deadline for completing the pledge</div>
+                            </div>
+                        </div>
+
+                        {% if pledge %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="PENDING" {% if pledge.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                    <option value="PARTIAL" {% if pledge.status == 'PARTIAL' %}selected{% endif %}>Partially Paid</option>
+                                    <option value="COMPLETED" {% if pledge.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                    <option value="OVERDUE" {% if pledge.status == 'OVERDUE' %}selected{% endif %}>Overdue</option>
+                                    <option value="CANCELLED" {% if pledge.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="notes" class="form-control" rows="3">{{ pledge.notes|default:'' }}</textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'pledge_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                {% if pledge %}Update{% else %}Create{% endif %} Pledge
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

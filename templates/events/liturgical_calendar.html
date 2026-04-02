@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liturgical Calendar - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="fas fa-church text-primary me-2"></i>Liturgical Calendar</h1>
+            <p class="text-muted mb-0">Church liturgical year, feasts, and solemnities</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'calendar' %}" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-alt me-1"></i>Events Calendar
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{% url 'liturgical_calendar' %}?month={{ prev_month }}&year={{ prev_year }}" class="btn btn-outline-primary">
+            <i class="fas fa-chevron-left me-1"></i>Previous
+        </a>
+        <h2 class="h4 mb-0">{{ month_name }} {{ year }}</h2>
+        <a href="{% url 'liturgical_calendar' %}?month={{ next_month }}&year={{ next_year }}" class="btn btn-outline-primary">
+            Next<i class="fas fa-chevron-right ms-1"></i>
+        </a>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 calendar-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Sunday</th>
+                            <th class="text-center">Monday</th>
+                            <th class="text-center">Tuesday</th>
+                            <th class="text-center">Wednesday</th>
+                            <th class="text-center">Thursday</th>
+                            <th class="text-center">Friday</th>
+                            <th class="text-center">Saturday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar_weeks %}
+                        <tr style="height: 120px;">
+                            {% for day in week %}
+                            <td class="{% if not day.is_current_month %}bg-light text-muted{% endif %} {% if day.is_today %}table-primary{% endif %}" style="vertical-align: top; padding: 8px;">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="fw-bold {% if day.is_today %}text-primary{% endif %}">{{ day.date.day }}</span>
+                                </div>
+                                <div class="small">
+                                    {% if day.liturgical %}
+                                    <div class="p-2 rounded text-white text-center" style="background-color: {{ day.liturgical.color|default:'#6c757d' }};">
+                                        <strong>{{ day.liturgical.title }}</strong><br>
+                                        <small>{{ day.liturgical.get_celebration_type_display }}</small>
+                                    </div>
+                                    {% if day.liturgical.gospel_reference %}
+                                    <div class="mt-1 small text-muted text-center">
+                                        <i class="fas fa-book-open me-1"></i>{{ day.liturgical.gospel_reference }}
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Liturgical Colors</h6>
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <span class="badge me-2" style="background-color: #228B22; width: 30px;">&nbsp;</span>
+                        <div>
+                            <strong>Green</strong><br>
+                            <small class="text-muted">Ordinary Time</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <span class="badge me-2" style="background-color: #8B0000; width: 30px;">&nbsp;</span>
+                        <div>
+                            <strong>Red</strong><br>
+                            <small class="text-muted">Passion / Pentecost / Martyrs</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <span class="badge me-2" style="background-color: #4B0082; width: 30px;">&nbsp;</span>
+                        <div>
+                            <strong>Purple</strong><br>
+                            <small class="text-muted">Advent / Lent</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <span class="badge me-2" style="background-color: #DAA520; width: 30px;">&nbsp;</span>
+                        <div>
+                            <strong>Gold/White</strong><br>
+                            <small class="text-muted">Christmas / Easter / Feasts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+            <h6 class="mb-3">Celebration Types</h6>
+            <div class="d-flex flex-wrap gap-3">
+                <span class="badge bg-primary">Solemnity</span>
+                <span class="badge bg-success">Feast</span>
+                <span class="badge bg-info">Memorial</span>
+                <span class="badge bg-secondary">Optional Memorial</span>
+                <span class="badge bg-light text-dark border">Ferial Day</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-table td {
+    width: 14.28%;
+    min-width: 100px;
+}
+</style>
+{% endblock %}

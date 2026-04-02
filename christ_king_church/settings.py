@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     'finance',
     'catechesis',
     'audits',
+    'analytics',
+    'events',
 ]
 
 LOGIN_URL = 'login_user'  

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.utils import timezone
 import json
 from django.views.decorators.csrf import csrf_exempt
 from .models import Notification, NotificationLog,NotificationReadStatus
@@ -37,7 +38,7 @@ def notification_create(request):
             notification.created_by = request.user
             notification.save()
             
-            # Send notification if send_sms is True
+            # Send notification via SMS if enabled, otherwise mark as SENT for in-app
             if notification.send_sms:
                 service = NotificationService()
                 result = service.send_notification(notification.id)
@@ -51,7 +52,12 @@ def notification_create(request):
                 else:
                     messages.error(request, f"Error: {result.get('error')}")
             else:
-                messages.success(request, 'Notification created successfully')
+                # Mark as SENT for in-app notification (no SMS)
+                notification.status = 'SENT'
+                notification.sent_at = timezone.now()
+                notification.total_recipients = notification.get_recipients().count()
+                notification.save()
+                messages.success(request, 'Notification created and sent to users (in-app only)')
             
             return redirect('notification_detail', pk=notification.id)
     else:

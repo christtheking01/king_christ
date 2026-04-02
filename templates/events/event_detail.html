@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'event_list' %}">Events</a></li>
+            <li class="breadcrumb-item active">{{ event.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            {% if event.banner_image %}
+            <img src="{{ event.banner_image.url }}" class="img-fluid rounded mb-4 w-100" alt="{{ event.title }}" style="max-height: 400px; object-fit: cover;">
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="h2 mb-2">{{ event.title }}</h1>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if event.category %}
+                        <span class="badge" style="background-color: {{ event.category.color }}">
+                            {{ event.category.name }}
+                        </span>
+                        {% endif %}
+                        <span class="badge bg-secondary">{{ event.get_event_type_display }}</span>
+                        {% if event.featured %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Featured</span>
+                        {% endif %}
+                        {% if event.is_past %}
+                        <span class="badge bg-dark">Completed</span>
+                        {% elif event.is_ongoing %}
+                        <span class="badge bg-success">Ongoing</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if event.organizer == user or user.is_staff %}
+                        <li><a class="dropdown-item" href="{% url 'event_edit' event.id %}"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'event_delete' event.id %}"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-align-left text-primary me-2"></i>About This Event</h5>
+                    <p class="card-text">{{ event.description|linebreaks }}</p>
+                </div>
+            </div>
+
+            {% if event.location_details %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle text-primary me-2"></i>Additional Information</h5>
+                    <p class="card-text">{{ event.location_details|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if event.ministries.all %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users text-primary me-2"></i>Organizing Ministries</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for ministry in event.ministries.all %}
+                        <span class="badge bg-info">{{ ministry.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if related_events %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-thumbs-up text-primary me-2"></i>Related Events</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for related in related_events %}
+                        <a href="{% url 'event_detail' related.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ related.title }}</h6>
+                                <small>{{ related.start_date|date:"M j" }}</small>
+                            </div>
+                            <small class="text-muted">{{ related.get_event_type_display }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Event Details Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Event Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <strong>Date:</strong><br>
+                            <span class="ms-4">{{ event.start_date|date:"l, F j, Y" }}</span>
+                            {% if event.end_date and event.end_date != event.start_date %}
+                            <br><span class="ms-4">to {{ event.end_date|date:"l, F j, Y" }}</span>
+                            {% endif %}
+                        </li>
+                        {% if not event.all_day and event.start_time %}
+                        <li class="mb-3">
+                            <i class="fas fa-clock text-primary me-2"></i>
+                            <strong>Time:</strong><br>
+                            <span class="ms-4">{{ event.start_time|time:"g:i A" }}</span>
+                            {% if event.end_time %}
+                            <span> - {{ event.end_time|time:"g:i A" }}</span>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                        {% if event.location %}
+                        <li class="mb-3">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            <strong>Location:</strong><br>
+                            <span class="ms-4">{{ event.location.name }}</span>
+                            {% if event.location.address %}
+                            <br><small class="ms-4 text-muted">{{ event.location.address }}</small>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                        {% if event.recurrence != 'NONE' %}
+                        <li class="mb-3">
+                            <i class="fas fa-redo text-primary me-2"></i>
+                            <strong>Repeats:</strong><br>
+                            <span class="ms-4">{{ event.get_recurrence_display }}</span>
+                            {% if event.recurrence_end_date %}
+                            <br><small class="ms-4 text-muted">until {{ event.recurrence_end_date|date:"M j, Y" }}</small>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                        <li class="mb-3">
+                            <i class="fas fa-user text-primary me-2"></i>
+                            <strong>Organizer:</strong><br>
+                            <span class="ms-4">{{ event.organizer.get_full_name|default:event.organizer.username }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Registration Card -->
+            {% if event.requires_registration and not event.is_past %}
+            <div class="card mb-4 {% if event.is_full %}border-danger{% endif %}">
+                <div class="card-header {% if event.is_full %}bg-danger text-white{% else %}bg-success text-white{% endif %}">
+                    <h5 class="mb-0">
+                        {% if event.is_full %}
+                        <i class="fas fa-times-circle me-2"></i>Registration Closed
+                        {% else %}
+                        <i class="fas fa-ticket-alt me-2"></i>Registration Open
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if event.max_attendees %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Spots Filled</span>
+                            <span>{{ event.attendee_count }} / {{ event.max_attendees }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if event.is_full %}bg-danger{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ event.attendee_count|div:event.max_attendees|mul:100 }}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if event.registration_deadline %}
+                    <p class="text-muted">
+                        <i class="fas fa-hourglass-half me-1"></i>
+                        Registration closes: {{ event.registration_deadline|date:"F j, Y" }}
+                    </p>
+                    {% endif %}
+
+                    {% if user_registered %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>You are registered!
+                    </div>
+                    {% elif not event.registration_closed %}
+                    <a href="{% url 'event_register' event.id %}" class="btn btn-success w-100">
+                        <i class="fas fa-user-plus me-2"></i>Register Now
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        <i class="fas fa-ban me-2"></i>Registration Closed
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt text-primary me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'calendar' %}?month={{ event.start_date.month }}&year={{ event.start_date.year }}" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-calendar-alt me-2"></i>View in Calendar
+                    </a>
+                    <button class="btn btn-outline-primary btn-sm w-100" onclick="shareEvent()">
+                        <i class="fas fa-share-alt me-2"></i>Share Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function shareEvent() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ event.title }}',
+            text: 'Check out this event at Christ King Church: {{ event.title }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+</script>
+{% endblock %}

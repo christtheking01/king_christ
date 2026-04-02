@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Event Pledges{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-hand-holding-heart me-2 text-primary"></i>Event Pledges</h2>
+            <p class="text-muted mb-0">Track member pledges and contributions for church events</p>
+        </div>
+        <div class="d-flex gap-2">
+            <form method="post" action="{% url 'pledge_bulk_reminder' %}" class="d-inline" onsubmit="return confirm('Send reminders to all members with pending/overdue pledges?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-warning">
+                    <i class="fas fa-paper-plane me-1"></i>Send Bulk Reminders
+                </button>
+            </form>
+            <a href="{% url 'pledge_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Create Pledge
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Promised</h6>
+                            <h4 class="text-primary mb-0">{{ total_promised|currency }}</h4>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded p-2">
+                            <i class="fas fa-handshake text-primary fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Paid</h6>
+                            <h4 class="text-success mb-0">{{ total_paid|currency }}</h4>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded p-2">
+                            <i class="fas fa-check-circle text-success fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Remaining</h6>
+                            <h4 class="text-warning mb-0">{{ total_remaining|currency }}</h4>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded p-2">
+                            <i class="fas fa-clock text-warning fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Completion Rate</h6>
+                            <h4 class="text-info mb-0">
+                                {% if total_promised > 0 %}
+                                    {{ total_paid|div:total_promised|mul:100|floatformat:1 }}%
+                                {% else %}0%{% endif %}
+                            </h4>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded p-2">
+                            <i class="fas fa-chart-pie text-info fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <ul class="nav nav-pills card-header-pills">
+                <li class="nav-item">
+                    <a class="nav-link {% if not selected_status %}active{% endif %}" href="{% url 'pledge_list' %}">
+                        All <span class="badge bg-secondary ms-1">{{ status_counts.PENDING|add:status_counts.PARTIAL|add:status_counts.COMPLETED|add:status_counts.OVERDUE }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_status == 'PENDING' %}active{% endif %}" href="{% url 'pledge_list' %}?status=PENDING">
+                        Pending <span class="badge bg-warning ms-1">{{ status_counts.PENDING }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_status == 'PARTIAL' %}active{% endif %}" href="{% url 'pledge_list' %}?status=PARTIAL">
+                        Partial <span class="badge bg-info ms-1">{{ status_counts.PARTIAL }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_status == 'COMPLETED' %}active{% endif %}" href="{% url 'pledge_list' %}?status=COMPLETED">
+                        Completed <span class="badge bg-success ms-1">{{ status_counts.COMPLETED }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_status == 'OVERDUE' or overdue_only %}active{% endif %}" href="{% url 'pledge_list' %}?overdue=1">
+                        Overdue <span class="badge bg-danger ms-1">{{ status_counts.OVERDUE }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <!-- Filters -->
+            <form method="get" class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <select name="event" class="form-select">
+                        <option value="">All Events</option>
+                        {% for event in events %}
+                        <option value="{{ event.id }}" {% if selected_event == event.id|stringformat:'s' %}selected{% endif %}>
+                            {{ event.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select name="member" class="form-select">
+                        <option value="">All Members</option>
+                        {% for member in members %}
+                        <option value="{{ member.id }}" {% if selected_member == member.id|stringformat:'s' %}selected{% endif %}>
+                            {{ member.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                    <a href="{% url 'pledge_list' %}" class="btn btn-outline-secondary ms-1">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </a>
+                </div>
+            </form>
+
+            <!-- Pledges Table -->
+            {% if pledges %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Member</th>
+                            <th>Event</th>
+                            <th>Promised</th>
+                            <th>Paid</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pledge in pledges %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                        {% if pledge.member %}
+                                        <i class="fas fa-user text-primary"></i>
+                                        {% else %}
+                                        <i class="fas fa-user-plus text-success"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ pledge.pledger_name }}</strong>
+                                        {% if pledge.pledger_phone %}
+                                        <small class="d-block text-muted">{{ pledge.pledger_phone }}</small>
+                                        {% endif %}
+                                        {% if not pledge.member %}
+                                        <small class="d-block text-muted"><span class="badge bg-secondary">External</span></small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{% url 'event_detail' pledge.event.id %}">{{ pledge.event.title }}</a>
+                            </td>
+                            <td><strong>{{ pledge.promised_amount|currency }}</strong></td>
+                            <td class="text-success">{{ pledge.paid_amount|currency }}</td>
+                            <td class="{% if pledge.remaining_amount > 0 %}text-warning{% else %}text-success{% endif %}">
+                                {{ pledge.remaining_amount|currency }}
+                            </td>
+                            <td style="width: 150px;">
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar {% if pledge.progress_percentage >= 100 %}bg-success{% elif pledge.progress_percentage >= 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ pledge.progress_percentage }}%">
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ pledge.progress_percentage|floatformat:1 }}%</small>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if pledge.status == 'COMPLETED' %}bg-success
+                                    {% elif pledge.status == 'PARTIAL' %}bg-info
+                                    {% elif pledge.status == 'OVERDUE' %}bg-danger
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ pledge.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if pledge.due_date %}
+                                    {% if pledge.status == 'OVERDUE' %}
+                                        <span class="text-danger">{{ pledge.due_date|date:'M d, Y' }}</span>
+                                    {% else %}
+                                        {{ pledge.due_date|date:'M d, Y' }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'pledge_detail' pledge.pk %}" class="btn btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if pledge.remaining_amount > 0 %}
+                                    <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-outline-success" title="Record Payment">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" class="btn btn-outline-warning" title="Send Reminder SMS"
+                                       onclick="return confirm('Send reminder SMS to {{ pledge.member.name }}?');">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'pledge_edit' pledge.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-hand-holding-heart text-muted fa-3x"></i>
+                </div>
+                <h5 class="text-muted">No pledges found</h5>
+                <p class="text-muted">Create a new pledge to track member contributions for events.</p>
+                <a href="{% url 'pledge_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Create First Pledge
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

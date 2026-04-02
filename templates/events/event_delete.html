@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Event - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Event</h4>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-danger mb-4"></i>
+                    <h5 class="card-title">Are you sure?</h5>
+                    <p class="card-text">
+                        You are about to delete the event:<br>
+                        <strong class="h5">"{{ event.title }}"</strong>
+                    </p>
+                    <p class="text-muted">
+                        Scheduled for {{ event.start_date|date:"F j, Y" }}
+                    </p>
+                    
+                    {% if event.registrations.count > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-users me-2"></i>
+                        This event has <strong>{{ event.registrations.count }}</strong> registration(s).
+                        Deleting it will also remove all registrations.
+                    </div>
+                    {% endif %}
+
+                    <p class="text-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-center gap-3">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Yes, Delete Event
+                        </button>
+                    </form>
+                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

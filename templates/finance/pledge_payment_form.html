@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Record Payment{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2 text-success"></i>Record Payment</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Pledge Summary -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Member:</strong> {{ pledge.member.name }}<br>
+                                <strong>Event:</strong> {{ pledge.event.title }}
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <strong>Promised:</strong> {{ pledge.promised_amount|currency }}<br>
+                                <strong>Remaining:</strong> <span class="{% if remaining > 0 %}text-warning{% else %}text-success{% endif %}">{{ remaining|currency }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Payment Amount <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="amount" id="amount" 
+                                       class="form-control" step="0.01" min="0.01" 
+                                       max="{{ remaining }}" required
+                                       value="{{ remaining }}">
+                            </div>
+                            <div class="form-text">Maximum: {{ remaining|currency }}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Payment Method <span class="text-danger">*</span></label>
+                            <select name="payment_method" id="payment_method" class="form-select" required>
+                                <option value="CASH">Cash</option>
+                                <option value="BANK">Bank Transfer</option>
+                                <option value="MOBILE">Mobile Money</option>
+                                <option value="CHEQUE">Cheque</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="payment_date" class="form-label">Payment Date <span class="text-danger">*</span></label>
+                            <input type="date" name="payment_date" id="payment_date" 
+                                   class="form-control" required
+                                   value="{% now 'Y-m-d' %}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="notes" class="form-control" rows="2" 
+                                      placeholder="Optional notes about this payment..."></textarea>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-comment-alt me-2"></i>
+                            An SMS notification will be automatically sent to <strong>{{ pledge.member.name }}</strong> at <strong>{{ pledge.member.telephone }}</strong> after recording this payment.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'pledge_detail' pledge.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>Record Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

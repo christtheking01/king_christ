@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Registrations - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="fas fa-ticket-alt text-primary me-2"></i>My Event Registrations</h1>
+            <p class="text-muted mb-0">View and manage your event registrations</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'event_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-calendar me-1"></i>Browse Events
+            </a>
+            <a href="{% url 'calendar' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-calendar-alt me-1"></i>Calendar
+            </a>
+        </div>
+    </div>
+
+    <!-- Registrations -->
+    <div class="row">
+        {% for reg in registrations %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 {% if reg.event.is_past %}border-secondary{% endif %}">
+                {% if reg.event.banner_image %}
+                <img src="{{ reg.event.banner_image.url }}" class="card-img-top" alt="{{ reg.event.title }}" style="height: 150px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                    <i class="fas fa-calendar-day fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary">{{ reg.get_status_display }}</span>
+                        {% if reg.event.is_past %}
+                        <span class="badge bg-secondary">Completed</span>
+                        {% elif reg.event.is_ongoing %}
+                        <span class="badge bg-success">Today</span>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ reg.event.title }}</h5>
+                    <p class="card-text text-muted small">{{ reg.event.description|truncatewords:15 }}</p>
+                    
+                    <ul class="list-unstyled small mb-3">
+                        <li><i class="fas fa-calendar text-primary me-2"></i>{{ reg.event.start_date|date:"F j, Y" }}</li>
+                        {% if reg.event.start_time %}
+                        <li><i class="fas fa-clock text-primary me-2"></i>{{ reg.event.start_time|time:"g:i A" }}</li>
+                        {% endif %}
+                        {% if reg.event.location %}
+                        <li><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ reg.event.location.name }}</li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="alert alert-light border mb-0">
+                        <small class="text-muted">
+                            <strong>Registered:</strong> {{ reg.registered_at|date:"M j, Y" }}<br>
+                            <strong>Confirmation #:</strong> {{ reg.id }}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'event_detail' reg.event.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>View Event
+                        </a>
+                        {% if not reg.event.is_past and reg.status != 'CANCELLED' %}
+                        <a href="{% url 'registration_cancel' reg.id %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-times me-1"></i>Cancel Registration
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
+                <h4>No Registrations Yet</h4>
+                <p class="text-muted">You haven't registered for any events. Browse upcoming events to register!</p>
+                <a href="{% url 'event_list' %}" class="btn btn-primary">
+                    <i class="fas fa-calendar me-2"></i>Browse Events
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

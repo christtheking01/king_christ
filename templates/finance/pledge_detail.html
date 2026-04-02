@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Pledge Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Main Pledge Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-hand-holding-heart me-2 text-primary"></i>Pledge Details</h5>
+                    <div class="btn-group">
+                        <a href="{% url 'pledge_edit' pledge.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'pledge_delete' pledge.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">{% if pledge.member %}Member{% else %}External Supporter{% endif %}</h6>
+                            <p class="h5">{{ pledge.pledger_name }}</p>
+                            {% if pledge.pledger_phone %}
+                            <p class="text-muted"><i class="fas fa-phone me-1"></i>{{ pledge.pledger_phone }}</p>
+                            {% endif %}
+                            {% if not pledge.member %}
+                            <p><span class="badge bg-secondary">External Pledger</span></p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Event</h6>
+                            <p class="h5">{{ pledge.event.title }}</p>
+                            <p class="text-muted">{{ pledge.event.start_date|date:'F d, Y' }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Promised Amount</h6>
+                            <p class="h4 text-primary">{{ pledge.promised_amount|currency }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Paid Amount</h6>
+                            <p class="h4 text-success">{{ pledge.paid_amount|currency }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Remaining</h6>
+                            <p class="h4 {% if remaining > 0 %}text-warning{% else %}text-success{% endif %}">{{ remaining|currency }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Status</h6>
+                            <span class="badge {% if pledge.status == 'COMPLETED' %}bg-success{% elif pledge.status == 'PARTIAL' %}bg-info{% elif pledge.status == 'OVERDUE' %}bg-danger{% else %}bg-warning{% endif %} fs-6">
+                                {{ pledge.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Due Date</h6>
+                            <p class="{% if pledge.status == 'OVERDUE' %}text-danger{% endif %}">
+                                {% if pledge.due_date %}
+                                    {{ pledge.due_date|date:'F d, Y' }}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if pledge.notes %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-1">Notes</h6>
+                            <p>{{ pledge.notes|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Payment Progress</h6>
+                    <div class="progress mb-2" style="height: 25px;">
+                        <div class="progress-bar {% if progress >= 100 %}bg-success{% elif progress >= 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ progress }}%"
+                             aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ progress|floatformat:1 }}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Payment History</h5>
+                    {% if remaining > 0 %}
+                    <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add Payment
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Received By</th>
+                                    <th>SMS Sent</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.payment_date|date:'M d, Y' }}</td>
+                                    <td class="text-success fw-bold">+{{ payment.amount|currency }}</td>
+                                    <td>{{ payment.get_payment_method_display }}</td>
+                                    <td>{{ payment.received_by.get_full_name|default:payment.received_by.username }}</td>
+                                    <td>
+                                        {% if payment.sms_notification_sent %}
+                                            <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                        {% else %}
+                                            <span class="badge bg-secondary"><i class="fas fa-times"></i></span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'pledge_payment_delete' payment.pk %}" 
+                                           class="btn btn-outline-danger btn-sm"
+                                           onclick="return confirm('Delete this payment record?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-receipt text-muted fa-2x mb-2"></i>
+                        <p class="text-muted mb-0">No payments recorded yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Actions Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if remaining > 0 %}
+                    <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-plus-circle me-2"></i>Record Payment
+                    </a>
+                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" 
+                       class="btn btn-warning w-100 mb-2"
+                       onclick="return confirm('Send reminder SMS to {{ pledge.pledger_name }}?');">
+                        <i class="fas fa-paper-plane me-2"></i>Send Reminder SMS
+                    </a>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>This pledge is fully paid!
+                    </div>
+                    {% endif %}
+                    <a href="{% url 'pledge_list' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- SMS Status -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-comment-alt me-2"></i>SMS Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Reminder Sent:</span>
+                        {% if pledge.reminder_sent %}
+                            <span class="badge bg-success">Yes</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </div>
+                    {% if pledge.last_reminder_date %}
+                    <small class="text-muted">Last reminder: {{ pledge.last_reminder_date|date:'M d, Y H:i' }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Event Info -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Event Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ pledge.event.title }}</strong></p>
+                    <p class="text-muted mb-1">
+                        <i class="fas fa-calendar me-2"></i>{{ pledge.event.start_date|date:'F d, Y' }}
+                    </p>
+                    {% if pledge.event.start_time %}
+                    <p class="text-muted mb-1">
+                        <i class="fas fa-clock me-2"></i>{{ pledge.event.start_time|time:'g:i A' }}
+                    </p>
+                    {% endif %}
+                    {% if pledge.event.location %}
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ pledge.event.location }}
+                    </p>
+                    {% endif %}
+                    <hr>
+                    <a href="{% url 'event_detail' pledge.event.id %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-external-link-alt me-1"></i>View Event Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Events - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="fas fa-calendar-day text-primary me-2"></i>Church Events</h1>
+            <p class="text-muted mb-0">Browse and discover upcoming events</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'calendar' %}" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-alt me-1"></i>Calendar View
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'events_dashboard' %}" class="btn btn-outline-info">
+                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+            </a>
+            <a href="{% url 'event_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Create Event
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search events..." value="{{ search|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select name="event_type" class="form-select">
+                        <option value="">All</option>
+                        {% for type_code, type_name in event_types %}
+                        <option value="{{ type_code }}" {% if selected_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">View</label>
+                    <div class="btn-group w-100" role="group">
+                        <a href="?view=upcoming{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_type %}&event_type={{ selected_type }}{% endif %}" 
+                           class="btn btn-outline-primary {% if view_type == 'upcoming' %}active{% endif %}">
+                            Upcoming ({{ upcoming_count }})
+                        </a>
+                        <a href="?view=past{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_type %}&event_type={{ selected_type }}{% endif %}" 
+                           class="btn btn-outline-primary {% if view_type == 'past' %}active{% endif %}">
+                            Past ({{ past_count }})
+                        </a>
+                        <a href="?view=featured{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_type %}&event_type={{ selected_type }}{% endif %}" 
+                           class="btn btn-outline-primary {% if view_type == 'featured' %}active{% endif %}">
+                            Featured ({{ featured_count }})
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="row g-4">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                {% if event.banner_image %}
+                <img src="{{ event.banner_image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 150px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                    <i class="fas fa-calendar-day fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        {% if event.category %}
+                        <span class="badge" style="background-color: {{ event.category.color }}">
+                            {{ event.category.name }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ event.get_event_type_display }}</span>
+                        {% endif %}
+                        {% if event.featured %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Featured</span>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text text-muted small">{{ event.description|truncatewords:20 }}</p>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fas fa-calendar text-primary me-2 w-20"></i>
+                            <small>{{ event.start_date|date:"F j, Y" }}</small>
+                        </div>
+                        {% if event.start_time %}
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fas fa-clock text-primary me-2 w-20"></i>
+                            <small>{{ event.start_time|time:"g:i A" }}</small>
+                        </div>
+                        {% endif %}
+                        {% if event.location %}
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-primary me-2 w-20"></i>
+                            <small class="text-truncate">{{ event.location.name }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if event.requires_registration %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge {% if event.is_full %}bg-danger{% else %}bg-success{% endif %}">
+                            {% if event.is_full %}Full{% else %}{{ event.available_spots }} spots left{% endif %}
+                        </span>
+                        <small class="text-muted">{{ event.attendee_count }} registered</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'event_detail' event.id %}" class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                <h4>No events found</h4>
+                <p class="text-muted">There are no {{ view_type }} events matching your criteria.</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'event_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Create an Event
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

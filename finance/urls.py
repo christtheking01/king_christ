@@ -44,4 +44,18 @@ urlpatterns = [
     
     # API Endpoints
     path('api/financial-summary/', views.financial_summary_api, name='financial_summary_api'),
+    path('api/member-search/', views.member_search_api, name='member_search_api'),
+    
+    # Pledge Management
+    path('pledges/', views.pledge_list, name='pledge_list'),
+    path('pledges/create/', views.pledge_create, name='pledge_create'),
+    path('pledges/<int:pk>/', views.pledge_detail, name='pledge_detail'),
+    path('pledges/<int:pk>/edit/', views.pledge_edit, name='pledge_edit'),
+    path('pledges/<int:pk>/delete/', views.pledge_delete, name='pledge_delete'),
+    path('pledges/<int:pk>/send-reminder/', views.pledge_send_reminder, name='pledge_send_reminder'),
+    path('pledges/bulk-reminder/', views.pledge_bulk_reminder, name='pledge_bulk_reminder'),
+    
+    # Pledge Payments
+    path('pledges/<int:pledge_pk>/payment/add/', views.pledge_payment_add, name='pledge_payment_add'),
+    path('pledge-payments/<int:pk>/delete/', views.pledge_payment_delete, name='pledge_payment_delete'),
 ]

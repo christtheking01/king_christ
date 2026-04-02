@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Events Dashboard - Christ King Church{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="fas fa-tachometer-alt text-primary me-2"></i>Events Dashboard</h1>
+            <p class="text-muted mb-0">Manage your events and track registrations</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'event_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-1"></i>All Events
+            </a>
+            <a href="{% url 'event_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Create Event
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Total Events</h6>
+                            <h2 class="mb-0">{{ total_events }}</h2>
+                        </div>
+                        <i class="fas fa-calendar fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Upcoming</h6>
+                            <h2 class="mb-0">{{ upcoming_events }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Registrations</h6>
+                            <h2 class="mb-0">{{ total_registrations }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">My Registrations</h6>
+                            <a href="{% url 'my_registrations' %}" class="btn btn-sm btn-outline-dark mt-2">View</a>
+                        </div>
+                        <i class="fas fa-user-check fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Events -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Your Upcoming Events</h5>
+                    <a href="{% url 'calendar' %}" class="btn btn-sm btn-light">View Calendar</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if upcoming %}
+                    <div class="list-group list-group-flush">
+                        {% for event in upcoming %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'event_detail' event.id %}" class="text-decoration-none">{{ event.title }}</a>
+                                </h6>
+                                <small class="text-muted">{{ event.start_date|date:"M j" }}</small>
+                            </div>
+                            <p class="mb-1 small text-muted">
+                                {% if event.start_time %}{{ event.start_time|time:"g:i A" }} | {% endif %}
+                                {{ event.get_event_type_display }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>
+                                    {% if event.requires_registration %}
+                                    <span class="badge bg-info">{{ event.attendee_count }} registered</span>
+                                    {% endif %}
+                                </small>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming events</p>
+                        <a href="{% url 'event_create' %}" class="btn btn-primary btn-sm">Create Event</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Needs Attention -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Needs Attention</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if attention_events %}
+                    <div class="list-group list-group-flush">
+                        {% for event in attention_events %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <span class="badge {% if event.status == 'DRAFT' %}bg-secondary{% else %}bg-danger{% endif %}">
+                                    {{ event.get_status_display }}
+                                </span>
+                            </div>
+                            <p class="mb-1 small text-muted">Created {{ event.created_at|date:"M j, Y" }}</p>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                                {% if event.status == 'DRAFT' %}
+                                <form method="post" action="{% url 'event_edit' event.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="PUBLISHED">
+                                    <button type="submit" class="btn btn-outline-success">
+                                        <i class="fas fa-check me-1"></i>Publish
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <p class="text-muted">All caught up! No events need attention.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recently Created Events</h5>
+            <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+            {% if recent_events %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Registrations</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in recent_events %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'event_detail' event.id %}" class="text-decoration-none fw-bold">{{ event.title }}</a>
+                            </td>
+                            <td>{{ event.get_event_type_display }}</td>
+                            <td>{{ event.start_date|date:"M j, Y" }}</td>
+                            <td>
+                                <span class="badge {% if event.status == 'PUBLISHED' %}bg-success{% elif event.status == 'DRAFT' %}bg-secondary{% elif event.status == 'CANCELLED' %}bg-danger{% else %}bg-info{% endif %}">
+                                    {{ event.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if event.requires_registration %}
+                                {{ event.attendee_count }}{% if event.max_attendees %}/{{ event.max_attendees }}{% endif %}
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ event.created_at|date:"M j, Y" }}</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted">No events created yet</p>
+                <a href="{% url 'event_create' %}" class="btn btn-primary">Create Your First Event</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
