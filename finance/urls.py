@@ -12,9 +12,16 @@ urlpatterns = [
     path('transactions/<int:pk>/edit/', views.edit_transaction, name='edit_transaction'),
     path('transactions/<int:pk>/delete/', views.delete_transaction, name='delete_transaction'),
     
+    # Offerings
+    path('offerings/', views.offering_list, name='offering_list'),
+    path('offerings/add/', views.add_offering, name='add_offering'),
+    path('offerings/<int:pk>/edit/', views.edit_offering, name='edit_offering'),
+    path('offerings/<int:pk>/delete/', views.delete_offering, name='delete_offering'),
+    
     # Categories
     path('categories/', views.category_list, name='category_list'),
     path('categories/add/', views.add_category, name='add_categories'),
+    path('categories/<int:pk>/edit/', views.edit_category, name='edit_category'),
     path('categories/<int:pk>/delete/', views.delete_category, name='delete_category'),
     
     # Employee Management
@@ -27,11 +34,36 @@ urlpatterns = [
     path('payrolls/', views.payroll_list, name='payroll_list'),
     path('payrolls/generate/', views.generate_payroll, name='generate_payroll'),
     path('payrolls/<int:pk>/process/', views.process_payroll, name='process_payroll'),
+    path('payrolls/<int:pk>/submit-for-verification/', views.submit_payroll_for_verification, name='submit_payroll_for_verification'),
+    path('payrolls/<int:pk>/verify/', views.verify_payroll, name='verify_payroll'),
+    path('payrolls/<int:pk>/reject/', views.reject_payroll, name='reject_payroll'),
     
     # Budget Management
     path('budgets/', views.budget_list, name='budget_list'),
     path('budgets/create/', views.create_budget, name='create_budget'),
     path('budgets/<int:pk>/', views.budget_detail, name='budget_detail'),
+    path('budgets/<int:pk>/edit/', views.edit_budget, name='edit_budget'),
+    path('budgets/<int:pk>/submit-for-approval/', views.submit_budget_for_approval, name='submit_budget_for_approval'),
+    path('budgets/<int:pk>/approve/', views.approve_budget, name='approve_budget'),
+    path('budgets/<int:pk>/reject/', views.reject_budget, name='reject_budget'),
+    path('budgets/<int:pk>/add-allocation/', views.add_budget_allocation, name='add_budget_allocation'),
+    path('budgets/<int:pk>/allocation/<int:allocation_id>/edit/', views.edit_budget_allocation, name='edit_budget_allocation'),
+    path('budgets/<int:pk>/allocation/<int:allocation_id>/delete/', views.delete_budget_allocation, name='delete_budget_allocation'),
+    path('budgets/reports/', views.budget_reports, name='budget_reports'),
+    path('budgets/transfer-request/', views.budget_transfer_request, name='budget_transfer_request'),
+    path('budgets/transfer/<int:pk>/approve/', views.approve_budget_transfer, name='approve_budget_transfer'),
+    path('budgets/transfer/<int:pk>/reject/', views.reject_budget_transfer, name='reject_budget_transfer'),
+    path('budgets/variances/', views.budget_variances, name='budget_variances'),
+    path('budgets/alerts/<int:pk>/acknowledge/', views.acknowledge_budget_alert, name='acknowledge_budget_alert'),
+    
+    # Budget Export
+    path('budgets/export/', views.export_budgets, name='export_budgets'),
+    path('budgets/<int:pk>/export-allocations/', views.export_budget_allocations, name='export_budget_allocations'),
+    path('budgets/reports/export/', views.export_budget_reports, name='export_budget_reports'),
+    
+    # Budget Print
+    path('budgets/<int:pk>/print/', views.print_budget, name='print_budget'),
+    path('budgets/<int:pk>/print-allocations/', views.print_budget_allocations, name='print_budget_allocations'),
     
     # Expense Reports
     path('expense-reports/', views.expense_report_list, name='expense_report_list'),

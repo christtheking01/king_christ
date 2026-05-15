@@ -3,30 +3,127 @@
 
 {% block title %}Analytics & Reporting{% endblock %}
 
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+.small-box {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  display: block;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.small-box > .inner {
+  padding: 1rem;
+}
+.small-box h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  white-space: nowrap;
+  color: white;
+}
+.small-box p {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.9);
+  margin: 0;
+}
+.small-box .icon {
+  color: rgba(0,0,0,0.15);
+  z-index: 0;
+}
+.small-box .icon > i {
+  font-size: 5rem;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  transition: transform var(--transition-normal);
+}
+.small-box:hover .icon > i {
+  transform: scale(1.1);
+}
+.small-box > .small-box-footer {
+  background-color: rgba(0,0,0,0.1);
+  color: white;
+  display: block;
+  padding: 0.5rem 0;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  z-index: 10;
+  font-size: 0.85rem;
+}
+.small-box > .small-box-footer:hover {
+  background-color: rgba(0,0,0,0.15);
+  color: white;
+}
+.bg-success { 
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%) !important; 
+}
+.bg-info { 
+  background: linear-gradient(135deg, var(--info) 0%, var(--info-dark) 100%) !important; 
+}
+.bg-warning { 
+  background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%) !important;
+  color: white !important;
+}
+.bg-warning h3, .bg-warning p {
+  color: white !important;
+}
+.bg-primary { 
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important; 
+}
+.products-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.products-list > .item {
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-primary);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+}
+.product-img {
+  margin-right: 0.75rem;
+}
+.product-info {
+  flex: 1;
+}
+.product-title {
+  font-weight: 600;
+  display: block;
+  color: var(--text-primary);
+}
+.product-description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.product-price {
+  font-weight: 700;
+  color: var(--success);
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="content-wrapper">
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Analytics & Reporting Dashboard</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-            <li class="breadcrumb-item active">Analytics</li>
-          </ol>
-        </div>
-      </div>
-    </div>
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header mb-4">
+    <h1 class="page-title">
+      <i class="fas fa-chart-line me-2"></i> Analytics & Reporting Dashboard
+    </h1>
   </div>
 
   <!-- Date Range Filter -->
   <section class="content">
-    <div class="container-fluid">
       <div class="row">
         <div class="col-12">
           <div class="card">
@@ -55,11 +152,14 @@
                 <button type="submit" class="btn btn-primary">
                   <i class="fas fa-filter mr-1"></i> Apply
                 </button>
-                <a href="{% url 'tithing_report' %}?{{ request.GET.urlencode }}" class="btn btn-success ml-2">
+                <a href="{% url 'analytics:tithing_report' %}?{{ request.GET.urlencode }}" class="btn btn-success ml-2">
                   <i class="fas fa-file-alt mr-1"></i> Tithing Report
                 </a>
-                <a href="{% url 'financial_report' %}?{{ request.GET.urlencode }}" class="btn btn-info ml-2">
+                <a href="{% url 'analytics:financial_report' %}?{{ request.GET.urlencode }}" class="btn btn-info ml-2">
                   <i class="fas fa-chart-line mr-1"></i> Financial Report
+                </a>
+                <a href="{% url 'analytics:blocked_users' %}" class="btn btn-danger ml-2">
+                  <i class="fas fa-shield-alt mr-1"></i> Security
                 </a>
               </form>
             </div>
@@ -263,7 +363,6 @@
           </div>
         </div>
       </div>
-    </div>
   </section>
 </div>
 
@@ -282,7 +381,7 @@ document.getElementById('period').addEventListener('change', function() {
 function formatCurrency(amount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'TZS',
     minimumFractionDigits: 0
   }).format(amount);
 }
@@ -290,7 +389,9 @@ function formatCurrency(amount) {
 // Load Tithe Analytics
 function loadTitheData() {
   console.log('Loading tithe data...');
-  fetch('/analytics/api/tithes/?' + new URLSearchParams(window.location.search))
+  fetch('/analytics/api/tithes/?' + new URLSearchParams(window.location.search), {
+    credentials: 'same-origin'
+  })
     .then(response => {
       console.log('Tithe API response:', response.status);
       return response.json();
@@ -300,7 +401,7 @@ function loadTitheData() {
       
       // Handle empty data
       if (!data.summary || data.summary.total_tithes === 0) {
-        document.getElementById('titheTotal').textContent = '$0';
+        document.getElementById('titheTotal').textContent = formatCurrency(0);
         document.getElementById('titheYoY').innerHTML = '<span class="text-muted">No data</span>';
         document.getElementById('topContributors').innerHTML = '<li class="item text-center text-muted">No tithe data available</li>';
         
@@ -405,15 +506,17 @@ function loadTitheData() {
     })
     .catch(error => {
       console.error('Error loading tithe data:', error);
-      document.getElementById('titheTotal').textContent = 'Error';
-      document.getElementById('topContributors').innerHTML = '<li class="item text-center text-danger">Failed to load data</li>';
+      document.getElementById('titheTotal').textContent = 'Error loading data';
+      document.getElementById('topContributors').innerHTML = '<li class="item text-center text-danger">Failed to load data: ' + error.message + '</li>';
     });
 }
 
 // Load Finance Analytics
 function loadFinanceData() {
   console.log('Loading finance data...');
-  fetch('/analytics/api/finance/?' + new URLSearchParams(window.location.search))
+  fetch('/analytics/api/finance/?' + new URLSearchParams(window.location.search), {
+    credentials: 'same-origin'
+  })
     .then(response => {
       console.log('Finance API response:', response.status);
       return response.json();
@@ -423,9 +526,9 @@ function loadFinanceData() {
       
       // Handle empty data
       if (!data.summary || (data.summary.total_income === 0 && data.summary.total_expense === 0)) {
-        document.getElementById('incomeTotal').textContent = '$0';
-        document.getElementById('expenseTotal').textContent = '$0';
-        document.getElementById('netBalance').innerHTML = '<span class="text-muted">$0</span>';
+        document.getElementById('incomeTotal').textContent = formatCurrency(0);
+        document.getElementById('expenseTotal').textContent = formatCurrency(0);
+        document.getElementById('netBalance').innerHTML = '<span class="text-muted">' + formatCurrency(0) + '</span>';
         document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-muted">No financial data available</td></tr>';
         
         // Show empty charts
@@ -538,16 +641,18 @@ function loadFinanceData() {
     })
     .catch(error => {
       console.error('Error loading finance data:', error);
-      document.getElementById('incomeTotal').textContent = 'Error';
-      document.getElementById('expenseTotal').textContent = 'Error';
-      document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load data</td></tr>';
+      document.getElementById('incomeTotal').textContent = 'Error loading data';
+      document.getElementById('expenseTotal').textContent = 'Error loading data';
+      document.getElementById('budgetTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load data: ' + error.message + '</td></tr>';
     });
 }
 
 // Load Member Analytics
 function loadMemberData() {
   console.log('Loading member data...');
-  fetch('/analytics/api/members/')
+  fetch('/analytics/api/members/', {
+    credentials: 'same-origin'
+  })
     .then(response => {
       console.log('Member API response:', response.status);
       return response.json();
@@ -633,7 +738,7 @@ function loadMemberData() {
     })
     .catch(error => {
       console.error('Error loading member data:', error);
-      document.getElementById('memberTotal').textContent = 'Error';
+      document.getElementById('memberTotal').textContent = 'Error loading data';
       document.getElementById('memberGrowth').textContent = 'Error';
     });
 }
@@ -645,85 +750,4 @@ document.addEventListener('DOMContentLoaded', function() {
   loadMemberData();
 });
 </script>
-
-<style>
-.small-box {
-  border-radius: 0.25rem;
-  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-  display: block;
-  margin-bottom: 20px;
-  position: relative;
-}
-.small-box > .inner {
-  padding: 10px;
-}
-.small-box h3 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0 0 10px;
-  padding: 0;
-  white-space: nowrap;
-  color: #fff;
-}
-.small-box p {
-  font-size: 1rem;
-  color: #fff;
-}
-.small-box .icon {
-  color: rgba(0,0,0,.15);
-  z-index: 0;
-}
-.small-box .icon > i {
-  font-size: 90px;
-  position: absolute;
-  right: 15px;
-  top: 15px;
-  transition: transform .3s linear;
-}
-.small-box > .small-box-footer {
-  background-color: rgba(0,0,0,.1);
-  color: #fff;
-  display: block;
-  padding: 3px 0;
-  position: relative;
-  text-align: center;
-  text-decoration: none;
-  z-index: 10;
-}
-.bg-success { background-color: #28a745 !important; }
-.bg-info { background-color: #17a2b8 !important; }
-.bg-warning { background-color: #ffc107 !important; color: #1f2d3d !important; }
-.bg-primary { background-color: #007bff !important; }
-.products-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.products-list > .item {
-  border-radius: 3px;
-  background-color: #fff;
-  padding: 10px 0;
-  border-bottom: 1px solid #f4f4f4;
-  display: flex;
-  align-items: center;
-}
-.product-img {
-  margin-right: 10px;
-}
-.product-info {
-  flex: 1;
-}
-.product-title {
-  font-weight: 600;
-  display: block;
-}
-.product-description {
-  font-size: 0.85rem;
-  color: #666;
-}
-.product-price {
-  font-weight: 700;
-  color: #28a745;
-}
-</style>
 {% endblock %}

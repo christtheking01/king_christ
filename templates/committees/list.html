@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block internal_style %}
 <style>
     :root {
         --primary: #4f46e5;
@@ -141,7 +141,9 @@
         border: 2px dashed var(--border);
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="list-container">
     <div class="page-header">
         <h1>Committees & Boards</h1>

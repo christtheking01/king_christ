@@ -1,58 +1,355 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add User</title>
-    <style>
-        .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; }
-        input { padding: 8px; width: 300px; }
-        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; }
-        .messages { margin: 10px 0; padding: 10px; }
-        .success { background: #d4edda; }
-        .error { background: #f8d7da; }
-    </style>
-</head>
-<body>
-    <h2>Add New User</h2>
-    
-    {% for message in messages %}
-    <div class="messages {% if message.tags %}{{ message.tags }}{% endif %}">
-        {{ message }}
+{% extends 'base.html' %}
+
+{% block title %}Add User - Kristo Mfalme{% endblock %}
+
+{% block internal_style %}
+<style>
+    /* Glassmorphism Design System */
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --secondary: #f093fb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.9);
+        --surface-solid: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: rgba(255, 255, 255, 0.5);
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+        --shadow-md: 0 8px 24px rgba(0,0,0,0.1);
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page Background */
+    .add-user-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* Floating Orbs */
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.3;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.4);
+        top: -100px;
+        left: -100px;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.3);
+        bottom: -50px;
+        right: -50px;
+        animation-delay: -5s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    /* Glass Card */
+    .add-user-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        z-index: 10;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Card Header */
+    .add-user-card h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .add-user-card h2 i {
+        font-size: 2rem;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        box-sizing: border-box;
+        color: var(--text-primary);
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Messages */
+    .glass-message {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        animation: slideIn 0.4s ease-out;
+        backdrop-filter: blur(10px);
+        border: 1px solid;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .glass-message.success {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.3);
+        color: var(--success);
+    }
+
+    .glass-message.error {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: var(--danger);
+    }
+
+    .glass-message i {
+        font-size: 1.25rem;
+    }
+
+    /* Error in form */
+    .form-group .error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .form-group .error::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* Buttons */
+    .btn-glass {
+        position: relative;
+        overflow: hidden;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-glass:hover::before {
+        left: 100%;
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-glass-outline {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .add-user-card {
+            padding: 1.75rem;
+            margin: 0.5rem;
+        }
+
+        .add-user-card h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="add-user-page">
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="add-user-card">
+        <h2><i class="fas fa-user-plus"></i> Add New User</h2>
+
+        {% for message in messages %}
+        <div class="glass-message {{ message.tags }}">
+            <i class="fas {% if message.tags == 'error' %}fa-times-circle{% else %}fa-check-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="error">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_firstname">First Name</label>
+                {{ form.firstname }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_lastname">Last Name</label>
+                {{ form.lastname }}
+            </div>
+
+            <button type="submit" class="btn-glass">
+                <i class="fas fa-user-plus"></i> Create User
+            </button>
+        </form>
+
+        <a href="{% url 'list_users' %}" class="btn-glass-outline">
+            <i class="fas fa-arrow-left"></i> Back to User List
+        </a>
     </div>
-    {% endfor %}
-    
-    <form method="post">
-        {% csrf_token %}
-        
-        <div class="form-group">
-            <label for="id_username">Username:</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <div class="error">{{ form.username.errors }}</div>
-            {% endif %}
-        </div>
-        
-        <div class="form-group">
-            <label for="id_email">Email:</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="error">{{ form.email.errors }}</div>
-            {% endif %}
-        </div>
-        
-        <div class="form-group">
-            <label for="id_first_name">First Name:</label>
-            {{ form.firstname }}
-        </div>
-        
-        <div class="form-group">
-            <label for="id_last_name">Last Name:</label>
-            {{ form.lastname }}
-        </div>
-        
-        <button type="submit" class="btn">Create User</button>
-    </form>
-    
-    <p><a href="{% url 'list_users' %}">← Back to User List</a></p>
-</body>
-</html>
+</div>
+{% endblock %}

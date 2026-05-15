@@ -3,26 +3,62 @@
 
 {% block title %}Financial Report{% endblock %}
 
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+  .card.bg-info {
+    background: linear-gradient(135deg, var(--info) 0%, var(--info-dark) 100%) !important;
+    color: white;
+    border: none;
+  }
+  .card.bg-warning {
+    background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%) !important;
+    color: white;
+    border: none;
+  }
+  .card.bg-success {
+    background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%) !important;
+    color: white;
+    border: none;
+  }
+  .card.bg-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%) !important;
+    color: white;
+    border: none;
+  }
+  .card h2, .card h3 {
+    color: white;
+    margin: 0;
+  }
+  .card h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+  }
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-wrapper">
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Financial Report</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="{% url 'analytics_dashboard' %}">Analytics</a></li>
-            <li class="breadcrumb-item active">Financial Report</li>
-          </ol>
-        </div>
-      </div>
-    </div>
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header mb-4">
+    <h1 class="page-title">
+      <i class="fas fa-chart-line me-2"></i> Financial Report
+    </h1>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'analytics:analytics_dashboard' %}">Analytics</a></li>
+        <li class="breadcrumb-item active">Financial Report</li>
+      </ol>
+    </nav>
   </div>
 
   <section class="content">
-    <div class="container-fluid">
       <!-- Summary Cards -->
       <div class="row">
         <div class="col-md-4">
@@ -107,7 +143,6 @@
           </div>
         </div>
       </div>
-    </div>
   </section>
 </div>
 {% endblock %}

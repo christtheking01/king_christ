@@ -80,9 +80,12 @@
                 {{ form.active }}
                 <label class="form-check-label ms-2" for="{{ form.active.id_for_label }}">Active Member</label>
             </div>
-            <div class="form-check form-check-inline mb-2">
-                {{ form.new_believer_school }}
-                <label class="form-check-label ms-2" for="{{ form.new_believer_school.id_for_label }}">New Believer School</label>
+            <div class="mb-3">
+                <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                {{ form.gender }}
+                {% if form.gender.errors %}
+                    <div class="text-danger small mt-1">{{ form.gender.errors }}</div>
+                {% endif %}
             </div>
         </div>
     </div>

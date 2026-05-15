@@ -1,0 +1,48 @@
+{% extends 'finance/pdf/base_pdf.html' %}
+
+{% block title %}Payroll{% endblock %}
+{% block report_title %}Payroll Report{% endblock %}
+
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Period</th>
+            <th>Basic Salary</th>
+            <th>Gross Salary</th>
+            <th>Net Salary</th>
+            <th>Status</th>
+            <th>Payment Method</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payroll in payrolls %}
+        <tr>
+            <td>#{{ payroll.id }}</td>
+            <td>{{ payroll.employee.name }}</td>
+            <td>{{ payroll.pay_period_start|date:"Y-m-d" }} to {{ payroll.pay_period_end|date:"Y-m-d" }}</td>
+            <td class="amount">{{ payroll.basic_salary|floatformat:2 }}</td>
+            <td class="amount">{{ payroll.gross_salary|floatformat:2 }}</td>
+            <td class="amount">{{ payroll.net_salary|floatformat:2 }}</td>
+            <td>
+                <span class="badge badge-{{ payroll.status|lower }}">{{ payroll.status }}</span>
+            </td>
+            <td>{{ payroll.get_payment_method_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" style="text-align: center;">No payroll records found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary">
+    <div class="summary-row">
+        <span><strong>Total Records:</strong> {{ payrolls|length }}</span>
+        <span><strong>Total Net Salary:</strong> TSH {{ total_net_salary|default:0|floatformat:2 }}</span>
+    </div>
+</div>
+{% endblock %}

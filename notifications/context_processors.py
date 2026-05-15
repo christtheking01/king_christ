@@ -6,28 +6,33 @@ def notification_context(request):
     """
     context = {
         'unread_count': 0,
+        'notifications': [],
     }
     
     # Get unread notifications count for authenticated users
     if request.user.is_authenticated:
         try:
-            from .models import Notification, NotificationReadStatus
+            from .models import UserNotification
             
-            # Get IDs of notifications this user has already read
-            read_notification_ids = NotificationReadStatus.objects.filter(
-                user=request.user
-            ).values_list('notification_id', flat=True)
-            
-            # Get unread notifications count
-            unread_count = Notification.objects.filter(
-                ~Q(id__in=read_notification_ids),
-                status='SENT'
+            # Get unread count from UserNotification model
+            unread_count = UserNotification.objects.filter(
+                user=request.user,
+                is_read=False
             ).count()
             
             context['unread_count'] = unread_count
             
+            # Get recent unread notifications for dropdown
+            recent_notifications = UserNotification.objects.filter(
+                user=request.user,
+                is_read=False
+            ).select_related('notification').order_by('-sent_at')[:5]
+            
+            context['notifications'] = recent_notifications
+            
         except Exception:
             # If there's any error, default to 0
             context['unread_count'] = 0
+            context['notifications'] = []
     
     return context

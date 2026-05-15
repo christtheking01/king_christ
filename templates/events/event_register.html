@@ -3,150 +3,338 @@
 
 {% block title %}Register for {{ event.title }} - Christ King Church{% endblock %}
 
+{% block internal_style %}
+<style>
+    .register-wrapper {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+
+    .event-summary {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        gap: 1.25rem;
+        align-items: center;
+    }
+
+    .event-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--gradient-primary);
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .event-info h2 {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .event-info p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .register-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .register-card-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-card-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .register-card-header p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .form-field {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-field label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-field label .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        background: white;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea.form-control-modern {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .availability-info {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .spots-left {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .spots-left.available { color: var(--success); }
+    .spots-left.limited { color: var(--warning); }
+    .spots-left.full { color: var(--danger); }
+
+    .progress-bar-modern {
+        height: 10px;
+        background: var(--bg-tertiary);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-fill.available { background: var(--success); }
+    .progress-fill.limited { background: var(--warning); }
+    .progress-fill.full { background: var(--danger); }
+
+    .checkbox-modern {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-modern input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .checkbox-modern label {
+        margin: 0;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-register {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        flex: 1;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        flex: 1;
+    }
+
+    .btn-cancel:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    @media (max-width: 600px) {
+        .register-wrapper {
+            margin: 1rem auto;
+        }
+
+        .event-summary {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .register-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <!-- Header -->
-    <div class="text-center mb-4">
-        <h1 class="h3 mb-2"><i class="fas fa-ticket-alt text-primary me-2"></i>Event Registration</h1>
-        <p class="text-muted">Complete the form below to register for this event</p>
-    </div>
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Event Summary -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>{{ event.title }}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2">
-                                <i class="fas fa-calendar text-primary me-2"></i>
-                                <strong>Date:</strong> {{ event.start_date|date:"F j, Y" }}
-                            </p>
-                            {% if event.start_time %}
-                            <p class="mb-2">
-                                <i class="fas fa-clock text-primary me-2"></i>
-                                <strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
-                            </p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            {% if event.location %}
-                            <p class="mb-2">
-                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                <strong>Location:</strong> {{ event.location.name }}
-                            </p>
-                            {% endif %}
-                            {% if event.max_attendees %}
-                            <p class="mb-0">
-                                <i class="fas fa-users text-primary me-2"></i>
-                                <strong>Spots Available:</strong> 
-                                <span class="{% if event.is_full %}text-danger{% else %}text-success{% endif %}">
-                                    {% if event.is_full %}Full{% else %}{{ event.available_spots }} remaining{% endif %}
-                                </span>
-                            </p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Registration Form -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Registration Form</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" 
-                                       value="{{ user.first_name|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" 
-                                       value="{{ user.last_name|default:'' }}" required>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="{{ user.email|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" 
-                                       placeholder="+255...">
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-                        <h6 class="mb-3 text-muted">Additional Information</h6>
-
-                        <div class="mb-3">
-                            <label for="dietary_requirements" class="form-label">Dietary Requirements / Allergies</label>
-                            <textarea class="form-control" id="dietary_requirements" name="dietary_requirements" rows="2"
-                                      placeholder="Vegetarian, allergies, etc."></textarea>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="emergency_contact" class="form-label">Emergency Contact Name</label>
-                                <input type="text" class="form-control" id="emergency_contact" name="emergency_contact">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="emergency_phone" class="form-label">Emergency Contact Phone</label>
-                                <input type="tel" class="form-control" id="emergency_phone" name="emergency_phone">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Additional Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="3"
-                                      placeholder="Any special requirements or comments..."></textarea>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="terms" required>
-                            <label class="form-check-label" for="terms">
-                                I confirm that the information provided is accurate and I agree to attend this event.
-                            </label>
-                        </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check me-2"></i>Complete Registration
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<div class="register-wrapper">
+    <!-- Event Summary -->
+    <div class="event-summary">
+        <div class="event-icon">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="event-info">
+            <h2>{{ event.title }}</h2>
+            <p>
+                <i class="fas fa-calendar me-2"></i>{{ event.start_date|date:"F j, Y" }}
+                {% if event.start_time %}<i class="fas fa-clock ms-3 me-2"></i>{{ event.start_time|time:"g:i A" }}{% endif %}
+            </p>
         </div>
     </div>
-</div>
 
-<script>
-(function () {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
-</script>
+    <!-- Registration Form -->
+    <div class="register-card">
+        <div class="register-card-header">
+            <h3><i class="fas fa-ticket-alt text-primary me-2"></i>Event Registration</h3>
+            <p>Fill in your details to register for this event</p>
+        </div>
+
+        {% if event.max_attendees %}
+        <div class="availability-info">
+            {% with spots_left=event.max_attendees|sub:event.attendee_count %}
+            <div class="spots-left {% if spots_left > 10 %}available{% elif spots_left > 3 %}limited{% else %}full{% endif %}">
+                <i class="fas fa-{% if spots_left > 10 %}check-circle{% elif spots_left > 3 %}exclamation-circle{% else %}times-circle{% endif %}"></i>
+                {{ spots_left }} spot{{ spots_left|pluralize }} remaining
+            </div>
+            <div class="progress-bar-modern">
+                <div class="progress-fill {% if spots_left > 10 %}available{% elif spots_left > 3 %}limited{% else %}full{% endif %}" 
+                     style="width: {{ event.attendee_count|div:event.max_attendees|mul:100 }}%"></div>
+            </div>
+            {% endwith %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-field">
+                <label for="name">Full Name <span class="required">*</span></label>
+                <input type="text" class="form-control-modern" id="name" name="name" 
+                       value="{{ user.get_full_name|default:user.username }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" class="form-control-modern" id="email" name="email" 
+                       value="{{ user.email }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="phone">Phone Number</label>
+                <input type="tel" class="form-control-modern" id="phone" name="phone" 
+                       placeholder="e.g., +255 123 456 789">
+            </div>
+
+            <div class="form-field">
+                <label for="notes">Additional Notes</label>
+                <textarea class="form-control-modern" id="notes" name="notes" 
+                          placeholder="Any special requirements or dietary restrictions..."></textarea>
+            </div>
+
+            <div class="checkbox-modern">
+                <input type="checkbox" id="notifications" name="notifications" checked>
+                <label for="notifications">
+                    Send me email reminders about this event
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-check"></i> Complete Registration
+                </button>
+                <a href="{% url 'event_detail' event.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

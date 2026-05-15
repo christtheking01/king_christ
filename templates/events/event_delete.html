@@ -3,51 +3,180 @@
 
 {% block title %}Delete Event - Christ King Church{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Event</h4>
-                </div>
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-calendar-times fa-4x text-danger mb-4"></i>
-                    <h5 class="card-title">Are you sure?</h5>
-                    <p class="card-text">
-                        You are about to delete the event:<br>
-                        <strong class="h5">"{{ event.title }}"</strong>
-                    </p>
-                    <p class="text-muted">
-                        Scheduled for {{ event.start_date|date:"F j, Y" }}
-                    </p>
-                    
-                    {% if event.registrations.count > 0 %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-users me-2"></i>
-                        This event has <strong>{{ event.registrations.count }}</strong> registration(s).
-                        Deleting it will also remove all registrations.
-                    </div>
-                    {% endif %}
+{% block internal_style %}
+<style>
+    .delete-wrapper {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 1rem;
+    }
 
-                    <p class="text-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        This action cannot be undone.
-                    </p>
-                </div>
-                <div class="card-footer bg-transparent d-flex justify-content-center gap-3">
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-2"></i>Yes, Delete Event
-                        </button>
-                    </form>
-                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </a>
-                </div>
-            </div>
+    .delete-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .delete-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    .delete-icon i {
+        font-size: 3rem;
+        color: white;
+    }
+
+    .delete-card h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .delete-card p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .event-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        margin: 1.5rem 0;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #92400e;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: left;
+    }
+
+    .warning-box i {
+        font-size: 1.25rem;
+        color: #f59e0b;
+    }
+
+    .btn-delete {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        margin-left: 1rem;
+    }
+
+    .btn-cancel:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    @media (max-width: 600px) {
+        .delete-card {
+            padding: 1.5rem;
+        }
+
+        .delete-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-delete, .btn-cancel {
+            width: 100%;
+            margin: 0;
+            justify-content: center;
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .delete-icon {
+        animation: shake 0.8s ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-wrapper">
+    <div class="delete-card">
+        <div class="delete-icon">
+            <i class="fas fa-trash-alt"></i>
         </div>
+        <h1>Delete Event</h1>
+        <p>Are you sure you want to delete this event?</p>
+        <div class="event-name">
+            <i class="fas fa-calendar-day me-2"></i>{{ event.title }}
+        </div>
+        <div class="warning-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>This action cannot be undone. All event data, including registrations and attachments, will be permanently removed.</span>
+        </div>
+        <form method="post" class="delete-actions">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete">
+                <i class="fas fa-trash-alt"></i> Yes, Delete Event
+            </button>
+            <a href="{% url 'event_detail' event.id %}" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </form>
     </div>
 </div>
 {% endblock %}

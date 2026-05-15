@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid dashboard-content">
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="page-header">
+                <h2 class="pageheader-title">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Sacrament Verification
+                </h2>
+                <div class="page-breadcrumb">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'catechesis_analytics' %}">Catechesis</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Verification</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-warning">Pending</h5>
+                            <h2>{{ pending_count }}</h2>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-info">Under Review</h5>
+                            <h2>{{ under_review_count }}</h2>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-search fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-success">Verified</h5>
+                            <h2>{{ verified_count }}</h2>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-danger">Rejected</h5>
+                            <h2>{{ rejected_count }}</h2>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="form-inline">
+                        <div class="form-group mr-3">
+                            <label class="mr-2">Status:</label>
+                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                <option value="" {% if not status_filter %}selected{% endif %}>All</option>
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+                                <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group mr-3">
+                            <label class="mr-2">Sacrament:</label>
+                            <select name="type" class="form-control" onchange="this.form.submit()">
+                                <option value="" {% if not sacrament_type %}selected{% endif %}>All</option>
+                                {% for type_code, type_name in SACRAMENT_CHOICES %}
+                                <option value="{{ type_code }}" {% if sacrament_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <a href="{% url 'pending_sacraments_list' %}" class="btn btn-outline-secondary ml-auto">
+                            <i class="fas fa-sync mr-2"></i>Reset
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sacraments List -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list mr-2"></i>
+                        Sacrament Records Awaiting Verification
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if sacraments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Requested By</th>
+                                    <th>Sacrament</th>
+                                    <th>Date Received</th>
+                                    <th>Place</th>
+                                    <th>Submitted</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sacrament in sacraments %}
+                                <tr>
+                                    <td>
+                                        {% if sacrament.user %}
+                                            <strong>{{ sacrament.user.get_full_name|default:sacrament.user.username }}</strong>
+                                            <br><small class="text-muted">{{ sacrament.user.email }}</small>
+                                        {% elif sacrament.member %}
+                                            <strong>{{ sacrament.member.name }}</strong>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ sacrament.get_sacrament_type_display }}</strong>
+                                    </td>
+                                    <td>{{ sacrament.date_received|default:"Not specified"|date:"M d, Y" }}</td>
+                                    <td>{{ sacrament.place_received|default:"Not specified" }}</td>
+                                    <td>
+                                        {{ sacrament.created_at|date:"M d, Y" }}
+                                        <br><small class="text-muted">{{ sacrament.created_at|timesince }} ago</small>
+                                    </td>
+                                    <td>
+                                        {% if sacrament.verification_status == 'verified' %}
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check mr-1"></i>Verified
+                                            </span>
+                                        {% elif sacrament.verification_status == 'pending' %}
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-clock mr-1"></i>Pending
+                                            </span>
+                                        {% elif sacrament.verification_status == 'under_review' %}
+                                            <span class="badge badge-info">
+                                                <i class="fas fa-search mr-1"></i>Under Review
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-danger">
+                                                <i class="fas fa-times mr-1"></i>Rejected
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'sacrament_detail' sacrament.id %}" class="btn btn-sm btn-outline-primary mr-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if sacrament.verification_status == 'pending' or sacrament.verification_status == 'under_review' %}
+                                        <a href="{% url 'verify_sacrament' sacrament.id %}" class="btn btn-sm btn-outline-success" title="Review & Verify">
+                                            <i class="fas fa-clipboard-check"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4 class="text-muted">All Caught Up!</h4>
+                        <p class="text-muted">There are no sacrament records matching your criteria.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

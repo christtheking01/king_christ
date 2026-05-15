@@ -1,10 +1,12 @@
-import json
 import re
+import logging
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.timezone import now
-from django.conf import settings
-from .models import AuditLog, LoginHistory
-from .utils import get_client_ip, parse_user_agent, get_location_from_ip
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.contrib import messages
+
+logger = logging.getLogger(__name__)
 
 EXEMPT_PATHS = [
     r'^/static/',
@@ -32,11 +34,15 @@ AUDIT_MODELS = [
 ]
 
 
+# ============================================================
+# AUDIT MIDDLEWARE
+# ============================================================
+
 class AuditMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
         if self._is_exempt(request.path):
             return None
-
         request.audit_start_time = now()
         return None
 
@@ -45,7 +51,10 @@ class AuditMiddleware(MiddlewareMixin):
             return response
 
         if request.user.is_authenticated:
-            self._log_action(request, response)
+            try:
+                self._log_action(request, response)
+            except Exception as e:
+                logger.error(f"AuditMiddleware failed to log action: {e}")
 
         return response
 
@@ -61,9 +70,12 @@ class AuditMiddleware(MiddlewareMixin):
             return
 
         model_name = self._extract_model_name(request)
-        
+
+        from audits.models import AuditLog
+        from audits.utils import get_client_ip
+
         AuditLog.objects.create(
-            user=request.user if request.user.is_authenticated else None,
+            user=request.user,
             action=action,
             model_name=model_name,
             path=request.path,
@@ -111,75 +123,162 @@ class AuditMiddleware(MiddlewareMixin):
             app, model_name = model.split('.')
             if app in path or model_name.lower() in path:
                 return model
-        return ''    
+        return ''
 
+
+# ============================================================
+# PASSWORD CHANGE MIDDLEWARE
+# ============================================================
+
+class PasswordChangeMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated and getattr(request.user, 'force_password_change', False):
+
+            allowed_urls = [
+                '/accounts/change_password/',
+                '/accounts/_login_/',
+                '/accounts/_logout_/',
+                '/static/',
+                '/media/',
+                '/api/',
+            ]
+
+            is_allowed = any(request.path.startswith(url) for url in allowed_urls)
+
+            if not is_allowed:
+                return redirect(
+                    f"{reverse('change_password')}?next={request.path}"
+                )
+
+        response = self.get_response(request)
+        return response
+
+
+# ============================================================
+# LOGIN HISTORY MIDDLEWARE
+# ============================================================
 
 class LoginHistoryMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # Capture authenticated user BEFORE the view runs.
+        # Logout clears request.user, so we must save it here.
+        user_before = (
+            request.user
+            if hasattr(request, 'user') and request.user.is_authenticated
+            else None
+        )
+
         response = self.get_response(request)
-        self._track_login_logout(request, response)
+
+        self._track_login_logout(request, response, user_before)
         return response
 
-    def _track_login_logout(self, request, response):
-        path = request.path
-        method = request.method
-
-        if method != 'POST':
+    def _track_login_logout(self, request, response, user_before):
+        if request.method != 'POST':
             return
 
-        if '/login' in path or '/_login_' in path:
-            self._log_login_attempt(request, response)
-        elif '/logout' in path or '/_logout' in path:
-            self._log_logout(request)
+        path = request.path
+
+        try:
+            if '/login' in path or '/_login_' in path:
+                self._log_login_attempt(request, response)
+            elif '/logout' in path or '/_logout' in path:
+                self._log_logout(request, user_before)
+        except Exception as e:
+            logger.error(f"LoginHistoryMiddleware error on path {path}: {e}")
 
     def _log_login_attempt(self, request, response):
+        from audits.models import LoginHistory
+        from audits.utils import get_client_ip, get_location_from_ip
+
         ip = get_client_ip(request)
         user_agent = request.META.get('HTTP_USER_AGENT', '')
-        ua_data = parse_user_agent(user_agent)
+        ua_data = self._parse_user_agent_safe(user_agent)
 
-        username = request.POST.get('username', '')
-        
-        success = response.status_code == 302 or response.status_code == 200
-        
-        user = None
-        if success and hasattr(request, 'user') and request.user.is_authenticated:
-            user = request.user
-            username = user.username
-
-        LoginHistory.objects.create(
-            user=user,
-            username_attempted=username,
-            ip_address=ip,
-            user_agent=user_agent[:500],
-            location=get_location_from_ip(ip),
-            device_info=ua_data.get('device', ''),
-            browser=ua_data.get('browser', ''),
-            os=ua_data.get('os', ''),
-            status='SUCCESS' if success else 'FAILED',
-            failure_reason='' if success else 'Invalid credentials',
-            session_key=request.session.session_key if request.session else ''
+        # Only a redirect + authenticated user = real success
+        # 200 means the form was re-rendered with errors
+        success = (
+            response.status_code == 302
+            and hasattr(request, 'user')
+            and request.user.is_authenticated
         )
 
-    def _log_logout(self, request):
-        if not request.user.is_authenticated:
+        user = request.user if success else None
+        username = user.username if user else request.POST.get('username', '')
+
+        try:
+            LoginHistory.objects.create(
+                user=user,
+                username_attempted=username,
+                ip_address=ip,
+                user_agent=user_agent[:500],
+                location=self._get_location_safe(ip),
+                device_info=ua_data.get('device', ''),
+                browser=ua_data.get('browser', ''),
+                os=ua_data.get('os', ''),
+                status='SUCCESS' if success else 'FAILED',
+                failure_reason='' if success else 'Invalid credentials',
+                session_key=self._get_session_key(request),
+            )
+        except Exception as e:
+            logger.error(f"Failed to log login attempt for '{username}': {e}")
+
+    def _log_logout(self, request, user_before):
+        if not user_before:
             return
 
+        from audits.models import LoginHistory
+        from audits.utils import get_client_ip, get_location_from_ip
+
         ip = get_client_ip(request)
         user_agent = request.META.get('HTTP_USER_AGENT', '')
-        ua_data = parse_user_agent(user_agent)
+        ua_data = self._parse_user_agent_safe(user_agent)
 
-        LoginHistory.objects.create(
-            user=request.user,
-            username_attempted=request.user.username,
-            ip_address=ip,
-            user_agent=user_agent[:500],
-            location=get_location_from_ip(ip),
-            device_info=ua_data.get('device', ''),
-            browser=ua_data.get('browser', ''),
-            os=ua_data.get('os', ''),
-            status='LOGOUT',
-            session_key=request.session.session_key if request.session else ''
-        )
+        try:
+            LoginHistory.objects.create(
+                user=user_before,
+                username_attempted=user_before.username,
+                ip_address=ip,
+                user_agent=user_agent[:500],
+                location=self._get_location_safe(ip),
+                device_info=ua_data.get('device', ''),
+                browser=ua_data.get('browser', ''),
+                os=ua_data.get('os', ''),
+                status='LOGOUT',
+                failure_reason='',
+                session_key=self._get_session_key(request),
+            )
+        except Exception as e:
+            logger.error(f"Failed to log logout for '{user_before.username}': {e}")
+
+    # ── Helpers ──────────────────────────────────────────────
+
+    def _get_session_key(self, request):
+        """Safely get session key — returns empty string if None or missing."""
+        try:
+            return request.session.session_key or ''
+        except AttributeError:
+            return ''
+
+    def _parse_user_agent_safe(self, user_agent):
+        """Parse user agent string — returns empty dict on any failure."""
+        try:
+            from audits.utils import parse_user_agent
+            result = parse_user_agent(user_agent)
+            return result if isinstance(result, dict) else {}
+        except Exception:
+            return {}
+
+    def _get_location_safe(self, ip):
+        """Get location from IP — returns empty string on any failure."""
+        try:
+            from audits.utils import get_location_from_ip
+            return get_location_from_ip(ip) or ''
+        except Exception:
+            return ''

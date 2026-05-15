@@ -97,7 +97,7 @@
             </div>
         </div>
         <div class="finance-stat-card success">
-            <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="finance-stat-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Total Amount</div>
                 <div class="finance-stat-value">Tsh{{ total_expense_amount|floatformat:2 }}</div>
@@ -136,10 +136,13 @@
         <div class="finance-card-header">
             <h6>All Expense Reports</h6>
             <div class="finance-btn-group">
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportReports()">
-                    <i class="fas fa-download"></i> Export
-                </button>
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printReports()">
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}export=csv" class="finance-btn finance-btn-sm finance-btn-outline">
+                    <i class="fas fa-file-csv"></i> CSV
+                </a>
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}export=pdf" class="finance-btn finance-btn-sm finance-btn-outline">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="window.print()">
                     <i class="fas fa-print"></i> Print
                 </button>
             </div>
@@ -179,7 +182,7 @@
                                     </div>
                                 {% else %}<span style="color: #999;">No employee assigned</span>{% endif %}
                             </td>
-                            <td style="color: #ffc107; font-weight: 600;">${{ report.total_amount|floatformat:2 }}</td>
+                            <td style="color: #ffc107; font-weight: 600;">TSH {{ report.total_amount|floatformat:2 }}</td>
                             <td>{{ report.date_submitted|date:"M d, Y" }}</td>
                             <td>
                                 {% if report.status == 'PENDING' %}<span class="finance-badge finance-badge-warning">Pending</span>
@@ -223,10 +226,18 @@
 
 {% block extra_js %}
 <script>
-function exportReports() { alert('Export functionality would be implemented here'); }
-function printReports() { window.print(); }
-function viewReport(id) { alert('View report ' + id); }
-function approveReport(id) { if (confirm('Approve this expense report?')) alert('Approved ' + id); }
-function rejectReport(id) { if (confirm('Reject this expense report?')) alert('Rejected ' + id); }
+// Note: Export and Print functions are handled by links/buttons directly
+function viewReport(id) { window.location.href = '/financial/expense-reports/' + id + '/'; }
+function approveReport(id) { 
+    if (confirm('Approve this expense report?')) {
+        // Submit approval via form or AJAX
+        window.location.href = '/financial/expense-reports/' + id + '/approve/';
+    }
+}
+function rejectReport(id) { 
+    if (confirm('Reject this expense report?')) {
+        window.location.href = '/financial/expense-reports/' + id + '/reject/';
+    }
+}
 </script>
 {% endblock %}

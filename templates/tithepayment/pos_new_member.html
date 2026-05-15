@@ -1,0 +1,275 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - New Member{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-container h2 {
+        margin: 0 0 20px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-container h2 i {
+        color: #4cc9f0;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: rgba(76, 201, 240, 0.05);
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-item:hover {
+        background: rgba(76, 201, 240, 0.1);
+        border-color: #4cc9f0;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4cc9f0;
+    }
+    
+    .checkbox-item label {
+        color: #e0e0e0;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .file-upload {
+        position: relative;
+        border: 2px dashed rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(76, 201, 240, 0.05);
+    }
+    
+    .file-upload:hover {
+        border-color: #4cc9f0;
+        background: rgba(76, 201, 240, 0.1);
+    }
+    
+    .file-upload input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .file-upload-icon {
+        font-size: 2rem;
+        color: #4cc9f0;
+        margin-bottom: 12px;
+    }
+    
+    .file-upload-text {
+        color: #a0a0a0;
+        font-size: 0.875rem;
+    }
+    
+    .preview-image {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 12px;
+        margin-top: 12px;
+        display: none;
+    }
+    
+    .preview-image.show {
+        display: block;
+    }
+</style>
+
+<div class="form-container">
+    <h2><i class="fas fa-user-plus"></i> Register New Member</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            <div class="pos-form-group">
+                <label><i class="fas fa-user"></i> Full Name *</label>
+                <input type="text" name="name" class="pos-input" placeholder="Enter full name" required>
+            </div>
+            
+            <div class="pos-form-group">
+                <label><i class="fas fa-id-card"></i> Member Code</label>
+                <input type="text" name="code" class="pos-input" placeholder="e.g., 001PT">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="pos-form-group">
+                <label><i class="fas fa-phone"></i> Phone Number</label>
+                <input type="tel" name="telephone" class="pos-input" placeholder="+255 XXX XXX XXX">
+            </div>
+            
+            <div class="pos-form-group">
+                <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                <input type="text" name="location" class="pos-input" placeholder="Enter location">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="pos-form-group">
+                <label><i class="fas fa-church"></i> Community</label>
+                <select name="shepherd" class="pos-select">
+                    <option value="">-- Select Community --</option>
+                    {% for community in communities %}
+                        <option value="{{ community.id }}">{{ community.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="pos-form-group">
+                <label><i class="fas fa-users"></i> Ministry</label>
+                <select name="ministry" class="pos-select">
+                    <option value="">-- Select Ministry --</option>
+                    {% for ministry in ministries %}
+                        <option value="{{ ministry.id }}">{{ ministry.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="pos-form-group">
+                <label><i class="fas fa-venus-mars"></i> Gender</label>
+                <select name="gender" class="pos-select">
+                    <option value="">-- Select Gender --</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            
+            <div class="pos-form-group">
+                <label><i class="fas fa-user-tag"></i> Membership Category</label>
+                <select name="membership_category" class="pos-select">
+                    <option value="">-- Select Category --</option>
+                    <option value="elder">Elder</option>
+                    <option value="youth">Youth</option>
+                    <option value="child">Child</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="pos-form-group">
+                <label><i class="fas fa-user-tie"></i> Father's Name</label>
+                <input type="text" name="fathers_name" class="pos-input" placeholder="Father's name">
+            </div>
+            
+            <div class="pos-form-group">
+                <label><i class="fas fa-user"></i> Mother's Name</label>
+                <input type="text" name="mothers_name" class="pos-input" placeholder="Mother's name">
+            </div>
+        </div>
+        
+        <div class="pos-form-group">
+            <label><i class="fas fa-user-shield"></i> Guardian's Name</label>
+            <input type="text" name="guardians_name" class="pos-input" placeholder="Guardian's name (if applicable)">
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" name="pays_tithe" id="paysTithe">
+                <label for="paysTithe">Pays Tithe</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="working" id="working">
+                <label for="working">Working</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="schooling" id="schooling">
+                <label for="schooling">Schooling</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="active" id="active" checked>
+                <label for="active">Active Member</label>
+            </div>
+        </div>
+        
+        <div class="pos-form-group">
+            <label><i class="fas fa-camera"></i> Member Photo</label>
+            <div class="file-upload">
+                <input type="file" name="picture" accept="image/*" id="pictureInput" onchange="previewFile()">
+                <div class="file-upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="file-upload-text">
+                    Click to upload or drag and drop
+                </div>
+                <img id="preview" class="preview-image" alt="Preview">
+            </div>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-save"></i> Register Member
+        </button>
+    </form>
+</div>
+
+<script>
+    function previewFile() {
+        const preview = document.getElementById('preview');
+        const file = document.getElementById('pictureInput').files[0];
+        const reader = new FileReader();
+        
+        reader.onloadend = function() {
+            preview.src = reader.result;
+            preview.classList.add('show');
+        }
+        
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "";
+            preview.classList.remove('show');
+        }
+    }
+</script>
+{% endblock %}

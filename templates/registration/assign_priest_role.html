@@ -1,133 +1,463 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --secondary: #f093fb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.9);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .priest-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .priest-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .priest-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .priest-header h1 i {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .priest-header p {
+        color: rgba(255,255,255,0.9);
+        margin: 0;
+    }
+
+    .priest-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: slideUp 0.6s ease-out 0.1s both;
+    }
+
+    @media (max-width: 992px) {
+        .priest-grid { grid-template-columns: 1fr; }
+    }
+
+    .glass-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    .card-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .card-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--primary);
+    }
+
+    .priest-profile {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .priest-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .priest-avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .priest-avatar-placeholder i {
+        font-size: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .priest-info h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem;
+    }
+
+    .priest-info p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-group label i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        color: var(--text-primary);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .help-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .alert-glass-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-glass-info h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--info);
+        margin: 0 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-glass-info ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: var(--text-secondary);
+    }
+
+    .alert-glass-info li {
+        margin-bottom: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-glass {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex: 1;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-glass:hover::before {
+        left: 100%;
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-glass-outline {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        flex: 1;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .status-badge.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .info-icon {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .info-icon i {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .info-icon p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .priest-page { padding: 1rem; }
+        .priest-profile { flex-direction: column; text-align: center; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'priest_role_management' %}">Priest Roles</a></li>
-                    <li class="breadcrumb-item active">Assign Role</li>
-                </ol>
-            </nav>
-            <h2 class="mb-1">
-                <i class="fas fa-user-tag text-primary me-2"></i>Assign Priest Role
-            </h2>
-            <p class="text-muted">Assign a specific role to {{ priest.full_name|default:priest.username }}</p>
-        </div>
+<div class="priest-page">
+    <!-- Header -->
+    <div class="priest-header">
+        <h1>
+            <i class="fas fa-user-tag"></i>
+            Assign Priest Role
+        </h1>
+        <p>Assign a specific role to {{ priest.full_name|default:priest.username }}</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user me-2"></i>Priest Information
-                    </h5>
+    <div class="priest-grid">
+        <!-- Main Card -->
+        <div class="glass-card">
+            <!-- Priest Profile Section -->
+            <div class="card-section">
+                <div class="section-title">
+                    <i class="fas fa-user"></i>
+                    Priest Information
                 </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="flex-shrink-0">
-                            {% if priest.userprofile and priest.userprofile.picture %}
-                            <img src="{{ priest.userprofile.picture.url }}" alt="{{ priest.username }}" 
-                                 class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                            {% else %}
-                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 80px; height: 80px;">
-                                <i class="fas fa-user fa-2x text-muted"></i>
-                            </div>
-                            {% endif %}
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5 class="mb-1">{{ priest.full_name|default:priest.username }}</h5>
-                            <p class="text-muted mb-1">{{ priest.email|default:"No email" }}</p>
-                            <p class="text-muted mb-0">{{ priest.phone|default:"No phone" }}</p>
+                <div class="priest-profile">
+                    {% if priest.userprofile and priest.userprofile.picture %}
+                    <img src="{{ priest.userprofile.picture.url }}" alt="{{ priest.username }}" class="priest-avatar">
+                    {% else %}
+                    <div class="priest-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    {% endif %}
+                    <div class="priest-info">
+                        <h5>{{ priest.full_name|default:priest.username }}</h5>
+                        <p><i class="fas fa-envelope"></i> {{ priest.email|default:"No email" }}</p>
+                        <p><i class="fas fa-phone"></i> {{ priest.phone|default:"No phone" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="card-section">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="priest_role">
+                            <i class="fas fa-id-badge"></i>Select Priest Role
+                        </label>
+                        <select name="priest_role" id="priest_role" class="form-control" required>
+                            <option value="">-- Select Role --</option>
+                            {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
+                                {% if role_value in available_role_values %}
+                                <option value="{{ role_value }}" {% if current_role == role_value %}selected{% endif %}>
+                                    {{ role_display }}
+                                </option>
+                                {% else %}
+                                <option value="{{ role_value }}" disabled>
+                                    {{ role_display }} (Already assigned)
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Parish Priest and Assistant Priest roles can only be assigned to one person each.
                         </div>
                     </div>
 
-                    <hr class="my-4">
+                    <div class="alert-glass-info">
+                        <h6><i class="fas fa-info-circle"></i>Role Descriptions</h6>
+                        <ul>
+                            <li><strong>Parish Priest:</strong> The head of the parish (1 only)</li>
+                            <li><strong>Assistant Priest:</strong> Supports the Parish Priest (1 only)</li>
+                            <li><strong>Normal Priest:</strong> Other priests serving in the parish (multiple)</li>
+                        </ul>
+                    </div>
 
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="mb-4">
-                            <label for="priest_role" class="form-label fw-bold">
-                                <i class="fas fa-id-badge me-2"></i>Select Priest Role
-                            </label>
-                            <select name="priest_role" id="priest_role" class="form-select form-select-lg" required>
-                                <option value="">-- Select Role --</option>
-                                {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
-                                    {% if role_value in available_role_values %}
-                                    <option value="{{ role_value }}" {% if current_role == role_value %}selected{% endif %}>
-                                        {{ role_display }}
-                                    </option>
-                                    {% else %}
-                                    <option value="{{ role_value }}" disabled>
-                                        {{ role_display }} (Already assigned to another priest)
-                                    </option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                            <div class="form-text mt-2">
-                                <i class="fas fa-info-circle me-1"></i>
-                                <strong>Note:</strong> Parish Priest and Assistant Priest roles can only be assigned to one person each.
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Role Descriptions</h6>
-                            <ul class="mb-0">
-                                <li><strong>Parish Priest:</strong> The head of the parish (1 only)</li>
-                                <li><strong>Assistant Priest:</strong> Supports the Parish Priest (1 only)</li>
-                                <li><strong>Normal Priest:</strong> Other priests serving in the parish (multiple)</li>
-                            </ul>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'priest_role_management' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Assign Role
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="form-actions">
+                        <a href="{% url 'priest_role_management' %}" class="btn-glass-outline">
+                            <i class="fas fa-arrow-left"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn-glass">
+                            <i class="fas fa-save"></i>Assign Role
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="col-md-4 col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>Current Status
-                    </h5>
+        <!-- Side Card -->
+        <div class="glass-card">
+            <div class="card-section">
+                <div class="section-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Current Status
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="text-muted">Current Role:</label>
-                        <p class="mb-0">
-                            {% if current_role %}
-                                {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
-                                    {% if role_value == current_role %}
-                                    <span class="badge bg-success">{{ role_display }}</span>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <span class="badge bg-warning text-dark">Not Assigned</span>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Current Role:</label>
+                    {% if current_role %}
+                        {% for role_value, role_display in PRIEST_ROLE_CHOICES %}
+                            {% if role_value == current_role %}
+                            <span class="status-badge success">{{ role_display }}</span>
                             {% endif %}
-                        </p>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="text-center">
-                        <i class="fas fa-church fa-3x text-muted mb-3"></i>
-                        <p class="text-muted small">
-                            Proper role assignment ensures clear leadership structure within the parish.
-                        </p>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <span class="status-badge warning">Not Assigned</span>
+                    {% endif %}
+                </div>
+
+                <div class="info-icon">
+                    <i class="fas fa-church"></i>
+                    <p>Proper role assignment ensures clear leadership structure within the parish.</p>
                 </div>
             </div>
         </div>

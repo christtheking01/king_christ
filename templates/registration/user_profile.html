@@ -2,90 +2,381 @@
 
 {% block title %}My Profile - {{ user_profile.username }}{% endblock %}
 
+{% block internal_style %}
+<style>
+    /* Modern Profile Styles */
+    .profile-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header */
+    .profile-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .profile-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .profile-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Glass Cards */
+    .profile-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .profile-card-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .profile-card-header.secondary {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    }
+
+    .profile-card-header.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .profile-card-header.info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .profile-card-header h5 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .profile-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Avatar */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 0 auto 1rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.1);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    /* Info Table */
+    .info-table {
+        width: 100%;
+    }
+
+    .info-table td, .info-table th {
+        padding: 12px 0;
+        border: none;
+    }
+
+    .info-table th {
+        font-weight: 600;
+        color: var(--text-secondary);
+        width: 40%;
+        vertical-align: top;
+    }
+
+    .info-table td {
+        color: var(--text-primary);
+    }
+
+    .info-table tr:not(:last-child) {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Role Badge */
+    .role-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .role-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .role-admin {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .role-priest {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .role-staff {
+        background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+        color: white;
+    }
+
+    .role-member {
+        background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        color: #374151;
+    }
+
+    /* Buttons */
+    .btn-profile {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-profile-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-profile-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-profile-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-profile-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Quick Stats */
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .quick-stat {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        transition: all 0.2s ease;
+    }
+
+    .quick-stat:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .quick-stat-value {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .quick-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="profile-wrapper">
+    <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+    </div>
+
     <div class="row">
         <div class="col-md-4">
             <!-- Profile Card -->
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <!-- Avatar/Initials -->
-                    <div class="mb-3">
-                        <div class="avatar-circle" style="
-                            width: 120px;
-                            height: 120px;
-                            background: linear-gradient(45deg, #3498db, #2c3e50);
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto;
-                            color: white;
-                            font-size: 3rem;
-                            font-weight: bold;
-                        ">
-                            {{ user.firstname|first|upper }}{{ user.lastname|first|upper }}
-                        </div>
+            <div class="profile-card">
+                <div class="profile-card-body text-center">
+                    <!-- Avatar -->
+                    {% if user.userprofile.picture %}
+                    <div class="profile-avatar">
+                        <img src="{{ user.userprofile.picture.url }}" alt="Profile Picture">
                     </div>
-                    
+                    {% else %}
+                    <div class="profile-avatar">
+                        {{ user.firstname|default:"?"|first|upper }}{{ user.lastname|default:"?"|first|upper }}
+                    </div>
+                    {% endif %}
+
                     <h4 class="mb-1">{{ user.full_name }}</h4>
-                    <p class="text-muted">@{{ user.username }}</p>
-                    
+                    <p style="color: var(--text-secondary);">@{{ user.username }}</p>
+
+                    {% if user.userprofile.title %}
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        <i class="fas fa-briefcase"></i> {{ user.userprofile.title }}
+                    </p>
+                    {% endif %}
+
                     <!-- Role Badge -->
                     <div class="mb-3">
-                        <span class="badge 
-                            {% if user.roles == 'admin' %}bg-danger
-                            {% elif user.roles == 'Chairperson' %}bg-primary
-                            {% elif user.roles == 'Secretary' %}bg-success
-                            {% elif user.roles == 'Priest' %}bg-success
-                            {% elif user.roles == 'Catechesis' %}bg-success
-                            {% elif user.roles == 'Accountant' %}bg-warning
-                            {% else %}bg-secondary{% endif %}
-                            p-2">
+                        <span class="role-badge
+                            {% if user.roles == 'admin' %}role-admin
+                            {% elif user.roles == 'Priest' %}role-priest
+                            {% elif user.is_staff %}role-staff
+                            {% else %}role-member{% endif %}">
+                            <i class="fas fa-user-shield"></i>
                             {{ user_profile.get_roles_display }}
                         </span>
                     </div>
-                    
+
                     <!-- Status Indicators -->
                     <div class="d-flex justify-content-center gap-3 mb-3">
-                        <span class="status-indicator {% if user.is_active %}text-success{% else %}text-danger{% endif %}">
-                            <i class="fas fa-circle me-1"></i>
+                        <span class="status-badge {% if user.is_active %}active{% else %}inactive{% endif %}">
+                            <i class="fas fa-{% if user.is_active %}check-circle{% else %}times-circle{% endif %}"></i>
                             {% if user.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
-                        
-                        <span class="status-indicator {% if user.is_verified %}text-success{% else %}text-warning{% endif %}">
-                            <i class="fas {% if user.is_verified %}fa-check-circle{% else %}fa-clock{% endif %} me-1"></i>
+
+                        <span class="status-badge {% if user.is_verified %}active{% else %}inactive{% endif %}">
+                            <i class="fas {% if user.is_verified %}fa-check-circle{% else %}fa-clock{% endif %}"></i>
                             {% if user.is_verified %}Verified{% else %}Pending{% endif %}
                         </span>
                     </div>
+
+                    <!-- Edit Profile Button -->
+                    <a href="{% url 'edit_profile' %}" class="btn-profile btn-profile-primary w-100 mb-2">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
                     
-                    <!-- Staff Status -->
-                    {% if user.is_staff %}
-                    <div class="alert alert-info py-2">
-                        <small><i class="fas fa-shield-alt me-1"></i> Staff Member</small>
-                    </div>
-                    {% endif %}
+                    <!-- Change Password Button -->
+                    <a href="{% url 'change_password' %}" class="btn-profile btn-profile-secondary w-100">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
                 </div>
             </div>
             
-            <!-- Quick Stats -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-body">
-                    <h6 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Account Info</h6>
-                    <div class="row text-center">
-                        <div class="col-6 border-end">
-                            <h5 class="mb-1">{{ user.date_joined|date:"M Y" }}</h5>
-                            <small class="text-muted">Joined</small>
+            <!-- Quick Stats Card -->
+            <div class="profile-card">
+                <div class="profile-card-header secondary">
+                    <i class="fas fa-chart-line"></i>
+                    <h5>Account Info</h5>
+                </div>
+                <div class="profile-card-body">
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value">{{ user.date_joined|date:"M Y" }}</div>
+                            <div class="quick-stat-label">Joined</div>
                         </div>
-                        <div class="col-6">
-                            <h5 class="mb-1">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value">
                                 {% if user.last_login %}
                                     {{ user.last_login|timesince }}
                                 {% else %}
                                     Never
                                 {% endif %}
-                            </h5>
-                            <small class="text-muted">Last Login</small>
+                            </div>
+                            <div class="quick-stat-label">Last Login</div>
                         </div>
                     </div>
                 </div>
@@ -93,17 +384,20 @@
         </div>
         
         <div class="col-md-8">
-            <!-- User Details Card -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Personal Information</h5>
+            <!-- Personal Information Card -->
+            <div class="profile-card">
+                <div class="profile-card-header info">
+                    <i class="fas fa-user-circle"></i>
+                    <h5>Personal Information</h5>
                 </div>
-                <div class="card-body">
+                <div class="profile-card-body">
                     <div class="row">
                         <!-- Personal Details -->
                         <div class="col-md-6">
-                            <h6 class="border-bottom pb-2 mb-3">Basic Details</h6>
-                            <table class="table table-borderless">
+                            <h6 style="font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                                <i class="fas fa-id-card me-2" style="color: var(--primary);"></i>Basic Details
+                            </h6>
+                            <table class="info-table">
                                 <tr>
                                     <th width="40%">Username:</th>
                                     <td>{{ user.username }}</td>
@@ -125,8 +419,10 @@
                         
                         <!-- Contact Information -->
                         <div class="col-md-6">
-                            <h6 class="border-bottom pb-2 mb-3">Contact Information</h6>
-                            <table class="table table-borderless">
+                            <h6 style="font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                                <i class="fas fa-address-card me-2" style="color: var(--primary);"></i>Contact Information
+                            </h6>
+                            <table class="info-table">
                                 <tr>
                                     <th width="40%">Email:</th>
                                     <td>
@@ -147,14 +443,15 @@
             </div>
             
             <!-- Account Information Card -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Account Information</h5>
+            <div class="profile-card">
+                <div class="profile-card-header success">
+                    <i class="fas fa-shield-alt"></i>
+                    <h5>Account Information</h5>
                 </div>
-                <div class="card-body">
+                <div class="profile-card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <table class="table table-borderless">
+                            <table class="info-table">
                                 <tr>
                                     <th width="50%">User Role:</th>
                                     <td>
@@ -192,7 +489,7 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <table class="table table-borderless">
+                            <table class="info-table">
                                 <tr>
                                     <th width="50%">Staff Status:</th>
                                     <td>
@@ -240,6 +537,46 @@
                 </div>
             </div>
             
+            <!-- About Me Card -->
+            {% if user.userprofile.about %}
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-quote-left me-2"></i>About Me</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ user.userprofile.about|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Social Media Links Card -->
+            {% if user.userprofile.facebook_link or user.userprofile.twitter_link or user.userprofile.instagram_link %}
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-share-alt me-2"></i>Social Media</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3">
+                        {% if user.userprofile.facebook_link %}
+                        <a href="{{ user.userprofile.facebook_link }}" target="_blank" class="btn btn-primary btn-sm">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        {% endif %}
+                        {% if user.userprofile.twitter_link %}
+                        <a href="{{ user.userprofile.twitter_link }}" target="_blank" class="btn btn-info btn-sm text-white">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                        {% endif %}
+                        {% if user.userprofile.instagram_link %}
+                        <a href="{{ user.userprofile.instagram_link }}" target="_blank" class="btn btn-danger btn-sm">
+                            <i class="fab fa-instagram"></i> Instagram
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
             <!-- Security Alert if Password Change Required -->
             {% if user_profile.force_password_change and user_profile == request.user %}
             <div class="alert alert-warning mt-3">
@@ -282,57 +619,4 @@
         </div>
       </div>
 
-<style>
-    .card {
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-    }
-    
-    .card-header {
-        border-bottom: 2px solid #f8f9fa;
-        padding: 1rem 1.5rem;
-    }
-    
-    .table-borderless td, .table-borderless th {
-        border: none;
-        padding: 8px 0;
-    }
-    
-    .table-borderless th {
-        font-weight: 600;
-        color: #555;
-        vertical-align: top;
-    }
-    
-    .table-borderless tr:not(:last-child) td,
-    .table-borderless tr:not(:last-child) th {
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .avatar-circle {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-    }
-    
-    .avatar-circle:hover {
-        transform: scale(1.05);
-    }
-    
-    .status-indicator {
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-    }
-    
-    .badge {
-        font-size: 0.8rem;
-        font-weight: 500;
-        padding: 0.4rem 0.8rem;
-    }
-    
-    h6.border-bottom {
-        color: #2c3e50;
-        font-weight: 600;
-    }
-</style>
 {% endblock %}

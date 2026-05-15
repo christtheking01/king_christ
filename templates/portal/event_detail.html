@@ -1,0 +1,352 @@
+{% extends 'portal/base_portal.html' %}
+
+{% block title %}{{ event.title }} - Christ King Church{% endblock %}
+
+{% block content %}
+<style>
+    /* Event Detail - X/Signal Style */
+    .event-detail-header {
+        background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-secondary) 100%);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-detail-header h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .event-detail-header .event-type {
+        color: rgba(255,255,255,0.8);
+        margin-top: 0.5rem;
+        font-size: 0.9375rem;
+    }
+    
+    .event-banner {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-info-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .event-info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        background: var(--bg-tertiary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-primary);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .event-info-content {
+        flex: 1;
+    }
+    
+    .event-info-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+    
+    .event-info-value {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+    }
+    
+    .event-description {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-description h5 {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .event-description h5 i {
+        color: var(--accent-primary);
+    }
+    
+    .event-description p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* Registration Status Card */
+    .reg-status-card {
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .reg-status-card.open {
+        background: rgba(0, 186, 124, 0.1);
+        border: 1px solid rgba(0, 186, 124, 0.3);
+    }
+    
+    .reg-status-card.closed {
+        background: rgba(244, 33, 46, 0.1);
+        border: 1px solid rgba(244, 33, 46, 0.3);
+    }
+    
+    .reg-status-card.full {
+        background: rgba(255, 173, 31, 0.1);
+        border: 1px solid rgba(255, 173, 31, 0.3);
+    }
+    
+    .reg-status-card.registered {
+        background: rgba(0, 186, 124, 0.1);
+        border: 1px solid rgba(0, 186, 124, 0.3);
+    }
+    
+    .reg-status-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    
+    .reg-status-card.open .reg-status-icon {
+        background: rgba(0, 186, 124, 0.2);
+        color: var(--accent-success);
+    }
+    
+    .reg-status-card.closed .reg-status-icon {
+        background: rgba(244, 33, 46, 0.2);
+        color: var(--accent-danger);
+    }
+    
+    .reg-status-card.full .reg-status-icon {
+        background: rgba(255, 173, 31, 0.2);
+        color: var(--accent-warning);
+    }
+    
+    .reg-status-card.registered .reg-status-icon {
+        background: rgba(0, 186, 124, 0.2);
+        color: var(--accent-success);
+    }
+    
+    .reg-status-content h5 {
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+    }
+    
+    .reg-status-card.open .reg-status-content h5 {
+        color: var(--accent-success);
+    }
+    
+    .reg-status-card.closed .reg-status-content h5 {
+        color: var(--accent-danger);
+    }
+    
+    .reg-status-card.full .reg-status-content h5 {
+        color: var(--accent-warning);
+    }
+    
+    .reg-status-card.registered .reg-status-content h5 {
+        color: var(--accent-success);
+    }
+    
+    .reg-status-content p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .event-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .event-detail-header h1 {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+<!-- Back Button -->
+<div class="mb-3">
+    <a href="{% url 'portal_events' %}" class="btn-portal btn-portal-outline" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+        <i class="fas fa-arrow-left"></i> Back to Events
+    </a>
+</div>
+
+<!-- Event Header -->
+<div class="event-detail-header">
+    <h1><i class="fas fa-calendar-alt"></i> {{ event.title }}</h1>
+    <div class="event-type">{{ event.get_event_type_display }}</div>
+</div>
+
+{% if event.banner_image %}
+<img src="{{ event.banner_image.url }}" class="event-banner" alt="{{ event.title }}">
+{% endif %}
+
+<!-- Registration Status -->
+{% if event.requires_registration %}
+    {% if is_registered %}
+    <div class="reg-status-card registered">
+        <div class="reg-status-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="reg-status-content">
+            <h5>You're Registered!</h5>
+            <p>You are confirmed for this event.</p>
+        </div>
+    </div>
+    {% elif event.is_full %}
+    <div class="reg-status-card full">
+        <div class="reg-status-icon">
+            <i class="fas fa-ban"></i>
+        </div>
+        <div class="reg-status-content">
+            <h5>Event Full</h5>
+            <p>This event has reached maximum capacity.</p>
+        </div>
+    </div>
+    {% elif event.registration_closed %}
+    <div class="reg-status-card closed">
+        <div class="reg-status-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <div class="reg-status-content">
+            <h5>Registration Closed</h5>
+            <p>Registration is no longer available for this event.</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="reg-status-card open">
+        <div class="reg-status-icon">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="reg-status-content">
+            <h5>Registration Open</h5>
+            <p>
+                {% if event.max_attendees %}
+                    {{ event.available_spots }} spots remaining
+                {% else %}
+                    Register now to secure your spot!
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+<!-- Event Details Grid -->
+<div class="event-info-grid">
+    <div class="event-info-item">
+        <div class="event-info-icon">
+            <i class="fas fa-calendar"></i>
+        </div>
+        <div class="event-info-content">
+            <div class="event-info-label">Date</div>
+            <div class="event-info-value">{{ event.start_date|date:"l, F j, Y" }}</div>
+        </div>
+    </div>
+    
+    {% if event.start_time %}
+    <div class="event-info-item">
+        <div class="event-info-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="event-info-content">
+            <div class="event-info-label">Time</div>
+            <div class="event-info-value">{{ event.start_time|time:"g:i A" }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if event.location %}
+    <div class="event-info-item">
+        <div class="event-info-icon">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="event-info-content">
+            <div class="event-info-label">Location</div>
+            <div class="event-info-value">{{ event.location.name }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if event.organizer %}
+    <div class="event-info-item">
+        <div class="event-info-icon">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="event-info-content">
+            <div class="event-info-label">Organizer</div>
+            <div class="event-info-value">{{ event.organizer.get_full_name }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Description -->
+{% if event.description %}
+<div class="event-description">
+    <h5><i class="fas fa-align-left"></i> About This Event</h5>
+    <p>{{ event.description|linebreaks }}</p>
+</div>
+{% endif %}
+
+<!-- Location Details -->
+{% if event.location_details %}
+<div class="event-description">
+    <h5><i class="fas fa-map-marked-alt"></i> Location Details</h5>
+    <p>{{ event.location_details|linebreaks }}</p>
+</div>
+{% endif %}
+
+<div class="mt-4">
+    <a href="{% url 'portal_events' %}" class="btn-portal btn-portal-outline">
+        <i class="fas fa-arrow-left"></i> Back to Events
+    </a>
+</div>
+{% endblock %}

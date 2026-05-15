@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    /* Glassmorphism Design System */
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --secondary: #f093fb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.9);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: rgba(255, 255, 255, 0.5);
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sacrament-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sacrament-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .sacrament-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .sacrament-header h1 i {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .glass-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+        animation: slideUp 0.6s ease-out 0.1s both;
+    }
+
+    .alert-glass {
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        margin: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        animation: slideIn 0.4s ease-out;
+        backdrop-filter: blur(10px);
+        border: 1px solid;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .alert-glass-warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: var(--warning); }
+    .alert-glass-info { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: var(--info); }
+
+    .sacrament-form { padding: 0 1.5rem 1.5rem; }
+    .form-section { margin-bottom: 2rem; }
+    .section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(102, 126, 234, 0.2); display: flex; align-items: center; gap: 0.5rem; }
+    .form-grid { display: grid; gap: 1.25rem; }
+    .form-group { margin: 0; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.875rem 1rem; font-size: 0.95rem; background: rgba(255, 255, 255, 0.6); border: 2px solid rgba(102, 126, 234, 0.1); border-radius: var(--radius-md); transition: var(--transition); box-sizing: border-box; color: var(--text-primary); }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); background: rgba(255, 255, 255, 0.9); box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
+    .help-text { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block; }
+    .error-text { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; }
+
+    .btn-view-file { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; color: var(--info); text-decoration: none; font-size: 0.9rem; transition: var(--transition); }
+    .btn-view-file:hover { background: rgba(59, 130, 246, 0.2); }
+
+    input[type="file"] { padding: 0.75rem !important; }
+    input[type="file"]::file-selector-button { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; margin-right: 1rem; cursor: pointer; }
+
+    .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(102, 126, 234, 0.1); }
+
+    .btn-glass { position: relative; overflow: hidden; padding: 0.875rem 1.5rem; font-size: 0.95rem; font-weight: 600; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; flex: 1; }
+    .btn-glass::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); transition: left 0.5s; }
+    .btn-glass:hover::before { left: 100%; }
+    .btn-glass:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+
+    .btn-glass-outline { padding: 0.875rem 1.5rem; font-size: 0.95rem; font-weight: 600; background: transparent; color: var(--text-secondary); border: 2px solid rgba(102, 126, 234, 0.2); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; flex: 1; }
+    .btn-glass-outline:hover { border-color: var(--primary); color: var(--primary); background: rgba(102, 126, 234, 0.05); }
+
+    .doc-preview { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.75rem; }
+    .doc-preview i { color: var(--success); font-size: 1.25rem; }
+    .doc-preview span { color: var(--text-secondary); font-size: 0.9rem; flex: 1; }
+
+    @media (max-width: 640px) { .sacrament-page { padding: 1rem; } .form-actions { flex-direction: column; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sacrament-page">
+    <!-- Header -->
+    <div class="sacrament-header">
+        <h1>
+            <i class="fas fa-edit"></i>
+            Edit Sacrament Record
+        </h1>
+    </div>
+
+    <!-- Glass Card -->
+    <div class="glass-card">
+        <!-- Alerts -->
+        <div class="alert-glass alert-glass-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Note:</strong> You can only edit sacraments that are still pending verification.
+                Once verified, changes must be requested through catechesis staff.
+            </div>
+        </div>
+
+        <div class="alert-glass alert-glass-info">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                Editing: <strong>{{ sacrament.get_sacrament_type_display }}</strong> for
+                <strong>{{ target_user.get_full_name|default:target_user.username }}</strong>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" enctype="multipart/form-data" class="sacrament-form">
+            {% csrf_token %}
+
+            <!-- Sacrament Information -->
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-church"></i>Sacrament Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_sacrament_type">Sacrament Type</label>
+                        {{ form.sacrament_type }}
+                        {% if form.sacrament_type.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i>{{ form.sacrament_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_date_received">Date Received</label>
+                        {{ form.date_received }}
+                        {% if form.date_received.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i>{{ form.date_received.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_place_received">Place Received</label>
+                        {{ form.place_received }}
+                        {% if form.place_received.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i>{{ form.place_received.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_minister_name">Minister Name</label>
+                        {{ form.minister_name }}
+                        {% if form.minister_name.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i>{{ form.minister_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-file-upload"></i>Documents</h3>
+
+                {% if sacrament.certificate_file %}
+                <div class="doc-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Current certificate uploaded</span>
+                    <a href="{{ sacrament.certificate_file.url }}" target="_blank" class="btn-view-file"><i class="fas fa-eye"></i>View</a>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_certificate_file">{% if sacrament.certificate_file %}Update{% else %}Upload{% endif %} Certificate</label>
+                    {{ form.certificate_file }}
+                    <small class="help-text">Upload new certificate to replace existing (optional)</small>
+                </div>
+
+                {% if sacrament.supporting_document %}
+                <div class="doc-preview">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Current supporting document uploaded</span>
+                    <a href="{{ sacrament.supporting_document.url }}" target="_blank" class="btn-view-file"><i class="fas fa-eye"></i>View</a>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_supporting_document">{% if sacrament.supporting_document %}Update{% else %}Upload{% endif %} Supporting Doc</label>
+                    {{ form.supporting_document }}
+                    <small class="help-text">Upload new supporting document (optional)</small>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-glass"><i class="fas fa-save"></i>Save Changes</button>
+                <a href="{% url 'user_sacraments' target_user.id %}" class="btn-glass-outline"><i class="fas fa-times"></i>Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

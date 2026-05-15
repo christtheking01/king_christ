@@ -37,14 +37,11 @@
                             <select name="employee" id="employee" class="form-select" required>
                                 <option value="">Choose an employee...</option>
                                 {% for emp in employees %}
-                                    <option value="{{ emp.id }}" 
-                                            data-base-salary="{{ emp.base_salary }}"
-                                            data-housing="{{ emp.housing_allowance }}"
-                                            data-transport="{{ emp.transport_allowance }}"
-                                            data-other="{{ emp.other_allowances }}"
+                                    <option value="{{ emp.id }}"
+                                            data-base-salary="{{ emp.base_salary|floatformat:2 }}"
                                             data-position="{{ emp.position }}"
-                                            data-member-name="{{ emp.member.name }}">
-                                        {{ emp.member.name }} - {{ emp.position }}
+                                            data-name="{{ emp.name }}">
+                                        {{ emp.name }} - {{ emp.position }}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -72,66 +69,37 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="payment_type" class="form-label">Payment Type</label>
-                            <input type="text" id="payment_type" class="form-control" readonly>
+                            <label for="payment_method" class="form-label">Payment Method *</label>
+                            <select name="payment_method" id="payment_method" class="form-select" required>
+                                <option value="CASH">Cash</option>
+                                <option value="CHEQUE">Cheque</option>
+                                <option value="BANK">Bank Transfer</option>
+                            </select>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Salary Breakdown -->
+                <!-- Salary Information -->
                 <div class="row mt-4">
                     <div class="col-12">
-                        <h6 class="text-muted mb-3">Salary Breakdown</h6>
+                        <h6 class="text-muted mb-3">Salary Information</h6>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label for="basic_salary" class="form-label">Basic Salary (Tsh)</label>
-                            <input type="number" id="basic_salary" class="form-control" readonly step="0.01">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="housing_allowance" class="form-label">Housing Allowance (Tsh)</label>
-                            <input type="number" id="housing_allowance" class="form-control" readonly step="0.01">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="transport_allowance" class="form-label">Transport Allowance (Tsh)</label>
-                            <input type="number" id="transport_allowance" class="form-control" readonly step="0.01">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="other_allowances" class="form-label">Other Allowances (Tsh)</label>
-                            <input type="number" id="other_allowances" class="form-control" readonly step="0.01">
+                            <input type="number" name="basic_salary" id="basic_salary" class="form-control" readonly step="0.01">
                         </div>
                     </div>
                 </div>
                 
-                <!-- Deductions and Totals -->
+                <!-- Salary Total -->
                 <div class="row mt-4">
-                    <div class="col-md-4">
+                    <div class="col-md-6 offset-md-3">
                         <div class="card border-success">
-                            <div class="card-body">
-                                <h6 class="text-success">Gross Salary</h6>
-                                <h3 class="text-success">$<span id="gross_salary">0.00</span></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-danger">
-                            <div class="card-body">
-                                <h6 class="text-danger">Tax Deduction (10%)</h6>
-                                <h3 class="text-danger">$<span id="tax_deduction">0.00</span></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-primary">
-                            <div class="card-body">
-                                <h6 class="text-primary">Net Salary</h6>
-                                <h3 class="text-primary">$<span id="net_salary">0.00</span></h3>
+                            <div class="card-body text-center">
+                                <h6 class="text-success">Total Salary</h6>
+                                <h3 class="text-success">TSH <span id="total_salary">0.00</span></h3>
+                                <small class="text-muted">Basic salary total for the selected employee</small>
                             </div>
                         </div>
                     </div>
@@ -154,79 +122,58 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block script %}
 <script>
-// Employee selection handler
-document.getElementById('employee').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    
-    if (this.value) {
-        // Show employee details
-        const memberName = selectedOption.getAttribute('data-member-name');
-        const position = selectedOption.getAttribute('data-position');
-        
-        document.getElementById('employee_details').style.display = 'block';
-        document.getElementById('employee_info').innerHTML = `
-            <strong>Name:</strong> ${memberName}<br>
-            <strong>Position:</strong> ${position}
-        `;
-        
-        // Fill salary details
-        document.getElementById('basic_salary').value = selectedOption.getAttribute('data-base-salary');
-        document.getElementById('housing_allowance').value = selectedOption.getAttribute('data-housing');
-        document.getElementById('transport_allowance').value = selectedOption.getAttribute('data-transport');
-        document.getElementById('other_allowances').value = selectedOption.getAttribute('data-other');
-        
-        // Calculate totals
-        calculatePayroll();
-    } else {
-        // Hide employee details and clear fields
-        document.getElementById('employee_details').style.display = 'none';
-        clearSalaryFields();
+document.addEventListener('DOMContentLoaded', function() {
+    const employeeSelect = document.getElementById('employee');
+    const employeeDetails = document.getElementById('employee_details');
+    const employeeInfo = document.getElementById('employee_info');
+    const basicSalaryField = document.getElementById('basic_salary');
+    const totalSalaryField = document.getElementById('total_salary');
+
+    function updateSalaryDisplay() {
+        const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
+
+        if (employeeSelect.value) {
+            const baseSalary = Number(selectedOption.dataset.baseSalary) || 0;
+            const empName = selectedOption.dataset.name;
+            const position = selectedOption.dataset.position;
+            const salaryText = baseSalary.toFixed(2);
+
+            employeeDetails.style.display = 'block';
+            employeeInfo.innerHTML = `
+                <strong>Name:</strong> ${empName}<br>
+                <strong>Position:</strong> ${position}
+            `;
+
+            basicSalaryField.value = salaryText;
+            totalSalaryField.textContent = salaryText;
+        } else {
+            employeeDetails.style.display = 'none';
+            basicSalaryField.value = '';
+            totalSalaryField.textContent = '0.00';
+        }
     }
-});
 
-// Calculate payroll totals
-function calculatePayroll() {
-    const basicSalary = parseFloat(document.getElementById('basic_salary').value) || 0;
-    const housingAllowance = parseFloat(document.getElementById('housing_allowance').value) || 0;
-    const transportAllowance = parseFloat(document.getElementById('transport_allowance').value) || 0;
-    const otherAllowances = parseFloat(document.getElementById('other_allowances').value) || 0;
-    
-    const grossSalary = basicSalary + housingAllowance + transportAllowance + otherAllowances;
-    const taxDeduction = grossSalary * 0.1; // 10% tax
-    const netSalary = grossSalary - taxDeduction;
-    
-    document.getElementById('gross_salary').textContent = grossSalary.toFixed(2);
-    document.getElementById('tax_deduction').textContent = taxDeduction.toFixed(2);
-    document.getElementById('net_salary').textContent = netSalary.toFixed(2);
-}
+    if (employeeSelect) {
+        employeeSelect.addEventListener('change', updateSalaryDisplay);
 
-// Clear salary fields
-function clearSalaryFields() {
-    document.getElementById('basic_salary').value = '';
-    document.getElementById('housing_allowance').value = '';
-    document.getElementById('transport_allowance').value = '';
-    document.getElementById('other_allowances').value = '';
-    document.getElementById('gross_salary').textContent = '0.00';
-    document.getElementById('tax_deduction').textContent = '0.00';
-    document.getElementById('net_salary').textContent = '0.00';
-    document.getElementById('payment_type').value = '';
-}
+        if (!employeeSelect.value && employeeSelect.options.length === 2) {
+            employeeSelect.selectedIndex = 1;
+        }
 
-// Set default dates (current month)
-function setDefaultDates() {
+        if (employeeSelect.value) {
+            updateSalaryDisplay();
+        }
+    }
+
+    // Set default dates
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     
     document.getElementById('pay_period_start').value = firstDay.toISOString().split('T')[0];
     document.getElementById('pay_period_end').value = lastDay.toISOString().split('T')[0];
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setDefaultDates();
 });
 </script>
 {% endblock %}

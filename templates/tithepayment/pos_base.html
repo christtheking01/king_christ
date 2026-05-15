@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}POS Terminal{% endblock %}</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CTK POS">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="CTK POS">
+    <meta name="theme-color" content="#16213e">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    {% load static %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            color: #e0e0e0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .pos-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #16213e 0%, #0f3460 100%);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        /* Status Bar */
+        .pos-status-bar {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #e0e0e0;
+            font-size: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .pos-status-bar .time {
+            font-weight: 600;
+            color: #4cc9f0;
+        }
+        
+        .pos-status-bar .operator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .pos-status-bar .operator i {
+            color: #4cc9f0;
+        }
+        
+        /* Header */
+        .pos-header {
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pos-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        .pos-header .logo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .pos-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .pos-header .subtitle {
+            font-size: 0.875rem;
+            opacity: 0.95;
+            position: relative;
+        }
+        
+        .pos-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        /* Logout Button */
+        .logout-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: linear-gradient(180deg, #e94560 0%, #c73e54 100%);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(233, 69, 96, 0.4);
+            border-top: 2px solid #ff6b8a;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:active {
+            background: linear-gradient(180deg, #c73e54 0%, #a83548 100%);
+            box-shadow: 0 -2px 10px rgba(233, 69, 96, 0.3);
+            transform: translateY(2px);
+        }
+        
+        .logout-btn i {
+            font-size: 1.2rem;
+        }
+        
+        /* Payment Type Cards */
+        .payment-type-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .payment-card {
+            background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 2px solid rgba(76, 201, 240, 0.2);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+            border-color: #4cc9f0;
+        }
+        
+        .payment-card:hover::before {
+            opacity: 1;
+        }
+        
+        .payment-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.2);
+        }
+        
+        .payment-card i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .payment-card h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .payment-card p {
+            margin: 6px 0 0 0;
+            font-size: 0.75rem;
+            color: #a0a0a0;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #0f9b0f 0%, #0d7a0d 100%);
+            color: white;
+            border-color: #0f9b0f;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            color: white;
+            border-color: #dc3545;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+            border-color: #ffc107;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border-color: #17a2b8;
+        }
+        
+        /* Form Elements */
+        .pos-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .pos-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+            font-size: 0.875rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .pos-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(76, 201, 240, 0.3);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(30, 42, 74, 0.8);
+            color: #e0e0e0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-input:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
+            background: rgba(30, 42, 74, 1);
+        }
+        
+        .pos-input::placeholder {
+            color: #666;
+        }
+        
+        .pos-select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(76, 201, 240, 0.3);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(30, 42, 74, 0.8);
+            color: #e0e0e0;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-select:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
+        }
+        
+        .pos-select option {
+            background: #16213e;
+            color: #e0e0e0;
+        }
+        
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(76, 201, 240, 0.5);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 15px rgba(76, 201, 240, 0.3);
+        }
+        
+        /* Quick Amount Buttons */
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-amount-btn {
+            padding: 16px;
+            border: 2px solid rgba(76, 201, 240, 0.3);
+            border-radius: 12px;
+            background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+            font-weight: 600;
+            cursor: pointer;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .quick-amount-btn:hover {
+            border-color: #4cc9f0;
+            background: linear-gradient(145deg, #2a3a5c 0%, #1e2a4a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.3);
+        }
+        
+        .quick-amount-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="pos-container">
+        <!-- Status Bar -->
+        <div class="pos-status-bar">
+            <div class="time" id="currentTime">--:--</div>
+            <div class="operator">
+                <button id="connectPrinterBtn" onclick="connectPrinter()" style="background: none; border: none; color: #4cc9f0; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.75rem;">
+                    <i class="fas fa-print" id="printerIcon"></i>
+                    <span id="printerStatus">Connect Printer</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <div class="pos-header">
+            <div class="logo-icon">
+                <i class="fas fa-church"></i>
+            </div>
+            <h1>POS Terminal</h1>
+            <div class="subtitle">Christ The King Parish</div>
+        </div>
+        
+        <div class="pos-content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <a href="{% url 'tithepayment:pos_logout' %}" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+    
+    <script>
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+    
+    <!-- Printer Library -->
+    <script>
+        // Thermal Printer Service
+        class ThermalPrinter {
+            constructor() {
+                this.device = null;
+                this.server = null;
+                this.characteristic = null;
+                this.serviceUUID = '000018f0-0000-1000-8000-00805f9b34fb'; // Standard printer service
+                this.characteristicUUID = '00002af1-0000-1000-8000-00805f9b34fb'; // Write characteristic
+                this.isConnected = false;
+            }
+
+            async connect() {
+                try {
+                    // Request Bluetooth device
+                    this.device = await navigator.bluetooth.requestDevice({
+                        filters: [{ services: [this.serviceUUID] }],
+                        optionalServices: [this.serviceUUID]
+                    });
+
+                    // Connect to device
+                    this.server = await this.device.gatt.connect();
+                    const service = await this.server.getPrimaryService(this.serviceUUID);
+                    this.characteristic = await service.getCharacteristic(this.characteristicUUID);
+
+                    this.isConnected = true;
+                    console.log('Printer connected successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Printer connection error:', error);
+                    this.isConnected = false;
+                    return false;
+                }
+            }
+
+            async printReceipt(receiptData) {
+                if (!this.characteristic || !this.isConnected) {
+                    console.error('Printer not connected');
+                    return false;
+                }
+
+                try {
+                    const commands = this.generateReceiptCommands(receiptData);
+                    const encoder = new TextEncoder();
+                    await this.characteristic.writeValue(encoder.encode(commands));
+                    console.log('Receipt printed successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Print error:', error);
+                    return false;
+                }
+            }
+
+            generateReceiptCommands(data) {
+                let commands = '';
+                
+                // ESC/POS commands for thermal printer
+                const ESC = '\x1B';
+                const GS = '\x1D';
+                
+                // Initialize printer
+                commands += ESC + '@'; // Initialize
+                
+                // Center align
+                commands += ESC + '\x61' + '\x01';
+                
+                // Print church name
+                commands += '\n' + data.churchName + '\n';
+                commands += data.churchAddress + '\n';
+                commands += '--------------------------------\n';
+                
+                // Left align
+                commands += ESC + '\x61' + '\x00';
+                
+                // Receipt header
+                commands += '\nRECEIPT\n';
+                commands += 'Type: ' + data.type + '\n';
+                commands += 'Date: ' + data.date + '\n';
+                commands += 'Time: ' + data.time + '\n';
+                commands += 'Receipt #: ' + data.receiptNumber + '\n';
+                commands += '--------------------------------\n';
+                
+                // Member info
+                if (data.memberName) {
+                    commands += 'Member: ' + data.memberName + '\n';
+                }
+                if (data.memberCode) {
+                    commands += 'Code: ' + data.memberCode + '\n';
+                }
+                commands += '--------------------------------\n';
+                
+                // Payment details
+                commands += 'Amount: Tsh ' + data.amount + '\n';
+                commands += 'Method: ' + data.paymentMethod + '\n';
+                if (data.contactNumber) {
+                    commands += 'Phone: ' + data.contactNumber + '\n';
+                }
+                commands += '--------------------------------\n';
+                
+                // Footer
+                commands += '\n';
+                commands += ESC + '\x61' + '\x01'; // Center align
+                commands += 'Thank you for your contribution!\n';
+                commands += 'God bless you!\n';
+                commands += '\n\n\n';
+                
+                // Cut paper (if supported)
+                commands += GS + 'V' + '\x00';
+                
+                return commands;
+            }
+
+            disconnect() {
+                if (this.device && this.device.gatt.connected) {
+                    this.device.gatt.disconnect();
+                    this.isConnected = false;
+                    console.log('Printer disconnected');
+                }
+            }
+        }
+
+        // Initialize printer service
+        window.thermalPrinter = new ThermalPrinter();
+
+        // Connect printer function
+        async function connectPrinter() {
+            const printerStatus = document.getElementById('printerStatus');
+            const printerIcon = document.getElementById('printerIcon');
+            
+            if (window.thermalPrinter.isConnected) {
+                // Disconnect
+                window.thermalPrinter.disconnect();
+                printerStatus.textContent = 'Connect Printer';
+                printerIcon.className = 'fas fa-print';
+            } else {
+                // Connect
+                printerStatus.textContent = 'Connecting...';
+                const connected = await window.thermalPrinter.connect();
+                
+                if (connected) {
+                    printerStatus.textContent = 'Printer Connected';
+                    printerIcon.className = 'fas fa-check-circle';
+                } else {
+                    printerStatus.textContent = 'Connect Printer';
+                    printerIcon.className = 'fas fa-print';
+                }
+            }
+        }
+
+        // Generate receipt number
+        function generateReceiptNumber() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return 'RCP' + timestamp.toString().slice(-6) + random;
+        }
+
+        // Print receipt helper
+        async function printReceipt(type, memberName, memberCode, amount, paymentMethod, contactNumber) {
+            if (!window.thermalPrinter.isConnected) {
+                console.log('Printer not connected, skipping print');
+                return;
+            }
+
+            const now = new Date();
+            const receiptData = {
+                churchName: 'Christ The King Parish',
+                churchAddress: 'Dar es Salaam, Tanzania',
+                type: type,
+                date: now.toLocaleDateString('en-GB'),
+                time: now.toLocaleTimeString('en-GB'),
+                receiptNumber: generateReceiptNumber(),
+                memberName: memberName,
+                memberCode: memberCode,
+                amount: amount.toLocaleString('en-TZ'),
+                paymentMethod: paymentMethod,
+                contactNumber: contactNumber
+            };
+
+            await window.thermalPrinter.printReceipt(receiptData);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

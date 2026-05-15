@@ -1,244 +1,669 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load event_filters %}
 
 {% block title %}Events Dashboard - Christ King Church{% endblock %}
 
+{% block internal_style %}
+<style>
+    /* Modern Glassmorphism Dashboard Styles */
+    .dashboard-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header */
+    .dashboard-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .dashboard-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .dashboard-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .stat-card.success::before { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-card.info::before { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .stat-card.warning::before { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .stat-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-card.success .stat-icon { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-card.info .stat-icon { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .stat-card.warning .stat-icon { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+    .stat-value {
+        font-family: var(--font-display);
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-action {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-stat:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Glass Card */
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    }
+
+    .glass-card-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .glass-card-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .glass-card-header h3 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .glass-card-body {
+        padding: 1rem;
+    }
+
+    /* Event List Item */
+    .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .event-list-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-primary);
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+        transition: all 0.25s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .event-list-item:hover {
+        transform: translateX(4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary);
+    }
+
+    .event-date-box {
+        width: 56px;
+        height: 56px;
+        background: var(--gradient-primary);
+        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .event-date-box .month {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .event-date-box .day {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .event-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .event-info h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .event-info p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .event-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-icon:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Status Badge */
+    .status-badge-sm {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-draft { background: var(--bg-tertiary); color: var(--text-secondary); }
+    .status-published { background: var(--success); color: white; }
+    .status-cancelled { background: var(--danger); color: white; }
+    .status-pending { background: var(--warning); color: white; }
+
+    /* Empty State */
+    .empty-state-sm {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state-sm i {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.5;
+    }
+
+    .empty-state-sm p {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Full Width Table Card */
+    .table-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .table-card-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-card-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .data-table tbody tr:hover {
+        background: var(--bg-secondary);
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Button Styles */
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary-modern {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card, .glass-card, .table-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
+<div class="dashboard-wrapper">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1"><i class="fas fa-tachometer-alt text-primary me-2"></i>Events Dashboard</h1>
-            <p class="text-muted mb-0">Manage your events and track registrations</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'event_list' %}" class="btn btn-outline-primary">
-                <i class="fas fa-list me-1"></i>All Events
-            </a>
-            <a href="{% url 'event_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Create Event
-            </a>
+    <div class="dashboard-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h1><i class="fas fa-tachometer-alt"></i> Events Dashboard</h1>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'event_list' %}" class="btn-modern btn-outline-modern">
+                    <i class="fas fa-list"></i> All Events
+                </a>
+                <a href="{% url 'event_create' %}" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-plus"></i> Create Event
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-0">Total Events</h6>
-                            <h2 class="mb-0">{{ total_events }}</h2>
-                        </div>
-                        <i class="fas fa-calendar fa-2x opacity-50"></i>
-                    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Total Events</span>
+                <div class="stat-icon">
+                    <i class="fas fa-calendar"></i>
                 </div>
             </div>
+            <h2 class="stat-value">{{ total_events }}</h2>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-0">Upcoming</h6>
-                            <h2 class="mb-0">{{ upcoming_events }}</h2>
-                        </div>
-                        <i class="fas fa-calendar-check fa-2x opacity-50"></i>
-                    </div>
+        <div class="stat-card success">
+            <div class="stat-header">
+                <span class="stat-title">Upcoming</span>
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
                 </div>
             </div>
+            <h2 class="stat-value">{{ upcoming_events }}</h2>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-0">Registrations</h6>
-                            <h2 class="mb-0">{{ total_registrations }}</h2>
-                        </div>
-                        <i class="fas fa-users fa-2x opacity-50"></i>
-                    </div>
+        <div class="stat-card info">
+            <div class="stat-header">
+                <span class="stat-title">Registrations</span>
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
+            <h2 class="stat-value">{{ total_registrations }}</h2>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-0">My Registrations</h6>
-                            <a href="{% url 'my_registrations' %}" class="btn btn-sm btn-outline-dark mt-2">View</a>
-                        </div>
-                        <i class="fas fa-user-check fa-2x opacity-50"></i>
-                    </div>
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <span class="stat-title">My Registrations</span>
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
                 </div>
+            </div>
+            <div class="stat-action">
+                <a href="{% url 'my_registrations' %}" class="btn-stat">
+                    <i class="fas fa-eye"></i> View My Events
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <!-- Content Grid -->
+    <div class="content-grid">
         <!-- Upcoming Events -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Your Upcoming Events</h5>
-                    <a href="{% url 'calendar' %}" class="btn btn-sm btn-light">View Calendar</a>
-                </div>
-                <div class="card-body p-0">
-                    {% if upcoming %}
-                    <div class="list-group list-group-flush">
-                        {% for event in upcoming %}
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">
-                                    <a href="{% url 'event_detail' event.id %}" class="text-decoration-none">{{ event.title }}</a>
-                                </h6>
-                                <small class="text-muted">{{ event.start_date|date:"M j" }}</small>
-                            </div>
-                            <p class="mb-1 small text-muted">
+        <div class="glass-card">
+            <div class="glass-card-header">
+                <h3><i class="fas fa-calendar-day"></i> Your Upcoming Events</h3>
+                <a href="{% url 'calendar' %}" class="btn-stat">View Calendar</a>
+            </div>
+            <div class="glass-card-body">
+                {% if upcoming %}
+                <div class="event-list">
+                    {% for event in upcoming %}
+                    <div class="event-list-item">
+                        <div class="event-date-box">
+                            <span class="month">{{ event.start_date|date:"M" }}</span>
+                            <span class="day">{{ event.start_date|date:"j" }}</span>
+                        </div>
+                        <div class="event-info">
+                            <h4>{{ event.title }}</h4>
+                            <p>
                                 {% if event.start_time %}{{ event.start_time|time:"g:i A" }} | {% endif %}
                                 {{ event.get_event_type_display }}
                             </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small>
-                                    {% if event.requires_registration %}
-                                    <span class="badge bg-info">{{ event.attendee_count }} registered</span>
-                                    {% endif %}
-                                </small>
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-primary" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-secondary" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </div>
                         </div>
-                        {% endfor %}
+                        <div class="event-actions">
+                            {% if event.requires_registration %}
+                            <span class="status-badge-sm status-published">{{ event.attendee_count }} registered</span>
+                            {% endif %}
+                            <a href="{% url 'event_detail' event.id %}" class="btn-icon" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'event_edit' event.id %}" class="btn-icon" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No upcoming events</p>
-                        <a href="{% url 'event_create' %}" class="btn btn-primary btn-sm">Create Event</a>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="empty-state-sm">
+                    <i class="fas fa-calendar"></i>
+                    <p>No upcoming events</p>
+                    <a href="{% url 'event_create' %}" class="btn-modern btn-primary-modern" style="margin-top: 1rem;">
+                        Create Event
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Needs Attention -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Needs Attention</h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if attention_events %}
-                    <div class="list-group list-group-flush">
-                        {% for event in attention_events %}
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ event.title }}</h6>
-                                <span class="badge {% if event.status == 'DRAFT' %}bg-secondary{% else %}bg-danger{% endif %}">
-                                    {{ event.get_status_display }}
-                                </span>
-                            </div>
-                            <p class="mb-1 small text-muted">Created {{ event.created_at|date:"M j, Y" }}</p>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-primary">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </a>
-                                {% if event.status == 'DRAFT' %}
-                                <form method="post" action="{% url 'event_edit' event.id %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="status" value="PUBLISHED">
-                                    <button type="submit" class="btn btn-outline-success">
-                                        <i class="fas fa-check me-1"></i>Publish
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
+        <div class="glass-card">
+            <div class="glass-card-header">
+                <h3><i class="fas fa-exclamation-circle"></i> Needs Attention</h3>
+            </div>
+            <div class="glass-card-body">
+                {% if attention_events %}
+                <div class="event-list">
+                    {% for event in attention_events %}
+                    <div class="event-list-item">
+                        <div class="event-date-box" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <span class="month">{{ event.created_at|date:"M" }}</span>
+                            <span class="day">{{ event.created_at|date:"j" }}</span>
                         </div>
-                        {% endfor %}
+                        <div class="event-info">
+                            <h4>{{ event.title }}</h4>
+                            <p>Created {{ event.created_at|date:"M j, Y" }}</p>
+                        </div>
+                        <div class="event-actions">
+                            <span class="status-badge-sm {% if event.status == 'DRAFT' %}status-draft{% else %}status-cancelled{% endif %}">
+                                {{ event.get_status_display }}
+                            </span>
+                            <a href="{% url 'event_edit' event.id %}" class="btn-icon" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <p class="text-muted">All caught up! No events need attention.</p>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="empty-state-sm">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <p>All caught up! No events need attention.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Recent Events -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recently Created Events</h5>
-            <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    <!-- Recent Events Table -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h3><i class="fas fa-history"></i> Recently Created Events</h3>
+            <a href="{% url 'event_list' %}" class="btn-stat">View All</a>
         </div>
-        <div class="card-body">
-            {% if recent_events %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Type</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Registrations</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for event in recent_events %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'event_detail' event.id %}" class="text-decoration-none fw-bold">{{ event.title }}</a>
-                            </td>
-                            <td>{{ event.get_event_type_display }}</td>
-                            <td>{{ event.start_date|date:"M j, Y" }}</td>
-                            <td>
-                                <span class="badge {% if event.status == 'PUBLISHED' %}bg-success{% elif event.status == 'DRAFT' %}bg-secondary{% elif event.status == 'CANCELLED' %}bg-danger{% else %}bg-info{% endif %}">
-                                    {{ event.get_status_display }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if event.requires_registration %}
-                                {{ event.attendee_count }}{% if event.max_attendees %}/{{ event.max_attendees }}{% endif %}
-                                {% else %}
-                                <span class="text-muted">N/A</span>
-                                {% endif %}
-                            </td>
-                            <td><small class="text-muted">{{ event.created_at|date:"M j, Y" }}</small></td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-primary" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'event_edit' event.id %}" class="btn btn-outline-secondary" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-4">
-                <p class="text-muted">No events created yet</p>
-                <a href="{% url 'event_create' %}" class="btn btn-primary">Create Your First Event</a>
-            </div>
-            {% endif %}
+        {% if recent_events %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Registrations</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in recent_events %}
+                    <tr>
+                        <td>
+                            <strong>{{ event.title }}</strong>
+                        </td>
+                        <td>{{ event.get_event_type_display }}</td>
+                        <td>{{ event.start_date|date:"M j, Y" }}</td>
+                        <td>
+                            <span class="status-badge-sm status-{{ event.status|lower }}">
+                                {{ event.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if event.requires_registration %}
+                            {{ event.attendee_count }}{% if event.max_attendees %}/{{ event.max_attendees }}{% endif %}
+                            {% else %}
+                            <span style="color: var(--text-muted);">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="event-actions">
+                                <a href="{% url 'event_detail' event.id %}" class="btn-icon" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'event_edit' event.id %}" class="btn-icon" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        {% else %}
+        <div class="empty-state-sm">
+            <i class="fas fa-calendar"></i>
+            <p>No events created yet</p>
+            <a href="{% url 'event_create' %}" class="btn-modern btn-primary-modern" style="margin-top: 1rem;">
+                Create Your First Event
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

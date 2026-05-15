@@ -1,9 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 from django.db.models import Sum, Count, Avg, Q
 from django.db.models.functions import TruncMonth, TruncWeek, ExtractYear
+from django.core.exceptions import FieldDoesNotExist
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.cache import cache
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -295,21 +299,21 @@ def member_analytics_api(request):
         def generate_data():
             # Total members
             total_members = Member.objects.count()
-            active_members = Member.objects.filter(is_active=True).count()
+            active_members = Member.objects.filter(active=True).count()
             
             # Ministry distribution
             ministry_data = Ministry.objects.annotate(
-                member_count=Count('members', filter=Q(members__is_active=True))
+                member_count=Count('members', filter=Q(members__active=True))
             ).values('name', 'member_count').order_by('-member_count')
             
             # Community distribution
             community_data = Community.objects.annotate(
-                member_count=Count('members', filter=Q(members__is_active=True))
+                member_count=Count('members', filter=Q(members__active=True))
             ).values('name', 'member_count').order_by('-member_count')
             
             # Gender distribution (if gender field exists)
             gender_data = Member.objects.filter(
-                is_active=True
+                active=True
             ).values('gender').annotate(
                 count=Count('id')
             ).order_by('-count')
@@ -326,35 +330,41 @@ def member_analytics_api(request):
                 '60+': 0
             }
             
-            current_year = timezone.now().year
-            for member in Member.objects.filter(is_active=True, birth_date__isnull=False):
-                age = current_year - member.birth_date.year
-                if 18 <= age <= 25:
-                    age_groups['18-25'] += 1
-                elif 26 <= age <= 35:
-                    age_groups['26-35'] += 1
-                elif 36 <= age <= 45:
-                    age_groups['36-45'] += 1
-                elif 46 <= age <= 60:
-                    age_groups['46-60'] += 1
-                elif age > 60:
-                    age_groups['60+'] += 1
+            # Skip age calculation since birth_date field doesn't exist
+            # current_year = timezone.now().year
+            # for member in Member.objects.filter(active=True, birth_date__isnull=False):
+            #     age = current_year - member.birth_date.year
+            #     if 18 <= age <= 25:
+            #         age_groups['18-25'] += 1
+            #     elif 26 <= age <= 35:
+            #         age_groups['26-35'] += 1
+            #     elif 36 <= age <= 45:
+            #         age_groups['36-45'] += 1
+            #     elif 46 <= age <= 60:
+            #         age_groups['46-60'] += 1
+            #     elif age > 60:
+            #         age_groups['60+'] += 1
             
             # Membership growth (members joined by month)
-            growth_data = Member.objects.filter(
-                created_at__gte=timezone.now() - relativedelta(years=1)
-            ).annotate(
-                month=TruncMonth('created_at')
-            ).values('month').annotate(
-                count=Count('id')
-            ).order_by('month')
-            
             growth_months = []
             growth_counts = []
-            
-            for entry in growth_data:
-                growth_months.append(entry['month'].strftime('%b %Y'))
-                growth_counts.append(entry['count'])
+            try:
+                Member._meta.get_field('created_at')
+                growth_data = Member.objects.filter(
+                    created_at__gte=timezone.now() - relativedelta(years=1)
+                ).annotate(
+                    month=TruncMonth('created_at')
+                ).values('month').annotate(
+                    count=Count('id')
+                ).order_by('month')
+
+                for entry in growth_data:
+                    growth_months.append(entry['month'].strftime('%b %Y'))
+                    growth_counts.append(entry['count'])
+            except FieldDoesNotExist:
+                # Member has no created_at timestamp field, so skip growth series
+                growth_months = []
+                growth_counts = []
             
             return {
                 'summary': {
@@ -465,3 +475,155 @@ def financial_report(request):
     }
     
     return render(request, 'analytics/financial_report.html', context)
+
+
+@staff_member_required
+@login_required
+def blocked_users_list(request):
+    """Display list of currently blocked users with unblock option"""
+    # Scan cache for blocked users
+    # Note: This works best with Redis; LocMemCache won't support delete_pattern
+    blocked_users = []
+
+    # Get all users and check if they're blocked
+    for user in User.objects.filter(is_active=True):
+        lockout_key = f"security:account_lockout:{user.username.lower()}"
+        if cache.get(lockout_key):
+            blocked_users.append({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'fullname': f"{user.firstname} {user.lastname}".strip() or user.username,
+                'blocked_at': None,  # TTL not available on LocMemCache
+            })
+
+    context = {
+        'blocked_users': blocked_users,
+        'total_blocked': len(blocked_users),
+        'active_page': 'analytics',
+    }
+    return render(request, 'analytics/blocked_users.html', context)
+
+
+@staff_member_required
+@login_required
+def unblock_user_view(request, user_id):
+    """Unblock a specific user"""
+    user = User.objects.get(id=user_id)
+    username = user.username.lower()
+
+    # Clear all security cache keys for this user
+    cache.delete(f"security:account_lockout:{username}")
+    cache.delete(f"security:account_failures:{username}")
+
+    messages.success(request, f'User "{user.username}" has been unblocked successfully.')
+    return redirect('analytics:blocked_users')
+
+
+@login_required
+def export_financial_report(request):
+    """Export financial report to CSV"""
+    from .exports import export_financial_report_to_csv
+    
+    start_date, end_date = get_date_range(request)
+    
+    # Get financial data
+    transactions = Transaction.objects.filter(
+        date__range=[start_date, end_date]
+    ).order_by('date')
+    
+    # Group by date
+    from django.db.models.functions import TruncDate
+    daily_data = transactions.annotate(
+        date=TruncDate('date')
+    ).values('date').annotate(
+        income=Sum('amount', filter=Q(type='INCOME')),
+        expenses=Sum('amount', filter=Q(type='EXPENSE'))
+    ).order_by('date')
+    
+    # Add tithes and offerings
+    tithes = TithePayment.objects.filter(
+        date__range=[start_date, end_date]
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    offerings = Transaction.objects.filter(
+        date__range=[start_date, end_date],
+        category__name__icontains='offering'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # Prepare data for export
+    data = []
+    for item in daily_data:
+        data.append({
+            'date': item['date'],
+            'income': item['income'] or 0,
+            'expenses': item['expenses'] or 0,
+            'net': (item['income'] or 0) - (item['expenses'] or 0),
+            'tithes': tithes,
+            'offerings': offerings
+        })
+    
+    return export_financial_report_to_csv(data)
+
+
+@login_required
+def export_tithe_analytics(request):
+    """Export tithe analytics to CSV"""
+    from .exports import export_tithe_analytics_to_csv
+    
+    start_date, end_date = get_date_range(request)
+    
+    # Get tithe data grouped by month
+    from django.db.models.functions import TruncMonth
+    monthly_data = TithePayment.objects.filter(
+        date__range=[start_date, end_date]
+    ).annotate(
+        period=TruncMonth('date')
+    ).values('period').annotate(
+        total_amount=Sum('amount'),
+        count=Count('id')
+    ).order_by('period')
+    
+    # Calculate average
+    data = []
+    for item in monthly_data:
+        data.append({
+            'period': item['period'].strftime('%Y-%m'),
+            'total_amount': item['total_amount'] or 0,
+            'average_amount': (item['total_amount'] or 0) / (item['count'] or 1),
+            'count': item['count'] or 0
+        })
+    
+    return export_tithe_analytics_to_csv(data)
+
+
+@login_required
+def export_member_analytics(request):
+    """Export member analytics to CSV"""
+    from .exports import export_member_analytics_to_csv
+    
+    # Get member statistics
+    total_members = Member.objects.count()
+    active_members = Member.objects.filter(active=True).count()
+    inactive_members = total_members - active_members
+    
+    # Members by ministry
+    ministry_data = Ministry.objects.annotate(
+        count=Count('member')
+    ).values('name', 'count')
+    
+    # Prepare data for export
+    data = [
+        {'category': 'Total Members', 'count': total_members, 'percentage': 100},
+        {'category': 'Active Members', 'count': active_members, 'percentage': (active_members / total_members * 100) if total_members > 0 else 0},
+        {'category': 'Inactive Members', 'count': inactive_members, 'percentage': (inactive_members / total_members * 100) if total_members > 0 else 0},
+    ]
+    
+    for item in ministry_data:
+        data.append({
+            'category': f"Ministry: {item['name']}",
+            'count': item['count'],
+            'percentage': (item['count'] / total_members * 100) if total_members > 0 else 0
+        })
+    
+    return export_member_analytics_to_csv(data)

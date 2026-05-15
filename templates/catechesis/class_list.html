@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catechesis Classes - Christ King Church{% endblock %}
+
+{% block internal_style %}
+<style>
+    .class-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .class-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .class-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .class-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Class Cards Grid */
+    .class-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .class-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        transition: all 0.3s ease;
+    }
+
+    .class-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .class-card-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .class-title {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .class-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .class-badge {
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--success);
+        color: white;
+    }
+
+    .class-badge.inactive {
+        background: var(--text-muted);
+    }
+
+    .class-card-body {
+        padding: 1.5rem;
+    }
+
+    .class-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .class-stat {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        transition: all 0.2s ease;
+    }
+
+    .class-stat:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .class-stat-value {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: block;
+    }
+
+    .class-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .class-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .class-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .class-meta-item i {
+        width: 24px;
+        text-align: center;
+        color: var(--primary);
+    }
+
+    .class-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-class {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-class-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-class-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-class-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-class-secondary:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 2px dashed var(--border-color);
+        border-radius: var(--border-radius-lg);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        opacity: 0.6;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Buttons */
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .class-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .class-card:nth-child(1) { animation-delay: 0.05s; }
+    .class-card:nth-child(2) { animation-delay: 0.1s; }
+    .class-card:nth-child(3) { animation-delay: 0.15s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="class-wrapper">
+    <div class="class-header">
+        <h1><i class="fas fa-chalkboard-teacher"></i> Catechesis Classes</h1>
+        <a href="{% url 'create_class' %}" class="btn-modern">
+            <i class="fas fa-plus"></i> Add Class
+        </a>
+    </div>
+
+    {% if classes %}
+    <div class="class-grid">
+        {% for class in classes %}
+        <div class="class-card">
+            <div class="class-card-header">
+                <div>
+                    <h3 class="class-title">{{ class.name }}</h3>
+                    <div class="class-subtitle">
+                        <i class="fas fa-church"></i> {{ class.get_sacrament_type_display }}
+                    </div>
+                </div>
+                <span class="class-badge {% if not class.is_active %}inactive{% endif %}">
+                    {{ class.is_active|yesno:"Active,Inactive" }}
+                </span>
+            </div>
+            <div class="class-card-body">
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-value">{{ class.members.count }}</span>
+                        <span class="class-stat-label">Members</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-value">{{ class.attendance_records.count }}</span>
+                        <span class="class-stat-label">Sessions</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-value">{{ class.year }}</span>
+                        <span class="class-stat-label">Year</span>
+                    </div>
+                </div>
+
+                <div class="class-meta">
+                    <div class="class-meta-item">
+                        <i class="fas fa-user-tie"></i>
+                        <span>{{ class.instructor|default:"No instructor assigned" }}</span>
+                    </div>
+                    <div class="class-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>{{ class.schedule|default:"No schedule set" }}</span>
+                    </div>
+                    <div class="class-meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ class.location|default:"No location set" }}</span>
+                    </div>
+                </div>
+
+                <div class="class-actions">
+                    <a href="{% url 'take_attendance' class.pk %}" class="btn-class btn-class-primary">
+                        <i class="fas fa-clipboard-check"></i> Attendance
+                    </a>
+                    <a href="{% url 'view_attendance' class.pk %}" class="btn-class btn-class-secondary">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chalkboard"></i>
+        <h3>No Classes Found</h3>
+        <p>Get started by creating your first catechesis class</p>
+        <a href="{% url 'create_class' %}" class="btn-modern">
+            <i class="fas fa-plus"></i> Create First Class
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -867,9 +867,6 @@ body {
                         <a href="{% url 'list_members' %}" class="mr-4">
                             <i class="fas fa-fw fa-list mr-2"></i>List View
                         </a>
-                        <a href="{% url 'thumbnail_members' %}">
-                            <i class="fas fa-fw fa-th mr-2"></i>Thumbnail View
-                        </a>
                     </h5>
                     
                     <!-- Community Filter Section -->
@@ -1061,8 +1058,8 @@ body {
                                                         {% if member.pays_tithe %}
                                                             <span class="status-badge badge-tithe">Tithe</span>
                                                         {% endif %}
-                                                        {% if member.new_believer_school %}
-                                                            <span class="status-badge badge-believer">Believer</span>
+                                                        {% if member.gender %}
+                                                            <span class="status-badge badge-gender">{{ member.get_gender_display }}</span>
                                                         {% endif %}
                                                         {% if member.working %}
                                                             <span class="status-badge badge-working">Working</span>

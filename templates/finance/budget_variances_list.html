@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budget Variances{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Budget Variances</h1>
+            <p class="text-muted">View and manage budget variances</p>
+        </div>
+        <div>
+            <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Budgets
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3">
+                    <label for="variance_type" class="form-label">Variance Type</label>
+                    <select name="variance_type" id="variance_type" class="form-select">
+                        <option value="">All Types</option>
+                        {% for type_code, type_name in variance_types %}
+                        <option value="{{ type_code }}" {% if request.GET.variance_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="severity" class="form-label">Severity</label>
+                    <select name="severity" id="severity" class="form-select">
+                        <option value="">All Severities</option>
+                        {% for severity_code, severity_name in severity_levels %}
+                        <option value="{{ severity_code }}" {% if request.GET.severity == severity_code %}selected{% endif %}>{{ severity_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="resolved" class="form-label">Status</label>
+                    <select name="resolved" id="resolved" class="form-select">
+                        <option value="">All</option>
+                        <option value="resolved" {% if request.GET.resolved == 'resolved' %}selected{% endif %}>Resolved</option>
+                        <option value="unresolved" {% if request.GET.resolved == 'unresolved' %}selected{% endif %}>Unresolved</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'budget_variances' %}" class="btn btn-secondary ms-2">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Variances Table -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Variances</h6>
+        </div>
+        <div class="card-body">
+            {% if variances %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Budget</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Severity</th>
+                            <th>Budget Amount</th>
+                            <th>Actual Amount</th>
+                            <th>Variance</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                            <th>Detected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for variance in variances %}
+                        <tr>
+                            <td><a href="{% url 'budget_detail' variance.budget.pk %}">{{ variance.budget.name }}</a></td>
+                            <td>{{ variance.allocation.category.name|default:"N/A" }}</td>
+                            <td>{{ variance.get_variance_type_display }}</td>
+                            <td>
+                                {% if variance.severity == 'HIGH' %}
+                                <span class="badge bg-danger">{{ variance.get_severity_display }}</span>
+                                {% elif variance.severity == 'MEDIUM' %}
+                                <span class="badge bg-warning text-dark">{{ variance.get_severity_display }}</span>
+                                {% else %}
+                                <span class="badge bg-info">{{ variance.get_severity_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>TSH {{ variance.budget_amount|floatformat:2 }}</td>
+                            <td>TSH {{ variance.actual_amount|floatformat:2 }}</td>
+                            <td class="{% if variance.variance_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                                TSH {{ variance.variance_amount|floatformat:2 }}
+                            </td>
+                            <td>{{ variance.variance_percentage|floatformat:1 }}%</td>
+                            <td>
+                                {% if variance.is_resolved %}
+                                <span class="badge bg-success">Resolved</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Unresolved</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ variance.detected_date|date:"M d, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No variances found</h5>
+                <p class="text-muted">There are no budget variances to display.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

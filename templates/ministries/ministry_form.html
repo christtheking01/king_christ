@@ -1,232 +1,1053 @@
 <!-- templates/ministries/ministry_form.html -->
-{% extends 'base.html' %}
-{% load static %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% load static %} {% block internal_style %}
 <style>
-    .leader-form {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-    }
-    .leader-form:hover {
-        background-color: #e9ecef;
-    }
-</style>
-{% endblock %}
+  :root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg:
+      0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.75rem;
+  }
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <div class="card">
-                <div class="card-header {% if is_update %}bg-warning{% else %}bg-primary{% endif %} text-white">
-                    <h3>{{ title }}</h3>
+  .ministry-form-container {
+    min-height: 100vh;
+    background: linear-gradient(
+      135deg,
+      var(--gray-50) 0%,
+      var(--gray-100) 100%
+    );
+    padding: 2rem 0;
+  }
+
+  .form-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .form-card:hover {
+    box-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .form-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-hover) 100%
+    );
+    color: white;
+    padding: 2rem;
+    border: none;
+  }
+
+  .form-header.update-mode {
+    background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+  }
+
+  .form-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-header h1 i {
+    font-size: 1.5rem;
+  }
+
+  .form-body {
+    padding: 2rem;
+  }
+
+  .form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-section:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+  }
+
+  .form-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--gray-200);
+  }
+
+  .form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-section-title i {
+    color: var(--primary-color);
+  }
+
+  .leader-count-badge {
+    background: var(--success-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+    transform: translateY(-1px);
+  }
+
+  .form-control.is-invalid {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+  }
+
+  .invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .leader-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .leader-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  .leader-card.existing {
+    border-left: 4px solid var(--success-color);
+  }
+
+  .leader-card.new {
+    border-left: 4px solid var(--primary-color);
+  }
+
+  .leader-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .leader-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .leader-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .leader-badge.existing {
+    background: rgb(16 185 129 / 0.1);
+    color: var(--success-color);
+  }
+
+  .leader-badge.new {
+    background: rgb(99 102 241 / 0.1);
+    color: var(--primary-color);
+  }
+
+  .member-search-container {
+    position: relative;
+  }
+
+  .member-search-input {
+    position: relative;
+  }
+
+  .member-search-input input {
+    padding-right: 2.5rem;
+  }
+
+  .member-search-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+  }
+
+  .delete-leader {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: var(--danger-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .delete-leader:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+    box-shadow: var(--shadow);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+    margin-top: 2rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  .btn-warning {
+    background: var(--warning-color);
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  .btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-900);
+  }
+
+  .btn-secondary:hover {
+    background: var(--gray-300);
+    transform: translateY(-1px);
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .alert-success {
+    background: rgb(16 185 129 / 0.1);
+    border: 1px solid rgb(16 185 129 / 0.2);
+    color: var(--success-color);
+  }
+
+  .alert-danger {
+    background: rgb(239 68 68 / 0.1);
+    border: 1px solid rgb(239 68 68 / 0.2);
+    color: var(--danger-color);
+  }
+
+  .alert-warning {
+    background: rgb(245 158 11 / 0.1);
+    border: 1px solid rgb(245 158 11 / 0.2);
+    color: #92400e;
+  }
+
+  .alert-dismissible {
+    position: relative;
+  }
+
+  .alert-dismissible .close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+  }
+
+  .alert-dismissible .close:hover {
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .ministry-form-container {
+      padding: 1rem 0;
+    }
+
+    .form-body {
+      padding: 1rem;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* Loading state */
+  .loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+  }
+
+  .loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: 2px solid var(--gray-300);
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Focus states */
+  .focused .form-label {
+    color: var(--primary-color);
+  }
+
+  /* Animation for form sections */
+  .form-section {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .form-section:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .form-section:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="ministry-form-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <div class="form-card">
+          <div class="form-header {% if is_update %}update-mode{% endif %}">
+            <h1>
+              <i
+                class="fas {% if is_update %}fa-edit{% else %}fa-plus-circle{% endif %}"
+              ></i>
+              {{ title }}
+            </h1>
+          </div>
+
+          <div class="form-body">
+            {% if messages %} {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags }} alert-dismissible"
+              role="alert"
+            >
+              <i
+                class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"
+              ></i>
+              <span>{{ message }}</span>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            {% endfor %} {% endif %}
+
+            <form method="post" id="ministryForm" novalidate>
+              {% csrf_token %}
+
+              <!-- Ministry Information Section -->
+              <div class="form-section">
+                <div class="form-section-header">
+                  <h2 class="form-section-title">
+                    <i class="fas fa-church"></i>
+                    Ministry Information
+                  </h2>
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            </div>
-                        {% endfor %}
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label
+                      for="{{ ministry_form.name.id_for_label }}"
+                      class="form-label"
+                    >
+                      Ministry Name <span class="text-danger">*</span>
+                    </label>
+                    {{ ministry_form.name }} {% if ministry_form.name.errors %}
+                    <div class="invalid-feedback">
+                      {{ ministry_form.name.errors }}
+                    </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="form-group">
+                    <label
+                      for="{{ ministry_form.feast_name.id_for_label }}"
+                      class="form-label"
+                    >
+                      Feast Name
+                    </label>
+                    {{ ministry_form.feast_name }} {% if ministry_form.feast_name.errors %}
+                    <div class="invalid-feedback">
+                      {{ ministry_form.feast_name.errors }}
+                    </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="form-group">
+                    <label
+                      for="{{ ministry_form.feast_date.id_for_label }}"
+                      class="form-label"
+                    >
+                      Feast Date
+                    </label>
+                    {{ ministry_form.feast_date }} {% if ministry_form.feast_date.errors %}
+                    <div class="invalid-feedback">
+                      {{ ministry_form.feast_date.errors }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ministry Leaders Section -->
+              <div class="form-section">
+                <div class="form-section-header">
+                  <h2 class="form-section-title">
+                    <i class="fas fa-users"></i>
+                    Ministry Leaders {% if is_update %}
+                    <span class="leader-count-badge"
+                      >{{ ministry.leaders.count }} Current</span
+                    >
+                    {% endif %}
+                  </h2>
+                </div>
+
+                {{ leader_formset.management_form }}
+
+                <div id="leader-forms">
+                  {% for form in leader_formset %}
+                  <div
+                    class="leader-card {% if form.instance.pk %}existing{% else %}new{% endif %}"
+                  >
+                    <div class="leader-header">
+                      <h3 class="leader-title">
+                        <i class="fas fa-user-tie"></i>
+                        Leader {{ forloop.counter }}
+                        <span class="leader-badge {% if form.instance.pk %}existing{% else %}new{% endif %}">
+                          {% if form.instance.pk %}Existing{% else %}New{% endif %}
+                        </span>
+                      </h3>
+                      {% if form.instance.pk %}
+                      <label class="delete-leader" title="Delete this leader">
+                        <input
+                          type="checkbox"
+                          name="{{ form.DELETE.html_name }}"
+                          id="{{ form.DELETE.id_for_label }}"
+                          style="display: none"
+                        />
+                        <i class="fas fa-trash-alt"></i>
+                      </label>
+                      {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      {{ form.non_field_errors }}
+                    </div>
                     {% endif %}
 
-                    <form method="post" id="ministryForm">
-                        {% csrf_token %}
-                        
-                        <!-- Ministry Information -->
-                        <fieldset class="border p-3 mb-4">
-                            <legend class="w-auto px-2">Ministry Information</legend>
-                            
-                            <div class="form-group">
-                                <label for="{{ ministry_form.name.id_for_label }}">Ministry Name *</label>
-                                {{ ministry_form.name }}
-                                {% if ministry_form.name.errors %}
-                                    <div class="text-danger">{{ ministry_form.name.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ ministry_form.feast_name.id_for_label }}">Feast Name</label>
-                                        {{ ministry_form.feast_name }}
-                                        {% if ministry_form.feast_name.errors %}
-                                            <div class="text-danger">{{ ministry_form.feast_name.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ ministry_form.feast_date.id_for_label }}">Feast Date</label>
-                                        {{ ministry_form.feast_date }}
-                                        {% if ministry_form.feast_date.errors %}
-                                            <div class="text-danger">{{ ministry_form.feast_date.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </fieldset>
-
-                        <!-- Ministry Leaders -->
-                        <fieldset class="border p-3 mb-4">
-                            <legend class="w-auto px-2">
-                                Ministry Leaders
-                                {% if is_update %}
-                                    <span class="badge badge-info">{{ ministry.leaders.count }} Current</span>
-                                {% endif %}
-                            </legend>
-                            
-                            {{ leader_formset.management_form }}
-                            
-                            <div id="leader-forms">
-                                {% for form in leader_formset %}
-                                    <div class="leader-form {% if form.instance.pk %}existing-leader{% else %}new-leader{% endif %}">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0">
-                                                Leader {{ forloop.counter }}
-                                                {% if form.instance.pk %}
-                                                    <span class="badge badge-success">Existing</span>
-                                                {% else %}
-                                                    <span class="badge badge-primary">New</span>
-                                                {% endif %}
-                                            </h5>
-                                        </div>
-                                        
-                                        {% if form.non_field_errors %}
-                                            <div class="alert alert-danger">
-                                                {{ form.non_field_errors }}
-                                            </div>
-                                        {% endif %}
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Leader Name *</label>
-                                                    {{ form.leader_name }}
-                                                    {% if form.leader_name.errors %}
-                                                        <div class="text-danger">{{ form.leader_name.errors }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Position *</label>
-                                                    {{ form.position }}
-                                                    {% if form.position.errors %}
-                                                        <div class="text-danger">{{ form.position.errors }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Community *</label>
-                                                    {{ form.community }}
-                                                    {% if form.community.errors %}
-                                                        <div class="text-danger">{{ form.community.errors }}</div>
-                                                    {% endif %}
-                                                    <small class="form-text text-muted">Select the community this leader belongs to</small>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Phone</label>
-                                                    {{ form.phone }}
-                                                    {% if form.phone.errors %}
-                                                        <div class="text-danger">{{ form.phone.errors }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Email</label>
-                                                    {{ form.email }}
-                                                    {% if form.email.errors %}
-                                                        <div class="text-danger">{{ form.email.errors }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Appointed Date</label>
-                                                    {{ form.appointed_date }}
-                                                    {% if form.appointed_date.errors %}
-                                                        <div class="text-danger">{{ form.appointed_date.errors }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                {% if form.instance.pk %}
-                                                    <div class="form-group">
-                                                        <label class="d-block">
-                                                            <input type="checkbox" name="{{ form.DELETE.html_name }}" id="{{ form.DELETE.id_for_label }}">
-                                                            <span class="text-danger">Delete this leader?</span>
-                                                        </label>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        
-                                        {{ form.id }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            
-                            {% if leader_formset.non_form_errors %}
-                                <div class="alert alert-danger">
-                                    {{ leader_formset.non_form_errors }}
-                                </div>
-                            {% endif %}
-                        </fieldset>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-{% if is_update %}warning{% else %}primary{% endif %} btn-lg">
-                                <i class="fas fa-save"></i> {% if is_update %}Update{% else %}Save{% endif %} Ministry
-                            </button>
-                            <a href="{% if is_update %}{% url 'ministry_detail' ministry.pk %}{% else %}{% url 'ministry_list' %}{% endif %}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
+                    <div class="form-grid">
+                      <div class="form-group member-search-container">
+                        <label class="form-label">Existing Member</label>
+                        <div class="member-search-input">
+                          <input
+                            type="text"
+                            class="form-control member-select"
+                            list="member-data-{{ forloop.counter }}"
+                            placeholder="Search for a member..."
+                            autocomplete="off"
+                          />
+                          <i class="fas fa-search member-search-icon"></i>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+                        <input
+                          type="hidden"
+                          name="{{ form.member.html_name }}"
+                          value="{{ form.member.value|default:'' }}"
+                        />
+                        <datalist id="member-data-{{ forloop.counter }}">
+                          {% for member in members %}
+                          <option
+                            value="{{ member.name }}"
+                            data-id="{{ member.id }}"
+                            data-phone="{{ member.telephone|default:'' }}"
+                            data-community="{{ member.shepherd_id|default:'' }}"
+                          >
+                            {% endfor %}
+                          </option>
+                        </datalist>
+                        {% if form.member.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.member.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                          <i class="fas fa-info-circle"></i>
+                          Select a member to auto-fill name, phone and
+                          community.
+                        </div>
+                      </div>
 
-{% block extra_js %}
+                      <div class="form-group">
+                        <label class="form-label">
+                          Leader Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.leader_name }} {% if form.leader_name.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.leader_name.errors }}
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">
+                          Position <span class="text-danger">*</span>
+                        </label>
+                        {{ form.position }} {% if form.position.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.position.errors }}
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">
+                          Community <span class="text-danger">*</span>
+                        </label>
+                        {{ form.community }} {% if form.community.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.community.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                          <i class="fas fa-map-marker-alt"></i>
+                          Select the community this leader belongs to.
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        {{ form.phone }} {% if form.phone.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.phone.errors }}
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">Email</label>
+                        {{ form.email }} {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.email.errors }}
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">Appointed Date</label>
+                        {{ form.appointed_date }} {% if form.appointed_date.errors %}
+                        <div class="invalid-feedback">
+                          {{ form.appointed_date.errors }}
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    {{ form.id }}
+                  </div>
+                  {% endfor %}
+                </div>
+
+                {% if leader_formset.non_form_errors %}
+                <div class="alert alert-danger">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  {{ leader_formset.non_form_errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-{% if is_update %}warning{% else %}primary{% endif %}"
+                  id="submitBtn"
+                >
+                  <i class="fas fa-save"></i>
+                  {% if is_update %}Update{% else %}Create{% endif %} Ministry
+                </button>
+                <a
+                  href="{% if is_update %}{% url 'ministry_detail' ministry.pk %}{% else %}{% url 'ministry_list' %}{% endif %}"
+                  class="btn btn-secondary"
+                >
+                  <i class="fas fa-times"></i>
+                  Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block script %}
 <script>
-    // Confirm before deleting leaders
-    document.addEventListener('DOMContentLoaded', function() {
-        const deleteCheckboxes = document.querySelectorAll('input[type="checkbox"][name*="DELETE"]');
-        
-        deleteCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    const confirmed = confirm('Are you sure you want to delete this leader?');
-                    if (!confirmed) {
-                        this.checked = false;
-                    } else {
-                        this.closest('.leader-form').style.opacity = '0.5';
-                    }
-                } else {
-                    this.closest('.leader-form').style.opacity = '1';
-                }
-            });
+  // Modern ES6+ JavaScript with better error handling and UX
+  class MinistryFormManager {
+    constructor() {
+      this.membersData = {
+        {% for m in members %}
+        "{{ m.id }}": {
+          name: "{{ m.name|escapejs }}",
+          telephone: "{{ m.telephone|default:''|escapejs }}",
+          community_id: "{{ m.shepherd_id|default:'' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      };
+
+      this.init();
+    }
+
+    init() {
+      this.setupMemberAutocomplete();
+      this.setupDeleteConfirmations();
+      this.setupFormValidation();
+      this.initializeExistingValues();
+      this.setupFormSubmission();
+      this.setupKeyboardNavigation();
+      this.setupAccessibility();
+    }
+
+    setupMemberAutocomplete() {
+      document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('member-select')) {
+          this.handleMemberInput(e.target);
+        }
+      });
+
+      // Add keyboard navigation for datalist
+      document.addEventListener('keydown', (e) => {
+        if (e.target.classList.contains('member-select')) {
+          this.handleMemberKeyboard(e);
+        }
+      });
+    }
+
+    handleMemberInput(inputElement) {
+      const inputValue = inputElement.value.trim();
+      const leaderCard = inputElement.closest('.leader-card');
+      const hiddenInput = leaderCard.querySelector('input[type="hidden"][name*="member"]');
+
+      // Find member by name
+      const selectedMember = this.findMemberByName(inputValue);
+
+      // Update hidden field
+      if (hiddenInput) {
+        hiddenInput.value = selectedMember ? selectedMember.id : '';
+      }
+
+      // Auto-populate fields if member found
+      if (selectedMember) {
+        this.populateFields(leaderCard, selectedMember);
+        // Add success indicator
+        inputElement.style.borderColor = 'var(--success-color)';
+        setTimeout(() => {
+          inputElement.style.borderColor = '';
+        }, 1500);
+      }
+    }
+
+    handleMemberKeyboard(e) {
+      // Add keyboard shortcuts for better UX
+      if (e.key === 'Enter' && e.target.value) {
+        e.preventDefault();
+        this.handleMemberInput(e.target);
+      }
+    }
+
+    findMemberByName(name) {
+      for (const [id, member] of Object.entries(this.membersData)) {
+        if (member.name.toLowerCase() === name.toLowerCase()) {
+          return { ...member, id };
+        }
+      }
+      return null;
+    }
+
+    populateFields(leaderCard, member) {
+      const fields = {
+        'input[name*="leader_name"]': member.name,
+        'input[name*="phone"]': member.telephone,
+        'select[name*="community"]': member.community_id
+      };
+
+      Object.entries(fields).forEach(([selector, value]) => {
+        if (value) {
+          const element = leaderCard.querySelector(selector);
+          if (element && !element.value) {
+            element.value = value;
+            // Add visual feedback
+            element.style.borderColor = 'var(--success-color)';
+            element.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+              element.style.borderColor = '';
+              element.style.transform = '';
+            }, 1000);
+          }
+        }
+      });
+    }
+
+    setupDeleteConfirmations() {
+      document.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox' && e.target.name.includes('DELETE')) {
+          this.handleDeleteConfirmation(e.target);
+        }
+      });
+    }
+
+    handleDeleteConfirmation(checkbox) {
+      if (checkbox.checked) {
+        const confirmed = confirm('Are you sure you want to delete this leader? This action cannot be undone.');
+        if (!confirmed) {
+          checkbox.checked = false;
+          return;
+        }
+
+        // Visual feedback with animation
+        const leaderCard = checkbox.closest('.leader-card');
+        leaderCard.style.transition = 'all 0.3s ease';
+        leaderCard.style.opacity = '0.5';
+        leaderCard.style.transform = 'scale(0.98)';
+
+        // Add shake animation for emphasis
+        leaderCard.style.animation = 'shake 0.5s ease-in-out';
+      } else {
+        const leaderCard = checkbox.closest('.leader-card');
+        leaderCard.style.opacity = '1';
+        leaderCard.style.transform = 'scale(1)';
+        leaderCard.style.animation = '';
+      }
+    }
+
+    setupFormValidation() {
+      const form = document.getElementById('ministryForm');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          if (!this.validateForm()) {
+            e.preventDefault();
+            this.showFirstError();
+          }
         });
+
+        // Real-time validation
+        form.addEventListener('blur', (e) => {
+          if (e.target.classList.contains('form-control')) {
+            this.validateField(e.target);
+          }
+        }, true);
+      }
+    }
+
+    validateForm() {
+      let isValid = true;
+      const requiredFields = document.querySelectorAll('input[required], select[required]');
+
+      requiredFields.forEach(field => {
+        if (!this.validateField(field)) {
+          isValid = false;
+        }
+      });
+
+      return isValid;
+    }
+
+    validateField(field) {
+      const isValid = field.value.trim() !== '';
+      field.classList.toggle('is-invalid', !isValid);
+      return isValid;
+    }
+
+    showFirstError() {
+      const firstError = document.querySelector('.is-invalid');
+      if (firstError) {
+        firstError.focus();
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    initializeExistingValues() {
+      const memberSelects = document.querySelectorAll('.member-select');
+      memberSelects.forEach(input => {
+        const leaderCard = input.closest('.leader-card');
+        const hiddenInput = leaderCard.querySelector('input[type="hidden"][name*="member"]');
+
+        if (hiddenInput && hiddenInput.value && this.membersData[hiddenInput.value]) {
+          input.value = this.membersData[hiddenInput.value].name;
+        }
+      });
+    }
+
+    setupFormSubmission() {
+      const form = document.getElementById('ministryForm');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (form && submitBtn) {
+        form.addEventListener('submit', () => {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+          form.classList.add('loading');
+        });
+      }
+    }
+
+    setupKeyboardNavigation() {
+      // Add keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + Enter to submit form
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn && !submitBtn.disabled) {
+            submitBtn.click();
+          }
+        }
+
+        // Escape to cancel
+        if (e.key === 'Escape') {
+          const cancelBtn = document.querySelector('.btn-secondary');
+          if (cancelBtn) {
+            cancelBtn.click();
+          }
+        }
+      });
+    }
+
+    setupAccessibility() {
+      // Add ARIA labels and improve accessibility
+      const memberSelects = document.querySelectorAll('.member-select');
+      memberSelects.forEach(input => {
+        input.setAttribute('aria-label', 'Search for existing member');
+        input.setAttribute('aria-describedby', 'member-help-' + input.closest('.leader-card').querySelector('input[type="hidden"]').name.split('-').pop());
+      });
+
+      // Add skip links for better navigation
+      const skipLink = document.createElement('a');
+      skipLink.href = '#ministryForm';
+      skipLink.className = 'sr-only sr-only-focusable';
+      skipLink.textContent = 'Skip to main form';
+      document.body.insertBefore(skipLink, document.body.firstChild);
+    }
+  }
+
+  // Add shake animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new MinistryFormManager();
+
+    // Add some modern UX enhancements
+    // Smooth scroll to first error
+    const firstError = document.querySelector('.invalid-feedback, .alert-danger');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Add focus states
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(control => {
+      control.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+
+      control.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
     });
+
+    // Add loading animation to submit button
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      submitBtn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+      });
+
+      submitBtn.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+      });
+    }
+  });
 </script>
 {% endblock %}

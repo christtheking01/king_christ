@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yearly Tithe Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Yearly Tithe Report</h1>
+            <p class="text-muted">Annual tithe collection summary</p>
+        </div>
+        <div>
+            <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Payments
+            </a>
+        </div>
+    </div>
+
+    <!-- Year Selection -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Select Year</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3">
+                    <label for="year" class="form-label">Year</label>
+                    <select name="year" id="year" class="form-select">
+                        {% for y in years %}
+                        <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Total Collected</h6>
+                    <h3 class="text-primary mb-0">TSH {{ total_collected|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Total Payments</h6>
+                    <h3 class="text-success mb-0">{{ total_payments }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Average per Payment</h6>
+                    <h3 class="text-info mb-0">TSH {{ average_payment|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Breakdown -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Monthly Breakdown - {{ current_year }}</h6>
+            <a href="{% url 'tithepayment:export_tithe_payments' %}?year={{ current_year }}" class="btn btn-sm btn-success">
+                <i class="fas fa-download"></i> Export
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Month</th>
+                            <th>Amount</th>
+                            <th>Payments</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for month_data in monthly_data %}
+                        <tr>
+                            <td>{{ month_data.month_name }}</td>
+                            <td>TSH {{ month_data.amount|floatformat:2 }}</td>
+                            <td>{{ month_data.count }}</td>
+                            <td>TSH {{ month_data.average|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No data available for this year</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th>Total</th>
+                            <th>TSH {{ total_collected|floatformat:2 }}</th>
+                            <th>{{ total_payments }}</th>
+                            <th>TSH {{ average_payment|floatformat:2 }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

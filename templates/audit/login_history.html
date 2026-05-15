@@ -1,134 +1,178 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Login History{% endblock %}
+
+{% block internal_style %}
+<style>
+  .audit-container { padding: 20px; max-width: 100%; box-sizing: border-box; }
+  .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .audit-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+  .audit-header h1 i { color: var(--primary); }
+  .audit-header p { color: var(--text-muted); margin: 4px 0 0 0; }
+  
+  .content-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--bg-secondary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+  .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-header h5 i { color: var(--primary); }
+  .card-body { padding: 20px; }
+  
+  .filter-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 768px) { .filter-form { grid-template-columns: 1fr; } }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .filter-group input, .filter-group select { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+  .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+  .filter-actions { display: flex; gap: 10px; }
+  .btn { padding: 10px 20px; border-radius: var(--border-radius-sm); font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+  .btn-primary { background: var(--gradient-primary); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+  .btn-outline:hover { background: var(--bg-tertiary); }
+  
+  .table-wrapper { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .audit-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  .audit-table th { background: var(--bg-secondary); padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
+  .audit-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.85rem; }
+  .audit-table tr:hover td { background: var(--bg-secondary); }
+  .audit-table .empty-cell { text-align: center; padding: 40px; color: var(--text-muted); }
+  .audit-table .empty-cell i { font-size: 2rem; opacity: 0.5; margin-bottom: 12px; display: block; }
+  
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; }
+  .status-badge.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .status-badge.error { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .status-badge.logout { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  
+  .pagination { display: flex; justify-content: center; gap: 4px; padding: 16px; list-style: none; margin: 0; }
+  .page-link { padding: 8px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; }
+  .page-link:hover { background: var(--bg-secondary); border-color: var(--primary); }
+  .page-link.active { background: var(--gradient-primary); color: white; border-color: transparent; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <h1 class="page-title">
-            <i class="fas fa-user-clock"></i> Login History
-        </h1>
+<div class="audit-container">
+  <!-- Header -->
+  <div class="audit-header">
+    <div>
+      <h1><i class="fas fa-user-clock"></i>Login History</h1>
+      <p>Track user login and logout activity</p>
     </div>
+  </div>
 
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row">
-                <div class="col-md-3">
-                    <label>User</label>
-                    <select name="user" class="form-control form-control-sm">
-                        <option value="">All Users</option>
-                        {% for u in users %}
-                        <option value="{{ u.id }}" {% if filters.user == u.id|stringformat:"s" %}selected{% endif %}>
-                            {{ u.username }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Status</label>
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">All</option>
-                        {% for status, label in status_choices %}
-                        <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Date From</label>
-                    <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
-                </div>
-                <div class="col-md-2">
-                    <label>Date To</label>
-                    <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
-                </div>
-                <div class="col-md-2">
-                    <label>IP Address</label>
-                    <input type="text" name="ip" class="form-control form-control-sm" placeholder="IP..." value="{{ filters.ip }}">
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-sm btn-primary btn-block">Filter</button>
-                </div>
-            </form>
-        </div>
+  <!-- Filters -->
+  <div class="content-card">
+    <div class="card-header">
+      <h5><i class="fas fa-filter"></i>Filters</h5>
     </div>
+    <div class="card-body">
+      <form method="get">
+        <div class="filter-form">
+          <div class="filter-group">
+            <label>User</label>
+            <select name="user">
+              <option value="">All Users</option>
+              {% for u in users %}
+              <option value="{{ u.id }}" {% if filters.user == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="">All</option>
+              {% for status, label in status_choices %}
+              <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>From</label>
+            <input type="date" name="date_from" value="{{ filters.date_from }}">
+          </div>
+          <div class="filter-group">
+            <label>To</label>
+            <input type="date" name="date_to" value="{{ filters.date_to }}">
+          </div>
+          <div class="filter-group">
+            <label>IP Address</label>
+            <input type="text" name="ip" placeholder="Search IP..." value="{{ filters.ip }}">
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i>Apply Filters</button>
+          <a href="{% url 'audits:login_history_list' %}" class="btn btn-outline"><i class="fas fa-undo"></i>Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
 
-    <!-- Login History Table -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>User</th>
-                            <th>Username Attempted</th>
-                            <th>IP Address</th>
-                            <th>Location</th>
-                            <th>Device</th>
-                            <th>Browser</th>
-                            <th>OS</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in page_obj %}
-                        <tr>
-                            <td>{{ entry.timestamp|date:"Y-m-d H:i:s" }}</td>
-                            <td>
-                                {% if entry.user %}
-                                    <a href="{% url 'view_user' entry.user.id %}">{{ entry.user.username }}</a>
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ entry.username_attempted }}</td>
-                            <td>{{ entry.ip_address|default:"-" }}</td>
-                            <td>{{ entry.location|default:"-" }}</td>
-                            <td>{{ entry.device_info|default:"-" }}</td>
-                            <td>{{ entry.browser|default:"-" }}</td>
-                            <td>{{ entry.os|default:"-" }}</td>
-                            <td>
-                                {% if entry.status == 'SUCCESS' %}
-                                    <span class="badge badge-success">Success</span>
-                                {% elif entry.status == 'FAILED' %}
-                                    <span class="badge badge-danger">Failed</span>
-                                {% else %}
-                                    <span class="badge badge-secondary">Logout</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">No login history found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% if page_obj.has_other_pages %}
-        <div class="card-footer">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
-                    </li>
-                    {% endif %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    </li>
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+  <!-- History Table -->
+  <div class="content-card">
+    <div class="card-body table-wrapper" style="padding: 0;">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Username</th>
+            <th>IP Address</th>
+            <th>Location</th>
+            <th>Device</th>
+            <th>Browser</th>
+            <th>OS</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in page_obj %}
+          <tr>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ entry.timestamp|date:"Y-m-d H:i:s" }}</td>
+            <td>
+              {% if entry.user %}<a href="{% url 'view_user' entry.user.id %}"><strong>{{ entry.user.username }}</strong></a>
+              {% else %}<span style="color: var(--text-muted);">-</span>{% endif %}
+            </td>
+            <td>{{ entry.username_attempted|default:"-" }}</td>
+            <td><code style="font-size: 0.75rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">{{ entry.ip_address|default:"-" }}</code></td>
+            <td>{{ entry.location|default:"-" }}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ entry.device_info|default:"-" }}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ entry.browser|default:"-" }}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ entry.os|default:"-" }}</td>
+            <td>
+              {% if entry.status == 'SUCCESS' %}
+                <span class="status-badge success"><i class="fas fa-check-circle"></i>Success</span>
+              {% elif entry.status == 'FAILED' %}
+                <span class="status-badge error"><i class="fas fa-times-circle"></i>Failed</span>
+              {% else %}
+                <span class="status-badge logout"><i class="fas fa-sign-out-alt"></i>Logout</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="empty-cell"><i class="fas fa-inbox"></i>No login history found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-left"></i></a></li>
         {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+          <li><span class="page-link active">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li><a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-right"></i></a></li>
+        {% endif %}
+      </ul>
     </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

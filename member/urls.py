@@ -1,11 +1,13 @@
 from django.urls import path
 
 from .views import (
-    table_members, list_members, thumbnail_members, detail_member, edit_member, update_member, restore_member,
+    table_members, list_members, thumbnail_members, detail_member, edit_member, restore_member,
     delete_member, filter_members, search_members, get_members_by_statuses, get_members_by_shepherds, list_deleted_members,
     ministry_detail, ministry_list, create_ministry,update_ministry,list_committees,create_committee,
     list_shepherds, add_shepherd, create_shepherd,edit_community,delete_community, delete_ministry,
-    edit_committee,delete_committee_member,CreateMembersView,AddMemberView
+    edit_committee,delete_committee_member,CreateMembersView,AddMemberView,
+    list_zones, zone_detail, create_zone, edit_zone, delete_zone,create_minis,
+    export_members, import_members
 )
 
 urlpatterns = [
@@ -15,7 +17,6 @@ urlpatterns = [
     path('thumbnail/', thumbnail_members, name="thumbnail_members"),
     path('detail/<int:pk>/', detail_member, name="detail_member"),
     path('edit/<int:pk>/', edit_member, name="edit_member"),
-    path('update/<int:pk>/', update_member, name="update_member"),
     path('add/', AddMemberView.as_view(), name="add_member"),
     path('create/', CreateMembersView.as_view(), name="create_member"),
     path('delete/<int:pk>/', delete_member, name="delete_member"),
@@ -30,7 +31,7 @@ urlpatterns = [
     path('committee/list/',list_committees,name="list_committees"),
     path('committee/create/',create_committee, name='create_committee'),
     path('committee/edit/<str:name>/',edit_committee, name='edit_committee'),
-    path('committee/delete/<str:name>',delete_committee_member, name="delete_committee_member"),
+    path('committee/delete/<int:pk>/',delete_committee_member, name="delete_committee_member"),
 
 
     # UrlConf For Ministries
@@ -46,5 +47,16 @@ urlpatterns = [
     path('shepherds/create/', create_shepherd, name="create_shepherd"),
     path('shepherds/edit/<int:community_id>/', edit_community, name="edit_community"),
     path('shepherds/delete/<int:community_id>/', delete_community, name="delete_community"),
-    
+
+    # UrlConf For Zones
+    path('zones/list/', list_zones, name="list_zones"),
+    path('zones/create/',create_zone, name= 'create_zone'),
+    path('zones/edit/<int:pk>/update/', edit_zone, name='edit_zone'),
+    path('zones/delete/<int:zone>/delete/', delete_zone, name='delete_zone'),
+    path('zones/detail/<int:pk>/', zone_detail, name = 'zone_detail'),
+    # Export
+    path('export/', export_members, name="export_members"),
+
+    # Import
+    path('import/', import_members, name="import_members"),
 ]

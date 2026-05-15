@@ -1,74 +1,267 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .remove-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .remove-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .card-header-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .card-header-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .remove-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .priest-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .priest-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        margin: 0 auto 1rem;
+    }
+
+    .priest-avatar-placeholder i {
+        font-size: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .priest-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .priest-email {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .current-role-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .current-role-box label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .current-role-box h5 {
+        color: var(--warning);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .alert-glass-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        color: var(--info);
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .alert-glass-info i {
+        font-size: 1.25rem;
+        margin-top: 0.125rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-glass {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex: 1;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-glass-danger {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex: 1;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-glass-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    @media (max-width: 480px) {
+        .remove-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'priest_role_management' %}">Priest Roles</a></li>
-                    <li class="breadcrumb-item active">Remove Role</li>
-                </ol>
-            </nav>
-            <h2 class="mb-1">
-                <i class="fas fa-user-times text-danger me-2"></i>Remove Priest Role
-            </h2>
+<div class="remove-page">
+    <div class="remove-card">
+        <div class="card-header-icon">
+            <i class="fas fa-user-times"></i>
         </div>
-    </div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Removal
-                    </h5>
-                </div>
-                <div class="card-body text-center">
-                    <div class="mb-4">
-                        {% if priest.userprofile and priest.userprofile.picture %}
-                        <img src="{{ priest.userprofile.picture.url }}" alt="{{ priest.username }}" 
-                             class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
-                        {% else %}
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" 
-                             style="width: 100px; height: 100px;">
-                            <i class="fas fa-user fa-3x text-muted"></i>
-                        </div>
-                        {% endif %}
-                    </div>
+        <h4>Remove Priest Role</h4>
 
-                    <h4 class="mb-2">{{ priest.full_name|default:priest.username }}</h4>
-                    <p class="text-muted mb-3">{{ priest.email|default:"No email" }}</p>
+        {% if priest.userprofile and priest.userprofile.picture %}
+        <img src="{{ priest.userprofile.picture.url }}" alt="{{ priest.username }}" class="priest-avatar">
+        {% else %}
+        <div class="priest-avatar-placeholder">
+            <i class="fas fa-user"></i>
+        </div>
+        {% endif %}
 
-                    {% if current_role_display %}
-                    <div class="alert alert-warning">
-                        <p class="mb-1">Current Role:</p>
-                        <h5 class="mb-0">{{ current_role_display }}</h5>
-                    </div>
-                    {% endif %}
+        <div class="priest-name">{{ priest.full_name|default:priest.username }}</div>
+        <div class="priest-email">{{ priest.email|default:"No email" }}</div>
 
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <p class="mb-0">
-                            This action will remove the priest role assignment. The user will remain as a priest but without a specific role designation.
-                        </p>
-                    </div>
+        {% if current_role_display %}
+        <div class="current-role-box">
+            <label>Current Role:</label>
+            <h5>{{ current_role_display }}</h5>
+        </div>
+        {% endif %}
 
-                    <form method="post" class="mt-4">
-                        {% csrf_token %}
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="{% url 'priest_role_management' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash-alt me-1"></i>Remove Role
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <div class="alert-glass-info">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                This action will remove the priest role assignment. The user will remain as a priest but without a specific role designation.
             </div>
         </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'priest_role_management' %}" class="btn-glass">
+                    <i class="fas fa-arrow-left"></i>Cancel
+                </a>
+                <button type="submit" class="btn-glass-danger">
+                    <i class="fas fa-trash-alt"></i>Remove Role
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

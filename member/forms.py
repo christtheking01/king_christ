@@ -9,7 +9,8 @@ class MemberForm(forms.ModelForm):
         fields = [
             'name', 'code', 'active', 'shepherd', 'ministry', 'telephone',
             'location', 'fathers_name', 'mothers_name', 'guardians_name',
-            'new_believer_school', 'pays_tithe', 'working', 'schooling', 'picture','transfer_update','transfered'
+            'gender', 'pays_tithe', 'working', 'schooling', 'picture','transfer_update','transfered',
+            'membership_category'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'}),
@@ -22,13 +23,14 @@ class MemberForm(forms.ModelForm):
             'shepherd': forms.Select(attrs={'class': 'form-control'}),
             'ministry': forms.Select(attrs={'class': 'form-control'}),
             'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'new_believer_school': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'gender': forms.Select(attrs={'class': 'form-control'}),
             'pays_tithe': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'working': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'schooling': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'transfered': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'transfer_update': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Enter details of the member'}),
             'picture': forms.FileInput(attrs={'class': 'form-control'}),
+            'membership_category': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Select membership category'}),
         }
     
 """    def clean_telephone(self):
@@ -56,23 +58,33 @@ class MinistryForm(forms.ModelForm):
             }),
         }
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name and Ministry.objects.filter(name__iexact=name).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise forms.ValidationError("A ministry with this name already exists.")
+        return name
+
 
 class MinistryLeaderForm(forms.ModelForm):
     class Meta:
         model = MinistryLeader
-        fields = ['leader_name', 'position', 'community', 'phone', 'email', 'appointed_date']
+        fields = ['member', 'leader_name', 'position', 'community', 'phone', 'email', 'appointed_date']
         widgets = {
+            'member': forms.Select(attrs={
+                'class': 'form-control member-select',
+                'data-placeholder': 'Select a member to autopopulate'
+            }),
             'leader_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter leader name'
+                'class': 'form-control leader-name-input',
+                'placeholder': 'Enter leader name (or select member to autopopulate)'
             }),
             'position': forms.Select(attrs={'class': 'form-control'}),
             'community': forms.Select(attrs={
-                'class': 'form-control',
+                'class': 'form-control community-select',
                 'placeholder': 'Select community'
             }),
             'phone': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control phone-input',
                 'placeholder': '+255XXXXXXXXX'
             }),
             'email': forms.EmailInput(attrs={
@@ -85,6 +97,7 @@ class MinistryLeaderForm(forms.ModelForm):
             }),
         }
         labels = {
+            'member': 'Select Member (Optional)',
             'community': 'Community *',
             'leader_name': 'Leader Name *',
             'position': 'Position *',

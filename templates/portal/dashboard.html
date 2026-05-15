@@ -1,0 +1,722 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %} - Christ King Church{% endblock %}
+
+{% block content %}
+<style>
+    /* Dashboard - Social Media Dark Theme */
+    .dashboard-welcome {
+        background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-welcome h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .dashboard-welcome p {
+        color: rgba(255,255,255,0.8);
+        margin: 0.5rem 0 0 2.5rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        transition: var(--transition);
+    }
+    
+    .stat-card:hover {
+        border-color: var(--accent-primary);
+    }
+    
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        background: var(--bg-tertiary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-primary);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon.success {
+        color: var(--accent-success);
+    }
+    
+    .stat-icon.warning {
+        color: var(--accent-warning);
+    }
+    
+    .stat-icon.info {
+        color: var(--accent-secondary);
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-value.success {
+        color: var(--accent-success);
+    }
+    
+    .stat-value.warning {
+        color: var(--accent-warning);
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+    
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 991px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Chart Container */
+    .chart-wrapper {
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
+    
+    /* Activity List */
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-primary);
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .activity-item:first-child {
+        padding-top: 0;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .activity-icon.tithe {
+        background: rgba(0, 186, 124, 0.15);
+        color: var(--accent-success);
+    }
+    
+    .activity-icon.pledge {
+        background: rgba(255, 173, 31, 0.15);
+        color: var(--accent-warning);
+    }
+    
+    .activity-icon.event {
+        background: rgba(29, 155, 240, 0.15);
+        color: var(--accent-primary);
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-date {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+    }
+    
+    .activity-amount {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--accent-primary);
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+    
+    .quick-action:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+    }
+    
+    .quick-action i {
+        font-size: 1.125rem;
+        color: var(--accent-primary);
+    }
+    
+    /* Event Date Box */
+    .event-date-box {
+        width: 48px;
+        text-align: center;
+        background: var(--accent-primary);
+        color: white;
+        border-radius: var(--radius-sm);
+        padding: 0.5rem;
+        flex-shrink: 0;
+    }
+    
+    .event-date-box .month {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+    
+    .event-date-box .day {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-badge.active {
+        background: rgba(0, 186, 124, 0.15);
+        color: var(--accent-success);
+    }
+    
+    /* Two Column Layout */
+    .dashboard-columns {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+    }
+    
+    @media (max-width: 991px) {
+        .dashboard-columns {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Section Headers */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .section-header h5 {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .dashboard-welcome {
+            padding: 1.25rem;
+        }
+        
+        .dashboard-welcome h1 {
+            font-size: 1.125rem;
+            gap: 0.5rem;
+        }
+        
+        .dashboard-welcome h1 i {
+            font-size: 1.25rem;
+        }
+        
+        .dashboard-welcome p {
+            font-size: 0.875rem;
+            margin-left: 1.75rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-value {
+            font-size: 1.125rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-action {
+            padding: 0.875rem;
+            font-size: 0.8125rem;
+        }
+        
+        .quick-action i {
+            font-size: 1rem;
+        }
+        
+        .chart-wrapper {
+            height: 220px;
+        }
+        
+        .event-date-box {
+            width: 44px;
+            padding: 0.375rem;
+        }
+        
+        .event-date-box .day {
+            font-size: 1.125rem;
+        }
+        
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 0.875rem;
+        }
+        
+        .activity-title {
+            font-size: 0.875rem;
+        }
+        
+        .activity-amount {
+            font-size: 0.875rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-action {
+            padding: 0.75rem;
+        }
+        
+        .dashboard-columns .feed-card .card-body {
+            padding: 0.875rem;
+        }
+    }
+</style>
+
+<!-- Welcome Card -->
+<div class="dashboard-welcome">
+    <h1><i class="fas fa-hand-sparkles"></i> {% trans "Welcome back" %}, {{ church_member.first_name|default:"Member" }}!</h1>
+    <p>{% trans "Here's what's happening with your church activities" %}</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="stat-value">{% if total_tithe_this_year %}TSh {{ total_tithe_this_year|floatformat:0|default:"0" }}{% else %}TSh 0{% endif %}</div>
+        <div class="stat-label">{% trans "Total Tithes" %} ({{ current_year|default:"2025" }})</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-donate"></i>
+        </div>
+        <div class="stat-value success">{% if pledges %}{{ pledges|length }}{% else %}0{% endif %}</div>
+        <div class="stat-label">{% trans "Active Pledges" %}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-value warning">{{ upcoming_events|length|default:"0" }}</div>
+        <div class="stat-label">{% trans "Upcoming Events" %}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value" style="font-size: 1.25rem;">
+            {% if church_member.member and church_member.member.shepherd %}
+                <i class="fas fa-check-circle" style="color: var(--accent-success);"></i>
+            {% else %}
+                <span style="color: var(--text-muted);">-</span>
+            {% endif %}
+        </div>
+        <div class="stat-label">{% trans "Community" %}</div>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Chart Section -->
+    <div class="feed-card">
+        <div class="card-header">
+            <i class="fas fa-chart-line"></i>
+            <h5>{% trans "Tithing Overview" %} {{ current_year|default:"2025" }}</h5>
+            <span class="badge-portal badge-portal-success" style="margin-left: auto;">
+                <i class="fas fa-circle" style="font-size: 6px;"></i> Active
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="chart-wrapper">
+                <canvas id="tithingChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="feed-card">
+        <div class="card-header">
+            <i class="fas fa-history"></i>
+            <h5>Recent Activity</h5>
+            <a href="{% url 'portal_tithe_history' %}" class="btn-portal btn-portal-outline" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;">{% trans "View All" %}</a>
+        </div>
+        <div class="card-body">
+            {% if tithe_payments %}
+                <ul class="activity-list">
+                    {% for payment in tithe_payments|slice:":5" %}
+                    <li class="activity-item">
+                        <div class="activity-icon tithe">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{% trans "Tithe Payment" %}</div>
+                            <div class="activity-date">{{ payment.date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="activity-amount">
+                            {% if payment.amount %}TSh {{ payment.amount|floatformat:0 }}{% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <h6>{% trans "No Recent Activity" %}</h6>
+                    <p>{% trans "Your recent transactions will appear here" %}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="feed-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-bolt"></i>
+        <h5>Quick Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="quick-actions">
+            <a href="{% url 'portal_tithe_history' %}" class="quick-action">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>{% trans "View Tithes" %}</span>
+            </a>
+            <a href="{% url 'portal_pledges' %}" class="quick-action">
+                <i class="fas fa-donate"></i>
+                <span>{% trans "My Pledges" %}</span>
+            </a>
+            <a href="{% url 'portal_events' %}" class="quick-action">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{% trans "Browse Events" %}</span>
+            </a>
+            <a href="{% url 'portal_profile' %}" class="quick-action">
+                <i class="fas fa-user-cog"></i>
+                <span>{% trans "Edit Profile" %}</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Two Column Layout -->
+<div class="dashboard-columns">
+    <!-- Left Column -->
+    <div>
+        <!-- Upcoming Events -->
+        <div class="feed-card mb-4">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h5>{% trans "Upcoming Events" %}</h5>
+                <a href="{% url 'portal_events' %}" class="btn-portal btn-portal-outline" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;">{% trans "View All" %}</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                    {% for event in upcoming_events|slice:":5" %}
+                    <div class="d-flex align-items-start mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}" style="border-color: var(--border-primary);">
+                        <div class="flex-shrink-0">
+                            <div class="event-date-box">
+                                <small class="d-block month">{{ event.start_date|date:"M" }}</small>
+                                <strong class="d-block day">{{ event.start_date|date:"j" }}</strong>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1" style="font-weight: 600; color: var(--text-primary);">{{ event.title }}</h6>
+                            <p class="small mb-1" style="color: var(--text-secondary);">
+                                <i class="fas fa-clock me-1"></i>{{ event.start_time|time:"g:i A"|default:"All Day" }}
+                                {% if event.location %}
+                                    <i class="fas fa-map-marker-alt ms-2 me-1"></i>{{ event.location.name }}
+                                {% endif %}
+                            </p>
+                            <span class="badge-portal badge-portal-primary">{{ event.get_event_type_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <h6>{% trans "No Upcoming Events" %}</h6>
+                        <p>{% trans "Check back later for new events" %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        {% if community %}
+        <!-- My Community -->
+        <div class="feed-card mb-4">
+            <div class="card-header">
+                <i class="fas fa-users" style="color: var(--accent-secondary);"></i>
+                <h5>{% trans "My Community" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6 style="font-weight: 600; color: var(--text-primary);">{{ community.name }}</h6>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                    <i class="fas fa-user-friends me-1"></i>{{ community_members|length|add:1 }} members
+                </p>
+                <hr style="border-color: var(--border-primary);">
+                <a href="{% url 'portal_community' %}" class="btn-portal btn-portal-primary w-100" style="padding: 0.5rem;">
+                    <i class="fas fa-eye me-1"></i>{% trans "View Community" %}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ministry %}
+        <!-- My Ministry -->
+        <div class="feed-card mb-4">
+            <div class="card-header">
+                <i class="fas fa-hands-helping" style="color: var(--accent-success);"></i>
+                <h5>{% trans "My Ministry" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6 style="font-weight: 600; color: var(--text-primary);">{{ ministry.name }}</h6>
+                {% if ministry_events %}
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                        <i class="fas fa-calendar me-1"></i>{{ ministry_events|length }} upcoming events
+                    </p>
+                {% endif %}
+                <hr style="border-color: var(--border-primary);">
+                <a href="{% url 'portal_ministry' %}" class="btn-portal btn-portal-primary w-100" style="padding: 0.5rem; background: var(--accent-success);">
+                    <i class="fas fa-eye me-1"></i>{% trans "View Ministry" %}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if committees %}
+        <!-- My Committees -->
+        <div class="feed-card mb-4">
+            <div class="card-header">
+                <i class="fas fa-sitemap" style="color: var(--accent-warning);"></i>
+                <h5>My Committees</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    {% for committee in committees|slice:":3" %}
+                    <li class="mb-2" style="color: var(--text-primary);">
+                        <i class="fas fa-check-circle me-2" style="color: var(--accent-warning);"></i>{{ committee.Commitee_name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(function() {
+        var ctx = document.getElementById('tithingChart');
+        if (!ctx) {
+            console.error('Canvas element #tithingChart not found');
+            return;
+        }
+        
+        $.get('{% url "tithe_chart_json" %}', function(data) {
+            console.log('Chart data received:', data);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: data.datasets[0].label || 'Monthly Tithes (TSh)',
+                        data: data.datasets[0].data,
+                        borderColor: '#1d9bf0',
+                        backgroundColor: 'rgba(29, 155, 240, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#1d9bf0',
+                        pointBorderColor: '#16181c',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#16181c',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'TSh ' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#71767b',
+                                callback: function(value) {
+                                    return 'TSh ' + value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: '#2f3336'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#71767b'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }).fail(function(xhr, status, error) {
+            console.error('Failed to load chart data:', error);
+        });
+    });
+</script>
+{% endblock %}

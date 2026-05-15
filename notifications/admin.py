@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, NotificationLog,NotificationReadStatus
+from .models import Notification, NotificationLog,NotificationReadStatus,DeliveryReport,IncomingSMS
     
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
@@ -29,13 +29,13 @@ class NotificationAdmin(admin.ModelAdmin):
             'fields': ('title', 'message', 'send_sms')
         }),
         ('Recipients', {
-            'fields': ('recipient_type', 'member', 'ministry', 'community')
+            'fields': ('recipient_type', 'member', 'ministry', 'community', 'zone', 'custom_phone_numbers')
         }),
         ('Status & Tracking', {
             'fields': (
-                'status', 
+                'status',
                 'total_recipients',
-                'sms_sent_count', 
+                'sms_sent_count',
                 'sms_failed_count',
                 'error_message',
                 'created_at',
@@ -66,3 +66,7 @@ class NotificationLogAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at']
 
     admin.site.register(NotificationReadStatus)
+
+
+admin.site.register(DeliveryReport)
+admin.site.register(IncomingSMS)

@@ -1,0 +1,155 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS PIN Login{% endblock %}
+
+{% block content %}
+<style>
+    .pin-login-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .pin-login-header {
+        margin-bottom: 30px;
+    }
+
+    .pin-login-header h1 {
+        color: #667eea;
+        margin: 0 0 10px 0;
+    }
+
+    .pin-login-header p {
+        color: #666;
+        margin: 0;
+    }
+
+    .pin-input {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.5rem;
+        text-align: center;
+        letter-spacing: 8px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+    }
+
+    .pin-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .pin-submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .pin-submit-btn:active {
+        transform: scale(0.98);
+    }
+
+    .pin-info {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f0f0ff;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .security-notice {
+        margin-top: 20px;
+        padding: 12px;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #856404;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="pin-login-container">
+    <div class="pin-login-header">
+        <h1><i class="fas fa-lock"></i> POS Security</h1>
+        <p>Enter your PIN to access the terminal</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" style="padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <input 
+            type="password" 
+            name="pin" 
+            class="pin-input" 
+            placeholder="••••" 
+            maxlength="4"
+            pattern="[0-9]{4}"
+            required
+            autofocus
+            autocomplete="off"
+        >
+        
+        <button type="submit" class="pin-submit-btn">
+            <i class="fas fa-unlock"></i> Access POS
+        </button>
+    </form>
+
+    <div class="pin-info">
+        <i class="fas fa-info-circle"></i> 
+        Enter your 4-digit POS PIN to continue
+    </div>
+
+    <div class="security-notice">
+        <i class="fas fa-shield-alt"></i> 
+        <strong>Security Notice:</strong> POS sessions expire after 15 minutes of inactivity for your protection.
+    </div>
+
+</div>
+
+<script>
+    // Auto-focus PIN input
+    document.querySelector('.pin-input').focus();
+
+    // Clear PIN on page load for security
+    document.querySelector('.pin-input').value = '';
+
+    // Prevent copy/paste for security
+    const pinInput = document.querySelector('.pin-input');
+    pinInput.addEventListener('copy', (e) => e.preventDefault());
+    pinInput.addEventListener('paste', (e) => e.preventDefault());
+</script>
+{% endblock %}

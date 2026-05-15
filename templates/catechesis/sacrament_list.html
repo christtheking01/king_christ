@@ -2,6 +2,59 @@
 {% extends 'base.html' %}
 
 {% block title %}Sacraments List{% endblock %}
+{% block internal_style %}
+<style>
+    .sacraments-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .sacraments-header h2 {
+        font-size: 28px;
+        color: #333;
+    }
+    .sacraments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    .sacrament-card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-top: 4px solid #4f46e5;
+    }
+    .sacrament-card h3 {
+        color: #4f46e5;
+        margin-bottom: 15px;
+        font-size: 22px;
+    }
+    .sacrament-card p {
+        color: #666;
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .requirement.required {
+        color: #dc2626;
+    }
+    .requirement.not-required {
+        color: #059669;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <style>

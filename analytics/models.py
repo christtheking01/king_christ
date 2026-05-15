@@ -29,17 +29,24 @@ class AnalyticsCache(models.Model):
                 return cache.data
         except cls.DoesNotExist:
             pass
+        except Exception:
+            # If cache table doesn't exist or other DB error, skip caching
+            return data_func()
         
         # Generate new data
         data = data_func()
         
-        # Save to cache
-        cls.objects.update_or_create(
-            key=key,
-            defaults={
-                'data': data,
-                'expires_at': timezone.now() + timedelta(hours=ttl_hours)
-            }
-        )
+        # Try to save to cache, but don't fail if it doesn't work
+        try:
+            cls.objects.update_or_create(
+                key=key,
+                defaults={
+                    'data': data,
+                    'expires_at': timezone.now() + timedelta(hours=ttl_hours)
+                }
+            )
+        except Exception:
+            # If caching fails, just return the data
+            pass
         
         return data

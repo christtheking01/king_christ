@@ -1,0 +1,493 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - Pledge{% endblock %}
+
+{% block content %}
+<style>
+    .search-box {
+        margin-bottom: 20px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 16px;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background: rgba(30, 42, 74, 0.5);
+        color: #e0e0e0;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #4cc9f0;
+    }
+    
+    .search-input::placeholder {
+        color: #a0a0a0;
+    }
+    
+    .pledge-list {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .pledge-item {
+        padding: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .pledge-item:hover {
+        background: rgba(76, 201, 240, 0.1);
+    }
+    
+    .pledge-item:last-child {
+        border-bottom: none;
+    }
+    
+    .pledge-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
+    
+    .pledge-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #e0e0e0;
+    }
+    
+    .pledge-status {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .status-partial {
+        background: rgba(76, 201, 240, 0.2);
+        color: #4cc9f0;
+    }
+    
+    .status-completed {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+    }
+    
+    .status-overdue {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+    }
+    
+    .pledge-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+    
+    .pledge-progress {
+        margin-top: 12px;
+    }
+    
+    .progress-bar {
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        transition: width 0.3s;
+    }
+    
+    .progress-text {
+        font-size: 0.75rem;
+        color: #a0a0a0;
+        margin-top: 4px;
+    }
+    
+    .no-pledges {
+        padding: 32px;
+        text-align: center;
+        color: #a0a0a0;
+    }
+    
+    .no-pledges i {
+        color: #4cc9f0;
+    }
+    
+    /* Payment Form Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .modal.show {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 400px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #e0e0e0;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #a0a0a0;
+        transition: color 0.2s;
+    }
+    
+    .close-btn:hover {
+        color: #e94560;
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: #e0e0e0;
+    }
+    
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 8px;
+        box-sizing: border-box;
+        background: rgba(30, 42, 74, 0.5);
+        color: #e0e0e0;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+        outline: none;
+        border-color: #4cc9f0;
+    }
+    
+    .pledge-summary {
+        background: rgba(76, 201, 240, 0.1);
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .pledge-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        color: #a0a0a0;
+    }
+    
+    .pledge-summary-row strong {
+        color: #e0e0e0;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 12px;
+        background: rgba(76, 201, 240, 0.05);
+        border-radius: 12px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: rgba(76, 201, 240, 0.1);
+        border-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper span {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+</style>
+
+<div class="search-box">
+    <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search pledges by name or event..."
+        id="pledgeSearch"
+    >
+</div>
+
+<div class="pledge-list" id="pledgeList">
+    {% if pledges %}
+        {% for pledge in pledges %}
+        <div class="pledge-item" data-pledge-id="{{ pledge.id }}" data-pledger="{{ pledge.pledger_name|escapejs }}" data-promised="{{ pledge.promised_amount }}" data-paid="{{ pledge.paid_amount }}" data-event="{{ pledge.event.title|escapejs }}" onclick="openPaymentModal(this)">
+            <div class="pledge-header">
+                <div class="pledge-name">{{ pledge.pledger_name }}</div>
+                <span class="pledge-status status-{{ pledge.status|lower }}">{{ pledge.get_status_display }}</span>
+            </div>
+            <div class="pledge-details">
+                <div><strong>Event:</strong> {{ pledge.event.title }}</div>
+                <div><strong>Due:</strong> {% if pledge.due_date %}{{ pledge.due_date|date:"M d, Y" }}{% else %}—{% endif %}</div>
+            </div>
+            <div class="pledge-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {% widthratio pledge.paid_amount pledge.promised_amount 100 %}%"></div>
+                </div>
+                <div class="progress-text">
+                    Tsh {{ pledge.paid_amount|floatformat:0 }} / Tsh {{ pledge.promised_amount|floatformat:0 }} paid
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-pledges">
+            <i class="fas fa-file-contract" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+            <p>No active pledges found</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Payment Modal -->
+<div class="modal" id="paymentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Record Pledge Payment</h3>
+            <button class="close-btn" onclick="closePaymentModal()">&times;</button>
+        </div>
+        
+        <div class="pledge-summary">
+            <div class="pledge-summary-row">
+                <span>Pledger:</span>
+                <strong id="modalPledger">-</strong>
+            </div>
+            <div class="pledge-summary-row">
+                <span>Event:</span>
+                <strong id="modalEvent">-</strong>
+            </div>
+            <div class="pledge-summary-row">
+                <span>Promised:</span>
+                <strong id="modalPromised">-</strong>
+            </div>
+            <div class="pledge-summary-row">
+                <span>Paid:</span>
+                <strong id="modalPaid">-</strong>
+            </div>
+            <div class="pledge-summary-row">
+                <span>Remaining:</span>
+                <strong id="modalRemaining" style="color: #4cc9f0;">-</strong>
+            </div>
+        </div>
+        
+        <form id="pledgePaymentForm" method="post" action="{% url 'tithepayment:pos_pledge' %}">
+            {% csrf_token %}
+            <input type="hidden" name="pledge_id" id="pledgeId">
+            
+            <div class="form-group">
+                <label>Payment Amount (Tsh)</label>
+                <input 
+                    type="number" 
+                    name="amount" 
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0"
+                    required
+                    id="paymentAmount"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment_method" id="paymentMethod">
+                    <option value="CASH">Cash</option>
+                    <option value="BANK">Bank Transfer</option>
+                    <option value="MOBILE">Mobile Money</option>
+                    <option value="CHEQUE">Cheque</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number (for SMS)</label>
+                <input 
+                    type="tel" 
+                    name="phone" 
+                    placeholder="Phone number"
+                    required
+                    id="pledgePhone"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="send_sms" checked>
+                    <span>Send SMS confirmation</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-check"></i> Record Payment
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentPledgeData = null;
+
+    function openPaymentModal(element) {
+        const pledgeId = element.dataset.pledgeId;
+        const pledgerName = element.dataset.pledger;
+        const promised = parseFloat(element.dataset.promised);
+        const paid = parseFloat(element.dataset.paid);
+        const eventTitle = element.dataset.event;
+        const remaining = promised - paid;
+        
+        currentPledgeData = {
+            pledgerName,
+            eventTitle,
+            promised,
+            paid,
+            remaining
+        };
+        
+        document.getElementById('pledgeId').value = pledgeId;
+        document.getElementById('modalPledger').textContent = pledgerName;
+        document.getElementById('modalEvent').textContent = eventTitle;
+        document.getElementById('modalPromised').textContent = 'Tsh ' + promised.toLocaleString();
+        document.getElementById('modalPaid').textContent = 'Tsh ' + paid.toLocaleString();
+        document.getElementById('modalRemaining').textContent = 'Tsh ' + remaining.toLocaleString();
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentAmount').max = remaining;
+        
+        document.getElementById('paymentModal').classList.add('show');
+    }
+    
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.remove('show');
+        currentPledgeData = null;
+    }
+    
+    // Search functionality
+    document.getElementById('pledgeSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const items = document.querySelectorAll('.pledge-item');
+        
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? 'block' : 'none';
+        });
+    });
+    
+    // Close modal on outside click
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePaymentModal();
+        }
+    });
+
+    // Handle form submission and print receipt
+    const pledgePaymentForm = document.getElementById('pledgePaymentForm');
+    if (pledgePaymentForm) {
+        pledgePaymentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(pledgePaymentForm);
+            const amount = parseFloat(formData.get('amount'));
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const phone = formData.get('phone');
+            
+            // Submit form via AJAX
+            fetch(pledgePaymentForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Print receipt if printer is connected
+                    if (window.thermalPrinter && window.thermalPrinter.isConnected && currentPledgeData) {
+                        printReceipt(
+                            'Pledge Payment',
+                            currentPledgeData.pledgerName,
+                            '',
+                            amount,
+                            paymentMethod,
+                            phone
+                        );
+                    }
+                    
+                    // Close modal and refresh page
+                    closePaymentModal();
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Submission error:', error);
+                // Fallback to normal form submission
+                pledgePaymentForm.submit();
+            });
+        });
+    }
+</script>
+{% endblock %}

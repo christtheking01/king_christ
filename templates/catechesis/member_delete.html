@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Member{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Delete Member</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the following member?</p>
+                    
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-user"></i> {{ member.first_name }} {{ member.last_name }}</strong><br>
+                        <small>
+                            Category: {{ member.get_member_category_display }}<br>
+                            Email: {{ member.email }}<br>
+                            Registered: {{ member.registration_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        This will soft-delete the member. They can be restored later from the admin panel.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Member
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

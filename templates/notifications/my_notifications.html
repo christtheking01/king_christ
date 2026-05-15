@@ -1,0 +1,286 @@
+{% extends base_template|default:'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    .notification-card {
+        transition: all 0.2s ease;
+        border: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .notification-card.unread {
+        border-left: 4px solid #0d6efd;
+    }
+    .notification-card.unread-urgent {
+        border-left: 4px solid #dc3545;
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+    .notification-card.unread-high {
+        border-left: 4px solid #ffc107;
+        background-color: rgba(255, 193, 7, 0.05);
+    }
+    .notification-card.read {
+        border-left: 4px solid #6c757d;
+        opacity: 0.8;
+    }
+    .priority-badge {
+        font-size: 0.7rem;
+        padding: 0.25em 0.6em;
+    }
+    .filter-btn.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock internal_style %}
+
+{% block title %}My Notifications{% endblock %}
+{% block page_title %}My Notifications{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">{% if is_church_member %}My Church Notifications{% else %}My Notifications{% endif %}</h2>
+            <p class="text-muted mb-0">
+                {% if unread_count > 0 %}
+                <span class="badge bg-danger">{{ unread_count }} unread</span>
+                {% else %}
+                <span class="badge bg-success">All caught up!</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if unread_count > 0 %}
+            <button id="markAllReadBtn" class="btn btn-outline-primary">
+                <i class="fas fa-check-double"></i> Mark all as read
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="card mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex gap-2">
+                <a href="{% url 'my_notifications' %}" class="btn btn-sm {% if filter_type == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    All
+                </a>
+                <a href="?filter=unread" class="btn btn-sm {% if filter_type == 'unread' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    <i class="fas fa-envelope"></i> Unread
+                    {% if unread_count > 0 %}
+                    <span class="badge bg-danger ms-1">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="?filter=read" class="btn btn-sm {% if filter_type == 'read' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    <i class="fas fa-envelope-open"></i> Read
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    {% if user_notifications %}
+    <div class="row">
+        {% for un in user_notifications %}
+        <div class="col-12 mb-3">
+            <div class="card notification-card {% if not un.is_read %}unread{% if un.notification.priority == 'urgent' %}-urgent{% elif un.notification.priority == 'high' %}-high{% endif %}{% else %}read{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex gap-3">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px; 
+                                        background: {% if un.notification.priority == 'urgent' %}#dc3545{% elif un.notification.priority == 'high' %}#ffc107{% elif un.notification.priority == 'low' %}#6c757d{% else %}#0d6efd{% endif %}; 
+                                        color: white;">
+                                <i class="fas {% if un.notification.recipient_type == 'Staff' %}fa-user-tie{% elif un.notification.recipient_type == 'MINISTRY' %}fa-users{% else %}fa-bell{% endif %} fa-lg"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1">{{ un.notification.title }}</h5>
+                                    <div class="d-flex gap-2 mb-2">
+                                        {% if un.notification.priority == 'urgent' %}
+                                        <span class="badge bg-danger priority-badge">URGENT</span>
+                                        {% elif un.notification.priority == 'high' %}
+                                        <span class="badge bg-warning text-dark priority-badge">HIGH</span>
+                                        {% elif un.notification.priority == 'low' %}
+                                        <span class="badge bg-secondary priority-badge">LOW</span>
+                                        {% endif %}
+                                        <span class="badge bg-info priority-badge">{{ un.notification.get_target_audience_display }}</span>
+                                        <span class="badge bg-light text-dark priority-badge">{{ un.notification.get_recipient_type_display }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">{{ un.sent_at|date:"M d, Y" }}</small>
+                                    <small class="text-muted">{{ un.sent_at|time:"H:i" }}</small>
+                                </div>
+                            </div>
+                            
+                            <p class="card-text text-muted">{{ un.notification.message }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="d-flex gap-2">
+                                    {% if not un.is_read %}
+                                    <button class="btn btn-sm btn-outline-primary mark-read-btn" data-notification-id="{{ un.id }}">
+                                        <i class="fas fa-check"></i> Mark as read
+                                    </button>
+                                    {% endif %}
+                                    <a href="{% url 'user_notification_detail' un.id %}" class="btn btn-sm btn-link text-decoration-none">
+                                        View details <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                                {% if un.is_read %}
+                                <span class="badge bg-light text-muted">
+                                    <i class="fas fa-check-double"></i> Read {{ un.read_at|timesince }} ago
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="card">
+        <div class="card-body empty-state">
+            <i class="fas fa-bell-slash empty-state-icon"></i>
+            <h5>No notifications found</h5>
+            <p class="text-muted">
+                {% if filter_type == 'unread' %}
+                You have no unread notifications. Great job staying on top of things!
+                {% elif filter_type == 'read' %}
+                You haven't read any notifications yet.
+                {% else %}
+                You don't have any notifications at the moment.
+                {% endif %}
+            </p>
+            {% if filter_type != 'all' %}
+            <a href="{% url 'my_notifications' %}" class="btn btn-outline-primary">
+                View all notifications
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark individual notification as read
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const notificationId = this.dataset.notificationId;
+            markNotificationRead(notificationId);
+        });
+    });
+
+    // Mark all as read
+    const markAllBtn = document.getElementById('markAllReadBtn');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function() {
+            markAllNotificationsRead();
+        });
+    }
+
+    function markNotificationRead(notificationId) {
+        fetch(`/notifications/api/my/${notificationId}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function markAllNotificationsRead() {
+        fetch('/notifications/api/my/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

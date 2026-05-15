@@ -14,6 +14,51 @@ def is_admin_or_staff(user):
     return user.is_authenticated and (user.is_superuser or user.is_staff or user.roles == 'admin')
 
 
+def get_user_type(user):
+    """
+    Classify user into: 'administrator', 'church_member', or 'unknown'
+    Administrator roles include: admin, chairperson, vice_chairperson, secretary, 
+    accountant, treasurer, priest, catechist, coordinator
+    """
+    if user is None:
+        return 'unknown'
+    
+    admin_roles = [
+        'admin', 'Admin', 
+        'chairperson', 'vice_chairperson',
+        'secretary', 'accountant', 'treasurer',
+        'priest', 'catechist', 'coordinator'
+    ]
+    
+    if user.is_superuser or user.is_staff or user.roles in admin_roles:
+        return 'administrator'
+    return 'church_member'
+
+
+def get_logs_grouped_by_user_type(logs_queryset):
+    """
+    Group audit logs by user type: administrator, church_member, unknown
+    """
+    admin_logs = []
+    member_logs = []
+    unknown_logs = []
+    
+    for log in logs_queryset:
+        user_type = get_user_type(log.user)
+        if user_type == 'administrator':
+            admin_logs.append(log)
+        elif user_type == 'church_member':
+            member_logs.append(log)
+        else:
+            unknown_logs.append(log)
+    
+    return {
+        'administrator': admin_logs,
+        'church_member': member_logs,
+        'unknown': unknown_logs,
+    }
+
+
 @login_required
 @user_passes_test(is_admin_or_staff)
 def audit_dashboard(request):
@@ -39,14 +84,34 @@ def audit_dashboard(request):
         timestamp__gte=last_30_days
     ).values('action').annotate(count=Count('action')).order_by('-count')[:5]
 
-    recent_logs = AuditLog.objects.select_related('user').order_by('-timestamp')[:10]
+    # Get recent logs grouped by user type
+    recent_logs_qs = AuditLog.objects.select_related('user').order_by('-timestamp')[:50]
+    grouped_logs = get_logs_grouped_by_user_type(recent_logs_qs)
+    
+    # Get stats by user type for today
+    today_logs = AuditLog.objects.filter(timestamp__date=today).select_related('user')
+    admin_count = 0
+    member_count = 0
+    unknown_count = 0
+    for log in today_logs:
+        user_type = get_user_type(log.user)
+        if user_type == 'administrator':
+            admin_count += 1
+        elif user_type == 'church_member':
+            member_count += 1
+        else:
+            unknown_count += 1
+    
+    stats['admin_logs_today'] = admin_count
+    stats['member_logs_today'] = member_count
+    stats['unknown_logs_today'] = unknown_count
 
     recent_alerts = SecurityAlert.objects.select_related('user').order_by('-created_at')[:5]
 
     context = {
         'stats': stats,
         'action_counts': action_counts,
-        'recent_logs': recent_logs,
+        'grouped_logs': grouped_logs,
         'recent_alerts': recent_alerts,
         'audit_active': 'active',
     }
@@ -86,8 +151,28 @@ def audit_log_list(request):
         )
 
     logs = logs.order_by('-timestamp')
+    
+    # Group logs by user type for display
+    grouped_logs = get_logs_grouped_by_user_type(logs[:100])  # Group first 100 for display
+    
+    # Get user type counts
+    admin_roles = [
+        'admin', 'Admin', 
+        'chairperson', 'vice_chairperson',
+        'secretary', 'accountant', 'treasurer',
+        'priest', 'catechist', 'coordinator'
+    ]
+    user_type_counts = {
+        'administrator': logs.filter(user__is_superuser=True).count() + 
+                        logs.filter(user__is_staff=True).count() + 
+                        logs.filter(user__roles__in=admin_roles).count(),
+        'church_member': logs.filter(user__is_superuser=False, user__is_staff=False).exclude(
+            user__roles__in=admin_roles
+        ).filter(user__isnull=False).count(),
+        'unknown': logs.filter(user__isnull=True).count(),
+    }
 
-    paginator = Paginator(logs, 25)
+    paginator = Paginator(logs, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -96,6 +181,8 @@ def audit_log_list(request):
 
     context = {
         'page_obj': page_obj,
+        'grouped_logs': grouped_logs,
+        'user_type_counts': user_type_counts,
         'users': users,
         'action_choices': action_choices,
         'filters': {
@@ -148,7 +235,7 @@ def login_history_list(request):
 
     history = history.order_by('-timestamp')
 
-    paginator = Paginator(history, 25)
+    paginator = Paginator(history, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -230,7 +317,7 @@ def resolve_alert(request, pk):
 def backup_list(request):
     backups = DataBackup.objects.select_related('created_by').all().order_by('-created_at')
 
-    paginator = Paginator(backups, 10)
+    paginator = Paginator(backups, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 

@@ -24,7 +24,7 @@ def get_catechesis_context(request):
     # Set active flags based on URL
     if path == '/catechesis/register/':
         context['catechesis_register_active'] = True
-    elif path == '/catechesis/' or path.startswith('/catechesis/member/') and '/request-sacrament/' not in path:
+    elif path == '/catechesis/' or (path.startswith('/catechesis/member/') and '/request-sacrament/' not in path):
         if 'member' in path and path.count('/') > 2:
             context['catechesis_member_detail'] = True
         else:
@@ -49,7 +49,7 @@ def get_catechesis_context(request):
         ).count()
         
         # If catechist, exclude Marriage and Holy Orders
-        if request.user.role == 'catechist':
+        if request.user.roles == 'Catechist':
             pending_count = SacramentRequest.objects.filter(
                 status='pending'
             ).exclude(

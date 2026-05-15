@@ -1,1631 +1,596 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+{% block title %}Members - Christ King Church{% endblock %}
+
+{% block internal_style %}
 <style>
-:root {
-    /* Flutter/Material Design Color Palette */
-    --primary: #6750A4;
-    --primary-container: #EADDFF;
-    --on-primary: #FFFFFF;
-    --secondary: #625B71;
-    --secondary-container: #E8DEF8;
-    --surface: #FFFFFF;
-    --surface-variant: #F8F9FA;
-    --background: #FEF7FF;
-    --error: #BA1A1A;
-    --success: #0D904F;
-    --warning: #F59E0B;
-    --info: #0284C7;
-    --outline: #79747E;
-    --outline-variant: #CAC4D0;
-    
-    /* Spacing */
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 20px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --space-10: 40px;
-    
-    /* Typography */
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --font-normal: 400;
-    --font-medium: 500;
-    --font-semibold: 600;
-    --font-bold: 700;
-    
-    /* Border Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --radius-full: 9999px;
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-    
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-base: 250ms ease;
-    --transition-slow: 300ms ease;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--font-sans);
-    background: var(--background);
-    color: #1F2937;
-    line-height: 1.5;
-}
-
-/* Layout Container */
-.dashboard-wrapper {
-    min-height: 100vh;
-    display: flex;
-}
-
-.container-fluid.table {
-    display: flex;
-    width: 100%;
-}
-
-/* Sidebar */
-.page-aside {
-    width: 280px;
-    background: var(--surface);
-    border-right: 1px solid var(--outline-variant);
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-}
-
-.aside-content {
-    padding: var(--space-4);
-    flex: 1;
-}
-
-.aside-header {
-    padding-bottom: var(--space-4);
-    border-bottom: 1px solid var(--outline-variant);
-    margin-bottom: var(--space-4);
-}
-
-.navbar-toggle {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--space-2);
-    color: var(--outline);
-}
-
-.aside-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: #111827;
-    display: block;
-    margin-bottom: var(--space-2);
-}
-
-.aside-description {
-    font-size: var(--text-sm);
-    color: var(--outline);
-}
-
-.aside-compose {
-    margin-bottom: var(--space-6);
-}
-
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-3) var(--space-6);
-    font-family: var(--font-sans);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    text-decoration: none;
-    gap: var(--space-2);
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn-block {
-    display: flex;
-    width: 100%;
-}
-
-.btn-lg {
-    padding: var(--space-4) var(--space-6);
-    font-size: var(--text-lg);
-}
-
-.btn-secondary {
-    background: var(--secondary-container);
-    color: var(--secondary);
-}
-
-.btn-secondary:hover {
-    background: #D5D3E0;
-}
-
-.btn-light {
-    background: var(--surface-variant);
-    color: var(--secondary);
-    border: 1px solid var(--outline-variant);
-}
-
-.btn-light:hover {
-    background: var(--outline-variant);
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #5A4494;
-}
-
-/* Navigation */
-.nav {
-    list-style: none;
-    margin-bottom: var(--space-6);
-}
-
-.nav li {
-    margin-bottom: var(--space-1);
-}
-
-.nav a {
-    display: flex;
-    align-items: center;
-    padding: var(--space-3) var(--space-4);
-    text-decoration: none;
-    color: var(--secondary);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
-    gap: var(--space-3);
-}
-
-.nav a:hover {
-    background: var(--surface-variant);
-    color: var(--primary);
-}
-
-.nav li.active a {
-    background: var(--primary-container);
-    color: var(--primary);
-    font-weight: var(--font-medium);
-}
-
-.nav-icon {
-    width: 20px;
-    text-align: center;
-    font-size: var(--text-lg);
-}
-
-.nav-text {
-    flex: 1;
-}
-
-/* Badges */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    border-radius: var(--radius-full);
-    min-width: 24px;
-    height: 24px;
-}
-
-.badge-success {
-    background: var(--success);
-    color: white;
-}
-
-.badge-warning {
-    background: var(--warning);
-    color: #1F2937;
-}
-
-.badge-secondary {
-    background: var(--secondary);
-    color: white;
-}
-
-.badge-primary {
-    background: var(--primary);
-    color: white;
-}
-
-.badge-danger {
-    background: var(--error);
-    color: white;
-}
-
-.badge-info {
-    background: var(--info);
-    color: white;
-}
-
-.float-right {
-    margin-left: auto;
-}
-
-/* Main Content */
-.main-content {
-    flex: 1;
-    padding: var(--space-4);
-    max-width: calc(100% - 280px);
-}
-
-/* Header */
-.email-inbox-header {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-6);
-    margin-bottom: var(--space-4);
-    box-shadow: var(--shadow-sm);
-}
-
-.email-title {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: #111827;
-    flex-wrap: wrap;
-}
-
-.new-messages {
-    color: var(--outline);
-    font-weight: var(--font-normal);
-}
-
-.header-link {
-    font-size: var(--text-base);
-    color: var(--primary);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    white-space: nowrap;
-}
-
-.header-link:hover {
-    text-decoration: underline;
-}
-
-/* Search Results Info */
-.search-results-info {
-    margin-top: var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    background: var(--primary-container);
-    border-radius: var(--radius-md);
-    border-left: 4px solid var(--primary);
-}
-
-.search-results-info p {
-    margin: 0;
-    color: var(--primary);
-    font-size: var(--text-sm);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.search-results-info a {
-    color: var(--primary);
-    text-decoration: underline;
-    font-weight: var(--font-medium);
-}
-
-.search-results-info a:hover {
-    text-decoration: none;
-}
-
-/* Search */
-.email-search {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: var(--space-4);
-}
-
-.input-search {
-    display: flex;
-    max-width: 400px;
-    width: 100%;
-}
-
-.form-control {
-    flex: 1;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--outline);
-    border-radius: var(--radius-md) 0 0 var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: var(--text-base);
-    transition: all var(--transition-fast);
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
-}
-
-.input-group-btn {
-    display: flex;
-}
-
-.search-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: var(--space-3) var(--space-6);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    cursor: pointer;
-    transition: background var(--transition-fast);
-}
-
-.search-btn:hover {
-    background: #5A4494;
-}
-
-/* Filters */
-.email-filters {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--surface);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-4);
-    box-shadow: var(--shadow-sm);
-    flex-wrap: wrap;
-    gap: var(--space-4);
-}
-
-.email-filters-left {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    flex-wrap: wrap;
-}
-
-/* Checkbox */
-.custom-control {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-}
-
-.custom-checkbox {
-    padding-left: 28px;
-}
-
-.custom-control-input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-control-label {
-    position: absolute;
-    left: 0;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--outline);
-    border-radius: 4px;
-    background: var(--surface);
-    transition: all var(--transition-fast);
-}
-
-.custom-control-input:checked ~ .custom-control-label {
-    background: var(--primary);
-    border-color: var(--primary);
-}
-
-.custom-control-input:checked ~ .custom-control-label::after {
-    content: "✓";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* Dropdown */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    cursor: pointer;
-}
-
-.caret {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 4px solid currentColor;
-    margin-left: var(--space-1);
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: var(--surface);
-    border: 1px solid var(--outline-variant);
-    border-radius: var(--radius-md);
-    padding: var(--space-2);
-    min-width: 180px;
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    display: none;
-    margin-top: var(--space-1);
-}
-
-.dropdown:hover .dropdown-menu,
-.dropdown-menu.show {
-    display: block;
-}
-
-.dropdown-item {
-    display: block;
-    padding: var(--space-3) var(--space-4);
-    color: var(--secondary);
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-}
-
-.dropdown-item:hover {
-    background: var(--surface-variant);
-    color: var(--primary);
-}
-
-.dropdown-divider {
-    height: 1px;
-    background: var(--outline-variant);
-    margin: var(--space-2) 0;
-}
-
-.btn-group {
-    display: inline-flex;
-    gap: var(--space-2);
-}
-
-/* Pagination Container */
-.pagination-container {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    margin: var(--space-6) 0;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-}
-
-.pagination-info {
-    color: var(--secondary);
-    font-size: var(--text-sm);
-}
-
-.pagination-info strong {
-    color: var(--primary);
-    font-weight: var(--font-semibold);
-}
-
-.pagination-controls {
-    display: flex;
-    gap: var(--space-2);
-    align-items: center;
-}
-
-.pagination-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-2) var(--space-3);
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    background: var(--surface-variant);
-    color: var(--secondary);
-    border: 1px solid var(--outline-variant);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    text-decoration: none;
-    min-width: 36px;
-    height: 36px;
-}
-
-.pagination-btn:hover:not(:disabled) {
-    background: var(--outline-variant);
-    transform: translateY(-1px);
-}
-
-.pagination-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination-btn.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.pagination-dots {
-    color: var(--outline);
-    padding: 0 var(--space-2);
-}
-
-/* Next Page Suggestion */
-.next-page-suggestion {
-    background: linear-gradient(135deg, var(--primary-container), #F3E8FF);
-    border: 2px dashed var(--primary);
-    border-radius: var(--radius-lg);
-    padding: var(--space-6);
-    margin: var(--space-6) 0;
-    text-align: center;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0 rgba(103, 80, 164, 0.2);
+    .members-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
     }
-    50% {
-        border-color: #8A74D3;
-        box-shadow: 0 0 0 10px rgba(103, 80, 164, 0);
-    }
-}
 
-.suggestion-icon {
-    font-size: 48px;
-    color: var(--primary);
-    margin-bottom: var(--space-3);
-}
-
-.suggestion-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    color: var(--primary);
-    margin-bottom: var(--space-2);
-}
-
-.suggestion-description {
-    color: var(--secondary);
-    margin-bottom: var(--space-4);
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.suggestion-stats {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-6);
-    margin-bottom: var(--space-4);
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-value {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--primary);
-    display: block;
-}
-
-.stat-label {
-    font-size: var(--text-sm);
-    color: var(--outline);
-}
-
-/* Shepherd Group Header */
-.shepherd-group {
-    margin-bottom: var(--space-6);
-}
-
-.shepherd-header {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    margin-bottom: var(--space-3);
-    border-left: 4px solid var(--primary);
-    box-shadow: var(--shadow-sm);
-}
-
-.shepherd-title {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: #111827;
-}
-
-.shepherd-count {
-    background: var(--primary-container);
-    color: var(--primary);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-}
-
-.no-shepherd-title {
-    color: var(--outline);
-    font-style: italic;
-}
-
-/* Email List */
-.email-list {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-}
-
-.email-list-item {
-    display: flex;
-    padding: var(--space-4);
-    border-bottom: 1px solid var(--outline-variant);
-    transition: all var(--transition-fast);
-    gap: var(--space-4);
-}
-
-.email-list-item:hover {
-    background: var(--surface-variant);
-}
-
-.email-list-item:last-child {
-    border-bottom: none;
-}
-
-.email-list-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-}
-
-.favorite {
-    color: var(--outline);
-    text-decoration: none;
-    transition: color var(--transition-fast);
-}
-
-.favorite:hover,
-.favorite.active {
-    color: #F59E0B;
-}
-
-.email-list-detail {
-    flex: 1;
-    min-width: 0;
-}
-
-.member-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-2);
-}
-
-.member-name {
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    color: #111827;
-}
-
-.member-code {
-    background: var(--surface-variant);
-    color: var(--secondary);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    font-family: monospace;
-}
-
-.member-status {
-    display: flex;
-    gap: var(--space-1);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-2);
-}
-
-.status-badge {
-    font-size: var(--text-sm);
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-}
-
-.badge-tithe {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.badge-believer {
-    background: #DBEAFE;
-    color: #1E40AF;
-}
-
-.badge-working {
-    background: #FEF3C7;
-    color: #92400E;
-}
-
-.badge-schooling {
-    background: #E0E7FF;
-    color: #3730A3;
-}
-
-.badge-transferred {
-    background: #FCE7F3;
-    color: #9D174D;
-}
-
-.member-details {
-    font-size: var(--text-sm);
-    color: var(--secondary);
-    line-height: 1.6;
-}
-
-.member-details strong {
-    color: #111827;
-}
-
-.date {
-    font-size: var(--text-sm);
-    color: var(--outline);
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-}
-
-.from {
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    color: #111827;
-    display: block;
-    margin-bottom: var(--space-2);
-}
-
-.msg {
-    color: var(--outline);
-    font-size: var(--text-sm);
-    line-height: 1.6;
-    margin: 0;
-}
-
-.msg a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.msg a:hover {
-    color: var(--primary);
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: var(--space-10) var(--space-4);
-}
-
-.empty-icon {
-    font-size: 48px;
-    color: var(--outline-variant);
-    margin-bottom: var(--space-4);
-}
-
-.empty-title {
-    font-size: var(--text-xl);
-    color: var(--outline);
-    margin-bottom: var(--space-2);
-}
-
-.empty-description {
-    color: var(--outline);
-    margin-bottom: var(--space-6);
-}
-
-/* No Results State */
-.no-results {
-    text-align: center;
-    padding: var(--space-10) var(--space-4);
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    margin: var(--space-6) 0;
-}
-
-.no-results-icon {
-    font-size: 64px;
-    color: var(--outline-variant);
-    margin-bottom: var(--space-4);
-}
-
-.no-results-title {
-    font-size: var(--text-xl);
-    color: var(--outline);
-    margin-bottom: var(--space-2);
-}
-
-.no-results-description {
-    color: var(--outline);
-    margin-bottom: var(--space-4);
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .dashboard-wrapper {
-        flex-direction: column;
-    }
-    
-    .page-aside {
-        width: 100%;
-        height: auto;
-        position: static;
-        border-right: none;
-        border-bottom: 1px solid var(--outline-variant);
-    }
-    
-    .navbar-toggle {
-        display: inline-flex;
-    }
-    
-    .aside-nav {
-        display: none;
-    }
-    
-    .aside-nav.show {
-        display: block;
-    }
-    
-    .main-content {
-        max-width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-    :root {
-        --space-4: 12px;
-        --space-6: 16px;
-    }
-    
-    .email-filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .email-filters-left,
-    .email-filters-right {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .email-search {
-        justify-content: stretch;
-        margin-top: var(--space-2);
-    }
-    
-    .input-search {
-        max-width: 100%;
-    }
-    
-    .email-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-2);
-    }
-    
-    .email-list-item {
-        flex-direction: column;
-        gap: var(--space-3);
-    }
-    
-    .email-list-actions {
+    /* Header */
+    .members-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
         justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    
-    .member-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-1);
-    }
-    
-    .pagination-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .suggestion-stats {
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-}
 
-@media (max-width: 480px) {
-    .btn-group {
+    .members-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .members-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Search & Filter Bar */
+    .filter-bar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
         flex-wrap: wrap;
     }
-    
-    .email-filters-left {
-        justify-content: center;
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 12px center;
+        color: var(--text-primary);
     }
-    
-    .nav {
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        background: white;
+        color: var(--text-primary);
+        min-width: 150px;
+    }
+
+    .btn-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-filter-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-filter-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-filter-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-filter-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stats-bar {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-2);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
-    
-    .nav a {
-        flex-direction: column;
-        text-align: center;
-        padding: var(--space-3);
+
+    .stat-pill {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: var(--shadow-sm);
     }
-    
-    .nav-text {
-        font-size: var(--text-sm);
-    }
-    
-    .pagination-controls {
-        flex-wrap: wrap;
+
+    .stat-pill-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
         justify-content: center;
+        background: var(--gradient-primary);
+        color: white;
+        font-size: 1.1rem;
     }
-}
+
+    .stat-pill-content {
+        flex: 1;
+    }
+
+    .stat-pill-value {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-pill-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    /* Members Table */
+    .members-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .members-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .members-table th {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        padding: 14px 18px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--primary-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.15);
+        white-space: nowrap;
+    }
+
+    .members-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    .members-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .members-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Member Info */
+    .member-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .member-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .member-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .member-details h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .member-details p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Badges */
+    .badge-modern {
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-inactive {
+        background: rgba(100, 116, 139, 0.1);
+        color: var(--text-muted);
+        border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-icon-sm:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pagination a, .pagination span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.75rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .pagination a {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .pagination a:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .pagination .active span {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-pill, .members-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
 </style>
+{% endblock %}
 
-<div class="dashboard-wrapper">
-    <div class="container-fluid table">
-        <!-- Sidebar -->
-        <aside class="page-aside">
-            <div class="aside-content">
-                <div class="aside-header">
-                    <button class="navbar-toggle" onclick="toggleNav()">
-                        <span class="nav-icon">▼</span>
-                    </button>
-                    <span class="aside-title">Saved Church</span>
-                    <p class="aside-description">Members list view</p>
-                </div>
-                
-                <div class="aside-compose">
-                    <a class="btn btn-lg btn-secondary btn-block" href="{% url 'add_member' %}">
-                        <span class="nav-icon">+</span>
-                        Add Member
-                    </a>
-                </div>
-                
-                <div class="aside-nav" id="asideNav">
-                    <ul class="nav">
-                        <li class="{% if status %}active{% endif %}">
-                            <a href="{% url 'list_members' %}">
-                                <span class="nav-icon">📋</span>
-                                <span class="nav-text">All</span>
-                                <span class="badge badge-success float-right">{{ total }}</span>
-                            </a>
-                        </li>
-                        <li class="{% if tithe %}active{% endif %}">
-                            <a href="{% url 'get_members_by_statuses' 'tithe' %}">
-                                <span class="nav-icon">💰</span>
-                                <span class="nav-text">Tithe Payers</span>
-                                <span class="badge badge-warning float-right">{{ total_tithe }}</span>
-                            </a>
-                        </li>
-                        <li class="{% if new_believers %}active{% endif %}">
-                            <a href="{% url 'get_members_by_statuses' 'new_believers' %}">
-                                <span class="nav-icon">🙏</span>
-                                <span class="nav-text">New Believers</span>
-                                <span class="badge badge-secondary float-right">{{ total_new_believers }}</span>
-                            </a>
-                        </li>
-                        <li class="{% if working %}active{% endif %}">
-                            <a href="{% url 'get_members_by_statuses' 'working' %}">
-                                <span class="nav-icon">💼</span>
-                                <span class="nav-text">Working</span>
-                                <span class="badge badge-primary float-right">{{ total_working }}</span>
-                            </a>
-                        </li>
-                        <li class="{% if schooling %}active{% endif %}">
-                            <a href="{% url 'get_members_by_statuses' 'schooling' %}">
-                                <span class="nav-icon">🎓</span>
-                                <span class="nav-text">Schooling</span>
-                                <span class="badge badge-danger float-right">{{ total_schooling }}</span>
-                            </a>
-                        </li>
-                        <li class="{{ active }}">
-                            <a href="{% url 'list_deleted_members' %}">
-                                <span class="nav-icon">🗑️</span>
-                                <span class="nav-text">Deleted</span>
-                                <span class="badge badge-info float-right">{{ total_delete }}</span>
-                            </a>
-                        </li>
-                    </ul>
-                    
-                    <span class="aside-title" style="margin-top: var(--space-6);">Shepherds</span>
-                    <ul class="nav">
-                        {% for shepherd in shepherds %}
-                        <li class="{% if shepherd_name %}active{% endif %}">
-                            <a href="{% url 'get_members_by_shepherd' shepherd.name %}" id="{{ shepherd.pk }}">
-                                <span class="nav-icon">👨‍🦳</span>
-                                <span class="nav-text">{{ shepherd.name }}</span>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="email-inbox-header">
-                <div class="header-row">
-                    <div class="email-title">
-                        <span class="nav-icon">👥</span>
-                        <span>
-                            {% if search_query %}
-                                Search Results for "{{ search_query }}"
-                            {% else %}
-                                Members
-                            {% endif %}
-                        </span>
-                        <span class="new-messages">(list view)</span>
-                        {% if search_query %}
-                            <a href="{% url 'list_members' %}" class="header-link">
-                                <span class="nav-icon">❌</span>
-                                Clear Search
-                            </a>
-                        {% endif %}
-                        <a href="{% url 'table_members' %}" class="header-link">
-                            <span class="nav-icon">📊</span>
-                            Table View
-                        </a>
-                        <a href="{% url 'thumbnail_members' %}" class="header-link">
-                            <span class="nav-icon">🖼️</span>
-                            Thumbnail View
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Search Results Info -->
-                {% if search_query %}
-                <div class="search-results-info">
-                    <p>
-                        <strong>{{ page_obj.paginator.count }}</strong> result{{ page_obj.paginator.count|pluralize }} found for "{{ search_query }}"
-                        {% if page_obj.paginator.count == 0 %}
-                            - <a href="{% url 'list_members' %}">View all members</a>
-                        {% endif %}
-                    </p>
-                </div>
-                {% endif %}
-
-                <!-- Search -->
-                <div class="email-search">
-                    <form action="{% url 'list_members' %}" method="get" id="search-form">
-                        <div class="input-search">
-                            <input class="form-control" type="text" 
-                                   placeholder="Search by name, phone, location, community..." 
-                                   name="q" value="{{ search_query|default:'' }}" id="search-input"
-                                   aria-label="Search members">
-                            <button class="search-btn" type="submit">
-                                <span class="nav-icon">🔍</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Filters -->
-            <div class="email-filters">
-                <div class="email-filters-left">
-                    <label class="custom-control custom-checkbox">
-                        <input class="custom-control-input chk_all" type="checkbox">
-                        <span class="custom-control-label"></span>
-                        Select All
-                    </label>
-                    
-                    <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle" type="button">
-                            With selected
-                            <span class="caret"></span>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Delete</a>
-                        </div>
-                    </div>
-                    
-                    <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle" type="button">
-                            Order by
-                            <span class="caret"></span>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Date Created</a>
-                            <a class="dropdown-item" href="#">Name</a>
-                            <a class="dropdown-item" href="#">Tithe Paying</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Age</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="email-filters-right">
-                    <span class="email-pagination-indicator">
-                        Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} members
-                        (Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }})
-                    </span>
-                </div>
-            </div>
-
-            <!-- Main Pagination (Top) -->
-            {% if page_obj.paginator.num_pages > 1 %}
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    <strong>{{ page_obj.start_index }}-{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> members
-                    <span class="text-muted">(23 per page)</span>
-                </div>
-                
-                <div class="pagination-controls">
-                    {% if page_obj.has_previous %}
-                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page=1" class="pagination-btn" title="First Page">
-                            <span class="nav-icon">⏮</span>
-                        </a>
-                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
-                            <span class="nav-icon">◀</span>
-                        </a>
-                    {% else %}
-                        <button class="pagination-btn" disabled title="First Page">
-                            <span class="nav-icon">⏮</span>
-                        </button>
-                        <button class="pagination-btn" disabled title="Previous Page">
-                            <span class="nav-icon">◀</span>
-                        </button>
-                    {% endif %}
-                    
-                    <!-- Page numbers -->
-                    {% for i in page_obj.paginator.page_range %}
-                        {% if i == page_obj.number %}
-                            <span class="pagination-btn active">{{ i }}</span>
-                        {% elif i == 1 or i == page_obj.paginator.num_pages or i >= page_obj.number|add:"-2" and i <= page_obj.number|add:"2" %}
-                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ i }}" class="pagination-btn">{{ i }}</a>
-                        {% elif i == page_obj.number|add:"-3" or i == page_obj.number|add:"3" %}
-                            <span class="pagination-dots">...</span>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if page_obj.has_next %}
-                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
-                            <span class="nav-icon">▶</span>
-                        </a>
-                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
-                            <span class="nav-icon">⏭</span>
-                        </a>
-                    {% else %}
-                        <button class="pagination-btn" disabled title="Next Page">
-                            <span class="nav-icon">▶</span>
-                        </button>
-                        <button class="pagination-btn" disabled title="Last Page">
-                            <span class="nav-icon">⏭</span>
-                        </button>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Members List Sorted by Shepherd -->
-            {% if grouped_members %}
-                {% for group in grouped_members %}
-                    <!-- Shepherd Group Header -->
-                    <div class="shepherd-group">
-                        <div class="shepherd-header">
-                            <div class="shepherd-title">
-                                {% if group.shepherd %}
-                                    <span class="nav-icon">👨‍🦳</span>
-                                    {{ group.shepherd.name }}
-                                    <span class="shepherd-count">{{ group.count }} members</span>
-                                {% else %}
-                                    <span class="no-shepherd-title">
-                                        <span class="nav-icon">❓</span>
-                                        No Community Assigned
-                                        <span class="shepherd-count">{{ group.count }} members</span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Members List for this Shepherd -->
-                        <div class="email-list">
-                            {% for member in group.members %}
-                            <div class="email-list-item">
-                                <div class="email-list-actions">
-                                    <label class="custom-control custom-checkbox">
-                                        <input class="custom-control-input checkboxes" type="checkbox" value="{{ member.id }}">
-                                        <span class="custom-control-label"></span>
-                                    </label>
-                                    <a class="favorite {% if forloop.first %}active{% endif %}" href="#">
-                                        <span class="nav-icon">★</span>
-                                    </a>
-                                </div>
-                                
-                                <div class="email-list-detail">
-                                    <div class="member-info">
-                                        <span class="member-name">{{ member.name }}</span>
-                                        {% if member.code %}
-                                        <span class="member-code">{{ member.code }}</span>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="member-status">
-                                        {% if member.pays_tithe %}
-                                            <span class="status-badge badge-tithe">💰 Pays Tithe</span>
-                                        {% endif %}
-                                        {% if member.new_believer_school %}
-                                            <span class="status-badge badge-believer">🙏 New Believer</span>
-                                        {% endif %}
-                                        {% if member.working %}
-                                            <span class="status-badge badge-working">💼 Working</span>
-                                        {% endif %}
-                                        {% if member.schooling %}
-                                            <span class="status-badge badge-schooling">🎓 Schooling</span>
-                                        {% endif %}
-                                        {% if member.transfered %}
-                                            <span class="status-badge badge-transferred">🔄 Transferred</span>
-                                        {% endif %}
-                                        {% if not member.active %}
-                                            <span class="status-badge badge-danger">Inactive</span>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="member-details">
-                                        <span class="date">
-                                            <span class="nav-icon">🏢</span>
-                                            {% if member.ministry %}{{ member.ministry.name }}{% else %}No Ministry{% endif %}
-                                        </span>
-                                        <p class="msg">
-                                            {% if member.shepherd %}
-                                                Member of <b>{{ member.shepherd.name }}</b> community
-                                            {% else %}
-                                                No community assigned
-                                            {% endif %}
-                                            • Lives at <b>{{ member.location|default:"No location" }}</b>
-                                            {% if member.telephone %}
-                                                • Contact: <b>{{ member.telephone }}</b>
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endfor %}
-                
-                <!-- No Search Results -->
-                {% elif search_query %}
-                <div class="no-results">
-                    <div class="no-results-icon">🔍</div>
-                    <h3 class="no-results-title">No members found</h3>
-                    <p class="no-results-description">
-                        No members match your search for "<strong>{{ search_query }}</strong>". 
-                        Try different keywords or check the spelling.
-                    </p>
-                    <div class="suggestion-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">{{ total }}</span>
-                            <span class="stat-label">Total Members</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">{{ total_tithe }}</span>
-                            <span class="stat-label">Tithe Payers</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">{{ total_working }}</span>
-                            <span class="stat-label">Working</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">{{ total_schooling }}</span>
-                            <span class="stat-label">Schooling</span>
-                        </div>
-                    </div>
-                    <a href="{% url 'list_members' %}" class="btn btn-primary btn-lg mt-4">
-                        <span class="nav-icon">👥</span>
-                        View All Members
-                    </a>
-                </div>
-                
-                {% else %}
-                <!-- Empty State -->
-                <div class="empty-state">
-                    <div class="empty-icon">👤</div>
-                    <h3 class="empty-title">No members found</h3>
-                    <p class="empty-description">Try adding some members or adjust your filters</p>
-                    <a href="{% url 'add_member' %}" class="btn btn-lg btn-secondary">
-                        <span class="nav-icon">+</span>
-                        Add Member
-                    </a>
-                </div>
-                {% endif %}
-                
-                <!-- Next Page Suggestion -->
-                {% if page_obj.has_next and grouped_members %}
-                <div class="next-page-suggestion">
-                    <div class="suggestion-icon">📄</div>
-                    <h3 class="suggestion-title">More Members Available!</h3>
-                    <p class="suggestion-description">
-                        You've viewed {{ page_obj.object_list|length }} members on this page. 
-                        There are <strong id="remaining-members">0</strong> more members to explore on the next pages.
-                    </p>
-                    
-                    <div class="suggestion-stats">
-                        <div class="stat-item">
-                            <span class="stat-value" id="total-members">{{ page_obj.paginator.count }}</span>
-                            <span class="stat-label">Total Members</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="showing-now">{{ page_obj.object_list|length }}</span>
-                            <span class="stat-label">Showing Now</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="remaining-count">0</span>
-                            <span class="stat-label">Remaining</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="more-pages">0</span>
-                            <span class="stat-label">More Pages</span>
-                        </div>
-                    </div>
-                    
-                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="btn btn-primary btn-lg">
-                        <span class="nav-icon">▶</span>
-                        Go to Page {{ page_obj.next_page_number }} of {{ page_obj.paginator.num_pages }}
-                    </a>
-                </div>
-                {% endif %}
-                
-                <!-- Bottom Pagination -->
-                {% if page_obj.paginator.num_pages > 1 and grouped_members %}
-                <div class="pagination-container">
-                    <div class="pagination-info">
-                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
-                        <span class="text-muted">(23 items per page)</span>
-                    </div>
-                    
-                    <div class="pagination-controls">
-                        {% if page_obj.has_previous %}
-                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page=1" class="pagination-btn" title="First Page">
-                                <span class="nav-icon">⏮</span>
-                            </a>
-                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pagination-btn" title="Previous Page">
-                                <span class="nav-icon">◀</span>
-                            </a>
-                        {% else %}
-                            <button class="pagination-btn" disabled title="First Page">
-                                <span class="nav-icon">⏮</span>
-                            </button>
-                            <button class="pagination-btn" disabled title="Previous Page">
-                                <span class="nav-icon">◀</span>
-                            </button>
-                        {% endif %}
-                        
-                        <select class="pagination-btn" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}page='+this.value" style="min-width: 80px;">
-                            <option value="">Jump to...</option>
-                            {% for i in page_obj.paginator.page_range %}
-                                <option value="{{ i }}" {% if i == page_obj.number %}selected{% endif %}>
-                                    Page {{ i }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        
-                        {% if page_obj.has_next %}
-                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="pagination-btn" title="Next Page">
-                                <span class="nav-icon">▶</span>
-                            </a>
-                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="pagination-btn" title="Last Page">
-                                <span class="nav-icon">⏭</span>
-                            </a>
-                        {% else %}
-                            <button class="pagination-btn" disabled title="Next Page">
-                                <span class="nav-icon">▶</span>
-                            </button>
-                            <button class="pagination-btn" disabled title="Last Page">
-                                <span class="nav-icon">⏭</span>
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
+{% block content %}
+<div class="members-wrapper">
+    <div class="members-header">
+        <h1><i class="fas fa-users"></i> Church Members</h1>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="{% url 'import_members' %}" class="btn-modern" style="background: #f59e0b; color: white; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                <i class="fas fa-file-import"></i> Import
+            </a>
+            <a href="{% url 'export_members' %}" class="btn-modern" style="background: #10b981; color: white; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <i class="fas fa-download"></i> Export
+            </a>
+            <a href="{% url 'add_member' %}" class="btn-modern" style="background: var(--gradient-primary); color: white; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                <i class="fas fa-plus"></i> Add Member
+            </a>
         </div>
     </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-pill">
+            <div class="stat-pill-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-pill-content">
+                <div class="stat-pill-value">{{ total_members|default:"0" }}</div>
+                <div class="stat-pill-label">Total Members</div>
+            </div>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-pill-content">
+                <div class="stat-pill-value">{{ active_members|default:"0" }}</div>
+                <div class="stat-pill-label">Active</div>
+            </div>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <div class="stat-pill-content">
+                <div class="stat-pill-value">{{ new_members|default:"0" }}</div>
+                <div class="stat-pill-label">New This Month</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <form method="get" class="filter-form">
+            <input type="text" name="search" class="search-input" 
+                   placeholder="Search members by name, email, phone..." 
+                   value="{{ request.GET.search }}">
+            <select name="status" class="filter-select">
+                <option value="">All Status</option>
+                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+            <select name="gender" class="filter-select">
+                <option value="">All Genders</option>
+                <option value="male" {% if request.GET.gender == 'male' %}selected{% endif %}>Male</option>
+                <option value="female" {% if request.GET.gender == 'female' %}selected{% endif %}>Female</option>
+            </select>
+            <button type="submit" class="btn-filter btn-filter-primary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            <a href="{% url 'list_members' %}" class="btn-filter btn-filter-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </form>
+    </div>
+
+    <!-- Members Table -->
+    <div class="members-card">
+        <div class="table-responsive">
+            {% if grouped_members %}
+                {% for group in grouped_members %}
+                <div class="community-section" style="margin-bottom: 2rem;">
+                    <div class="community-header" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 1rem 1.5rem; border-radius: var(--border-radius); margin-bottom: 1rem; border-left: 4px solid var(--primary);">
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">
+                            <i class="fas fa-church me-2" style="color: var(--primary);"></i>
+                            {{ group.shepherd.name|default:"No Community" }}
+                            <span style="background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; margin-left: 0.5rem;">{{ group.count }} members</span>
+                        </h3>
+                    </div>
+                    <table class="members-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Contact</th>
+                                <th>Gender</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in group.members %}
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <div class="member-avatar">
+                                            {{ member.name|first|upper }}
+                                        </div>
+                                        <div class="member-details">
+                                            <h4>{{ member.name }}</h4>
+                                            <p>{{ member.code|default:"No Code" }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.85rem;">
+                                        {% if member.telephone %}<div><i class="fas fa-phone me-2" style="color: var(--primary);"></i>{{ member.telephone }}</div>{% endif %}
+                                        {% if member.location %}<div><i class="fas fa-map-marker-alt me-2" style="color: var(--primary);"></i>{{ member.location }}</div>{% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-modern badge-{% if member.gender == 'male' %}info{% else %}warning{% endif %}">
+                                        <i class="fas fa-{% if member.gender == 'male' %}male{% else %}female{% endif %}"></i>
+                                        {{ member.get_gender_display|default:"N/A" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge-modern {% if member.active %}badge-active{% else %}badge-inactive{% endif %}">
+                                        <i class="fas fa-{% if member.active %}check-circle{% else %}times-circle{% endif %}"></i>
+                                        {{ member.active|yesno:"Active,Inactive" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a href="{% url 'detail_member' member.id %}" class="btn-icon-sm" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'edit_member' member.id %}" class="btn-icon-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-users-slash"></i>
+                    <h3>No Members Found</h3>
+                    <p>Start by adding your first church member</p>
+                    <a href="{% url 'add_member' %}" class="btn-modern" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> Add First Member
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if members.has_other_pages %}
+        <div class="pagination-wrapper">
+            <ul class="pagination">
+                {% if members.has_previous %}
+                <li><a href="?page={{ members.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a></li>
+                {% endif %}
+                
+                {% for num in members.paginator.page_range %}
+                {% if members.number == num %}
+                <li class="active"><span>{{ num }}</span></li>
+                {% elif num > members.number|add:'-3' and num < members.number|add:'3' %}
+                <li><a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if members.has_next %}
+                <li><a href="?page={{ members.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
 </div>
-
-<script>
-function toggleNav() {
-    const nav = document.getElementById('asideNav');
-    nav.classList.toggle('show');
-}
-
-// Calculate remaining members and pages using JavaScript
-function calculateStats() {
-    const totalItems = {{ page_obj.paginator.count }};
-    const endIndex = {{ page_obj.end_index }};
-    const showingNow = {{ page_obj.object_list|length }};
-    const currentPage = {{ page_obj.number }};
-    const totalPages = {{ page_obj.paginator.num_pages }};
-    
-    // Calculate remaining members
-    const remaining = totalItems - endIndex;
-    const morePages = totalPages - currentPage;
-    
-    // Update all elements with calculated values
-    document.querySelectorAll('#remaining-members').forEach(el => {
-        el.textContent = remaining > 0 ? remaining : 0;
-    });
-    
-    document.querySelectorAll('#remaining-count').forEach(el => {
-        el.textContent = remaining > 0 ? remaining : 0;
-    });
-    
-    document.querySelectorAll('#more-pages').forEach(el => {
-        el.textContent = morePages > 0 ? morePages : 0;
-    });
-}
-
-// Search form handling
-function setupSearch() {
-    const searchForm = document.getElementById('search-form');
-    const searchInput = document.getElementById('search-input');
-    
-    if (searchForm && searchInput) {
-        // Clear search when X button is clicked in the input (modern browsers)
-        searchInput.addEventListener('search', function(e) {
-            if (this.value === '') {
-                window.location.href = "{% url 'list_members' %}";
-            }
-        });
-        
-        // Handle Enter key with empty input
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && this.value.trim() === '') {
-                e.preventDefault();
-                window.location.href = "{% url 'list_members' %}";
-            }
-        });
-        
-        // Quick search shortcut (Ctrl+F)
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                e.preventDefault();
-                searchInput.focus();
-                searchInput.select();
-            }
-        });
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Select all checkboxes
-    const selectAll = document.querySelector('.chk_all');
-    const checkboxes = document.querySelectorAll('.checkboxes');
-    
-    if (selectAll) {
-        selectAll.addEventListener('click', function() {
-            const isChecked = this.checked;
-            checkboxes.forEach(cb => cb.checked = isChecked);
-        });
-    }
-    
-    // Individual checkbox logic
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('click', function() {
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            if (selectAll) {
-                selectAll.checked = allChecked;
-            }
-        });
-    });
-    
-    // Dropdown toggle
-    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const menu = this.nextElementSibling;
-            menu.classList.toggle('show');
-        });
-    });
-    
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function() {
-        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-            menu.classList.remove('show');
-        });
-    });
-    
-    // Auto-scroll to top on page change
-    const paginationLinks = document.querySelectorAll('.pagination-btn:not(:disabled)');
-    paginationLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (this.tagName === 'A') {
-                // Smooth scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
-    });
-    
-    // Calculate and update stats
-    calculateStats();
-    
-    // Setup search functionality
-    setupSearch();
-    
-    // Auto-focus search input if there's a search query
-    const searchInput = document.getElementById('search-input');
-    if (searchInput && searchInput.value) {
-        searchInput.focus();
-        searchInput.select();
-    }
-});
-</script>
 {% endblock %}

@@ -24,4 +24,7 @@ urlpatterns = [
     
     # Dashboard
     path('dashboard/', views.events_dashboard, name='events_dashboard'),
+    
+    # Export
+    path('export/', views.export_events, name='export_events'),
 ]

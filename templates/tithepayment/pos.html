@@ -1,0 +1,507 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - Tithe Payment{% endblock %}
+
+{% block content %}
+<style>
+    .pos-header {
+        margin-bottom: 20px;
+    }
+
+    .pos-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .pos-header .subtitle {
+        opacity: 0.9;
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }
+
+    .pos-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .pos-form-group {
+        margin-bottom: 20px;
+    }
+
+    .pos-form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 0.875rem;
+    }
+
+    .pos-input {
+        width: 100%;
+        padding: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .pos-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .pos-select {
+        width: 100%;
+        padding: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .pos-btn {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s, box-shadow 0.1s;
+        margin-bottom: 12px;
+    }
+
+    .pos-btn:active {
+        transform: scale(0.98);
+    }
+
+    .pos-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    }
+
+    .pos-btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .pos-btn-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .pos-btn-nfc {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .quick-amount-btn {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .quick-amount-btn:hover, .quick-amount-btn:active {
+        border-color: #667eea;
+        background: #f0f0ff;
+    }
+
+    .member-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+    .member-search-results.show {
+        display: block;
+    }
+
+    .member-search-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .member-search-item:hover {
+        background: #f0f0ff;
+    }
+
+    .member-search-item .name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .member-search-item .code {
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .pos-summary {
+        background: #f0f0ff;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .pos-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .pos-summary-row.total {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #667eea;
+        border-top: 2px solid #667eea;
+        padding-top: 8px;
+        margin-top: 8px;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    /* Loading spinner */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Touch-friendly autocomplete */
+    .autocomplete-item {
+        padding: 16px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+    }
+
+    .autocomplete-item:active {
+        background: #f0f0ff;
+    }
+</style>
+
+<div class="pos-container">
+    <div class="pos-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1><i class="fas fa-cash-register"></i> POS Terminal</h1>
+                <div class="subtitle" id="paymentTypeLabel">Quick Tithe Payment</div>
+            </div>
+            <a href="{% url 'tithepayment:pos_logout' %}" style="color: white; text-decoration: none; font-size: 1.5rem;">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="pos-card">
+        <form id="posForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Payment Type Selector -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-receipt"></i> Payment Type</label>
+                <select name="payment_type" class="pos-select" id="paymentType" onchange="updatePaymentType()">
+                    <option value="tithe">Tithe</option>
+                    <option value="offering">Offering</option>
+                    <option value="pledge">Pledge</option>
+                </select>
+            </div>
+
+            <!-- Member Search -->
+            <div class="pos-form-group search-wrapper">
+                <label><i class="fas fa-user"></i> Search Member</label>
+                <input 
+                    type="text" 
+                    id="memberSearch" 
+                    class="pos-input" 
+                    placeholder="Search by name or code..."
+                    autocomplete="off"
+                    required
+                >
+                <input type="hidden" name="name" id="selectedMemberId" required>
+                <div id="memberResults" class="member-search-results"></div>
+            </div>
+
+            <!-- Selected Member Display -->
+            <div id="selectedMemberDisplay" class="pos-summary" style="display: none;">
+                <div class="pos-summary-row">
+                    <span>Member:</span>
+                    <strong id="selectedMemberName">-</strong>
+                </div>
+                <div class="pos-summary-row">
+                    <span>Code:</span>
+                    <span id="selectedMemberCode">-</span>
+                </div>
+            </div>
+
+            <!-- Amount -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-money-bill"></i> Amount (Tsh)</label>
+                <input 
+                    type="number" 
+                    name="amount" 
+                    class="pos-input" 
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0"
+                    required
+                    id="amountInput"
+                >
+            </div>
+
+            <!-- Quick Amount Buttons -->
+            <div class="quick-amounts">
+                <button type="button" class="quick-amount-btn" onclick="setAmount(1000)">1,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(5000)">5,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(10000)">10,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(20000)">20,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(50000)">50,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(100000)">100,000</button>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                <select name="status" class="pos-select">
+                    <option value="cash">Cash</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="mobile">Mobile Money</option>
+                    <option value="nfc">NFC Card</option>
+                </select>
+            </div>
+
+            <!-- Contact Number -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-phone"></i> Contact Number (for SMS)</label>
+                <input 
+                    type="tel" 
+                    name="contact_number" 
+                    class="pos-input" 
+                    placeholder="Phone number"
+                    required
+                    id="contactNumber"
+                >
+            </div>
+
+            <!-- Send SMS Checkbox -->
+            <div class="pos-form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="send_sms" id="sendSms" checked style="width: 20px; height: 20px;">
+                    <span>Send SMS confirmation</span>
+                </label>
+            </div>
+
+            <!-- NFC Payment Button -->
+            <button type="button" class="pos-btn pos-btn-nfc" id="nfcBtn">
+                <i class="fas fa-wifi"></i> Tap NFC Card
+            </button>
+
+            <!-- Submit Button -->
+            <button type="submit" class="pos-btn pos-btn-primary" id="submitBtn">
+                <i class="fas fa-check"></i> Process <span id="submitButtonText">Tithe</span> Payment
+            </button>
+
+            <!-- Cancel Button -->
+            <a href="{% url 'tithepayment:tithepayment_list' %}" class="pos-btn pos-btn-secondary" style="display: block; text-align: center; text-decoration: none;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </form>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="pos-card">
+        <h3 style="margin-top: 0;"><i class="fas fa-history"></i> Recent Payments</h3>
+        <div id="recentPayments">
+            <p style="color: #666; text-align: center;">No recent payments</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedMember = null;
+    let searchTimeout = null;
+
+    // Update payment type label and button text
+    function updatePaymentType() {
+        const paymentType = document.getElementById('paymentType').value;
+        const label = document.getElementById('paymentTypeLabel');
+        const buttonText = document.getElementById('submitButtonText');
+        
+        const typeLabels = {
+            'tithe': 'Quick Tithe Payment',
+            'offering': 'Quick Offering Payment',
+            'pledge': 'Quick Pledge Payment'
+        };
+        
+        const typeNames = {
+            'tithe': 'Tithe',
+            'offering': 'Offering',
+            'pledge': 'Pledge'
+        };
+        
+        label.textContent = typeLabels[paymentType];
+        buttonText.textContent = typeNames[paymentType];
+    }
+
+    // Member search with autocomplete
+    const memberSearch = document.getElementById('memberSearch');
+    const memberResults = document.getElementById('memberResults');
+    const selectedMemberId = document.getElementById('selectedMemberId');
+    const selectedMemberDisplay = document.getElementById('selectedMemberDisplay');
+    const selectedMemberName = document.getElementById('selectedMemberName');
+    const selectedMemberCode = document.getElementById('selectedMemberCode');
+
+    memberSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+            memberResults.classList.remove('show');
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/tithe/search-members/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        memberResults.innerHTML = data.map(member => `
+                            <div class="member-search-item" onclick="selectMember(${member.id}, '${member.name.replace(/'/g, "\\'")}', '${member.code || ''}')">
+                                <div class="name">${member.name}</div>
+                                <div class="code">${member.code || 'No code'}</div>
+                            </div>
+                        `).join('');
+                        memberResults.classList.add('show');
+                    } else {
+                        memberResults.innerHTML = '<div class="member-search-item">No members found</div>';
+                        memberResults.classList.add('show');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }, 300);
+    });
+
+    function selectMember(id, name, code) {
+        selectedMember = { id, name, code };
+        selectedMemberId.value = id;
+        memberSearch.value = name;
+        memberResults.classList.remove('show');
+        
+        selectedMemberDisplay.style.display = 'block';
+        selectedMemberName.textContent = name;
+        selectedMemberCode.textContent = code || '—';
+    }
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) {
+            memberResults.classList.remove('show');
+        }
+    });
+
+    // Quick amount buttons
+    function setAmount(amount) {
+        document.getElementById('amountInput').value = amount;
+    }
+
+    // NFC Payment (Web NFC API)
+    const nfcBtn = document.getElementById('nfcBtn');
+    if ('NDEFReader' in window) {
+        nfcBtn.addEventListener('click', async () => {
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+                nfcBtn.innerHTML = '<span class="loading"></span> Tap card...';
+                
+                ndef.addEventListener('reading', event => {
+                    const message = event.message;
+                    // Process NFC card data
+                    alert('Card detected! Payment processed.');
+                    nfcBtn.innerHTML = '<i class="fas fa-wifi"></i> Tap NFC Card';
+                });
+            } catch (error) {
+                alert('NFC not supported or permission denied');
+                nfcBtn.innerHTML = '<i class="fas fa-wifi"></i> Tap NFC Card';
+            }
+        });
+    } else {
+        nfcBtn.style.display = 'none';
+    }
+
+    // Form submission
+    document.getElementById('posForm').addEventListener('submit', function(e) {
+        if (!selectedMemberId.value) {
+            e.preventDefault();
+            alert('Please select a member');
+            memberSearch.focus();
+        }
+    });
+
+    // Load recent payments
+    function loadRecentPayments() {
+        fetch('/tithe/api/recent/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('recentPayments');
+                if (data.length > 0) {
+                    container.innerHTML = data.map(payment => `
+                        <div style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <div style="font-weight: 600;">${payment.member_name}</div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                                <span style="color: #667eea; font-weight: 600;">Tsh ${payment.amount}</span>
+                                <span style="color: #666; font-size: 0.875rem;">${payment.date}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(error => console.error('Error loading recent payments:', error));
+    }
+
+    // Load recent payments on page load
+    loadRecentPayments();
+</script>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Monthly Tithe Report{% endblock %}
+
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+.report-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+.report-summary .card {
+  border: none;
+  border-radius: 1rem;
+}
+.report-summary .card-body {
+  padding: 1.5rem;
+}
+.report-summary .metric-label {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .75rem;
+  color: #6c757d;
+}
+.report-summary .metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+.report-summary .metric-note {
+  color: #6c757d;
+  margin-top: .5rem;
+}
+.chart-card {
+  min-height: 360px;
+}
+.table-card {
+  overflow-x: auto;
+}
+.table-card table {
+  min-width: 720px;
+}
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .9rem;
+  color: #495057;
+}
+.chart-legend .legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="report-header mb-4">
+    <div>
+      <h1 class="h3 mb-1">Monthly Tithe Report</h1>
+      <p class="text-muted mb-0">A clean overview of tithe collection by month.</p>
+      <small class="text-secondary">Year: {{ selected_year }}</small>
+    </div>
+    <div class="d-flex gap-2 justify-content-end">
+      <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Payments
+      </a>
+      <a href="{% url 'tithepayment:export_tithe_payments' %}" class="btn btn-success">
+        <i class="fas fa-file-export me-1"></i> Export CSV
+      </a>
+    </div>
+  </div>
+
+  <div class="row report-summary mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="metric-label">Total Months</div>
+          <div class="metric-value" id="totalMonths">0</div>
+          <div class="metric-note">Months with tithe data</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="metric-label">Total Collected</div>
+          <div class="metric-value" id="totalCollected">TSH 0</div>
+          <div class="metric-note">Sum of monthly collections</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="metric-label">Average per Month</div>
+          <div class="metric-value" id="averageMonth">TSH 0</div>
+          <div class="metric-note">Calculated over displayed months</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="metric-label">Top Month</div>
+          <div class="metric-value" id="topMonth">—</div>
+          <div class="metric-note">Highest monthly collection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8 mb-4">
+      <div class="card shadow chart-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Monthly Collection Chart</h5>
+          <span class="badge bg-primary">{{ monthly_data|length }} months</span>
+        </div>
+        <div class="card-body">
+          <canvas id="monthlyTitheChart" style="min-height: 280px;"></canvas>
+          <div class="chart-legend">
+            <span><span class="legend-color" style="background:#4e73df"></span>Collection</span>
+            <span><span class="legend-color" style="background:#1cc88a"></span>Payment count</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Month Details</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive table-card">
+            <table class="table table-borderless mb-0">
+              <tbody>
+                {% if monthly_data %}
+                  {% for item in monthly_data|slice:":6" %}
+                    <tr class="border-bottom">
+                      <td class="py-3">
+                        <strong>{{ item.month|date:"M Y" }}</strong><br>
+                        <small class="text-muted">{{ item.payment_count }} payments</small>
+                      </td>
+                      <td class="text-end py-3">
+                        <strong>TSH {{ item.total_amount|floatformat:2 }}</strong>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="2" class="text-center text-muted py-4">No monthly data available.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Monthly Breakdown Table</h5>
+      <span class="text-muted">Complete monthly totals</span>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Month</th>
+            <th class="text-end">Collected</th>
+            <th class="text-end">Payments</th>
+            <th class="text-end">Average</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if monthly_data %}
+            {% for item in monthly_data %}
+            <tr>
+              <td>{{ item.month|date:"M Y" }}</td>
+              <td class="text-end">TSH {{ item.total_amount|floatformat:2 }}</td>
+              <td class="text-end">{{ item.payment_count }}</td>
+              <td class="text-end avg-value" data-total="{{ item.total_amount|default:0 }}" data-count="{{ item.payment_count|default:0 }}">—</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">No report data available.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const monthLabels = [{% for item in monthly_data %}'{{ item.month|date:"M Y" }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+  const monthlyTotals = [{% for item in monthly_data %}{{ item.total_amount|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+  const monthCounts = [{% for item in monthly_data %}{{ item.payment_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+  function formatTZS(value) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'TZS',
+      minimumFractionDigits: 0
+    }).format(value);
+  }
+
+  function updateSummary() {
+    const totalMonths = monthLabels.length;
+    const totalCollected = monthlyTotals.reduce((sum, value) => sum + Number(value), 0);
+    const averageMonth = totalMonths ? totalCollected / totalMonths : 0;
+    const topMonthIndex = monthlyTotals.indexOf(Math.max(...monthlyTotals));
+    const topMonth = topMonthIndex >= 0 ? monthLabels[topMonthIndex] : '—';
+
+    document.getElementById('totalMonths').textContent = totalMonths;
+    document.getElementById('totalCollected').textContent = formatTZS(totalCollected);
+    document.getElementById('averageMonth').textContent = formatTZS(averageMonth);
+    document.getElementById('topMonth').textContent = topMonth;
+    fillAverageCells();
+  }
+
+  function fillAverageCells() {
+    document.querySelectorAll('.avg-value').forEach(cell => {
+      const total = Number(cell.dataset.total || 0);
+      const count = Number(cell.dataset.count || 0);
+      const average = count ? total / count : 0;
+      cell.textContent = count ? formatTZS(average) : '—';
+    });
+  }
+
+  function renderChart() {
+    const ctx = document.getElementById('monthlyTitheChart');
+    if (!ctx || !monthLabels.length) {
+      return;
+    }
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: monthLabels,
+        datasets: [
+          {
+            type: 'line',
+            label: 'Collection',
+            data: monthlyTotals,
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.12)',
+            tension: 0.35,
+            fill: true,
+            yAxisID: 'y1'
+          },
+          {
+            label: 'Payments',
+            data: monthCounts,
+            backgroundColor: '#1cc88a',
+            borderRadius: 6,
+            borderSkipped: false,
+            yAxisID: 'y2'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          y1: {
+            type: 'linear',
+            position: 'left',
+            ticks: {
+              callback: value => formatTZS(value)
+            },
+            title: {
+              display: true,
+              text: 'Amount (TZS)'
+            }
+          },
+          y2: {
+            type: 'linear',
+            position: 'right',
+            grid: {
+              drawOnChartArea: false
+            },
+            title: {
+              display: true,
+              text: 'Payments'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: context => {
+                if (context.dataset.label === 'Collection') {
+                  return `${context.dataset.label}: ${formatTZS(context.parsed.y)}`;
+                }
+                return `${context.dataset.label}: ${context.parsed.y}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateSummary();
+    renderChart();
+  });
+</script>
+{% endblock %}

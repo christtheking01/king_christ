@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if offering %}Edit{% else %}Record{% endif %} Offering{% endblock %}
+
+{% block internal_style %}
+<link rel="stylesheet" href="{% static 'style/css/finance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="finance-container">
+    <!-- Page Header -->
+    <div class="finance-page-header">
+        <div>
+            <h1>{% if offering %}Edit{% else %}Record{% endif %} Offering</h1>
+            <p>{% if offering %}Update offering details{% else %}Record a new offering or donation{% endif %}</p>
+        </div>
+        <a href="{% url 'offering_list' %}" class="finance-btn finance-btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Offerings
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="finance-card">
+        <div class="finance-card-header">
+            <h6><i class="fas fa-donate"></i> Offering Details</h6>
+        </div>
+        <div class="finance-card-body">
+            <form method="post" class="finance-form">
+                {% csrf_token %}
+                
+                <div class="finance-form-row">
+                    <div class="finance-form-group">
+                        <label for="offering_type">Offering Type <span class="text-danger">*</span></label>
+                        <select name="offering_type" id="offering_type" class="finance-form-control" required>
+                            {% for type_code, type_label in offering_types %}
+                            <option value="{{ type_code }}" {% if offering.offering_type == type_code %}selected{% elif not offering and type_code == 'SUNDAY' %}selected{% endif %}>
+                                {{ type_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="finance-form-group">
+                        <label for="date">Date <span class="text-danger">*</span></label>
+                        <input type="date" name="date" id="date" class="finance-form-control" 
+                               value="{% if offering %}{{ offering.date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}" required>
+                    </div>
+                </div>
+
+                <div class="finance-form-row">
+                    <div class="finance-form-group">
+                        <label for="amount">Amount <span class="text-danger">*</span></label>
+                        <div class="finance-input-group">
+                            <span class="finance-input-group-text">TSH</span>
+                            <input type="number" name="amount" id="amount" class="finance-form-control" 
+                                   step="0.01" min="0.01" value="{{ offering.amount|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="finance-form-group">
+                        <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                        <select name="payment_method" id="payment_method" class="finance-form-control" required>
+                            {% for method_code, method_label in payment_methods %}
+                            <option value="{{ method_code }}" {% if offering.payment_method == method_code %}selected{% elif not offering and method_code == 'CASH' %}selected{% endif %}>
+                                {{ method_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Anonymous Option -->
+                <div class="finance-form-group">
+                    <label class="finance-checkbox-label">
+                        <input type="checkbox" name="is_anonymous" id="is_anonymous" {% if offering.is_anonymous %}checked{% endif %} onchange="toggleAnonymous()">
+                        <span class="finance-checkmark"></span>
+                        Anonymous Donation (donor wishes to remain anonymous)
+                    </label>
+                </div>
+
+                <!-- Donor Info Section -->
+                <div id="donor-info-section" {% if offering.is_anonymous %}style="display: none; opacity: 0.5;"{% endif %}>
+                    <div class="finance-form-row">
+                        <div class="finance-form-group">
+                            <label for="donor_name">Donor Name</label>
+                            <input type="text" name="donor_name" id="donor_name" class="finance-form-control"
+                                   value="{{ offering.donor_name|default:'' }}" placeholder="Leave blank if member is selected">
+                        </div>
+
+                        <div class="finance-form-group">
+                            <label for="donor_phone">Donor Phone</label>
+                            <input type="tel" name="donor_phone" id="donor_phone" class="finance-form-control"
+                                   value="{{ offering.donor_phone|default:'' }}" placeholder="Phone number">
+                        </div>
+                    </div>
+
+                    <!-- Member Search -->
+                    <div class="finance-form-group">
+                        <label>Registered Member</label>
+                        <div class="search-container" style="position: relative;">
+                            <input type="text"
+                                   class="finance-form-control"
+                                   id="member_search"
+                                   placeholder="Type member name to search..."
+                                   autocomplete="off"
+                                   value="{% if offering.member %}{{ offering.member.name }}{% endif %}">
+                            <div id="member_search_results" style="
+                                position: absolute;
+                                top: 100%;
+                                left: 0;
+                                right: 0;
+                                background: white;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                max-height: 200px;
+                                overflow-y: auto;
+                                z-index: 1000;
+                                display: none;
+                            "></div>
+                            <!-- Hidden field for selected member -->
+                            <input type="hidden"
+                                   name="member"
+                                   id="selected_member_id"
+                                   value="{% if offering.member %}{{ offering.member.id }}{% endif %}">
+                        </div>
+                        <small class="form-text text-muted">Type at least 2 characters to search members</small>
+
+                        <!-- Selected Member Display -->
+                        <div id="selected_member_display" class="{% if not offering.member %}d-none{% endif %}" style="
+                            background: #f8f9fa;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                            padding: 12px;
+                            margin-top: 8px;
+                        ">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 600;" id="selected_member_name">{% if offering.member %}{{ offering.member.name }}{% endif %}</div>
+                                    <div style="font-size: 0.875rem; color: #666;" id="selected_member_phone">{% if offering.member %}{{ offering.member.telephone|default:"No phone" }}{% endif %}</div>
+                                </div>
+                                <button type="button" id="remove_member" style="
+                                    background: none;
+                                    border: none;
+                                    color: #dc3545;
+                                    cursor: pointer;
+                                    padding: 4px 8px;
+                                " title="Remove Member">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="finance-form-group">
+                    <label for="notes">Notes</label>
+                    <textarea name="notes" id="notes" class="finance-form-control" rows="3" 
+                              placeholder="Any additional information about this offering...">{{ offering.notes|default:'' }}</textarea>
+                </div>
+
+                <div class="finance-form-actions">
+                    <button type="submit" class="finance-btn finance-btn-primary">
+                        <i class="fas fa-save"></i> {% if offering %}Update{% else %}Record{% endif %} Offering
+                    </button>
+                    <a href="{% url 'offering_list' %}" class="finance-btn finance-btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAnonymous() {
+    const isAnonymous = document.getElementById('is_anonymous').checked;
+    const donorSection = document.getElementById('donor-info-section');
+
+    if (isAnonymous) {
+        donorSection.classList.add('d-none');
+        document.getElementById('donor_name').value = '';
+        document.getElementById('donor_phone').value = '';
+        document.getElementById('selected_member_id').value = '';
+        document.getElementById('member_search').value = '';
+        document.getElementById('selected_member_display').classList.add('d-none');
+    } else {
+        donorSection.classList.remove('d-none');
+    }
+}
+
+// Member search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const memberSearchInput = document.getElementById('member_search');
+    const memberSearchResults = document.getElementById('member_search_results');
+    const selectedMemberId = document.getElementById('selected_member_id');
+    const selectedMemberDisplay = document.getElementById('selected_member_display');
+    const selectedMemberName = document.getElementById('selected_member_name');
+    const selectedMemberPhone = document.getElementById('selected_member_phone');
+    const removeMemberBtn = document.getElementById('remove_member');
+
+    let searchTimeout = null;
+
+    // Search members
+    memberSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            memberSearchResults.style.display = 'none';
+            memberSearchResults.innerHTML = '';
+            return;
+        }
+
+        // Show loading
+        memberSearchResults.innerHTML = '<div style="padding: 12px; text-align: center; color: #666;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+        memberSearchResults.style.display = 'block';
+
+        searchTimeout = setTimeout(() => {
+            // Use the tithe app search endpoint since it already exists
+            fetch(`/tithe/search-members/?search=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                memberSearchResults.innerHTML = '';
+
+                if (data.members && data.members.length > 0) {
+                    data.members.forEach(member => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s;';
+                        div.innerHTML = `
+                            <div style="font-weight: 500;">${member.name}</div>
+                            <div style="font-size: 0.875rem; color: #666;">${member.telephone || 'No phone'}</div>
+                        `;
+                        div.addEventListener('click', function() {
+                            selectMember(member);
+                        });
+                        div.addEventListener('mouseenter', function() {
+                            this.style.backgroundColor = '#f8f9fa';
+                        });
+                        div.addEventListener('mouseleave', function() {
+                            this.style.backgroundColor = 'white';
+                        });
+                        memberSearchResults.appendChild(div);
+                    });
+                } else {
+                    memberSearchResults.innerHTML = '<div style="padding: 12px; text-align: center; color: #666;">No members found</div>';
+                }
+
+                memberSearchResults.style.display = 'block';
+            })
+            .catch(error => {
+                memberSearchResults.innerHTML = `<div style="padding: 12px; text-align: center; color: #dc3545;">Error: ${error.message}</div>`;
+            });
+        }, 300);
+    });
+
+    // Select member
+    function selectMember(member) {
+        selectedMemberId.value = member.id;
+        memberSearchInput.value = member.name;
+        selectedMemberName.textContent = member.name;
+        selectedMemberPhone.textContent = member.telephone || 'No phone';
+        selectedMemberDisplay.classList.remove('d-none');
+        memberSearchResults.style.display = 'none';
+
+        // Auto-fill donor name if empty
+        const donorNameInput = document.getElementById('donor_name');
+        if (!donorNameInput.value) {
+            donorNameInput.value = member.name;
+        }
+    }
+
+    // Remove member
+    removeMemberBtn.addEventListener('click', function() {
+        selectedMemberId.value = '';
+        memberSearchInput.value = '';
+        selectedMemberDisplay.classList.add('d-none');
+        memberSearchResults.style.display = 'none';
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-container')) {
+            memberSearchResults.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

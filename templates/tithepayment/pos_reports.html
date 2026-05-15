@@ -1,0 +1,378 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS Reports{% endblock %}
+
+{% block content %}
+<style>
+    .report-filters {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        margin-bottom: 24px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+    
+    .filter-btn {
+        padding: 12px 24px;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        background: rgba(30, 42, 74, 0.5);
+        color: #e0e0e0;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+        background: rgba(76, 201, 240, 0.1);
+        border-color: #4cc9f0;
+        color: #4cc9f0;
+    }
+    
+    .date-range-inputs {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .date-input {
+        padding: 12px 16px;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        background: rgba(30, 42, 74, 0.5);
+        color: #e0e0e0;
+    }
+    
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .summary-card {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        text-align: center;
+    }
+    
+    .summary-card-label {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+        margin-bottom: 8px;
+    }
+    
+    .summary-card-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #4cc9f0;
+    }
+    
+    .report-table {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        margin-bottom: 24px;
+        overflow-x: auto;
+    }
+    
+    .report-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .report-table th {
+        text-align: left;
+        padding: 12px;
+        color: #a0a0a0;
+        font-weight: 600;
+        border-bottom: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .report-table td {
+        padding: 12px;
+        color: #e0e0e0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .report-table tr:hover td {
+        background: rgba(76, 201, 240, 0.05);
+    }
+    
+    .report-table .amount {
+        text-align: right;
+        font-weight: 600;
+        color: #4cc9f0;
+    }
+    
+    .export-btn {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+    }
+    
+    .chart-container {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        margin-bottom: 24px;
+    }
+    
+    .daily-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .daily-label {
+        width: 100px;
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+    
+    .daily-bar-container {
+        flex: 1;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+    }
+    
+    .daily-tithe-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        transition: width 0.5s ease;
+    }
+    
+    .daily-offering-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #f72585 0%, #7209b7 100%);
+        transition: width 0.5s ease;
+    }
+    
+    .daily-value {
+        width: 100px;
+        text-align: right;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #4cc9f0;
+    }
+</style>
+
+<!-- Report Filters -->
+<div class="report-filters">
+    <div class="filter-buttons">
+        <button class="filter-btn {% if date_range == 'today' %}active{% endif %}" onclick="setDateRange('today')">Today</button>
+        <button class="filter-btn {% if date_range == 'week' %}active{% endif %}" onclick="setDateRange('week')">This Week</button>
+        <button class="filter-btn {% if date_range == 'month' %}active{% endif %}" onclick="setDateRange('month')">This Month</button>
+        <button class="filter-btn {% if date_range == 'custom' %}active{% endif %}" onclick="showCustomRange()">Custom</button>
+    </div>
+    
+    <div class="date-range-inputs" id="customDateInputs" style="display: {% if date_range == 'custom' %}flex{% else %}none{% endif %};">
+        <input type="date" class="date-input" id="startDate" value="{{ start_date|date:'Y-m-d' }}">
+        <span style="color: #a0a0a0;">to</span>
+        <input type="date" class="date-input" id="endDate" value="{{ end_date|date:'Y-m-d' }}">
+        <button class="export-btn" onclick="applyCustomRange()">Apply</button>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="summary-cards">
+    <div class="summary-card">
+        <div class="summary-card-label">Total Tithe</div>
+        <div class="summary-card-value">Tsh {{ tithe_total|floatformat:0 }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-card-label">Total Offering</div>
+        <div class="summary-card-value">Tsh {{ offering_total|floatformat:0 }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-card-label">Grand Total</div>
+        <div class="summary-card-value">Tsh {{ grand_total|floatformat:0 }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-card-label">Total Transactions</div>
+        <div class="summary-card-value">{{ tithe_count|add:offering_count }}</div>
+    </div>
+</div>
+
+<!-- Daily Breakdown Chart -->
+<div class="chart-container">
+    <div class="section-header">
+        <i class="fas fa-chart-bar"></i>
+        <h2>Daily Breakdown</h2>
+    </div>
+    
+    <div style="display: flex; gap: 24px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%); border-radius: 4px;"></div>
+            <span style="color: #a0a0a0; font-size: 0.875rem;">Tithe</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; background: linear-gradient(135deg, #f72585 0%, #7209b7 100%); border-radius: 4px;"></div>
+            <span style="color: #a0a0a0; font-size: 0.875rem;">Offering</span>
+        </div>
+    </div>
+    
+    {% for day in daily_breakdown %}
+    <div class="daily-bar">
+        <div class="daily-label">{{ day.date|date:"M d" }}</div>
+        <div class="daily-bar-container">
+            {% if grand_total > 0 %}
+                <div class="daily-tithe-fill" style="width: {% widthratio day.tithe_total grand_total 100 %}%"></div>
+                <div class="daily-offering-fill" style="width: {% widthratio day.offering_total grand_total 100 %}%"></div>
+            {% endif %}
+        </div>
+        <div class="daily-value">Tsh {{ day.total|floatformat:0 }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Tithe Payments Table -->
+<div class="report-table">
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-hand-holding-usd"></i>
+            <h2>Tithe Payments ({{ tithe_count }})</h2>
+        </div>
+        <button class="export-btn" onclick="exportCSV()">
+            <i class="fas fa-download"></i> Export CSV
+        </button>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Member</th>
+                <th>Amount</th>
+                <th>Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in tithe_payments %}
+            <tr>
+                <td>{{ payment.date|date:"M d, Y - H:i" }}</td>
+                <td>{{ payment.name.name|default:"Anonymous" }}</td>
+                <td class="amount">Tsh {{ payment.amount|floatformat:0 }}</td>
+                <td>{{ payment.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #a0a0a0; padding: 32px;">No tithe payments found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Offering Payments Table -->
+<div class="report-table">
+    <div class="section-header">
+        <i class="fas fa-gift"></i>
+        <h2>Offering Payments ({{ offering_count }})</h2>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Donor</th>
+                <th>Amount</th>
+                <th>Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for offering in offerings %}
+            <tr>
+                <td>{{ offering.created_at|date:"M d, Y - H:i" }}</td>
+                <td>{{ offering.get_offering_type_display }}</td>
+                <td>{{ offering.donor_name|default:offering.member.name|default:"Anonymous" }}</td>
+                <td class="amount">Tsh {{ offering.amount|floatformat:0 }}</td>
+                <td>{{ offering.get_payment_method_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 32px;">No offerings found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function setDateRange(range) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('range', range);
+        window.location.href = url.toString();
+    }
+    
+    function showCustomRange() {
+        document.getElementById('customDateInputs').style.display = 'flex';
+    }
+    
+    function applyCustomRange() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('range', 'custom');
+        url.searchParams.set('start_date', startDate);
+        url.searchParams.set('end_date', endDate);
+        window.location.href = url.toString();
+    }
+    
+    function exportCSV() {
+        const titheData = [
+            ['Date', 'Member', 'Amount', 'Method']
+        ];
+        
+        {% for payment in tithe_payments %}
+        titheData.push([
+            '{{ payment.date|date:"Y-m-d H:i" }}',
+            '{{ payment.name.name|default:"Anonymous" }}',
+            '{{ payment.amount }}',
+            '{{ payment.get_status_display }}'
+        ]);
+        {% endfor %}
+        
+        let csvContent = "data:text/csv;charset=utf-8," 
+            + titheData.map(e => e.join(",")).join("\n");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "tithe_report_{{ start_date|date:'Y-m-d' }}_to_{{ end_date|date:'Y-m-d' }}.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+{% endblock %}

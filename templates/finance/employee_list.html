@@ -133,28 +133,19 @@
                             <td>{{ employee.employee_id }}</td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    {% if employee.member.picture %}
-                                        <img src="{{ employee.member.picture.url }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" alt="{{ employee.member.name }}">
-                                    {% else %}
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-user" style="color: #999; font-size: 14px;"></i>
-                                        </div>
-                                    {% endif %}
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-user" style="color: #999; font-size: 14px;"></i>
+                                    </div>
                                     <div>
-                                        <div style="font-weight: 600;">{{ employee.member.name }}</div>
-                                        <small style="color: #666;">{{ employee.member.telephone }}</small>
+                                        <div style="font-weight: 600;">{{ employee.name }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>{{ employee.position }}</td>
                             <td>{{ employee.department|default:"-" }}</td>
-                            <td>${{ employee.base_salary|floatformat:2 }}</td>
+                            <td>TSH {{ employee.base_salary|floatformat:2 }}</td>
                             <td>
-                                <div style="font-weight: 600; color: #28a745;">${{ employee.total_salary|floatformat:2 }}</div>
-                                <small style="color: #666;">
-                                    +${{ employee.housing_allowance|floatformat:2 }} housing<br>
-                                    +${{ employee.transport_allowance|floatformat:2 }} transport
-                                </small>
+                                <div style="font-weight: 600; color: #28a745;">TSH {{ employee.total_salary|floatformat:2 }}</div>
                             </td>
                             <td>
                                 {% if employee.status == 'ACTIVE' %}<span class="finance-badge finance-badge-success">Active</span>

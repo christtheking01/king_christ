@@ -1,0 +1,529 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Offerings{% endblock %}
+
+{% block internal_style %}
+<style>
+    /* Hero Header */
+    .offering-hero {
+        background: linear-gradient(135deg, rgba(118, 75, 162, 0.95) 0%, rgba(102, 126, 234, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .offering-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .offering-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-create {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-create:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+    }
+    .stat-card.primary::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .stat-card.success::before { background: linear-gradient(90deg, #11998e, #38ef7d); }
+    .stat-card.info::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .stat-card.warning::before { background: linear-gradient(90deg, #f093fb, #f5576c); }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    .filter-card .card-body {
+        padding: 1.25rem;
+    }
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-group label i {
+        color: var(--primary);
+    }
+
+    /* Card */
+    .card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .card-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    /* Table Styles */
+    .offerings-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .offerings-table th {
+        background: var(--bg-secondary);
+        padding: 0.875rem 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .offerings-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    .offerings-table tr:hover td {
+        background: var(--bg-secondary);
+    }
+    .offerings-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-receipt {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+        color: #4facfe;
+    }
+    .badge-type {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+        color: #667eea;
+    }
+    .badge-cash {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        color: #10b981;
+    }
+    .badge-mobile {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        color: #f59e0b;
+    }
+    .badge-bank {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+        color: #6366f1;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-action:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+    .btn-action.delete:hover {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+    .btn-export {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-export:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .page-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .offering-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+        .offerings-table {
+            font-size: 0.875rem;
+        }
+        .offerings-table th,
+        .offerings-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="offering-hero">
+        <div>
+            <h1><i class="fas fa-donate"></i>Offerings</h1>
+        </div>
+        <a href="{% url 'add_offering' %}" class="btn-create">
+            <i class="fas fa-plus"></i>Record Offering
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <div class="stat-value">TSH {{ total_amount|floatformat:0 }}</div>
+                <div class="stat-label">Total Offerings</div>
+            </div>
+        </div>
+        {% for breakdown in type_breakdown %}
+        <div class="col-md-3">
+            <div class="stat-card {% if forloop.counter == 1 %}success{% elif forloop.counter == 2 %}info{% else %}warning{% endif %}">
+                <div class="stat-value">TSH {{ breakdown.total|floatformat:0 }}</div>
+                <div class="stat-label">{{ breakdown.offering_type }} ({{ breakdown.count }})</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <div class="card-body">
+            <form method="get" class="filter-row">
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Type</label>
+                    <select name="type" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Types</option>
+                        {% for type_code, type_label in offering_types %}
+                        <option value="{{ type_code }}" {% if request.GET.type == type_code %}selected{% endif %}>{{ type_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                    <select name="payment_method" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Methods</option>
+                        {% for method_code, method_label in payment_methods %}
+                        <option value="{{ method_code }}" {% if request.GET.payment_method == method_code %}selected{% endif %}>{{ method_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-user"></i> Donor</label>
+                    <select name="member" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Donors</option>
+                        {% for member in members %}
+                        <option value="{{ member.id }}" {% if request.GET.member == member.id|stringformat:"s" %}selected{% endif %}>{{ member.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> From Date</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}" onchange="this.form.submit()">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> To Date</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}" onchange="this.form.submit()">
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <a href="{% url 'offering_list' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Offerings Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-list me-2"></i>All Offerings</h5>
+            <div class="d-flex gap-2">
+                <a href="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.payment_method %}payment_method={{ request.GET.payment_method }}&{% endif %}{% if request.GET.member %}member={{ request.GET.member }}&{% endif %}{% if request.GET.start_date %}start_date={{ request.GET.start_date }}&{% endif %}{% if request.GET.end_date %}end_date={{ request.GET.end_date }}&{% endif %}export=csv" class="btn-export">
+                    <i class="fas fa-file-csv"></i> CSV
+                </a>
+                <a href="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.payment_method %}payment_method={{ request.GET.payment_method }}&{% endif %}{% if request.GET.member %}member={{ request.GET.member }}&{% endif %}{% if request.GET.start_date %}start_date={{ request.GET.start_date }}&{% endif %}{% if request.GET.end_date %}end_date={{ request.GET.end_date }}&{% endif %}export=pdf" class="btn-export">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <button class="btn-export" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="offerings-table">
+                    <thead>
+                        <tr>
+                            <th>Receipt #</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Donor</th>
+                            <th>Method</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offering in offerings %}
+                        <tr>
+                            <td><span class="badge badge-receipt">{{ offering.receipt_number }}</span></td>
+                            <td>{{ offering.date|date:"M d, Y" }}</td>
+                            <td><span class="badge badge-type">{{ offering.get_offering_type_display }}</span></td>
+                            <td>
+                                {% if offering.is_anonymous %}
+                                    <span class="text-muted"><i class="fas fa-user-secret me-1"></i>Anonymous</span>
+                                {% elif offering.member %}
+                                    <strong>{{ offering.member.name }}</strong>
+                                {% elif offering.donor_name %}
+                                    {{ offering.donor_name }}
+                                {% else %}
+                                    <span class="text-muted">Unknown</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if offering.payment_method == 'CASH' %}
+                                    <span class="badge badge-cash"><i class="fas fa-money-bill-wave"></i> Cash</span>
+                                {% elif offering.payment_method == 'MOBILE_MONEY' %}
+                                    <span class="badge badge-mobile"><i class="fas fa-mobile-alt"></i> Mobile</span>
+                                {% else %}
+                                    <span class="badge badge-bank"><i class="fas fa-university"></i> Bank</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-success" style="font-weight: 700;">TSH {{ offering.amount|floatformat:2 }}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'edit_offering' offering.pk %}" class="btn-action" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'delete_offering' offering.pk %}" class="btn-action delete" title="Delete" onclick="return confirm('Delete this offering?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-donate"></i>
+                                    <h3>No Offerings Recorded</h3>
+                                    <p>Start recording offerings to track donations.</p>
+                                    <a href="{% url 'add_offering' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Record First Offering
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.member %}&member={{ request.GET.member }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.member %}&member={{ request.GET.member }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.member %}&member={{ request.GET.member }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

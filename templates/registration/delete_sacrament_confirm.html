@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .delete-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .delete-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .warning-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .delete-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .details-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .details-box p {
+        margin: 0 0 0.75rem;
+        font-weight: 600;
+        color: var(--warning);
+    }
+
+    .details-box ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .details-box li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+        color: var(--text-secondary);
+    }
+
+    .details-box li:last-child {
+        border-bottom: none;
+    }
+
+    .details-box strong {
+        color: var(--text-primary);
+    }
+
+    .danger-alert {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--danger);
+        margin-bottom: 1.5rem;
+    }
+
+    .danger-alert i {
+        font-size: 1.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-glass-danger {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-glass-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-glass-outline {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    @media (max-width: 480px) {
+        .delete-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+    <div class="delete-card">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h4>Delete {{ sacrament.get_sacrament_type_display }} Record?</h4>
+
+        <div class="details-box">
+            <p><i class="fas fa-info-circle"></i> Record Details:</p>
+            <ul>
+                <li><strong>Sacrament:</strong> {{ sacrament.get_sacrament_type_display }}</li>
+                <li><strong>Date:</strong> {{ sacrament.date_received|default:"Not specified"|date:"M d, Y" }}</li>
+                <li><strong>Place:</strong> {{ sacrament.place_received|default:"Not specified" }}</li>
+                <li><strong>Status:</strong> {{ sacrament.get_verification_status_display }}</li>
+            </ul>
+        </div>
+
+        <div class="danger-alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <div><strong>Warning:</strong> This action cannot be undone. The record will be permanently deleted.</div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn-glass-danger">
+                    <i class="fas fa-trash"></i>Yes, Delete
+                </button>
+                <a href="{% url 'user_sacraments' sacrament.user.id %}" class="btn-glass-outline">
+                    <i class="fas fa-times"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if budget %}Edit{% else %}Create{% endif %} Professional Budget{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{% if budget %}Edit{% else %}Create{% endif %} Professional Budget</h1>
+            <p class="text-muted">{% if budget %}Update budget details{% else %}Set up a comprehensive budget with proper accounting controls{% endif %}</p>
+        </div>
+        <div>
+            <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Budgets
+            </a>
+        </div>
+    </div>
+
+    <!-- Budget Form -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Budget Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Basic Information -->
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Basic Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Budget Name *</label>
+                            <input type="text" name="name" id="name" class="form-control" 
+                                   placeholder="e.g., Q1 2024 Operating Budget" 
+                                   value="{% if budget %}{{ budget.name }}{% endif %}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="budget_type" class="form-label">Budget Type *</label>
+                            <select name="budget_type" id="budget_type" class="form-control" required>
+                                <option value="">Select budget type...</option>
+                                {% for type_value, type_label in budget_types %}
+                                <option value="{{ type_value }}" {% if budget and budget.budget_type == type_value %}selected{% endif %}>{{ type_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="total_amount" class="form-label">Total Amount (TSH) *</label>
+                            <input type="number" name="total_amount" id="total_amount" class="form-control" 
+                                   placeholder="0.00" step="0.01" min="0" 
+                                   value="{% if budget %}{{ budget.total_amount }}{% endif %}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" name="department" id="department" class="form-control" 
+                                   placeholder="e.g., General Operations, Missions, Building"
+                                   value="{% if budget %}{{ budget.department }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-control" rows="4" 
+                                      placeholder="Enter detailed budget description...">{% if budget %}{{ budget.description }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Fiscal Information -->
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Fiscal Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="fiscal_year" class="form-label">Fiscal Year</label>
+                            <input type="text" name="fiscal_year" id="fiscal_year" class="form-control" 
+                                   placeholder="e.g., 2024" maxlength="4"
+                                   value="{% if budget %}{{ budget.fiscal_year }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fiscal_period" class="form-label">Fiscal Period</label>
+                            <select name="fiscal_period" id="fiscal_period" class="form-control">
+                                {% for period_value, period_label in fiscal_periods %}
+                                <option value="{{ period_value }}" {% if budget and budget.fiscal_period == period_value %}selected{% elif not budget and period_value == 'JAN_DEC' %}selected{% endif %}>{{ period_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date *</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" required
+                                   value="{% if budget %}{{ budget.start_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date *</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" required
+                                   value="{% if budget %}{{ budget.end_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="variance_threshold" class="form-label">Variance Threshold (%)</label>
+                            <input type="number" name="variance_threshold" id="variance_threshold" class="form-control" 
+                                   value="{% if budget %}{{ budget.variance_threshold }}{% else %}10.0{% endif %}" step="0.1" min="0" max="100">
+                            <small class="form-text text-muted">Alert when budget variance exceeds this percentage</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Budget Controls -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-3">Budget Controls</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="requires_monthly_review" id="requires_monthly_review" checked>
+                                    <label class="form-check-label" for="requires_monthly_review">
+                                        <strong>Require Monthly Review</strong>
+                                        <br><small class="text-muted">Budget will be flagged for monthly review</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="auto_carry_forward" id="auto_carry_forward">
+                                    <label class="form-check-label" for="auto_carry_forward">
+                                        <strong>Auto Carry Forward</strong>
+                                        <br><small class="text-muted">Automatically carry forward unspent amounts</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Budget Duration Display -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6>Budget Duration</h6>
+                            <p class="mb-0">
+                                <strong>Start:</strong> <span id="display_start_date">Not set</span><br>
+                                <strong>End:</strong> <span id="display_end_date">Not set</span><br>
+                                <strong>Duration:</strong> <span id="duration">Not calculated</span><br>
+                                <strong>Fiscal Period:</strong> <span id="display_fiscal_period">January - December</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Budget Status Preview -->
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h6>Budget Workflow</h6>
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle"></i> 
+                                Budget will be created as <strong>DRAFT</strong> and can be submitted for approval when ready.
+                                <br><small class="text-muted">Draft → Pending Approval → Active → Completed</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'budget_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% if budget %}Update{% else %}Create{% endif %} Budget
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Date change handlers
+document.getElementById('start_date').addEventListener('change', updateDateDisplay);
+document.getElementById('end_date').addEventListener('change', updateDateDisplay);
+document.getElementById('fiscal_period').addEventListener('change', updateFiscalPeriodDisplay);
+
+// Update date display and calculate duration
+function updateDateDisplay() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    
+    if (startDate) {
+        const start = new Date(startDate);
+        document.getElementById('display_start_date').textContent = start.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    if (endDate) {
+        const end = new Date(endDate);
+        document.getElementById('display_end_date').textContent = end.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Calculate duration
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffMonths = Math.floor(diffDays / 30);
+        const remainingDays = diffDays % 30;
+        
+        let durationText = '';
+        if (diffMonths > 0) {
+            durationText = `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+            if (remainingDays > 0) {
+                durationText += ` and ${remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+            }
+        } else {
+            durationText = `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+        }
+        
+        document.getElementById('duration').textContent = durationText;
+        
+        // Validate dates
+        if (end < start) {
+            document.getElementById('duration').innerHTML = '<span class="text-danger">End date must be after start date!</span>';
+            document.querySelector('button[type="submit"]').disabled = true;
+        } else {
+            document.querySelector('button[type="submit"]').disabled = false;
+        }
+    }
+}
+
+function updateFiscalPeriodDisplay() {
+    const select = document.getElementById('fiscal_period');
+    const selectedOption = select.options[select.selectedIndex];
+    document.getElementById('display_fiscal_period').textContent = selectedOption.text;
+}
+
+// Set default dates (current year)
+function setDefaultDates() {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), 0, 1);
+    const lastDay = new Date(today.getFullYear(), 11, 31);
+    
+    document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('end_date').value = lastDay.toISOString().split('T')[0];
+    
+    updateDateDisplay();
+    updateFiscalPeriodDisplay();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setDefaultDates();
+});
+</script>
+{% endblock %}

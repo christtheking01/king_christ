@@ -1,382 +1,645 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block internal_style %}
 <style>
-    /* Receipt Container */
+    /* Modern Receipt Container */
     .receipt-container {
-        max-width: 800px;
+        max-width: 600px;
         margin: 0 auto;
         padding: 20px;
     }
 
-    /* Card Styles */
-    .card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--divider);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-        animation: slideUp 0.3s ease;
-    }
-
-    .card-header {
-        padding: 24px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: white;
-        position: relative;
-    }
-
-    .card-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .card-body {
-        padding: 32px;
-    }
-
-    /* Status Badge */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 16px;
-        border-radius: var(--radius-full);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        backdrop-filter: blur(10px);
-    }
-
-    .status-badge i {
-        font-size: 0.75rem;
-    }
-
-    /* Receipt Preview */
-    .receipt-preview {
+    /* Main Receipt Card */
+    .receipt-card {
         background: white;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--divider);
-        padding: 32px;
-        margin-bottom: 32px;
-        font-family: 'Courier New', Monaco, monospace;
-        color: #333;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        position: relative;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
         overflow: hidden;
+        position: relative;
     }
 
-    .receipt-preview::before {
+    /* Security Pattern Background */
+    .receipt-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary), var(--success));
+        bottom: 0;
+        background: 
+            repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(139, 0, 0, 0.015) 10px,
+                rgba(139, 0, 0, 0.015) 20px
+            );
+        pointer-events: none;
+        z-index: 0;
     }
 
-    .receipt-header {
+    /* Header Section */
+    .receipt-header-modern {
+        background: linear-gradient(135deg, #8B0000 0%, #a52a2a 50%, #8B0000 100%);
+        color: white;
+        padding: 32px 24px;
         text-align: center;
-        margin-bottom: 24px;
-        padding-bottom: 20px;
-        border-bottom: 2px dashed #ddd;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .receipt-header-modern::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: white;
+        border-radius: 50% 50% 0 0;
+    }
+
+    /* Cross Logo */
+    .church-logo {
+        width: 60px;
+        height: 80px;
+        margin: 0 auto 16px;
+        position: relative;
+    }
+
+    .church-logo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 100%;
+        background: white;
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .church-logo::after {
+        content: '';
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 12px;
+        background: white;
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .church-name {
         font-size: 1.5rem;
         font-weight: 700;
-        color: var(--primary-dark);
-        margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 3px;
+        margin-bottom: 4px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .church-info {
+    .church-subtitle {
         font-size: 0.875rem;
-        color: #666;
-        line-height: 1.4;
+        font-weight: 500;
+        opacity: 0.9;
+        letter-spacing: 4px;
     }
 
-    .receipt-title {
+    .church-contact {
+        margin-top: 12px;
+        font-size: 0.75rem;
+        opacity: 0.85;
+        line-height: 1.5;
+    }
+
+    /* Receipt Title Badge */
+    .receipt-title-badge {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px solid #8B0000;
+        border-radius: 8px;
+        padding: 12px 24px;
+        margin: -20px auto 24px;
+        max-width: 200px;
         text-align: center;
-        font-size: 1.25rem;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .receipt-title-badge h2 {
+        font-size: 1rem;
         font-weight: 700;
-        color: var(--primary);
-        margin: 24px 0;
+        color: #8B0000;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Receipt Body */
+    .receipt-body {
+        padding: 0 32px 32px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Receipt Meta Section */
+    .receipt-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+
+    .meta-item {
+        text-align: center;
+    }
+
+    .meta-label {
+        font-size: 0.625rem;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        position: relative;
+        color: #6c757d;
+        margin-bottom: 4px;
     }
 
-    .receipt-title::before,
-    .receipt-title::after {
-        content: '✦';
-        color: var(--primary-light);
-        margin: 0 12px;
-    }
-
-    /* Receipt Details */
-    .receipt-details {
-        margin: 32px 0;
-    }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    @media (min-width: 480px) {
-        .detail-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    .detail-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 12px 0;
-        border-bottom: 1px dashed #eee;
-    }
-
-    .detail-label {
+    .meta-value {
+        font-size: 0.875rem;
         font-weight: 600;
-        color: #555;
-        min-width: 120px;
-    }
-
-    .detail-value {
-        text-align: right;
-        color: #333;
+        color: #212529;
         word-break: break-word;
     }
 
-    /* Amount Display */
-    .amount-display {
-        text-align: center;
-        margin: 32px 0;
-        padding: 32px;
-        background: linear-gradient(135deg, rgba(52, 168, 83, 0.1), rgba(52, 168, 83, 0.05));
-        border-radius: var(--radius-md);
-        border: 1px solid rgba(52, 168, 83, 0.2);
-        position: relative;
-        overflow: hidden;
+    .meta-value.receipt-number {
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        color: #8B0000;
     }
 
-    .amount-display::before {
+    /* Section Headers */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 24px 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .section-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.875rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #495057;
+        margin: 0;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 3px solid #8B0000;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #212529;
+        text-align: right;
+    }
+
+    .info-value.member-name {
+        font-weight: 700;
+        color: #8B0000;
+    }
+
+    /* Amount Display */
+    .amount-section {
+        margin: 32px 0;
+        padding: 32px;
+        background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);
+        border-radius: 16px;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(139, 0, 0, 0.3);
+    }
+
+    .amount-section::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--success), var(--primary));
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
     }
 
     .amount-label {
-        font-size: 1rem;
-        color: var(--success);
+        font-size: 0.75rem;
         font-weight: 600;
-        margin-bottom: 12px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 3px;
+        opacity: 0.9;
+        margin-bottom: 12px;
     }
 
     .amount-value {
         font-size: 2.5rem;
         font-weight: 700;
-        color: var(--success);
-        line-height: 1;
         margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .amount-currency {
-        font-size: 1rem;
-        color: #666;
-        font-weight: 600;
+        font-size: 0.875rem;
+        opacity: 0.85;
     }
 
-    /* Receipt Footer */
-    .receipt-footer {
+    .amount-words {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255,255,255,0.3);
+        font-size: 0.875rem;
+        font-style: italic;
+        opacity: 0.9;
+    }
+
+    /* Verification Section */
+    .verification-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 24px 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px dashed #ced4da;
+    }
+
+    .verification-item {
+        text-align: center;
+    }
+
+    .verification-label {
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+
+    /* QR Code Placeholder */
+    .qr-code {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.625rem;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Auth Code */
+    .auth-code {
+        font-family: 'Courier New', monospace;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #8B0000;
+        letter-spacing: 2px;
+        padding: 8px 16px;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        display: inline-block;
+    }
+
+    /* Footer */
+    .receipt-footer-modern {
         margin-top: 32px;
         padding-top: 24px;
-        border-top: 2px dashed #ddd;
+        border-top: 2px solid #e9ecef;
         text-align: center;
-        font-size: 0.875rem;
-        color: #666;
     }
 
-    .generated-info {
-        margin-bottom: 12px;
-        line-height: 1.4;
+    .issuer-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
     }
 
-    .thank-you {
+    .issuer-info {
+        text-align: left;
+    }
+
+    .issuer-label {
+        font-size: 0.625rem;
         font-weight: 700;
-        color: var(--primary);
-        margin-top: 16px;
-        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+    }
+
+    .issuer-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .signature-area {
+        text-align: center;
+    }
+
+    .signature-line {
+        width: 120px;
+        height: 1px;
+        background: #adb5bd;
+        margin: 0 auto 8px;
+    }
+
+    .signature-label {
+        font-size: 0.625rem;
+        color: #6c757d;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
-    /* Print Marks (for actual printing) */
-    @media print {
-        .receipt-preview {
-            border: none;
-            box-shadow: none;
-            padding: 0;
-        }
-        
-        .no-print {
-            display: none !important;
-        }
+    .thank-you-message {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #8B0000;
+        margin: 20px 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
     }
 
-    /* Controls */
-    .controls-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
+    .receipt-note {
+        font-size: 0.6875rem;
+        color: #6c757d;
+        line-height: 1.5;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    /* Watermark */
+    .receipt-watermark-modern {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 4rem;
+        font-weight: 700;
+        color: rgba(139, 0, 0, 0.03);
+        text-transform: uppercase;
+        letter-spacing: 8px;
+        pointer-events: none;
+        z-index: 0;
+        white-space: nowrap;
+    }
+
+    /* Status Badge */
+    .status-badge-modern {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 10;
+    }
+
+    .status-paid {
+        background: rgba(40, 167, 69, 0.9);
+        color: white;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.9);
+        color: #212529;
+    }
+
+    /* Controls Section */
+    .controls-section {
+        margin-top: 24px;
         padding: 24px;
-        background: var(--background);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--divider);
-        margin-top: 32px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    /* Button Styles */
-    .btn {
-        display: inline-flex;
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .btn-receipt {
+        display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 12px 24px;
-        border-radius: var(--radius-md);
-        font-family: inherit;
-        font-size: 0.9375rem;
-        font-weight: 500;
-        text-decoration: none;
+        padding: 14px 20px;
         border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        white-space: nowrap;
-        user-select: none;
-    }
-
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .btn-print {
-        background: linear-gradient(135deg, var(--success) 0%, var(--secondary-dark) 100%);
-        color: white;
+        border-radius: 10px;
+        font-size: 0.875rem;
         font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
     }
 
-    .btn-print:hover:not(:disabled) {
+    .btn-primary-receipt {
+        background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);
+        color: white;
+        grid-column: span 2;
+    }
+
+    .btn-primary-receipt:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 4px 12px rgba(139, 0, 0, 0.4);
     }
 
-    .btn-list {
-        background: var(--primary);
+    .btn-secondary-receipt {
+        background: #f8f9fa;
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-secondary-receipt:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+
+    .btn-success-receipt {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
         color: white;
     }
 
-    .btn-list:hover:not(:disabled) {
-        background: var(--primary-dark);
+    .btn-success-receipt:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
     }
 
-    .btn-regenerate {
-        background: var(--warning);
-        color: var(--text-primary);
-    }
-
-    .btn-regenerate:hover:not(:disabled) {
-        background: #f57c00;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-secondary {
-        background: var(--background);
-        border: 1px solid var(--divider);
-        color: var(--text-primary);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--surface);
-        border-color: var(--primary);
-        color: var(--primary);
+    /* Print Styles */
+    @media print {
+        @page {
+            size: auto;
+            margin: 5mm;
+        }
+        
+        body * {
+            visibility: hidden;
+        }
+        
+        .receipt-container,
+        .receipt-container * {
+            visibility: visible;
+        }
+        
+        .receipt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .receipt-card {
+            box-shadow: none;
+            border-radius: 0;
+            max-width: 100%;
+        }
+        
+        .receipt-body {
+            padding: 0 16px 16px;
+        }
+        
+        /* Scale up for better readability on regular paper */
+        .receipt-card {
+            transform: scale(1.1);
+            transform-origin: top center;
+        }
+        
+        .no-print,
+        .controls-section {
+            display: none !important;
+        }
+        
+        .receipt-watermark-modern {
+            opacity: 0.05;
+            font-size: 6rem;
+        }
+        
+        .receipt-header-modern,
+        .amount-section {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        /* Make text larger for regular printers */
+        .church-name {
+            font-size: 2rem;
+        }
+        
+        .church-subtitle {
+            font-size: 1rem;
+        }
+        
+        .amount-value {
+            font-size: 3rem;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+        }
     }
 
     /* Responsive */
-    @media (max-width: 768px) {
-        .receipt-container {
-            padding: 15px;
+    @media (max-width: 480px) {
+        .receipt-meta {
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
         
-        .card-body {
-            padding: 24px;
+        .verification-section {
+            grid-template-columns: 1fr;
         }
         
-        .receipt-preview {
-            padding: 24px;
+        .controls-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .btn-primary-receipt {
+            grid-column: span 1;
         }
         
         .amount-value {
             font-size: 2rem;
         }
         
-        .controls-container {
-            flex-direction: column;
-        }
-        
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .receipt-preview {
-            padding: 20px;
-        }
-        
-        .church-name {
-            font-size: 1.25rem;
-        }
-        
-        .receipt-title {
-            font-size: 1.125rem;
-        }
-        
-        .amount-value {
-            font-size: 1.75rem;
-        }
-        
-        .detail-grid {
-            grid-template-columns: 1fr;
+        .receipt-body {
+            padding: 0 16px 24px;
         }
     }
 
     /* Animations */
-    @keyframes slideUp {
+    @keyframes fadeInUp {
         from {
             opacity: 0;
             transform: translateY(20px);
@@ -387,439 +650,230 @@
         }
     }
 
-    @keyframes printSuccess {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-        }
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    /* Loading State */
-    .loading {
-        position: relative;
-    }
-
-    .loading::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: var(--primary);
-        z-index: 10;
-    }
-
-    /* Receipt Watermark (for printed copies) */
-    .receipt-watermark {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-45deg);
-        font-size: 4rem;
-        font-weight: 700;
-        color: rgba(0, 0, 0, 0.03);
-        white-space: nowrap;
-        z-index: 1;
-        pointer-events: none;
-    }
-
-    @media print {
-        .receipt-watermark {
-            display: block;
-        }
-    }
-
-    /* Print Status */
-    .print-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: var(--radius-md);
-        margin-bottom: 16px;
-        font-weight: 500;
-        animation: slideUp 0.3s ease;
-    }
-
-    .print-status-success {
-        background: rgba(52, 168, 83, 0.1);
-        border: 1px solid rgba(52, 168, 83, 0.2);
-        color: var(--success);
-    }
-
-    .print-status-warning {
-        background: rgba(251, 188, 4, 0.1);
-        border: 1px solid rgba(251, 188, 4, 0.2);
-        color: var(--warning);
+    .receipt-card {
+        animation: fadeInUp 0.5s ease;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="receipt-container">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <span><i class="fas fa-print"></i> Print Tithe Receipt</span>
-                <span class="status-badge">
-                    <i class="fas fa-{% if receipt.is_printed %}check-circle{% else %}clock{% endif %}"></i>
-                    {% if receipt.is_printed %}Printed{% else %}Not Printed{% endif %}
-                </span>
-            </h2>
-        </div>
+    <!-- Main Receipt Card -->
+    <div class="receipt-card">
+        <!-- Watermark -->
+        <div class="receipt-watermark-modern">PAID</div>
         
-        <div class="card-body">
-            <!-- Print Status Message -->
-            {% if receipt.is_printed %}
-            <div class="print-status print-status-success">
-                <i class="fas fa-check-circle"></i>
-                This receipt was printed on {{ receipt.printed_at|date:"F d, Y H:i" }}
+        <!-- Status Badge -->
+        <div class="status-badge-modern {% if receipt.is_printed %}status-paid{% else %}status-pending{% endif %}">
+            {% if receipt.is_printed %}PAID{% else %}PENDING{% endif %}
+        </div>
+
+        <!-- Header -->
+        <div class="receipt-header-modern">
+            <div class="church-logo"></div>
+            <div class="church-name">Christ The King</div>
+            <div class="church-subtitle">☨ Kristo Mfalme ☨</div>
+            <div class="church-contact">
+                <div>{{ receipt.church_address|default:"P.O. Box 1310" }}</div>
+                {% if receipt.church_phone %}<div>Tel: {{ receipt.church_phone }}</div>{% endif %}
             </div>
-            {% else %}
-            <div class="print-status print-status-warning">
-                <i class="fas fa-exclamation-circle"></i>
-                This receipt has not been printed yet
+        </div>
+
+        <!-- Title Badge -->
+        <div class="receipt-title-badge">
+            <h2>Tithe Receipt</h2>
+        </div>
+
+        <!-- Receipt Body -->
+        <div class="receipt-body">
+            <!-- Receipt Meta -->
+            <div class="receipt-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Receipt No</div>
+                    <div class="meta-value receipt-number">{{ receipt.receipt_number }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Date</div>
+                    <div class="meta-value">{{ payment.date|date:"M d, Y" }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Time</div>
+                    <div class="meta-value">{{ payment.date|date:"H:i" }}</div>
+                </div>
             </div>
+
+            <!-- Payer Information Section -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="section-title">Payer Information</h3>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value member-name">{{ payment.name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Member ID</span>
+                    <span class="info-value">{{ payment.name.member_id|default:payment.name.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Contact Number</span>
+                    <span class="info-value">{{ payment.contact_number|default:"N/A" }}</span>
+                </div>
+            </div>
+
+            <!-- Payment Details Section -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <h3 class="section-title">Payment Details</h3>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Payment Method</span>
+                    <span class="info-value">{{ payment.get_status_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Purpose</span>
+                    <span class="info-value">Tithe Contribution</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Period</span>
+                    <span class="info-value">{{ payment.date|date:"F Y" }}</span>
+                </div>
+            </div>
+
+            <!-- Amount Section -->
+            <div class="amount-section">
+                <div class="amount-label">Total Amount Paid</div>
+                <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
+                <div class="amount-currency">Tanzanian Shillings</div>
+                <div class="amount-words">{{ payment.amount }} TZS Only</div>
+            </div>
+
+            <!-- Verification Section -->
+            <div class="verification-section">
+                <div class="verification-item">
+                    <div class="verification-label">Scan to Verify</div>
+                    <div class="qr-code">
+                        <i class="fas fa-qrcode" style="font-size: 3rem; color: #8B0000;"></i>
+                    </div>
+                </div>
+                <div class="verification-item">
+                    <div class="verification-label">Verification Code</div>
+                    <div class="auth-code">{{ receipt.receipt_number|slice:":8" }}</div>
+                    <div style="margin-top: 8px; font-size: 0.625rem; color: #6c757d;">
+                        Use this code to verify receipt authenticity
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="receipt-footer-modern">
+                <div class="issuer-section">
+                    <div class="issuer-info">
+                        <div class="issuer-label">Issued By</div>
+                        <div class="issuer-value">{{ receipt.generated_by|default:user.get_full_name|default:user.username }}</div>
+                        <div style="font-size: 0.75rem; color: #6c757d; margin-top: 4px;">
+                            {{ receipt.generated_at|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                    <div class="signature-area">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Authorized Signature</div>
+                    </div>
+                </div>
+
+                <div class="thank-you-message">☨ Asante kwa Sadaka Yako ☨</div>
+                
+                <div class="receipt-note">
+                    This receipt serves as official proof of your tithe payment. 
+                    Please retain for your records. For verification, visit the church office or contact us.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="controls-section no-print">
+        <div class="controls-grid">
+            <button class="btn-receipt btn-primary-receipt" onclick="printReceipt()">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+            
+            <a href="{% url 'tithepayment:receipt_list' %}" class="btn-receipt btn-secondary-receipt">
+                <i class="fas fa-list"></i> All Receipts
+            </a>
+            
+            <button class="btn-receipt btn-success-receipt" onclick="downloadReceipt()">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+            
+            {% if not receipt.is_printed %}
+            <a href="{% url 'tithepayment:auto_generate_receipt' payment.id %}" class="btn-receipt btn-secondary-receipt">
+                <i class="fas fa-redo"></i> Regenerate
+            </a>
             {% endif %}
-            
-            <!-- Receipt Preview -->
-            <div class="receipt-preview" id="receiptContent">
-                <!-- Watermark (only shows when printed) -->
-                <div class="receipt-watermark" style="display: none;">{{ receipt.church_name }}</div>
-                
-                <!-- Header -->
-                <div class="receipt-header">
-                    <div class="church-name">CHRIST THE KING</div>
-                    <div class="church-info">
-                        <div>P.O BOX 1310</div>
-                        <div>Tel: XXX XXX XXX</div>
-                    </div>
-                </div>
-                
-                <!-- Receipt Title -->
-                <div class="receipt-title">TITHE RECEIPT</div>
-                
-                <!-- Receipt Details -->
-                <div class="receipt-details">
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">Receipt Number:</span>
-                            <span class="detail-value">{{ receipt.receipt_number }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Date:</span>
-                            <span class="detail-value">{{ payment.date|date:"Y-m-d" }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Time:</span>
-                            <span class="detail-value">{{ payment.date|date:"H:i" }}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Member Information -->
-                <div class="receipt-details">
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">Member Name:</span>
-                            <span class="detail-value">{{ payment.name }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Phone Number:</span>
-                            <span class="detail-value">{{ payment.contact_number }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Payment Method:</span>
-                            <span class="detail-value">{{ payment.get_status_display }}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Amount Display -->
-                <div class="amount-display">
-                    <div class="amount-label">Amount Paid</div>
-                    <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
-                    <div class="amount-currency">Tanzanian Shillings</div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="receipt-footer">
-                    <div class="generated-info">
-                        <div>Generated: {{ receipt.generated_at|date:"Y-m-d H:i" }}</div>
-                        {% if receipt.is_printed %}
-                        <div>Printed: {{ receipt.printed_at|date:"Y-m-d H:i" }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="thank-you">Thank you for your tithe!</div>
-                </div>
-            </div>
-            
-            <!-- Print Controls -->
-            <div class="controls-container no-print">
-                <button id="printButton" class="btn btn-print" {% if receipt.is_printed %}disabled{% endif %}>
-                    <i class="fas fa-print"></i> 
-                    {% if receipt.is_printed %}Already Printed{% else %}Print Receipt{% endif %}
-                </button>
-                
-                <a href="{% url 'tithepayment:receipt_list' %}" class="btn btn-list">
-                    <i class="fas fa-list"></i> All Receipts
-                </a>
-                
-                {% if not receipt.is_printed %}
-                <a href="{% url 'tithepayment:auto_generate_receipt' payment.id %}" class="btn btn-regenerate">
-                    <i class="fas fa-redo"></i> Regenerate
-                </a>
-                {% endif %}
-                
-                <button onclick="window.print()" class="btn btn-secondary">
-                    <i class="fas fa-file-pdf"></i> Print Preview
-                </button>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const printButton = document.getElementById('printButton');
-    const receiptContent = document.getElementById('receiptContent');
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-    
-    // Format currency
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-TZ', {
-            style: 'currency',
-            currency: 'TZS',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(amount).replace('TZS', 'TZS ');
-    }
-    
-    // Update currency display
-    const amountElements = document.querySelectorAll('.amount-value');
-    amountElements.forEach(element => {
-        const text = element.textContent.trim();
-        if (text.startsWith('TZS')) {
-            const amount = parseFloat(text.replace('TZS', '').replace(/,/g, ''));
-            if (!isNaN(amount)) {
-                element.textContent = formatCurrency(amount);
-            }
-        }
+function printReceipt() {
+    // Hide controls before print
+    document.querySelectorAll('.no-print').forEach(el => {
+        el.style.display = 'none';
     });
     
-    // Print button handler
-    if (printButton) {
-        printButton.addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            
-            // Show loading state
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Printing...';
-            button.classList.add('loading');
-            
-            // Show watermark for print
-            const watermark = receiptContent.querySelector('.receipt-watermark');
-            if (watermark) watermark.style.display = 'block';
-            
-            // Send print request
-            fetch("{% url 'tithepayment:print_receipt' receipt.id %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({})
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Success animation
-                    button.style.animation = 'printSuccess 0.5s ease';
-                    
-                    // Show success message
-                    showNotification('✅ Receipt printed successfully!', 'success');
-                    
-                    // Reload after delay
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error(data.message || 'Printing failed');
-                }
-            })
-            .catch(error => {
-                console.error('Printing error:', error);
-                showNotification('❌ Printing failed: ' + error.message, 'error');
-                
-                // Reset button
-                button.disabled = false;
-                button.innerHTML = originalText;
-                button.classList.remove('loading');
-            });
-        });
-    }
+    // Trigger print
+    window.print();
     
-    // Show notification
-    function showNotification(message, type = 'info') {
-        // Remove existing notification
-        const existing = document.querySelector('.notification-toast');
-        if (existing) existing.remove();
-        
-        // Create notification
-        const notification = document.createElement('div');
-        notification.className = `notification-toast ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        // Add styles
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
-            color: white;
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-            animation: slideUp 0.3s ease;
-            max-width: 400px;
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Add close event
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.remove();
-        });
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.3s';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }
-        }, 5000);
-    }
-    
-    // Print preview
-    document.querySelector('[onclick="window.print()"]')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        const watermark = receiptContent.querySelector('.receipt-watermark');
-        if (watermark) watermark.style.display = 'block';
-        
-        // Hide non-printable elements
-        document.querySelectorAll('.no-print').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        // Print
-        window.print();
-        
-        // Restore display
-        setTimeout(() => {
-            document.querySelectorAll('.no-print').forEach(el => {
-                el.style.display = '';
-            });
-            if (watermark) watermark.style.display = 'none';
-        }, 500);
-    });
-    
-    // Add watermark on print dialog
-    window.addEventListener('beforeprint', () => {
-        const watermark = receiptContent.querySelector('.receipt-watermark');
-        if (watermark) watermark.style.display = 'block';
-        document.querySelectorAll('.no-print').forEach(el => {
-            el.style.display = 'none';
-        });
-    });
-    
-    window.addEventListener('afterprint', () => {
-        const watermark = receiptContent.querySelector('.receipt-watermark');
-        if (watermark) watermark.style.display = 'none';
+    // Restore controls after print dialog
+    setTimeout(() => {
         document.querySelectorAll('.no-print').forEach(el => {
             el.style.display = '';
         });
-    });
+    }, 500);
     
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + P to print
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-            e.preventDefault();
-            printButton.click();
-        }
-        
-        // Escape to go back
-        if (e.key === 'Escape') {
-            window.history.back();
-        }
+    // Optionally mark as printed
+    {% if not receipt.is_printed %}
+    fetch("{% url 'tithepayment:print_receipt' receipt.id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
     });
-});
-</script>
+    {% endif %}
+}
 
-<style>
-    /* Additional styles for print */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        
-        #receiptContent,
-        #receiptContent * {
-            visibility: visible;
-        }
-        
-        #receiptContent {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 20mm;
-            box-shadow: none;
-            border: none;
-        }
-        
-        .receipt-watermark {
-            opacity: 0.1 !important;
-            display: block !important;
-        }
-        
-        .no-print {
-            display: none !important;
-        }
+function downloadReceipt() {
+    // Use browser print to PDF
+    printReceipt();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        printReceipt();
     }
-</style>
+    if (e.key === 'Escape') {
+        window.history.back();
+    }
+});
+
+// Auto-print if requested
+{% if request.GET.auto_print == 'true' %}
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(printReceipt, 1000);
+});
+{% endif %}
+</script>
 {% endblock %}

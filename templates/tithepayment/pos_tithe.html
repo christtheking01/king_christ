@@ -1,0 +1,637 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - Tithe{% endblock %}
+
+{% block content %}
+<style>
+    .option-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .option-card {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .option-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #4cc9f0, #4361ee);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .option-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(76, 201, 240, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+        border-color: #4cc9f0;
+    }
+    
+    .option-card:hover::before {
+        opacity: 1;
+    }
+    
+    .option-card i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .option-card h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .option-card p {
+        margin: 6px 0 0 0;
+        font-size: 0.75rem;
+        color: #a0a0a0;
+    }
+    
+    /* Search wrapper */
+    .search-wrapper {
+        position: relative;
+    }
+    
+    .search-clear {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        transition: color 0.2s;
+        z-index: 2;
+    }
+    
+    .search-clear:hover {
+        color: #4cc9f0;
+    }
+    
+    /* Autocomplete results */
+    .autocomplete-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #1e2a4a;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        margin-top: 4px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .autocomplete-results.show {
+        display: block;
+    }
+    
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background 0.2s;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+        background: rgba(76, 201, 240, 0.1);
+    }
+    
+    .autocomplete-item-name {
+        font-weight: 500;
+        color: #e0e0e0;
+        margin-bottom: 2px;
+    }
+    
+    .autocomplete-item-code {
+        font-size: 0.8125rem;
+        color: #a0a0a0;
+    }
+    
+    /* Selected member display */
+    .selected-member {
+        background: rgba(76, 201, 240, 0.1);
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .selected-member-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    
+    .selected-member-info {
+        flex: 1;
+    }
+    
+    .selected-member-name {
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 4px;
+    }
+    
+    .selected-member-phone {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+    
+    .selected-member-remove {
+        background: none;
+        border: none;
+        color: #e94560;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        border-radius: 8px;
+    }
+    
+    .selected-member-remove:hover {
+        background: rgba(233, 69, 96, 0.1);
+    }
+    
+    /* Recent payments list */
+    .recent-payments-list {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .payment-item {
+        padding: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    
+    .payment-item:hover {
+        background: rgba(76, 201, 240, 0.05);
+    }
+    
+    .payment-item:last-child {
+        border-bottom: none;
+    }
+    
+    .payment-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+    
+    .payment-info p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+    
+    .payment-amount {
+        font-weight: 700;
+        color: #4cc9f0;
+        font-size: 1.1rem;
+    }
+    
+    .no-payments {
+        padding: 32px;
+        text-align: center;
+        color: #a0a0a0;
+    }
+    
+    .no-payments i {
+        font-size: 2rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+        color: #4cc9f0;
+    }
+    
+    /* Form container */
+    .form-container {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .form-container h2 {
+        margin: 0 0 20px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-container h2 i {
+        color: #4cc9f0;
+    }
+    
+    /* Checkbox styling */
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 12px;
+        background: rgba(76, 201, 240, 0.05);
+        border-radius: 12px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: rgba(76, 201, 240, 0.1);
+        border-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper span {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+</style>
+
+{% if view_mode == 'menu' %}
+    <!-- Menu View -->
+    <div class="option-cards">
+        <a href="{% url 'tithepayment:pos_tithe' %}?view=today" class="option-card">
+            <i class="fas fa-calendar-day"></i>
+            <h3>Today's Payments</h3>
+            <p>View payments recorded today</p>
+        </a>
+        
+        <a href="{% url 'tithepayment:pos_tithe' %}?view=individual" class="option-card">
+            <i class="fas fa-plus-circle"></i>
+            <h3>Individual Payment</h3>
+            <p>Record single tithe payment</p>
+        </a>
+        
+        <a href="{% url 'tithepayment:pos_tithe' %}?view=bulk" class="option-card">
+            <i class="fas fa-layer-group"></i>
+            <h3>Bulk Payments</h3>
+            <p>Record multiple payments at once</p>
+        </a>
+    </div>
+
+{% elif view_mode == 'today' %}
+    <!-- Today's Payments View -->
+    <div class="recent-payments-list">
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #e0e0e0; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-calendar-day" style="color: #4cc9f0;"></i>
+                Today's Payments
+            </h2>
+        </div>
+        
+        {% if today_payments %}
+            {% for payment in today_payments %}
+            <div class="payment-item">
+                <div class="payment-info">
+                    <h4>{{ payment.name.name }}</h4>
+                    <p>{{ payment.date|date:"H:i" }} • {{ payment.get_status_display }}</p>
+                </div>
+                <div class="payment-amount">Tsh {{ payment.amount|floatformat:0 }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-payments">
+                <i class="fas fa-receipt"></i>
+                <p>No payments recorded today</p>
+            </div>
+        {% endif %}
+    </div>
+
+{% elif view_mode == 'individual' %}
+    <!-- Individual Payment Form -->
+    <div class="form-container">
+        <h2><i class="fas fa-plus-circle"></i> Individual Payment</h2>
+        
+        <form id="titheForm" method="post" action="{% url 'tithepayment:pos_tithe' %}?view=individual">
+            {% csrf_token %}
+            
+            <!-- Member Search -->
+            <div class="pos-form-group search-wrapper">
+                <label><i class="fas fa-user"></i> Select Member</label>
+                <input 
+                    type="text" 
+                    id="memberSearch" 
+                    class="pos-input" 
+                    placeholder="Type member name to search..."
+                    autocomplete="off"
+                    required
+                >
+                <button type="button" class="search-clear" id="clearSearch" title="Clear Search">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="name" id="selectedMemberId" required>
+                <div id="memberResults" class="autocomplete-results"></div>
+                <div style="margin-top: 8px; font-size: 0.8125rem; color: #a0a0a0;">Type at least 2 characters to search members</div>
+            </div>
+
+            <!-- Selected Member Display -->
+            <div id="selectedMemberDisplay" class="selected-member" style="display: none;">
+                <div class="selected-member-header">
+                    <div class="selected-member-info">
+                        <div class="selected-member-name" id="selectedMemberName">-</div>
+                        <div class="selected-member-phone" id="selectedMemberPhone">-</div>
+                    </div>
+                    <button type="button" class="selected-member-remove" id="removeMember" title="Remove Member">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Telephone (Read-only) -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-phone"></i> Telephone</label>
+                <input 
+                    type="text" 
+                    id="telephoneDisplay" 
+                    class="pos-input" 
+                    readonly
+                    style="background: rgba(30, 42, 74, 0.5); cursor: not-allowed;"
+                >
+                <input type="hidden" id="contactNumberInput" name="contact_number">
+            </div>
+
+            <!-- Amount -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-money-bill"></i> Amount (Tsh)</label>
+                <input 
+                    type="number" 
+                    name="amount" 
+                    class="pos-input" 
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0"
+                    required
+                    id="amountInput"
+                >
+            </div>
+
+            <!-- Quick Amount Buttons -->
+            <div class="quick-amounts">
+                <button type="button" class="quick-amount-btn" onclick="setAmount(1000)">1,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(5000)">5,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(10000)">10,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(20000)">20,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(50000)">50,000</button>
+                <button type="button" class="quick-amount-btn" onclick="setAmount(100000)">100,000</button>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                <select name="status" class="pos-select" id="paymentMethod">
+                    <option value="cash">Cash</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="mobile">Mobile Money</option>
+                    <option value="nfc">NFC Card</option>
+                </select>
+            </div>
+
+            <!-- Date -->
+            <div class="pos-form-group">
+                <label><i class="fas fa-calendar"></i> Payment Date</label>
+                <input 
+                    type="date" 
+                    name="date" 
+                    class="pos-input"
+                    id="dateInput"
+                >
+            </div>
+
+            <!-- SMS Option -->
+            <div class="pos-form-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="send_sms" checked>
+                    <span>Send SMS confirmation</span>
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-check"></i> Process Tithe Payment
+            </button>
+        </form>
+    </div>
+
+{% elif view_mode == 'bulk' %}
+    <!-- Bulk Payments -->
+    <div class="form-container">
+        <h2><i class="fas fa-layer-group"></i> Bulk Payments</h2>
+        <p style="color: #a0a0a0; margin-bottom: 20px;">Use the bulk payment form from the main tithe module for now.</p>
+        <a href="{% url 'tithepayment:bulk_payment_create' %}" class="submit-btn" style="display: block; text-align: center; text-decoration: none;">
+            <i class="fas fa-layer-group"></i> Go to Bulk Payments
+        </a>
+    </div>
+{% endif %}
+
+<script>
+    let selectedMember = null;
+    let searchTimeout = null;
+
+    const memberSearch = document.getElementById('memberSearch');
+    const memberResults = document.getElementById('memberResults');
+    const selectedMemberId = document.getElementById('selectedMemberId');
+    const selectedMemberDisplay = document.getElementById('selectedMemberDisplay');
+    const selectedMemberName = document.getElementById('selectedMemberName');
+    const selectedMemberPhone = document.getElementById('selectedMemberPhone');
+    const telephoneDisplay = document.getElementById('telephoneDisplay');
+    const contactNumberInput = document.getElementById('contactNumberInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const removeMemberBtn = document.getElementById('removeMember');
+    const dateInput = document.getElementById('dateInput');
+    const titheForm = document.getElementById('titheForm');
+
+    // Set default date to today
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+
+    if (memberSearch) {
+        memberSearch.addEventListener('input', function() {
+            const query = this.value.trim();
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                memberResults.classList.remove('show');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/tithe/search-members/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            memberResults.innerHTML = data.map(member => {
+                                const safeName = member.name.replace(/'/g, "\\'");
+                                const safeCode = (member.code || '').replace(/'/g, "\\'");
+                                return `
+                                    <div class="autocomplete-item" onclick="selectMember(${member.id}, '${safeName}', '${safeCode}', '${member.telephone || ''}')">
+                                        <div class="autocomplete-item-name">${member.name}</div>
+                                        <div class="autocomplete-item-code">${member.code || 'No code'}</div>
+                                    </div>
+                                `;
+                            }).join('');
+                            memberResults.classList.add('show');
+                        } else {
+                            memberResults.innerHTML = '<div class="autocomplete-item" style="color: #a0a0a0;">No members found</div>';
+                            memberResults.classList.add('show');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                    });
+            }, 300);
+        });
+
+        function selectMember(id, name, code, telephone) {
+            selectedMember = { id, name, code, telephone };
+            selectedMemberId.value = id;
+            memberSearch.value = name;
+            memberResults.classList.remove('show');
+            selectedMemberDisplay.style.display = 'block';
+            selectedMemberName.textContent = name + (code ? ` (${code})` : '');
+            selectedMemberPhone.textContent = telephone || 'No telephone';
+            telephoneDisplay.value = telephone || '';
+            contactNumberInput.value = telephone || '';
+        }
+
+        function clearSelection() {
+            selectedMember = null;
+            selectedMemberId.value = '';
+            memberSearch.value = '';
+            memberResults.classList.remove('show');
+            selectedMemberDisplay.style.display = 'none';
+            telephoneDisplay.value = '';
+            contactNumberInput.value = '';
+        }
+
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', clearSelection);
+        }
+
+        if (removeMemberBtn) {
+            removeMemberBtn.addEventListener('click', clearSelection);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) {
+                memberResults.classList.remove('show');
+            }
+        });
+
+        function setAmount(amount) {
+            document.getElementById('amountInput').value = amount;
+        }
+
+        // Handle form submission and print receipt
+        if (titheForm) {
+            titheForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(titheForm);
+                const amount = parseFloat(formData.get('amount'));
+                const paymentMethod = document.getElementById('paymentMethod').value;
+                const contactNumber = formData.get('contact_number');
+                
+                // Submit form via AJAX
+                fetch(titheForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Print receipt if printer is connected
+                        if (selectedMember && window.thermalPrinter && window.thermalPrinter.isConnected) {
+                            printReceipt(
+                                'Tithe',
+                                selectedMember.name,
+                                selectedMember.code,
+                                amount,
+                                paymentMethod,
+                                contactNumber
+                            );
+                        }
+                        
+                        // Redirect or show success
+                        window.location.href = '{% url "tithepayment:pos_tithe" %}?view=individual';
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    // Fallback to normal form submission
+                    titheForm.submit();
+                });
+            });
+        }
+    }
+</script>
+{% endblock %}

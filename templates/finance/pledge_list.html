@@ -1,24 +1,298 @@
 {% extends 'base.html' %}
-{% load custom_filters %}
+{% load finance_filters %}
 
 {% block title %}Event Pledges{% endblock %}
 
+{% block internal_style %}
+<style>
+    /* Hero Header */
+    .pledge-hero {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(245, 87, 108, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .pledge-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .pledge-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-create {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-create:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-secondary-hero {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+        border: none;
+    }
+    .btn-secondary-hero:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+    }
+    .stat-card.primary::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .stat-card.success::before { background: linear-gradient(90deg, #11998e, #38ef7d); }
+    .stat-card.warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card.info::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Nav Pills */
+    .nav-pills .nav-link {
+        border-radius: var(--border-radius);
+        padding: 0.625rem 1rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: all var(--transition-fast);
+    }
+    .nav-pills .nav-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .nav-pills .nav-link.active {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    /* Table Styles */
+    .pledge-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .pledge-table th {
+        background: var(--bg-secondary);
+        padding: 0.875rem 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .pledge-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    .pledge-table tr:hover td {
+        background: var(--bg-secondary);
+    }
+    .pledge-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Member Avatar */
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+    .member-avatar.external {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    /* Badges */
+    .badge-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-completed {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        color: #10b981;
+    }
+    .badge-partial {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+        color: #4facfe;
+    }
+    .badge-pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        color: #f59e0b;
+    }
+    .badge-overdue {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        color: #ef4444;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .page-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Progress Bar */
+    .progress-thin {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--bg-secondary);
+        overflow: hidden;
+    }
+    .progress-bar-custom {
+        transition: width var(--transition-fast);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .pledge-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .pledge-table {
+            font-size: 0.875rem;
+        }
+        .pledge-table th,
+        .pledge-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Hero Header -->
+    <div class="pledge-hero">
         <div>
-            <h2 class="mb-1"><i class="fas fa-hand-holding-heart me-2 text-primary"></i>Event Pledges</h2>
-            <p class="text-muted mb-0">Track member pledges and contributions for church events</p>
+            <h1><i class="fas fa-hand-holding-heart"></i>Event Pledges</h1>
         </div>
         <div class="d-flex gap-2">
-            <form method="post" action="{% url 'pledge_bulk_reminder' %}" class="d-inline" onsubmit="return confirm('Send reminders to all members with pending/overdue pledges?');">
+            <form method="post" action="{% url 'pledge_bulk_reminder' %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-warning">
-                    <i class="fas fa-paper-plane me-1"></i>Send Bulk Reminders
+                <button type="submit" class="btn-secondary-hero" onclick="return confirm('Send reminders to all members with pending/overdue pledges?');">
+                    <i class="fas fa-paper-plane"></i>Send Bulk Reminders
                 </button>
             </form>
-            <a href="{% url 'pledge_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Create Pledge
+            <a href="{% url 'pledge_create' %}" class="btn-create">
+                <i class="fas fa-plus"></i>Create Pledge
             </a>
         </div>
     </div>
@@ -26,67 +300,31 @@
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card border-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Promised</h6>
-                            <h4 class="text-primary mb-0">{{ total_promised|currency }}</h4>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 rounded p-2">
-                            <i class="fas fa-handshake text-primary fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card primary">
+                <div class="stat-value">{{ total_promised|currency }}</div>
+                <div class="stat-label"><i class="fas fa-handshake me-1"></i>Total Promised</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Paid</h6>
-                            <h4 class="text-success mb-0">{{ total_paid|currency }}</h4>
-                        </div>
-                        <div class="bg-success bg-opacity-10 rounded p-2">
-                            <i class="fas fa-check-circle text-success fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card success">
+                <div class="stat-value">{{ total_paid|currency }}</div>
+                <div class="stat-label"><i class="fas fa-check-circle me-1"></i>Total Paid</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-warning">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Remaining</h6>
-                            <h4 class="text-warning mb-0">{{ total_remaining|currency }}</h4>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 rounded p-2">
-                            <i class="fas fa-clock text-warning fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card warning">
+                <div class="stat-value">{{ total_remaining|currency }}</div>
+                <div class="stat-label"><i class="fas fa-clock me-1"></i>Remaining</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-info">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Completion Rate</h6>
-                            <h4 class="text-info mb-0">
-                                {% if total_promised > 0 %}
-                                    {{ total_paid|div:total_promised|mul:100|floatformat:1 }}%
-                                {% else %}0%{% endif %}
-                            </h4>
-                        </div>
-                        <div class="bg-info bg-opacity-10 rounded p-2">
-                            <i class="fas fa-chart-pie text-info fa-lg"></i>
-                        </div>
-                    </div>
+            <div class="stat-card info">
+                <div class="stat-value">
+                    {% if total_promised > 0 %}
+                        {{ total_paid|div:total_promised|mul:100|floatformat:1 }}%
+                    {% else %}0%{% endif %}
                 </div>
+                <div class="stat-label"><i class="fas fa-chart-pie me-1"></i>Completion Rate</div>
             </div>
         </div>
     </div>
@@ -241,8 +479,8 @@
                                     <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-outline-success" title="Record Payment">
                                         <i class="fas fa-plus"></i>
                                     </a>
-                                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" class="btn btn-outline-warning" title="Send Reminder SMS"
-                                       onclick="return confirm('Send reminder SMS to {{ pledge.member.name }}?');">
+                                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" class="btn btn-outline-warning send-reminder" title="Send Reminder SMS"
+                                       data-member-name="{{ pledge.pledger_name }}">
                                         <i class="fas fa-paper-plane"></i>
                                     </a>
                                     {% endif %}
@@ -269,6 +507,59 @@
             </div>
             {% endif %}
         </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_event %}&event={{ selected_event }}{% endif %}{% if selected_member %}&member={{ selected_member }}{% endif %}{% if overdue_only %}&overdue=1{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_event %}&event={{ selected_event }}{% endif %}{% if selected_member %}&member={{ selected_member }}{% endif %}{% if overdue_only %}&overdue=1{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_event %}&event={{ selected_event }}{% endif %}{% if selected_member %}&member={{ selected_member }}{% endif %}{% if overdue_only %}&overdue=1{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Handle send reminder confirmation
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.send-reminder').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            var memberName = this.getAttribute('data-member-name');
+            if (!confirm('Send reminder SMS to ' + memberName + '?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

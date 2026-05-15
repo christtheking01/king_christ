@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Import Members" %} - Christ The King Parish{% endblock %}
+
+{% block content %}
+<div class="members-wrapper">
+    <div class="members-header">
+        <h1><i class="fas fa-file-import"></i> {% trans "Import Members" %}</h1>
+        <a href="{% url 'list_members' %}" class="btn-modern">
+            <i class="fas fa-arrow-left"></i> {% trans "Back to Members" %}
+        </a>
+    </div>
+
+    <div class="members-card">
+        <div style="padding: 2rem;">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <h2 style="margin-bottom: 1.5rem; color: var(--text-primary);">
+                    {% trans "Upload Excel File" %}
+                </h2>
+                
+                <form method="post" enctype="multipart/form-data" style="margin-bottom: 2rem;">
+                    {% csrf_token %}
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">
+                            {% trans "Select Excel File" %}
+                        </label>
+                        <input type="file" name="file" accept=".xlsx,.xls" required
+                               style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: var(--border-radius); background: white;">
+                        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                            {% trans "Supported formats: .xlsx, .xls" %}
+                        </p>
+                    </div>
+                    
+                    <button type="submit" class="btn-modern" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-upload"></i> {% trans "Import Members" %}
+                    </button>
+                </form>
+
+                <div style="background: rgba(102, 126, 234, 0.05); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: var(--border-radius); padding: 1.5rem;">
+                    <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--primary);">
+                        <i class="fas fa-info-circle me-2"></i>{% trans "Required Columns" %}
+                    </h3>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        {% trans "Your Excel file must have the following columns in the first row:" %}
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        <li><strong>name</strong> - {% trans "Member name (required)" %}</li>
+                        <li><strong>code</strong> - {% trans "Member code" %}</li>
+                        <li><strong>telephone</strong> - {% trans "Phone number" %}</li>
+                        <li><strong>location</strong> - {% trans "Location" %}</li>
+                        <li><strong>gender</strong> - {% trans "Gender (male/female)" %}</li>
+                        <li><strong>shepherd</strong> - {% trans "Community name" %}</li>
+                        <li><strong>ministry</strong> - {% trans "Ministry name" %}</li>
+                        <li><strong>membership_category</strong> - {% trans "Membership category (elder/youth/child)" %}</li>
+                        <li><strong>pays_tithe</strong> - {% trans "Pays tithe (true/false)" %}</li>
+                        <li><strong>working</strong> - {% trans "Working (true/false)" %}</li>
+                        <li><strong>schooling</strong> - {% trans "Schooling (true/false)" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

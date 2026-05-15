@@ -18,87 +18,111 @@ from member.models import Ministry
 # ====== CALENDAR VIEWS ======
 
 def calendar_view(request):
-    """Main calendar view - displays full calendar with events"""
+    """Main calendar view - displays dual month calendar with events"""
     today = timezone.now().date()
-    
+
     # Get filter parameters
     month = int(request.GET.get('month', today.month))
     year = int(request.GET.get('year', today.year))
     category_id = request.GET.get('category')
     event_type = request.GET.get('event_type')
-    
-    # Calculate date range for the month
-    first_day = date(year, month, 1)
-    last_day = date(year, month, calendar.monthrange(year, month)[1])
-    
-    # Extend range to show surrounding weeks
-    calendar_start = first_day - timedelta(days=first_day.weekday())
-    calendar_end = last_day + timedelta(days=(6 - last_day.weekday()))
-    
+
+    # Calculate current month
+    first_day_current = date(year, month, 1)
+    last_day_current = date(year, month, calendar.monthrange(year, month)[1])
+    current_month_start = first_day_current - timedelta(days=first_day_current.weekday())
+    current_month_end = last_day_current + timedelta(days=(6 - last_day_current.weekday()))
+
+    # Calculate next month
+    if month == 12:
+        next_month_num = 1
+        next_year_num = year + 1
+    else:
+        next_month_num = month + 1
+        next_year_num = year
+
+    first_day_next = date(next_year_num, next_month_num, 1)
+    last_day_next = date(next_year_num, next_month_num, calendar.monthrange(next_year_num, next_month_num)[1])
+    next_month_start = first_day_next - timedelta(days=first_day_next.weekday())
+    next_month_end = last_day_next + timedelta(days=(6 - last_day_next.weekday()))
+
+    # Combined date range for queries
+    query_start = min(current_month_start, next_month_start)
+    query_end = max(current_month_end, next_month_end)
+
     # Query events
     events = Event.objects.filter(
         status__in=['PUBLISHED', 'COMPLETED'],
-        start_date__gte=calendar_start,
-        start_date__lte=calendar_end
+        start_date__gte=query_start,
+        start_date__lte=query_end
     ).select_related('category', 'location', 'organizer').prefetch_related('ministries')
-    
-    if category_id and category_id.strip():
+
+    if category_id and category_id.strip() and category_id != 'None':
         events = events.filter(category_id=category_id)
     if event_type:
         events = events.filter(event_type=event_type)
-    
+
     # Get categories for filter
     categories = EventCategory.objects.filter(is_active=True)
-    
-    # Get liturgical calendar entries for this month
+
+    # Get liturgical calendar entries
     liturgical_days = LiturgicalCalendar.objects.filter(
-        date__gte=calendar_start,
-        date__lte=calendar_end
+        date__gte=query_start,
+        date__lte=query_end
     )
     liturgical_dict = {day.date: day for day in liturgical_days}
-    
-    # Build calendar data
-    calendar_weeks = []
-    current_week = []
-    current_date = calendar_start
-    
-    while current_date <= calendar_end:
-        day_events = []
-        for event in events:
-            if event.start_date <= current_date <= (event.end_date or event.start_date):
-                day_events.append(event)
-        
-        liturgical = liturgical_dict.get(current_date)
-        
-        current_week.append({
-            'date': current_date,
-            'events': day_events,
-            'liturgical': liturgical,
-            'is_today': current_date == today,
-            'is_current_month': current_date.month == month
-        })
-        
-        if len(current_week) == 7:
-            calendar_weeks.append(current_week)
-            current_week = []
-        
-        current_date += timedelta(days=1)
-    
+
+    # Build current month calendar
+    def build_month_calendar(start_date, end_date, target_month):
+        calendar_weeks = []
+        current_week = []
+        current_date = start_date
+
+        while current_date <= end_date:
+            day_events = []
+            for event in events:
+                if event.start_date <= current_date <= (event.end_date or event.start_date):
+                    day_events.append(event)
+
+            liturgical = liturgical_dict.get(current_date)
+
+            current_week.append({
+                'date': current_date,
+                'events': day_events,
+                'liturgical': liturgical,
+                'is_today': current_date == today,
+                'is_current_month': current_date.month == target_month
+            })
+
+            if len(current_week) == 7:
+                calendar_weeks.append(current_week)
+                current_week = []
+
+            current_date += timedelta(days=1)
+
+        return calendar_weeks
+
+    current_month_weeks = build_month_calendar(current_month_start, current_month_end, month)
+    next_month_weeks = build_month_calendar(next_month_start, next_month_end, next_month_num)
+
     # Navigation months
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
-    next_month = month + 1 if month < 12 else 1
-    next_year = year if month < 12 else year + 1
-    
+    next_nav_month = month + 2 if month < 11 else (month + 2) % 12 or 12
+    next_nav_year = year if month < 11 else year + 1
+
     context = {
-        'calendar_weeks': calendar_weeks,
+        'current_month_weeks': current_month_weeks,
+        'next_month_weeks': next_month_weeks,
         'month_name': calendar.month_name[month],
+        'next_month_name': calendar.month_name[next_month_num],
         'year': year,
+        'next_year': next_year_num,
         'month': month,
         'prev_month': prev_month,
         'prev_year': prev_year,
-        'next_month': next_month,
-        'next_year': next_year,
+        'next_month_nav': next_nav_month,
+        'next_year_nav': next_nav_year,
         'categories': categories,
         'selected_category': category_id,
         'selected_type': event_type,
@@ -190,7 +214,7 @@ def event_list(request):
     elif view_type == 'featured':
         events = events.filter(featured=True)
     
-    if category_id and category_id.strip():
+    if category_id and category_id.strip() and category_id != 'None':
         events = events.filter(category_id=category_id)
     if event_type:
         events = events.filter(event_type=event_type)
@@ -262,7 +286,6 @@ def event_create(request):
         title = request.POST.get('title')
         description = request.POST.get('description')
         event_type = request.POST.get('event_type')
-        category_id = request.POST.get('category')
         
         start_date = request.POST.get('start_date')
         start_time = request.POST.get('start_time') or None
@@ -272,9 +295,6 @@ def event_create(request):
         
         recurrence = request.POST.get('recurrence', 'NONE')
         recurrence_end_date = request.POST.get('recurrence_end_date') or None
-        
-        location_id = request.POST.get('location')
-        location_details = request.POST.get('location_details')
         
         requires_registration = request.POST.get('requires_registration') == 'on'
         max_attendees = request.POST.get('max_attendees') or None
@@ -287,12 +307,33 @@ def event_create(request):
         # Get ministries
         ministry_ids = request.POST.getlist('ministries')
         
+        # Get or create category by name
+        category_name = request.POST.get('category', '').strip()
+        category = None
+        if category_name:
+            category, _ = EventCategory.objects.get_or_create(
+                name__iexact=category_name,
+                defaults={'name': category_name, 'color': '#007bff'}
+            )
+        
+        # Get or create location by name
+        location_name = request.POST.get('location', '').strip()
+        location = None
+        if location_name:
+            location, _ = EventLocation.objects.get_or_create(
+                name__iexact=location_name,
+                defaults={'name': location_name, 'is_active': True}
+            )
+        
+        # Get location details
+        location_details = request.POST.get('location_details', '')
+        
         # Create event
         event = Event.objects.create(
             title=title,
             description=description,
             event_type=event_type,
-            category_id=category_id if category_id else None,
+            category=category,
             start_date=start_date,
             start_time=start_time,
             end_date=end_date,
@@ -300,7 +341,7 @@ def event_create(request):
             all_day=all_day,
             recurrence=recurrence,
             recurrence_end_date=recurrence_end_date,
-            location_id=location_id if location_id else None,
+            location=location,
             location_details=location_details,
             organizer=request.user,
             requires_registration=requires_registration,
@@ -325,13 +366,9 @@ def event_create(request):
         messages.success(request, 'Event created successfully!')
         return redirect('event_detail', pk=event.pk)
     
-    categories = EventCategory.objects.filter(is_active=True)
-    locations = EventLocation.objects.filter(is_active=True)
     ministries = Ministry.objects.all()
     
     context = {
-        'categories': categories,
-        'locations': locations,
         'ministries': ministries,
         'event_types': Event.EVENT_TYPES,
         'recurrence_choices': Event.RECURRENCE_CHOICES,
@@ -354,7 +391,17 @@ def event_edit(request, pk):
         event.title = request.POST.get('title')
         event.description = request.POST.get('description')
         event.event_type = request.POST.get('event_type')
-        event.category_id = request.POST.get('category') or None
+        
+        # Get or create category by name
+        category_name = request.POST.get('category', '').strip()
+        if category_name:
+            category, _ = EventCategory.objects.get_or_create(
+                name__iexact=category_name,
+                defaults={'name': category_name, 'color': '#007bff'}
+            )
+            event.category = category
+        else:
+            event.category = None
         
         event.start_date = request.POST.get('start_date')
         event.start_time = request.POST.get('start_time') or None
@@ -365,7 +412,17 @@ def event_edit(request, pk):
         event.recurrence = request.POST.get('recurrence', 'NONE')
         event.recurrence_end_date = request.POST.get('recurrence_end_date') or None
         
-        event.location_id = request.POST.get('location') or None
+        # Get or create location by name
+        location_name = request.POST.get('location', '').strip()
+        if location_name:
+            location, _ = EventLocation.objects.get_or_create(
+                name__iexact=location_name,
+                defaults={'name': location_name, 'is_active': True}
+            )
+            event.location = location
+        else:
+            event.location = None
+        
         event.location_details = request.POST.get('location_details')
         
         event.requires_registration = request.POST.get('requires_registration') == 'on'
@@ -389,14 +446,10 @@ def event_edit(request, pk):
         messages.success(request, 'Event updated successfully!')
         return redirect('event_detail', pk=event.pk)
     
-    categories = EventCategory.objects.filter(is_active=True)
-    locations = EventLocation.objects.filter(is_active=True)
     ministries = Ministry.objects.all()
     
     context = {
         'event': event,
-        'categories': categories,
-        'locations': locations,
         'ministries': ministries,
         'event_types': Event.EVENT_TYPES,
         'recurrence_choices': Event.RECURRENCE_CHOICES,
@@ -630,3 +683,23 @@ def liturgical_calendar(request):
         'events_active': True,
     }
     return render(request, 'events/liturgical_calendar.html', context)
+
+
+@login_required
+def export_events(request):
+    """Export events to CSV"""
+    from .exports import export_events_to_csv
+    
+    # Get filtered queryset
+    events = Event.objects.all()
+    
+    # Apply filters
+    category_id = request.GET.get('category')
+    event_type = request.GET.get('event_type')
+    
+    if category_id:
+        events = events.filter(category_id=category_id)
+    if event_type:
+        events = events.filter(event_type=event_type)
+    
+    return export_events_to_csv(events)

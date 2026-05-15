@@ -88,6 +88,17 @@
   color: white;
 }
 
+.finance-btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+}
+
+.finance-btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
 .finance-btn-sm {
   padding: 6px 12px;
   font-size: 12px;
@@ -257,6 +268,11 @@
   color: #004085;
 }
 
+.finance-badge-secondary {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 /* Button Group */
 .finance-btn-group {
   display: flex;
@@ -367,6 +383,11 @@
       <a href="{% url 'budget_list' %}" class="finance-btn finance-btn-outline">
         <i class="fas fa-arrow-left"></i> Back to Budgets
       </a>
+      {% if budget.status not in 'ACTIVE' and budget.status not in 'COMPLETED' %}
+      <a href="{% url 'edit_budget' budget.pk %}" class="finance-btn finance-btn-secondary">
+        <i class="fas fa-edit"></i> Edit Budget
+      </a>
+      {% endif %}
       <button class="finance-btn finance-btn-primary" onclick="addAllocation()">
         <i class="fas fa-plus"></i> Add Allocation
       </button>
@@ -443,17 +464,21 @@
         <div style="border-right: 1px solid #e0e0e0">
           <h6 style="color: #666; margin-bottom: 8px">Status</h6>
           <p style="margin: 0">
-            {% if budget.status == 'ACTIVE' %}<span
-              class="finance-badge finance-badge-success"
-              >Active</span
-            >
-            {% elif budget.status == 'COMPLETED' %}<span
-              class="finance-badge finance-badge-primary"
-              >Completed</span
-            >
-            {% else %}<span class="finance-badge finance-badge-danger"
-              >Cancelled</span
-            >{% endif %}
+            {% if budget.status == 'ACTIVE' %}
+              <span class="finance-badge finance-badge-success">Active</span>
+            {% elif budget.status == 'COMPLETED' %}
+              <span class="finance-badge finance-badge-primary">Completed</span>
+            {% elif budget.status == 'DRAFT' %}
+              <span class="finance-badge finance-badge-secondary">Draft</span>
+            {% elif budget.status == 'PENDING_APPROVAL' %}
+              <span class="finance-badge finance-badge-warning">Pending Approval</span>
+            {% elif budget.status == 'CANCELLED' %}
+              <span class="finance-badge finance-badge-danger">Cancelled</span>
+            {% elif budget.status == 'SUSPENDED' %}
+              <span class="finance-badge finance-badge-secondary">Suspended</span>
+            {% else %}
+              <span class="finance-badge finance-badge-secondary">{{ budget.get_status_display }}</span>
+            {% endif %}
           </p>
         </div>
         <div>
@@ -508,13 +533,13 @@
               </div>
             </td>
             <td style="font-weight: 600">
-              ${{ allocation.allocated_amount|floatformat:2 }}
+              TSH {{ allocation.allocated_amount|floatformat:2 }}
             </td>
             <td style="color: #ffc107; font-weight: 600">
-              ${{ allocation.spent_amount|floatformat:2 }}
+              TSH {{ allocation.spent_amount|floatformat:2 }}
             </td>
             <td style="color: #28a745; font-weight: 600">
-              ${{ allocation.remaining_amount|floatformat:2 }}
+              TSH {{ allocation.remaining_amount|floatformat:2 }}
             </td>
             <td>
               <div class="finance-progress">
@@ -531,14 +556,21 @@
                 <button
                   class="finance-btn finance-btn-sm finance-btn-outline"
                   onclick="viewTransactions({{ allocation.category.id }})"
+                  title="View Transactions"
                 >
                   <i class="fas fa-eye"></i>
                 </button>
                 <button
                   class="finance-btn finance-btn-sm finance-btn-outline"
-                  onclick="editAllocation({{ allocation.id }})"
+                  onclick="editAllocation({{ allocation.id }}, '{{ allocation.category.name|escapejs }}', {{ allocation.allocated_amount }}, '{{ allocation.category.type }}')"
                 >
                   <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="finance-btn finance-btn-sm finance-btn-danger"
+                  onclick="deleteAllocation({{ allocation.id }}, '{{ allocation.category.name|escapejs }}')"
+                >
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </td>
@@ -548,9 +580,9 @@
         <tfoot>
           <tr style="font-weight: 700; background: #f8f9fa">
             <td>Total</td>
-            <td>${{ total_allocated|floatformat:2 }}</td>
-            <td>${{ total_spent|floatformat:2 }}</td>
-            <td>${{ total_remaining|floatformat:2 }}</td>
+            <td>TSH {{ total_allocated|floatformat:2 }}</td>
+            <td>TSH {{ total_spent|floatformat:2 }}</td>
+            <td>TSH {{ total_remaining|floatformat:2 }}</td>
             <td>-</td>
             <td>-</td>
           </tr>
@@ -606,7 +638,7 @@
         align-items: center;
       "
     >
-      <h5 style="margin: 0">Add Budget Allocation</h5>
+      <h5 style="margin: 0" id="allocationModalTitle">Add Budget Allocation</h5>
       <button
         onclick="closeModal()"
         style="background: none; border: none; font-size: 20px; cursor: pointer"
@@ -617,22 +649,118 @@
     <div style="padding: 20px">
       <form id="allocationForm">
         {% csrf_token %}
-        <div class="finance-form-group" style="margin-bottom: 16px">
-          <label for="category">Category</label>
-          <select name="category" id="category" required>
-            <option value="">Select a category...</option>
-          </select>
+        <input type="hidden" id="editAllocationId" name="edit_allocation_id" value="">
+        <input type="hidden" id="isEditMode" name="is_edit_mode" value="false">
+        
+        <!-- Single allocation form for edit mode -->
+        <div id="singleAllocationForm" style="display: none;">
+          <div class="finance-form-group" style="margin-bottom: 16px">
+            <label for="edit_category">Category</label>
+            <input
+              type="text"
+              name="edit_category"
+              id="edit_category"
+              list="categoryList"
+              placeholder="Category name..."
+              required
+              style="width: 100%"
+            />
+            <datalist id="categoryList">
+              {% for category in available_categories %}
+              <option value="{{ category.name }}" data-id="{{ category.id }}" data-type="{{ category.type }}"></option>
+              {% endfor %}
+            </datalist>
+          </div>
+          <div class="finance-form-group" style="margin-bottom: 16px">
+            <label for="edit_allocated_amount">Allocated Amount (TSH)</label>
+            <input
+              type="number"
+              name="edit_allocated_amount"
+              id="edit_allocated_amount"
+              step="0.01"
+              min="0"
+              required
+              style="width: 100%"
+            />
+          </div>
+          <div class="finance-form-group" style="margin-bottom: 16px">
+            <label for="edit_category_type">Category Type</label>
+            <select name="edit_category_type" id="edit_category_type" required style="width: 100%">
+              <option value="">Select type...</option>
+              <option value="EXPENSE">Expense</option>
+              <option value="INCOME">Income</option>
+              <option value="ASSET">Asset</option>
+              <option value="LIABILITY">Liability</option>
+              <option value="EQUITY">Equity</option>
+            </select>
+          </div>
+          <div class="finance-form-group" style="margin-bottom: 0">
+            <label for="variance_reason">Reason for Change (optional)</label>
+            <textarea
+              name="variance_reason"
+              id="variance_reason"
+              rows="2"
+              placeholder="Explain why you're changing this allocation..."
+              style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
+            ></textarea>
+          </div>
         </div>
-        <div class="finance-form-group" style="margin-bottom: 16px">
-          <label for="allocated_amount">Allocated Amount ($)</label>
-          <input
-            type="number"
-            name="allocated_amount"
-            id="allocated_amount"
-            step="0.01"
-            min="0"
-            required
-          />
+
+        <!-- Multiple allocations form for add mode -->
+        <div id="allocationsContainer">
+          <div class="allocation-row" style="margin-bottom: 16px; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+            <div class="finance-form-group" style="margin-bottom: 12px">
+              <label for="category_0">Category</label>
+              <input
+                type="text"
+                name="category_0"
+                id="category_0"
+                list="categoryList"
+                placeholder="Select or type new category..."
+                required
+                style="width: 100%"
+              />
+              <datalist id="categoryList">
+                {% for category in available_categories %}
+                <option value="{{ category.name }}" data-id="{{ category.id }}" data-type="{{ category.type }}"></option>
+                {% endfor %}
+              </datalist>
+              <small style="color: #666; font-size: 12px;">Type to search existing categories or enter a new category name</small>
+            </div>
+            <div class="finance-form-group" style="margin-bottom: 12px">
+              <label for="allocated_amount_0">Allocated Amount (TSH)</label>
+              <input
+                type="number"
+                name="allocated_amount_0"
+                id="allocated_amount_0"
+                step="0.01"
+                min="0"
+                required
+                style="width: 100%"
+              />
+            </div>
+            <div class="finance-form-group" style="margin-bottom: 0">
+              <label for="category_type_0">Category Type</label>
+              <select name="category_type_0" id="category_type_0" required style="width: 100%">
+                <option value="">Select type...</option>
+                <option value="EXPENSE">Expense</option>
+                <option value="INCOME">Income</option>
+                <option value="ASSET">Asset</option>
+                <option value="LIABILITY">Liability</option>
+                <option value="EQUITY">Equity</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="addAnotherButton" style="margin-top: 12px;">
+          <button
+            type="button"
+            class="finance-btn finance-btn-secondary finance-btn-sm"
+            onclick="addAllocationRow()"
+            style="width: 100%"
+          >
+            <i class="fas fa-plus"></i> Add Another Allocation
+          </button>
         </div>
       </form>
     </div>
@@ -657,23 +785,276 @@
     </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock content %}
+
+{% block script %}
 <script>
+  let allocationRowCount = 1;
+
+  // Auto-fill category type when selecting from datalist
+  document.addEventListener('DOMContentLoaded', function() {
+    const categoryInputs = document.querySelectorAll('input[list="categoryList"]');
+    categoryInputs.forEach(input => {
+      input.addEventListener('input', function() {
+        const selectedOption = document.querySelector(`#categoryList option[value="${this.value}"]`);
+        if (selectedOption) {
+          const typeSelect = document.getElementById(this.id.replace('category', 'category_type'));
+          if (typeSelect) {
+            typeSelect.value = selectedOption.getAttribute('data-type');
+          }
+        }
+      });
+    });
+  });
+
   function addAllocation() {
-    document.getElementById("allocationModal").style.display = "block";
+    const modal = document.getElementById("allocationModal");
+    if (modal) {
+      modal.style.display = "block";
+      // Reset to add mode
+      document.getElementById('allocationModalTitle').textContent = 'Add Budget Allocation';
+      document.getElementById('isEditMode').value = 'false';
+      document.getElementById('editAllocationId').value = '';
+      document.getElementById('singleAllocationForm').style.display = 'none';
+      document.getElementById('allocationsContainer').style.display = 'block';
+      document.getElementById('addAnotherButton').style.display = 'block';
+      // Reset form to single row
+      allocationRowCount = 1;
+      document.getElementById('allocationsContainer').innerHTML = createAllocationRow(0);
+    }
   }
+
+  function editAllocation(allocationId, categoryName, allocatedAmount, categoryType) {
+    const modal = document.getElementById("allocationModal");
+    if (modal) {
+      modal.style.display = "block";
+      // Set to edit mode
+      document.getElementById('allocationModalTitle').textContent = 'Edit Budget Allocation';
+      document.getElementById('isEditMode').value = 'true';
+      document.getElementById('editAllocationId').value = allocationId;
+      document.getElementById('singleAllocationForm').style.display = 'block';
+      document.getElementById('allocationsContainer').style.display = 'none';
+      document.getElementById('addAnotherButton').style.display = 'none';
+      
+      // Populate form with current data
+      document.getElementById('edit_category').value = categoryName;
+      document.getElementById('edit_allocated_amount').value = allocatedAmount;
+      document.getElementById('edit_category_type').value = categoryType;
+    }
+  }
+
+  function addAllocationRow() {
+    const container = document.getElementById('allocationsContainer');
+    const newRow = createAllocationRow(allocationRowCount);
+    container.insertAdjacentHTML('beforeend', newRow);
+    allocationRowCount++;
+  }
+
+  function createAllocationRow(index) {
+    return `
+      <div class="allocation-row" style="margin-bottom: 16px; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; position: relative;">
+        ${index > 0 ? '<button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">&times;</button>' : ''}
+        <div class="finance-form-group" style="margin-bottom: 12px">
+          <label for="category_${index}">Category</label>
+          <input
+            type="text"
+            name="category_${index}"
+            id="category_${index}"
+            list="categoryList"
+            placeholder="Select or type new category..."
+            required
+            style="width: 100%"
+          />
+          <datalist id="categoryList">
+            {% for category in available_categories %}
+            <option value="{{ category.name }}" data-id="{{ category.id }}" data-type="{{ category.type }}"></option>
+            {% endfor %}
+          </datalist>
+          <small style="color: #666; font-size: 12px;">Type to search existing categories or enter a new category name</small>
+        </div>
+        <div class="finance-form-group" style="margin-bottom: 12px">
+          <label for="allocated_amount_${index}">Allocated Amount (TSH)</label>
+          <input
+            type="number"
+            name="allocated_amount_${index}"
+            id="allocated_amount_${index}"
+            step="0.01"
+            min="0"
+            required
+            style="width: 100%"
+          />
+        </div>
+        <div class="finance-form-group" style="margin-bottom: 0">
+          <label for="category_type_${index}">Category Type</label>
+          <select name="category_type_${index}" id="category_type_${index}" required style="width: 100%">
+            <option value="">Select type...</option>
+            <option value="EXPENSE">Expense</option>
+            <option value="INCOME">Income</option>
+            <option value="ASSET">Asset</option>
+            <option value="LIABILITY">Liability</option>
+            <option value="EQUITY">Equity</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
   function closeModal() {
     document.getElementById("allocationModal").style.display = "none";
   }
-  function editAllocation(id) {
-    alert("Edit allocation " + id);
+
+  function deleteAllocation(allocationId, categoryName) {
+    if (!confirm('Are you sure you want to delete the allocation for "' + categoryName + '"?')) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+    fetch("{% url 'delete_budget_allocation' budget.pk 0 %}".replace('0', allocationId), {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to delete allocation'));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to delete allocation. Please try again.');
+    });
   }
-  function viewTransactions(id) {
-    alert("View transactions for category " + id);
+
+  function viewTransactions(categoryId) {
+    // Redirect to transaction list filtered by category
+    window.location.href = "{% url 'transaction_list' %}?category=" + categoryId;
   }
+
   function saveAllocation() {
-    alert("Save allocation");
+    const form = document.getElementById("allocationForm");
+    const isEditMode = document.getElementById('isEditMode').value === 'true';
+    
+    if (isEditMode) {
+      // Handle edit mode
+      const allocationId = document.getElementById('editAllocationId').value;
+      const categoryName = document.getElementById('edit_category').value;
+      const allocatedAmount = document.getElementById('edit_allocated_amount').value;
+      const categoryType = document.getElementById('edit_category_type').value;
+      const varianceReason = document.getElementById('variance_reason').value;
+      
+      if (!categoryName || !allocatedAmount || !categoryType) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+      
+      if (parseFloat(allocatedAmount) <= 0) {
+        alert('Allocated amount must be greater than 0.');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+      formData.append('category_name', categoryName);
+      formData.append('allocated_amount', allocatedAmount);
+      formData.append('category_type', categoryType);
+      formData.append('variance_reason', varianceReason);
+      
+      fetch("{% url 'edit_budget_allocation' budget.pk 0 %}".replace('0', allocationId), {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeModal();
+          window.location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to update allocation'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update allocation. Please try again.');
+      });
+    } else {
+      // Handle add mode
+      const formData = new FormData();
+      formData.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+      
+      // Collect all allocation rows
+      const rows = document.querySelectorAll('.allocation-row');
+      const allocations = [];
+      
+      rows.forEach((row, index) => {
+        const categoryInput = row.querySelector(`input[name^="category_"]`);
+        const amountInput = row.querySelector(`input[name^="allocated_amount_"]`);
+        const typeSelect = row.querySelector(`select[name^="category_type_"]`);
+        
+        if (categoryInput && amountInput && typeSelect) {
+          allocations.push({
+            category_name: categoryInput.value,
+            allocated_amount: amountInput.value,
+            category_type: typeSelect.value
+          });
+        }
+      });
+      
+      if (allocations.length === 0) {
+        alert('Please add at least one allocation.');
+        return;
+      }
+      
+      // Validate all allocations
+      for (let alloc of allocations) {
+        if (!alloc.category_name || !alloc.allocated_amount || !alloc.category_type) {
+          alert('Please fill in all fields for each allocation.');
+          return;
+        }
+        if (parseFloat(alloc.allocated_amount) <= 0) {
+          alert('Allocated amount must be greater than 0.');
+          return;
+        }
+      }
+      
+      formData.append('allocations', JSON.stringify(allocations));
+      
+      // Submit to the add_budget_allocation URL
+      fetch("{% url 'add_budget_allocation' budget.pk %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeModal();
+          window.location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to add allocation'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add allocation. Please try again.');
+      });
+    }
   }
+
   window.onclick = function (event) {
     if (event.target == document.getElementById("allocationModal"))
       closeModal();

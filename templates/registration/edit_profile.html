@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - {{ user.username }}{% endblock %}
+{% block internal_style %}
+<style>
+    /* Glassmorphism Design System */
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --secondary: #f093fb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.9);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: rgba(255, 255, 255, 0.5);
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+        --shadow-md: 0 8px 24px rgba(0,0,0,0.1);
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page Background */
+    .edit-profile-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem 1rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* Main Container */
+    .edit-profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Glass Card */
+    .glass-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    /* Card Header */
+    .card-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2rem;
+        color: white;
+        text-align: center;
+    }
+
+    .card-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .card-header h2 i {
+        font-size: 2rem;
+        opacity: 0.9;
+    }
+
+    .card-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    /* Card Body */
+    .card-body {
+        padding: 2rem;
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    .section-header i {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group label i {
+        margin-right: 0.5rem;
+        color: var(--primary);
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        transition: var(--transition);
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Profile Picture Section */
+    .picture-section {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .current-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        box-shadow: var(--shadow-md);
+    }
+
+    .picture-upload {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    /* File Input Styling */
+    input[type="file"] {
+        padding: 0.75rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    input[type="file"]::file-selector-button {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        margin-right: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        opacity: 0.9;
+    }
+
+    /* Error & Help Text */
+    .error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .error::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    .help-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-glass {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-glass:hover::before {
+        left: 100%;
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-glass-outline {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .edit-profile-page {
+            padding: 1rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-glass,
+        .btn-glass-outline {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-page">
+    <div class="edit-profile-container">
+        <div class="glass-card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <h2><i class="fas fa-user-edit"></i> Edit Profile</h2>
+                <p>Update your personal information and preferences</p>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-user"></i>
+                            <h3>Basic Information</h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="id_firstname"><i class="fas fa-id-card"></i> First Name</label>
+                                {{ form.firstname }}
+                                {% if form.firstname.errors %}
+                                    <p class="error">{{ form.firstname.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_lastname"><i class="fas fa-id-card"></i> Last Name</label>
+                                {{ form.lastname }}
+                                {% if form.lastname.errors %}
+                                    <p class="error">{{ form.lastname.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_phone"><i class="fas fa-phone"></i> Phone Number</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <p class="error">{{ form.phone.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_title"><i class="fas fa-briefcase"></i> Title / Position</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <p class="error">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                            <p class="help-text">e.g., Choir Member, Parish Council, etc.</p>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="id_about"><i class="fas fa-info-circle"></i> About Me</label>
+                            {{ form.about }}
+                            {% if form.about.errors %}
+                                <p class="error">{{ form.about.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-camera"></i>
+                            <h3>Profile Picture</h3>
+                        </div>
+
+                        <div class="picture-section">
+                            {% if profile.picture %}
+                            <img src="{{ profile.picture.url }}" alt="Current Profile Picture" class="current-picture">
+                            {% endif %}
+
+                            <div class="picture-upload form-group">
+                                <label for="id_picture">
+                                    <i class="fas fa-upload"></i>
+                                    {% if profile.picture %}Change{% else %}Upload{% endif %} Picture
+                                </label>
+                                {{ form.picture }}
+                                {% if form.picture.errors %}
+                                    <p class="error">{{ form.picture.errors.0 }}</p>
+                                {% endif %}
+                                <p class="help-text">Recommended size: 400x400 pixels. Max file size: 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-address-card"></i>
+                            <h3>Additional Contact</h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="id_telephone"><i class="fas fa-phone-alt"></i> Telephone</label>
+                                {{ form.telephone }}
+                                {% if form.telephone.errors %}
+                                    <p class="error">{{ form.telephone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_whatsapp_line"><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                                {{ form.whatsapp_line }}
+                                {% if form.whatsapp_line.errors %}
+                                    <p class="error">{{ form.whatsapp_line.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Links -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-share-alt"></i>
+                            <h3>Social Media Links</h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="id_facebook_link"><i class="fab fa-facebook" style="color: #1877f2;"></i> Facebook</label>
+                                {{ form.facebook_link }}
+                                {% if form.facebook_link.errors %}
+                                    <p class="error">{{ form.facebook_link.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_twitter_link"><i class="fab fa-twitter" style="color: #1da1f2;"></i> Twitter</label>
+                                {{ form.twitter_link }}
+                                {% if form.twitter_link.errors %}
+                                    <p class="error">{{ form.twitter_link.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="id_instagram_link"><i class="fab fa-instagram" style="color: #e4405f;"></i> Instagram</label>
+                            {{ form.instagram_link }}
+                            {% if form.instagram_link.errors %}
+                                <p class="error">{{ form.instagram_link.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-glass">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a href="{% url 'user_profile' %}" class="btn-glass-outline">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,63 +1,368 @@
-{% extends "finance/layout.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block body %}
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'financial_dashboard' %}" class="nav-brand">Finance Tracker</a>
-            <div class="nav-links">
-                <a href="{% url 'financial_dashboard' %}">Dashboard</a>
-                <a href="{% url 'transaction_list' %}">Transactions</a>
-                <a href="{% url 'category_list' %}">Categories</a>
-                <a href="{% url 'role_management' %}">Profile</a>
-                <a href="{% url '_logout' %}" class="btn-logout">Logout</a>
-            </div>
-        </div>
-    </nav>
+{% block title %}Add Category{% endblock %}
 
-    <main class="main-content">
-        {% if messages %}
-            <div class="messages">
+{% block internal_style %}
+<style>
+    .category-hero {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .category-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .category-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .form-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .form-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .form-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+    .form-body {
+        padding: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        transition: all var(--transition-fast);
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    .form-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.375rem;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.625rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    .btn-secondary {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 0.625rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-secondary:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .category-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="category-hero">
+        <div>
+            <h1><i class="fas fa-tags"></i>{% if category %}Edit Category{% else %}Add Category{% endif %}</h1>
+        </div>
+        <a href="{% url 'category_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Categories
+        </a>
+    </div>
+
+    <!-- Category Form -->
+    <div class="form-card">
+        <div class="form-header">
+            <h5><i class="fas fa-edit me-2"></i>Category Details</h5>
+        </div>
+        <div class="form-body">
+            {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
+                    <div class="alert alert-{{ message.tags }} mb-3">
                         {{ message }}
                     </div>
                 {% endfor %}
-            </div>
-        {% endif %}
-
-        <div class="card form-container" style="max-width: 500px;">
-            <div class="card-header">
-                <h1 class="card-title">Add New Category</h1>
-            </div>
+            {% endif %}
 
             <form method="POST">
                 {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="name">Category Name *</label>
-                    <input type="text" id="name" name="name" class="form-control" 
-                           placeholder="e.g., Groceries, Salary, Rent" required>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="name">Category Name *</label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                   placeholder="e.g., Sunday Collection, Priest Salary"
+                                   value="{% if category %}{{ category.name }}{% endif %}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="type">Type *</label>
+                            <select id="type" name="type" class="form-control" required>
+                                <option value="">Select Type</option>
+                                <option value="INCOME" {% if category and category.type == 'INCOME' %}selected{% endif %}>Income</option>
+                                <option value="EXPENSE" {% if category and category.type == 'EXPENSE' %}selected{% endif %}>Expense</option>
+                                <option value="ASSET" {% if category and category.type == 'ASSET' %}selected{% endif %}>Asset</option>
+                                <option value="LIABILITY" {% if category and category.type == 'LIABILITY' %}selected{% endif %}>Liability</option>
+                                <option value="EQUITY" {% if category and category.type == 'EQUITY' %}selected{% endif %}>Equity</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="type">Type *</label>
-                    <select id="type" name="type" class="form-control" required>
-                        <option value="">Select Type</option>
-                        <option value="Income">Income</option>
-                        <option value="Expense">Expense</option>
+                    <label for="subcategory">Subcategory</label>
+                    <select id="subcategory" name="subcategory" class="form-control">
+                        <option value="">Select Subcategory (Optional)</option>
                     </select>
+                    <small class="form-text">Subcategory options will update based on type selection</small>
                 </div>
 
-                <div class="actions">
-                    <button type="submit" class="btn btn-submit">Add Category</button>
-                    <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3"
+                              placeholder="Describe this category...">{% if category %}{{ category.description }}{% endif %}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="budget_code">Budget Code</label>
+                            <input type="text" id="budget_code" name="budget_code" class="form-control"
+                                   placeholder="e.g., 1001, 2001"
+                                   value="{% if category %}{{ category.budget_code }}{% endif %}">
+                            <small class="form-text">Standard accounting code for budget tracking</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="department" name="department" class="form-control"
+                                   placeholder="e.g., Administration, Programs"
+                                   value="{% if category %}{{ category.department }}{% endif %}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="parent_category">Parent Category</label>
+                    <select id="parent_category" name="parent_category" class="form-control">
+                        <option value="">No Parent Category</option>
+                        {% for cat in all_categories %}
+                            <option value="{{ cat.id }}" {% if category and category.parent_category_id == cat.id %}selected{% endif %}>{{ cat.name }} ({{ cat.get_type_display }})</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text">Create a hierarchy by selecting a parent category</small>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="is_active" name="is_active" class="form-check-input"
+                               {% if not category or category.is_active %}checked{% endif %}>
+                        <label for="is_active" class="form-check-label">
+                            Active
+                        </label>
+                        <small class="form-text">Uncheck to deactivate this category</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'category_list' %}" class="btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Category
+                    </button>
                 </div>
             </form>
         </div>
-    </main>
+    </div>
+</div>
+{% endblock %}
 
-    <footer class="footer">
-        <p>&copy; 2025 Kristo Mfalme. All rights reserved.</p>
-    </footer>
+{% block extra_js %}
+<script>
+// Subcategory choices based on type
+const subcategoryChoices = {
+    'INCOME': [
+        {value: 'OFFERING', label: 'Offerings'},
+        {value: 'TITHE', label: 'Tithes'},
+        {value: 'DONATIONS', label: 'Donations'},
+        {value: 'INVESTMENT', label: 'Investment Income'},
+        {value: 'RENTAL', label: 'Rental Income'},
+        {value: 'EVENT_FEES', label: 'Event Fees'},
+        {value: 'OTHER_INCOME', label: 'Other Income'}
+    ],
+    'EXPENSE': [
+        {value: 'SALARIES', label: 'Salaries & Wages'},
+        {value: 'BENEFITS', label: 'Employee Benefits'},
+        {value: 'UTILITIES', label: 'Utilities'},
+        {value: 'MAINTENANCE', label: 'Maintenance & Repairs'},
+        {value: 'OFFICE_SUPPLIES', label: 'Office Supplies'},
+        {value: 'MARKETING', label: 'Marketing & Outreach'},
+        {value: 'INSURANCE', label: 'Insurance'},
+        {value: 'TAXES', label: 'Taxes'},
+        {value: 'DEPRECIATION', label: 'Depreciation'},
+        {value: 'INTEREST', label: 'Interest Expense'},
+        {value: 'PROGRAMS', label: 'Program Expenses'},
+        {value: 'MISSIONS', label: 'Mission Expenses'},
+        {value: 'OTHER_EXPENSE', label: 'Other Expenses'}
+    ],
+    'ASSET': [
+        {value: 'CASH', label: 'Cash & Cash Equivalents'},
+        {value: 'ACCOUNTS_RECEIVABLE', label: 'Accounts Receivable'},
+        {value: 'INVENTORY', label: 'Inventory'},
+        {value: 'PREPAID', label: 'Prepaid Expenses'},
+        {value: 'PROPERTY', label: 'Property & Equipment'},
+        {value: 'INVESTMENTS', label: 'Investments'},
+        {value: 'INTANGIBLE', label: 'Intangible Assets'}
+    ],
+    'LIABILITY': [
+        {value: 'ACCOUNTS_PAYABLE', label: 'Accounts Payable'},
+        {value: 'ACCRUED_EXPENSES', label: 'Accrued Expenses'},
+        {value: 'SHORT_TERM_DEBT', label: 'Short-term Debt'},
+        {value: 'LONG_TERM_DEBT', label: 'Long-term Debt'},
+        {value: 'DEFERRED_REVENUE', label: 'Deferred Revenue'}
+    ],
+    'EQUITY': [
+        {value: 'MEMBER_CONTRIBUTIONS', label: 'Member Contributions'},
+        {value: 'RETAINED_EARNINGS', label: 'Retained Earnings'},
+        {value: 'NET_ASSETS', label: 'Net Assets'}
+    ]
+};
+
+// Update subcategory dropdown based on type selection
+function updateSubcategoryDropdown(type, selectedValue = null) {
+    const subcategorySelect = document.getElementById('subcategory');
+
+    // Clear existing options
+    subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional)</option>';
+
+    // Add new options based on type
+    if (type && subcategoryChoices[type]) {
+        subcategoryChoices[type].forEach(function(choice) {
+            const option = document.createElement('option');
+            option.value = choice.value;
+            option.textContent = choice.label;
+            if (selectedValue && choice.value === selectedValue) {
+                option.selected = true;
+            }
+            subcategorySelect.appendChild(option);
+        });
+    }
+}
+
+// Event listener for type change
+document.getElementById('type').addEventListener('change', function() {
+    updateSubcategoryDropdown(this.value);
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type');
+    const currentType = typeSelect.value;
+    const currentSubcategory = document.getElementById('subcategory').value;
+
+    if (currentType) {
+        updateSubcategoryDropdown(currentType, currentSubcategory);
+    }
+});
+</script>
 {% endblock %}

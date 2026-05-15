@@ -1,6 +1,95 @@
 {% extends 'base.html' %}
 
 {% block title %}Request Sacrament{% endblock %}
+{% block internal_style %}
+<style>
+    .request-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .request-container h2 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+    .member-info {
+        background: #f0f9ff;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 25px;
+        border-left: 4px solid #3b82f6;
+    }
+    .member-info p {
+        margin: 5px 0;
+        color: #1e40af;
+    }
+    .warning {
+        background: #fef3c7;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .sacrament-info {
+        background: #f9fafb;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    .btn-submit {
+        background-color: #10b981;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-submit:hover {
+        background-color: #059669;
+    }
+    .btn-cancel {
+        background-color: #e5e7eb;
+        color: #374151;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .btn-cancel:hover {
+        background-color: #d1d5db;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <style>
@@ -115,6 +204,13 @@
     <form method="post">
         {% csrf_token %}
         
+        {% if not available_sacraments %}
+        <div class="warning" style="background: #fef3c7; padding: 15px; border-radius: 6px; border-left: 4px solid #f59e0b; color: #92400e; margin-bottom: 20px;">
+            <strong>This member has already requested all available sacraments.</strong><br>
+            No more sacraments can be requested at this time.
+        </div>
+        {% endif %}
+        
         <div class="form-group">
             <label for="id_sacrament">Select Sacrament *</label>
             {{ form.sacrament }}
@@ -122,7 +218,11 @@
                 <p style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.sacrament.errors.0 }}</p>
             {% endif %}
             <div class="sacrament-info">
-                Available sacraments based on your uploaded documents.
+                {% if available_sacraments %}
+                    Available: {{ available_sacraments|length }} sacrament(s)
+                {% else %}
+                    All sacraments already requested
+                {% endif %}
             </div>
         </div>
         
@@ -135,7 +235,7 @@
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn-submit">Submit Request</button>
+            <button type="submit" class="btn-submit" {% if not available_sacraments %}disabled{% endif %}>Submit Request</button>
             <a href="{% url 'member_detail' member.pk %}" class="btn-cancel">Cancel</a>
         </div>
     </form>

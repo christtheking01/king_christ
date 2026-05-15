@@ -1,133 +1,181 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Audit Log Detail{% endblock %}
+
+{% block internal_style %}
+<style>
+  .audit-container { padding: 20px; }
+  .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .audit-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+  .audit-header h1 i { color: var(--primary); }
+  .audit-header p { color: var(--text-muted); margin: 4px 0 0 0; }
+  .back-btn { padding: 10px 20px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .back-btn:hover { background: var(--bg-secondary); }
+  
+  .content-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--bg-secondary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+  .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-header h5 i { color: var(--primary); }
+  .card-body { padding: 20px; }
+  
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+  .detail-item { display: flex; flex-direction: column; gap: 4px; }
+  .detail-item.full-width { grid-column: 1 / -1; }
+  .detail-item label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .detail-item .value { color: var(--text-primary); font-size: 0.95rem; }
+  .detail-item code { background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+  
+  .user-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; }
+  .user-badge.admin { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .user-badge.member { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .user-badge.system { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  .action-badge { background: var(--primary); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; }
+  .status-badge.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .status-badge.error { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  
+  .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); padding: 12px 16px; border-radius: var(--border-radius-sm); }
+  .code-block { background: var(--bg-secondary); padding: 16px; border-radius: var(--border-radius-sm); font-family: monospace; font-size: 0.85rem; color: var(--text-primary); word-break: break-all; }
+  
+  .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+  @media (max-width: 900px) { .data-grid { grid-template-columns: 1fr; } }
+  .data-card.old { border-left: 4px solid var(--danger); }
+  .data-card.new { border-left: 4px solid var(--success); }
+  .data-card .card-header { background: var(--bg-secondary); }
+  .data-card.old .card-header { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .data-card.new .card-header { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  pre { margin: 0; padding: 16px; background: var(--bg-secondary); font-size: 0.85rem; color: var(--text-primary); max-height: 400px; overflow-y: auto; border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-eye"></i> Audit Log Detail
-        </h1>
-        <a href="{% url 'audit_log_list' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Logs
-        </a>
+<div class="audit-container">
+  <!-- Header -->
+  <div class="audit-header">
+    <div>
+      <h1><i class="fas fa-eye"></i>Audit Log Detail</h1>
+      <p>View detailed information about this audit log entry</p>
     </div>
+    <a href="{% url 'audits:audit_log_list' %}" class="back-btn">
+      <i class="fas fa-arrow-left"></i>Back to Logs
+    </a>
+  </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Log Information</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tr>
-                            <td width="30%"><strong>ID:</strong></td>
-                            <td>{{ log.id }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Timestamp:</strong></td>
-                            <td>{{ log.timestamp|date:"Y-m-d H:i:s.u" }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>User:</strong></td>
-                            <td>
-                                {% if log.user %}
-                                    <a href="{% url 'view_user' log.user.id %}">{{ log.user.username }}</a>
-                                    ({{ log.user.get_full_name }})
-                                {% else %}
-                                    <span class="text-muted">System/Anonymous</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Action:</strong></td>
-                            <td>
-                                <span class="badge badge-{% if log.action == 'CREATE' %}success{% elif log.action == 'UPDATE' %}info{% elif log.action == 'DELETE' %}danger{% else %}primary{% endif %}" style="font-size: 1em;">
-                                    {{ log.action }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Model:</strong></td>
-                            <td>{{ log.model_name|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Object ID:</strong></td>
-                            <td>{{ log.object_id|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Object Representation:</strong></td>
-                            <td>{{ log.object_repr|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>IP Address:</strong></td>
-                            <td>{{ log.ip_address|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Path:</strong></td>
-                            <td><code>{{ log.path|default:"-" }}</code></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Status:</strong></td>
-                            <td>
-                                {% if log.status == 'SUCCESS' %}
-                                    <span class="text-success"><i class="fas fa-check-circle"></i> Success</span>
-                                {% else %}
-                                    <span class="text-danger"><i class="fas fa-times-circle"></i> Failed</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% if log.error_message %}
-                        <tr>
-                            <td><strong>Error Message:</strong></td>
-                            <td class="text-danger">{{ log.error_message }}</td>
-                        </tr>
-                        {% endif %}
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">User Agent</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted" style="word-break: break-all;">{{ log.user_agent|default:"No user agent recorded" }}</p>
-                </div>
-            </div>
-        </div>
+  <!-- Log Summary -->
+  <div class="content-card">
+    <div class="card-header">
+      <h5><i class="fas fa-info-circle"></i>Log Information</h5>
     </div>
-
-    {% if log.old_values or log.new_values %}
-    <div class="row mt-4">
-        {% if log.old_values %}
-        <div class="col-md-6">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Old Values</h5>
-                </div>
-                <div class="card-body">
-                    <pre class="mb-0"><code>{{ log.old_values|pprint }}</code></pre>
-                </div>
-            </div>
+    <div class="card-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Log ID</label>
+          <div class="value"><code>{{ log.id }}</code></div>
+        </div>
+        <div class="detail-item">
+          <label>Timestamp</label>
+          <div class="value">{{ log.timestamp|date:"Y-m-d H:i:s.u" }}</div>
+        </div>
+        <div class="detail-item">
+          <label>User Type</label>
+          <div class="value">
+            {% if log.user %}
+              {% if log.user.is_superuser or log.user.is_staff or log.user.roles in 'admin,Admin,chairperson,vice_chairperson,secretary,accountant,treasurer,priest,catechist,coordinator' %}
+                <span class="user-badge admin"><i class="fas fa-user-shield"></i>Administrator</span>
+              {% else %}
+                <span class="user-badge member"><i class="fas fa-user"></i>Church Member</span>
+              {% endif %}
+            {% else %}
+              <span class="user-badge system"><i class="fas fa-robot"></i>System / Unknown</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="detail-item">
+          <label>User</label>
+          <div class="value">
+            {% if log.user %}
+              <a href="{% url 'view_user' log.user.id %}"><strong>{{ log.user.username }}</strong></a>
+              {% if log.user.get_full_name %}<span style="color: var(--text-muted);">({{ log.user.get_full_name }})</span>{% endif %}
+            {% else %}
+              <span style="color: var(--text-muted);">System / Anonymous</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="detail-item">
+          <label>Action</label>
+          <div class="value"><span class="action-badge">{{ log.action }}</span></div>
+        </div>
+        <div class="detail-item">
+          <label>Status</label>
+          <div class="value">
+            {% if log.status == 'SUCCESS' %}
+              <span class="status-badge success"><i class="fas fa-check-circle"></i>Success</span>
+            {% else %}
+              <span class="status-badge error"><i class="fas fa-times-circle"></i>Failed</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="detail-item">
+          <label>Model</label>
+          <div class="value">{{ log.model_name|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <label>Object ID</label>
+          <div class="value"><code>{{ log.object_id|default:"-" }}</code></div>
+        </div>
+        <div class="detail-item full-width">
+          <label>Object Representation</label>
+          <div class="value">{{ log.object_repr|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <label>IP Address</label>
+          <div class="value"><code>{{ log.ip_address|default:"-" }}</code></div>
+        </div>
+        <div class="detail-item">
+          <label>Request Path</label>
+          <div class="value"><code>{{ log.path|default:"-" }}</code></div>
+        </div>
+        {% if log.error_message %}
+        <div class="detail-item full-width">
+          <label>Error Message</label>
+          <div class="alert-error">{{ log.error_message }}</div>
         </div>
         {% endif %}
+      </div>
+    </div>
+  </div>
 
-        {% if log.new_values %}
-        <div class="col-md-6">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">New Values</h5>
-                </div>
-                <div class="card-body">
-                    <pre class="mb-0"><code>{{ log.new_values|pprint }}</code></pre>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+  <!-- User Agent -->
+  <div class="content-card">
+    <div class="card-header">
+      <h5><i class="fas fa-desktop"></i>User Agent</h5>
+    </div>
+    <div class="card-body">
+      <div class="code-block">{{ log.user_agent|default:"No user agent recorded" }}</div>
+    </div>
+  </div>
+
+  <!-- Data Changes -->
+  {% if log.old_values or log.new_values %}
+  <div class="data-grid">
+    {% if log.old_values %}
+    <div class="content-card data-card old">
+      <div class="card-header">
+        <h5><i class="fas fa-history"></i>Old Values</h5>
+      </div>
+      <pre><code>{{ log.old_values|pprint }}</code></pre>
     </div>
     {% endif %}
+    {% if log.new_values %}
+    <div class="content-card data-card new">
+      <div class="card-header">
+        <h5><i class="fas fa-file-alt"></i>New Values</h5>
+      </div>
+      <pre><code>{{ log.new_values|pprint }}</code></pre>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

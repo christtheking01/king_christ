@@ -133,9 +133,9 @@
         <div class="finance-card-header">
             <h6>All Budgets</h6>
             <div class="finance-btn-group">
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportBudgets()">
+                <a href="{% url 'export_budgets' %}" class="finance-btn finance-btn-sm finance-btn-outline">
                     <i class="fas fa-download"></i> Export
-                </button>
+                </a>
                 <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printBudgets()">
                     <i class="fas fa-print"></i> Print
                 </button>
@@ -167,9 +167,9 @@
                                 <div>{{ budget.start_date|date:"M d, Y" }}</div>
                                 <small style="color: #666;">to {{ budget.end_date|date:"M d, Y" }}</small>
                             </td>
-                            <td style="font-weight: 600;">${{ budget.total_amount|floatformat:2 }}</td>
-                            <td style="color: #ffc107; font-weight: 600;">${{ budget.spent_amount|floatformat:2 }}</td>
-                            <td style="color: #28a745; font-weight: 600;">${{ budget.remaining_amount|floatformat:2 }}</td>
+                            <td style="font-weight: 600;">TSH {{ budget.total_amount|floatformat:2 }}</td>
+                            <td style="color: #ffc107; font-weight: 600;">TSH {{ budget.spent_amount|floatformat:2 }}</td>
+                            <td style="color: #28a745; font-weight: 600;">TSH {{ budget.remaining_amount|floatformat:2 }}</td>
                             <td>
                                 {% if budget.total_amount > 0 %}
                                 <div class="finance-progress">

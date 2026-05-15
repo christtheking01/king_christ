@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tithe Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Tithe Analytics Dashboard</h1>
+            <p class="text-muted">Overview of tithe collection and trends</p>
+        </div>
+        <div>
+            <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Payments
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="p-3 bg-primary bg-opacity-10 rounded-circle">
+                                <i class="fas fa-coins text-primary fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-1">Total Collected</h6>
+                            <h4 class="mb-0">TSH {{ total_collected|floatformat:2 }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="p-3 bg-success bg-opacity-10 rounded-circle">
+                                <i class="fas fa-receipt text-success fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-1">Total Payments</h6>
+                            <h4 class="mb-0">{{ total_payments }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="p-3 bg-info bg-opacity-10 rounded-circle">
+                                <i class="fas fa-chart-line text-info fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-1">Average Payment</h6>
+                            <h4 class="mb-0">TSH {{ average_payment|floatformat:2 }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="p-3 {% if growth_percentage >= 0 %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 rounded-circle">
+                                <i class="fas {% if growth_percentage >= 0 %}fa-arrow-trend-up text-success{% else %}fa-arrow-trend-down text-danger{% endif %} fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-1">Growth (30d)</h6>
+                            <h4 class="mb-0 {% if growth_percentage >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ growth_percentage|floatformat:1 }}%
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Tithe Collection Trends</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Chart visualization will be displayed here. Integrate with Chart.js or similar library for data visualization.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-primary">
+                            <i class="fas fa-list"></i> View All Payments
+                        </a>
+                        <a href="{% url 'tithepayment:monthly_report' %}" class="btn btn-info">
+                            <i class="fas fa-calendar"></i> Monthly Report
+                        </a>
+                        <a href="{% url 'tithepayment:export_tithe_payments' %}" class="btn btn-success">
+                            <i class="fas fa-download"></i> Export Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

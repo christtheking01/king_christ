@@ -1,23 +1,1612 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% load static %} {% load i18n %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Christ The King Parish</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#667eea" />
+    <meta
+      name="description"
+      content="Christ The King Parish Management System - A modern solution for church administration"
+    />
+    <!-- PWA Meta Tags for Add to Home Screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CTK Parish">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="CTK Parish">
+    <title>
+      {% block title %}{% trans "Christ The King Parish" %}{% endblock %}
+    </title>
 
-    <!-- Fonts -->
+    <!-- Google Fonts - Modern Inter & Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script src="{% static 'libs/js/base.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'style/css/base.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" /> 
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛪</text></svg>"
+      type="image/svg+xml"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛪</text></svg>"
+      type="image/svg+xml"
+    />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛪</text></svg>" />
+
+    <!-- Modern Base Styles -->
+    <style>
+      :root {
+        /* Modern Color Palette */
+        --primary: #667eea;
+        --primary-dark: #5a67d8;
+        --primary-light: #7c3aed;
+        --secondary: #f093fb;
+        --accent: #4facfe;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+
+        /* Neutral Colors */
+        --bg-primary: #f8fafc;
+        --bg-secondary: #f1f5f9;
+        --bg-tertiary: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+
+        /* Glassmorphism */
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-bg-dark: rgba(30, 41, 59, 0.95);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+        /* Gradients */
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --gradient-sidebar: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        --gradient-header: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+
+        /* Typography */
+        --font-primary:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-display: "Playfair Display", Georgia, serif;
+
+        /* Spacing */
+        --sidebar-width: 280px;
+        --sidebar-collapsed: 80px;
+        --header-height: 70px;
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --border-radius-lg: 16px;
+
+        /* Transitions */
+        --transition-fast: 0.15s ease;
+        --transition-base: 0.25s ease;
+        --transition-slow: 0.35s ease;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        --shadow-glow: 0 0 20px rgba(102, 126, 234, 0.4);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-primary);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      /* Animated Background Pattern */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          radial-gradient(
+            circle at 20% 50%,
+            rgba(102, 126, 234, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(118, 75, 162, 0.06) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 20%,
+            rgba(240, 147, 251, 0.04) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: -1;
+        animation: backgroundPulse 15s ease-in-out infinite;
+      }
+
+      @keyframes backgroundPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      /* App Container */
+      .app-container {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+      }
+
+      /* ============================================
+           SIDEBAR - Modern Glassmorphism Design
+           ============================================ */
+      .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: var(--gradient-sidebar);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        transition: all var(--transition-base);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .sidebar::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23667eea' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      /* Sidebar Header */
+      .sidebar-header {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-decoration: none;
+        color: white;
+        transition: all var(--transition-fast);
+      }
+
+      .logo:hover {
+        transform: translateX(4px);
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--gradient-primary);
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-icon::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 3s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%) translateY(-100%);
+        }
+        100% {
+          transform: translateX(100%) translateY(100%);
+        }
+      }
+
+      .logo-text {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.3;
+      }
+
+      .logo-text small {
+        display: block;
+        font-family: var(--font-primary);
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0.7;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+
+      /* Language Switcher */
+      .language-switcher {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .language-switcher form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .language-switcher .lang-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .lang-btn {
+        padding: 5px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .lang-btn:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .lang-btn.active {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+      }
+
+      /* Sidebar Navigation */
+      .sidebar-nav {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 16px 12px;
+      }
+
+      .sidebar-nav::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .sidebar-nav::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      .nav-section {
+        margin-bottom: 24px;
+      }
+
+      .nav-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 0 12px;
+        margin-bottom: 10px;
+      }
+
+      .nav-item {
+        margin-bottom: 4px;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        border-radius: var(--border-radius-sm);
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .nav-link::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--gradient-primary);
+        border-radius: 0 3px 3px 0;
+        transform: scaleY(0);
+        transition: transform var(--transition-fast);
+      }
+
+      .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .nav-link:hover::before {
+        transform: scaleY(0.6);
+      }
+
+      .nav-link.active {
+        color: white;
+        background: rgba(102, 126, 234, 0.2);
+      }
+
+      .nav-link.active::before {
+        transform: scaleY(1);
+      }
+
+      .nav-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: all var(--transition-fast);
+        flex-shrink: 0;
+      }
+
+      .nav-link:hover .nav-icon {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.1);
+      }
+
+      .nav-link.active .nav-icon {
+        background: var(--gradient-primary);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .nav-text {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .nav-chevron {
+        font-size: 0.75rem;
+        transition: transform var(--transition-fast);
+        opacity: 0.6;
+      }
+
+      .nav-link.active .nav-chevron {
+        opacity: 1;
+      }
+
+      .nav-toggle.active .nav-chevron {
+        transform: rotate(180deg);
+      }
+
+      /* Submenu */
+      .submenu {
+        display: none;
+        margin-left: 46px;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .submenu.open {
+        display: block;
+        max-height: 300px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .submenu::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .submenu::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .submenu::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+      }
+
+      .submenu::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .submenu-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 400;
+        transition: all var(--transition-fast);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+        position: relative;
+        white-space: nowrap;
+        min-height: 40px;
+      }
+
+      .submenu-link::before {
+        content: "";
+        position: absolute;
+        left: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 0;
+        background: var(--gradient-primary);
+        transition: height var(--transition-fast);
+      }
+
+      .submenu-link:hover {
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .submenu-link:hover::before {
+        height: 20px;
+      }
+
+      .submenu-link.active {
+        color: white;
+        background: rgba(102, 126, 234, 0.15);
+      }
+
+      .submenu-link.active::before {
+        height: 100%;
+      }
+
+      .submenu-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+
+      .submenu-text {
+        font-size: 0.85rem;
+      }
+
+      .nav-badge {
+        background: var(--danger);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: auto;
+      }
+
+      /* Sidebar Footer */
+      .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .user-avatar {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all var(--transition-fast);
+        cursor: pointer;
+      }
+
+      .user-avatar:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+      }
+
+      .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .user-avatar::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        background: var(--success);
+        border-radius: 50%;
+        border: 2px solid #1e293b;
+      }
+
+      .user-details {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .user-name {
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-role {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .logout-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: rgba(239, 68, 68, 0.9);
+        border-radius: var(--border-radius-sm);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .logout-btn:hover {
+        background: rgba(239, 68, 68, 0.3);
+        border-color: rgba(239, 68, 68, 0.5);
+        color: #ef4444;
+        transform: translateY(-1px);
+      }
+
+      /* Overlay for mobile */
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-base);
+      }
+
+      .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* ============================================
+           HEADER - Modern Glassmorphism
+           ============================================ */
+      .app-header {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: var(--sidebar-width);
+        height: var(--header-height);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--glass-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        z-index: 100;
+        box-shadow: var(--glass-shadow);
+        transition: all var(--transition-base);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .menu-toggle {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        cursor: pointer;
+        border-radius: var(--border-radius-sm);
+        transition: all var(--transition-fast);
+      }
+
+      .menu-toggle:hover {
+        background: var(--bg-secondary);
+        color: var(--primary);
+      }
+
+      .header-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+      }
+
+      .header-title span {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      /* Notification Button */
+      .notification-btn {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .notification-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow);
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: var(--danger);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        border: 2px solid var(--glass-bg);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      /* Notification Dropdown */
+      .notification-dropdown {
+        position: relative;
+      }
+
+      .notification-dropdown-content {
+        position: absolute;
+        top: calc(100% + 12px);
+        right: -10px;
+        width: 360px;
+        max-height: 480px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all var(--transition-base);
+        z-index: 1001;
+        overflow: hidden;
+      }
+
+      .notification-dropdown-content.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.05) 0%,
+          rgba(118, 75, 162, 0.05) 100%
+        );
+      }
+
+      .notification-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .mark-all-read {
+        font-size: 0.8rem;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color var(--transition-fast);
+      }
+
+      .mark-all-read:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+      }
+
+      .unread-count {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .notification-list {
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 8px;
+      }
+
+      .notification-item {
+        display: block;
+        padding: 12px 14px;
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        color: inherit;
+        transition: all var(--transition-fast);
+        margin-bottom: 4px;
+      }
+
+      .notification-item:hover {
+        background: var(--bg-secondary);
+      }
+
+      .notification-item.unread {
+        background: rgba(102, 126, 234, 0.08);
+        border-left: 3px solid var(--primary);
+      }
+
+      .notification-item-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+
+      .notification-title-text {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .notification-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .notification-message {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .notification-type {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 6px;
+      }
+
+      .notification-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+      }
+      .notification-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+      }
+      .notification-info {
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--info);
+      }
+      .notification-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+      }
+
+      .notification-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+      }
+
+      .notification-empty i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+      }
+
+      .notification-loading {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+      }
+
+      .notification-loading i {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+        color: var(--primary);
+      }
+
+      .notification-footer {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+      }
+
+      .notification-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .notification-footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* User Menu */
+      .user-menu {
+        position: relative;
+      }
+
+      .user-menu .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--border-radius);
+        border: 2px solid var(--primary-light);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .user-menu .user-avatar:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+      }
+
+      .user-menu .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ============================================
+           MAIN CONTENT
+           ============================================ */
+      .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        margin-top: var(--header-height);
+        padding: 24px;
+        min-height: calc(100vh - var(--header-height));
+        transition: all var(--transition-base);
+        overflow-x: hidden;
+        max-width: calc(100vw - var(--sidebar-width));
+        box-sizing: border-box;
+      }
+
+      /* ============================================
+           MODALS - Modern Glassmorphism
+           ============================================ */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-base);
+        padding: 20px;
+      }
+
+      .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        width: 100%;
+        max-width: 420px;
+        transform: scale(0.9) translateY(20px);
+        transition: all var(--transition-base);
+        overflow: hidden;
+      }
+
+      .modal-overlay.show .modal {
+        transform: scale(1) translateY(0);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.05) 0%,
+          rgba(118, 75, 162, 0.05) 100%
+        );
+      }
+
+      .modal-header h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .close-modal {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius-sm);
+        color: var(--text-secondary);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .close-modal:hover {
+        background: var(--danger);
+        color: white;
+      }
+
+      .modal-body {
+        padding: 24px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 24px;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: none;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+      }
+
+      .btn-outline:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1200px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+          transform: translateX(0);
+        }
+
+        .app-header {
+          left: 0;
+        }
+
+        .main-content {
+          margin-left: 0;
+          max-width: 100vw;
+        }
+
+        .menu-toggle {
+          display: flex;
+        }
+      }
+
+      @media (max-width: 768px) {
+        :root {
+          --header-height: 60px;
+        }
+
+        .main-content {
+          padding: 16px;
+        }
+
+        .header-title {
+          font-size: 1rem;
+        }
+
+        .notification-dropdown-content {
+          width: calc(100vw - 40px);
+          right: -60px;
+        }
+
+        .modal {
+          max-width: 100%;
+        }
+      }
+
+      /* Print Styles */
+      @media print {
+        .sidebar,
+        .app-header,
+        .sidebar-overlay,
+        .modal-overlay {
+          display: none !important;
+        }
+
+        .main-content {
+          margin: 0 !important;
+          padding: 20px !important;
+        }
+      }
+
+      /* ============================================
+         ENHANCED NAVIGATION STYLES
+         ============================================ */
+
+      /* Navigation Search */
+      .nav-search-container {
+        padding: 0 12px 16px;
+        position: relative;
+      }
+
+      .nav-search {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius);
+        color: white;
+        font-size: 0.85rem;
+        transition: all var(--transition-fast);
+      }
+
+      .nav-search::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .nav-search:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      }
+
+      .nav-search-icon {
+        position: absolute;
+        left: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.9rem;
+        pointer-events: none;
+      }
+
+      /* Section Cards */
+      .nav-section-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all var(--transition-fast);
+      }
+
+      .nav-section-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border-bottom: 1px solid transparent;
+      }
+
+      .nav-section-card.expanded .nav-section-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .nav-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .nav-section-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+      }
+
+      /* Color-coded section icons */
+      .nav-section-icon.overview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .nav-section-icon.parish {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+      .nav-section-icon.community {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+      .nav-section-icon.finance {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      }
+      .nav-section-icon.analytics {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .nav-section-icon.communication {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      }
+      .nav-section-icon.leadership {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #1e293b !important;
+      }
+      .nav-section-icon.admin {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #1e293b !important;
+      }
+
+      .nav-section-toggle {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.5);
+        transition: all var(--transition-fast);
+        cursor: pointer;
+      }
+
+      .nav-section-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .nav-section-card.expanded .nav-section-toggle {
+        transform: rotate(180deg);
+      }
+
+      .nav-section-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height var(--transition-base);
+      }
+
+      .nav-section-card.expanded .nav-section-content {
+        max-height: 600px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .nav-section-items {
+        padding: 8px;
+      }
+
+      /* Enhanced Nav Links */
+      .nav-link-enhanced {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border-radius: var(--border-radius-sm);
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 500;
+        transition: all var(--transition-fast);
+        position: relative;
+        margin-bottom: 3px;
+      }
+
+      .nav-link-enhanced:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(4px);
+      }
+
+      .nav-link-enhanced.active {
+        color: white;
+        background: rgba(102, 126, 234, 0.2);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+      }
+
+      .nav-link-enhanced .nav-icon-small {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        background: rgba(255, 255, 255, 0.08);
+        transition: all var(--transition-fast);
+      }
+
+      .nav-link-enhanced:hover .nav-icon-small {
+        background: rgba(102, 126, 234, 0.3);
+        transform: scale(1.1);
+      }
+
+      .nav-link-enhanced.active .nav-icon-small {
+        background: var(--gradient-primary);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      /* Item Count Badges */
+      .nav-item-count {
+        margin-left: auto;
+        background: rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 20px;
+        min-width: 24px;
+        text-align: center;
+      }
+
+      .nav-link-enhanced.active .nav-item-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+      }
+
+      /* Quick Stats Panel */
+      .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--border-radius);
+        margin: 0 12px 16px;
+      }
+
+      .quick-stat-item {
+        text-align: center;
+        padding: 10px 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        transition: all var(--transition-fast);
+      }
+
+      .quick-stat-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .quick-stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        display: block;
+      }
+
+      .quick-stat-label {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 2px;
+      }
+
+      /* Favorites Section */
+      .favorites-section {
+        padding: 0 12px 16px;
+      }
+
+      .favorites-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px 10px;
+      }
+
+      .favorites-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .favorite-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 12px 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.7rem;
+        transition: all var(--transition-fast);
+        border: 1px solid transparent;
+      }
+
+      .favorite-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        transform: translateY(-3px);
+      }
+
+      .favorite-item i {
+        font-size: 1.2rem;
+        color: var(--accent);
+      }
+
+      .favorite-item span {
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+      }
+
+      /* Submenu within cards */
+      .submenu-nested {
+        margin-left: 40px;
+        padding: 4px 0;
+        border-left: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .submenu-nested .submenu-link {
+        padding: 8px 12px;
+        font-size: 0.82rem;
+      }
+
+      /* Section Divider */
+      .nav-divider {
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        margin: 16px 12px;
+      }
+
+      /* Collapsed State */
+      .nav-section-card.collapsed .nav-section-content {
+        max-height: 0;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 1024px) {
+        .favorites-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .quick-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .favorites-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+    </style>
+
+    <!-- Bootstrap 5 CSS - Load after custom styles so Bootstrap utilities work -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     {% block internal_style %}{% endblock internal_style %}
   </head>
 
-<body>
+  <body>
     {% if user.is_authenticated %}
     <div class="app-container">
       <!-- Sidebar -->
@@ -27,570 +1616,1060 @@
             <div class="logo-icon">
               <i class="fas fa-church"></i>
             </div>
-            <div class="logo-text">Christ The King</div>
+            <div class="logo-text">
+              {% trans "Christ The King" %}
+              <small>{% trans "Parish Management" %}</small>
+            </div>
           </a>
         </div>
-        {% endif %}
+
+        <!-- Language Selector -->
+        <div class="language-switcher">
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <input
+              name="next"
+              type="hidden"
+              value="{{ request.get_full_path }}"
+            />
+            <span class="lang-label">
+              <i class="fas fa-globe"></i>{% trans "Language" %}
+            </span>
+            {% for lang_code, lang_name in LANGUAGES %}
+            <button
+              type="submit"
+              name="language"
+              value="{{ lang_code }}"
+              class="lang-btn {% if CURRENT_LANGUAGE_CODE == lang_code %}active{% endif %}"
+            >
+              {% if lang_code == 'en' %}EN{% elif lang_code == 'sw' %}SW{% else
+              %}{{ lang_code|upper }}{% endif %}
+            </button>
+            {% empty %} {% endfor %}
+          </form>
+        </div>
 
         <nav class="sidebar-nav">
           <div class="nav-scroll-container">
-            <div class="nav-section">
-              <div class="nav-label">Main Menu</div>
-
-              <div class="nav-item">
-                <a href="{% url 'home' %}" class="nav-link {% if home_active %}active{% endif %}">
-                  <div class="nav-icon">
-                    <i class="fas fa-home"></i>
-                  </div>
-                  <div class="nav-text">Dashboard</div>
-                </a>
+            <!-- Quick Stats Panel -->
+            <div class="quick-stats">
+              <div class="quick-stat-item">
+                <span class="quick-stat-value" id="statMembers"
+                  >{{ total_members|default:"0" }}</span
+                >
+                <span class="quick-stat-label">{% trans "Members" %}</span>
               </div>
-
-              <!-- Events & Calendar Dropdown -->
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if events_active %}active{% endif %}" data-target="events-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                  </div>
-                  <div class="nav-text">Events & Calendar</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
-                </div>
-                <div class="submenu" id="events-submenu" {% if events_active %}style="max-height: 500px;"{% endif %}>
-                  <a href="{% url 'calendar' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-calendar"></i>
-                    </div>
-                    <div class="submenu-text">Calendar View</div>
-                  </a>
-                  <a href="{% url 'event_list' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
-                    </div>
-                    <div class="submenu-text">All Events</div>
-                  </a>
-                  <a href="{% url 'liturgical_calendar' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-church"></i>
-                    </div>
-                    <div class="submenu-text">Liturgical Calendar</div>
-                  </a>
-                  <a href="{% url 'events_dashboard' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="submenu-text">Events Dashboard</div>
-                  </a>
-                  {% if user.is_authenticated %}
-                  <a href="{% url 'my_registrations' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div class="submenu-text">My Registrations</div>
-                  </a>
-                  <a href="{% url 'event_create' %}" class="submenu-link">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus-circle"></i>
-                    </div>
-                    <div class="submenu-text">Create Event</div>
-                  </a>
-                  {% endif %}
-                </div>
+              <div class="quick-stat-item">
+                <span class="quick-stat-value" id="statEvents"
+                  >{{ upcoming_events|default:"0" }}</span
+                >
+                <span class="quick-stat-label">{% trans "Events" %}</span>
               </div>
-
-              <!-- Ministries Dropdown -->
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if ministries_active_add or ministries_active_list %}active{% endif %}" data-target="ministries-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-building"></i>
-                  </div>
-                  <div class="nav-text">Ministries</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
-                </div>
-                <div class="submenu" id="ministries-submenu" {% if ministries_active_add or ministries_active_list%} style="max-height: 500px;" {% endif %} >
-                  <a href="{% url 'create_ministry' %}" class="submenu-link {% if ministries_active_add %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="submenu-text">Add Ministry</div>
-                  </a>
-                  <a href="{% url 'ministry_list' %}" class="submenu-link {% if ministries_active_list %}active{% endif %}" >
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
-                    </div>
-                    <div class="submenu-text">List Ministries</div>
-                  </a>
-                </div>
+              <div class="quick-stat-item">
+                <span class="quick-stat-value" id="statTithe"
+                  >{{ monthly_tithe|default:"0" }}</span
+                >
+                <span class="quick-stat-label">{% trans "Tithe" %}</span>
               </div>
-
-              <!-- Committee Dropdown -->
-            <div class="nav-item dropdown-menu">
-              <div class="nav-link nav-toggle {% if committee_active_add or committee_active_list %}active{% endif %}" data-target="committee-submenu">
-                <div class="nav-icon">
-                  <i class="fas fa-users-cog"></i>
-                </div>
-                <div class="nav-text">Committees</div>
-                <div class="nav-chevron">
-                  <i class="fas fa-chevron-down"></i>
-                </div>
-              </div>
-              <div class="submenu" id="committee-submenu" {% if committee_active_add or committee_active_list %}style="max-height: 500px;" {% endif %}>
-                <a href="{% url 'create_committee' %}" class="submenu-link {% if committee_active_add %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-user-plus"></i>
-                  </div>
-                  <div class="submenu-text">Add Committee</div>
-                </a>
-                <a href="{% url 'list_committees' %}" class="submenu-link {% if committee_active_list %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-table"></i>
-                  </div>
-                  <div class="submenu-text">List Committees</div>
-                </a>
+              <div class="quick-stat-item">
+                <span class="quick-stat-value" id="statPending"
+                  >{{ pending_count|default:"0" }}</span
+                >
+                <span class="quick-stat-label">{% trans "Pending" %}</span>
               </div>
             </div>
 
-          <!-- communities -->
-          <div class="nav-item dropdown-menu">
-              <div class="nav-link nav-toggle {% if shepherds_active_add or shepherds_active_list %}active{% endif %}" 
-                   data-target="community-submenu">
-                  <div class="nav-icon">
-                      <i class="fas fa-building"></i>
-                  </div>
-                  <div class="nav-text">Community</div>
-                  <div class="nav-chevron">
-                      <i class="fas fa-chevron-down"></i>
-                  </div>
-              </div>
-              
-              <div class="submenu" id="community-submenu" 
-                   {% if shepherds_active_add or shepherds_active_list %}style="max-height: 500px;"{% endif %}>
-                  <a href="{% url 'add_community' %}" class="submenu-link {% if shepherds_active_add %}active{% endif %}">
-                      <div class="submenu-icon">
-                          <i class="fas fa-plus"></i>
-                      </div>
-                      <div class="submenu-text">Add Community</div>
-                  </a>
-                  <a href="{% url 'list_community' %}" class="submenu-link {% if shepherds_active_list %}active{% endif %}">
-                      <div class="submenu-icon">
-                          <i class="fas fa-list"></i>
-                      </div>
-                      <div class="submenu-text">List Communities</div>
-                  </a>
-              </div>
-          </div>        
-                    
+            <!-- Navigation Search -->
+            <div class="nav-search-container">
+              <i class="fas fa-search nav-search-icon"></i>
+              <input
+                type="text"
+                class="nav-search"
+                id="navSearch"
+                placeholder="{% trans 'Search menu...' %}"
+                aria-label="{% trans 'Search navigation' %}"
+              />
+            </div>
 
-              <!-- Catechesis Dropdown -->
-            <div class="nav-item dropdown-menu">
-              <div class="nav-link nav-toggle {% if catechesis_register_active or catechesis_member_list or catechesis_member_detail or catechesis_sacrament_request_create or catechesis_pending_request or catechesis_review_request or catechesis_sacrament_list or catechesis_complete_request %}active{% endif %}" data-target="catechesis-submenu">
-                <div class="nav-icon">
-                  <i class="fas fa-cross"></i>
+            <!-- Section 1: Overview -->
+            <div class="nav-section-card expanded" data-section="overview">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon overview">
+                    <i class="fas fa-compass"></i>
+                  </div>
+                  <span>{% trans "Overview" %}</span>
                 </div>
-                <div class="nav-text">Catechesis</div>
-                <div class="nav-chevron">
+                <div class="nav-section-toggle">
                   <i class="fas fa-chevron-down"></i>
                 </div>
               </div>
-              
-              <div class="submenu" id="catechesis-submenu" {% if catechesis_register_active or catechesis_member_list or catechesis_member_detail or catechesis_sacrament_request_create or catechesis_pending_request or catechesis_review_request or catechesis_sacrament_list or catechesis_complete_request %}style="max-height: 500px;"{% endif %}>
-                
-                <!-- Register Member -->
-                <a href="{% url 'member_register' %}" class="submenu-link {% if catechesis_register_active %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-user-plus"></i>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <a
+                    href="{% url 'home' %}"
+                    class="nav-link-enhanced {% if home_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-home"></i>
+                    </div>
+                    <span>{% trans "Dashboard" %}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Parish Life -->
+            <div class="nav-section-card" data-section="parish">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon parish">
+                    <i class="fas fa-church"></i>
                   </div>
-                  <div class="submenu-text">Register Member</div>
-                </a>
-                
-                <!-- List Members -->
-                <a href="{% url 'member_list' %}" class="submenu-link {% if catechesis_member_list %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-users"></i>
+                  <span>{% trans "Parish Life" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if calendar_active or events_active or liturgical_calendar_active %}active{% endif %}"
+                    data-target="parish-calendar-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <span>{% trans "Calendar & Events" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
                   </div>
-                  <div class="submenu-text">View Members</div>
-                </a>
-                
-                <!-- Request Sacrament for Member -->
-                <a href="{% url 'member_list' %}" class="submenu-link">
-                  <div class="submenu-icon">
-                    <i class="fas fa-hand-holding-heart"></i>
+                  <div id="parish-calendar-submenu" class="submenu">
+                    <a href="{% url 'calendar' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calendar-alt"></i>
+                      </div>
+                      <span>{% trans "Calendar" %}</span>
+                    </a>
+                    <a href="{% url 'event_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calendar-week"></i>
+                      </div>
+                      <span>{% trans "Events" %}</span>
+                    </a>
+                    <a href="{% url 'events_dashboard' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-tachometer-alt"></i>
+                      </div>
+                      <span>{% trans "Events Dashboard" %}</span>
+                    </a>
+                    <a href="{% url 'liturgical_calendar' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-cross"></i>
+                      </div>
+                      <span>{% trans "Liturgical Calendar" %}</span>
+                    </a>
                   </div>
-                  <div class="submenu-text">Request Sacrament</div>
-                </a>
-                
-                <!-- Sacraments List -->
-                <a href="{% url 'sacrament_list' %}" class="submenu-link {% if catechesis_sacrament_list %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-scroll"></i>
+                  <a
+                    href="{% url 'my_registrations' %}"
+                    class="nav-link-enhanced {% if my_registrations_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <span>{% trans "My Registrations" %}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Catechesis & Sacraments -->
+            <div class="nav-section-card" data-section="catechesis">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon parish">
+                    <i class="fas fa-cross"></i>
                   </div>
-                  <div class="submenu-text">All Sacraments</div>
-                </a>
-                
-                <!-- Pending Requests (For Priests/Admin to approve) -->
-                {% if user.is_approver %}
-                <a href="{% url 'pending_requests' %}" class="submenu-link {% if catechesis_pending_request %}active{% endif %}">
-                  <div class="submenu-icon">
-                    <i class="fas fa-tasks"></i>
-                  </div>
-                  <div class="submenu-text">Review Requests</div>
+                  <span>{% trans "Sacraments" %}</span>
                   {% if pending_requests_count and pending_requests_count > 0 %}
                   <span class="nav-badge">{{ pending_requests_count }}</span>
                   {% endif %}
-                </a>
-                {% endif %}
-                
-              </div>
-            </div>
-
-              <!-- Members Dropdown -->
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if members_active_list or members_active_add %}active{% endif %}" data-target="members-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-users"></i>
-                  </div>
-                  <div class="nav-text">Members</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
                 </div>
-                <div class="submenu" id="members-submenu" {% if members_active_list or members_active_add %}style="max-height: 500px;" {% endif %}>
-                  <a href="{% url 'add_member' %}" class="submenu-link {% if members_active_add %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="submenu-text">Add Member</div>
-                  </a>
-                  <a href="{% url 'table_members' %}" class="submenu-link {% if members_active_list %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
-                    </div>
-                    <div class="submenu-text">List Members</div>
-                  </a>
-                  <a href="{% url 'family_list' %}" class="submenu-link {% if family_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-home"></i>
-                    </div>
-                    <div class="submenu-text">Families</div>
-                  </a>
-                  <a href="{% url 'family_membership_list' %}" class="submenu-link {% if membership_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-users-cog"></i>
-                    </div>
-                    <div class="submenu-text">Family Memberships</div>
-                  </a>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
                 </div>
               </div>
-
-              <!-- Finance Dropdown - Only for Admin/Accountant -->
-              {% if user.is_superuser or user.is_staff or user.roles == 'Accountant' %}
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if finance_active or tithepayment_active_list or tithepayment_active_create or tithepayment_active_summary or receipts_active %}active{% endif %}" data-target="finance-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                  </div>
-                  <div class="nav-text">TITHE PAYMENTS</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
-                </div>
-                <div class="submenu" id="finance-submenu" {% if finance_active or tithepayment_active_list or tithepayment_active_create or tithepayment_active_summary or receipts_active %}style="max-height: 500px;" {% endif %}>
-                  <a href="{% url 'tithepayment:tithepayment_list' %}" class="submenu-link {% if tithepayment_active_list %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-list"></i>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <a
+                    href="{% url 'member_register' %}"
+                    class="nav-link-enhanced {% if catechesis_register_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-user-plus"></i>
                     </div>
-                    <div class="submenu-text">All Tithe Payments</div>
+                    <span>{% trans "Register Member" %}</span>
                   </a>
-                  <a href="{% url 'tithepayment:tithepayment_create' %}" class="submenu-link {% if tithepayment_active_create %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-plus-circle"></i>
-                    </div>
-                    <div class="submenu-text">Add Tithe Payment</div>
-                  </a>
-                  <a href="{% url 'receipt_list' %}" class="submenu-link {% if receipts_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-receipt"></i>
-                    </div>
-                    <div class="submenu-text">Receipts</div>
-                  </a>
-                </div>
-              </div>
-
-              <!-- Financial Tracker Dropdown - Only for Admin/Accountant -->
-              {% if user.is_superuser or user.is_staff or user.roles == 'Accountant' %}
-              <div class="nav-item dropdown-menu">
-                <div class="nav-link nav-toggle {% if finance_active_page or transaction_list_active or expense_report_list_active or budget_list_active or employee_list_active or payroll_list_active %}active{% endif %}" data-target="financial-tracker-submenu">
-                  <div class="nav-icon">
-                    <i class="fas fa-chart-line"></i>
-                  </div>
-                  <div class="nav-text">Financial Tracker</div>
-                  <div class="nav-chevron">
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
-                </div>
-                <div class="submenu" id="financial-tracker-submenu" {% if finance_active_page or transaction_list_active or expense_report_list_active or budget_list_active or employee_list_active or payroll_list_active %}style="max-height: 500px;" {% endif %}>
-                  <a href="{% url 'financial_dashboard' %}" class="submenu-link {% if financial_dashboard_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="submenu-text">Financial Dashboard</div>
-                  </a>
-                  <a href="{% url 'transaction_list' %}" class="submenu-link {% if transaction_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="submenu-text">Transactions</div>
-                  </a>
-                  <a href="{% url 'expense_report_list' %}" class="submenu-link {% if expense_report_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-file-invoice-dollar"></i>
-                    </div>
-                    <div class="submenu-text">Expense Reports</div>
-                  </a>
-                  <a href="{% url 'employee_list' %}" class="submenu-link {% if employee_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
+                  <a
+                    href="{% url 'member_list' %}"
+                    class="nav-link-enhanced {% if catechesis_member_list %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
                       <i class="fas fa-users"></i>
                     </div>
-                    <div class="submenu-text">Employees</div>
+                    <span>{% trans "Catechesis Members" %}</span>
                   </a>
-                  <a href="{% url 'payroll_list' %}" class="submenu-link {% if payroll_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-calculator"></i>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if catechesis_sacrament_list or catechesis_class_list or catechesis_calendar %}active{% endif %}"
+                    data-target="sacraments-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-scroll"></i>
                     </div>
-                    <div class="submenu-text">Payroll</div>
-                  </a>
-                  <a href="{% url 'budget_list' %}" class="submenu-link {% if budget_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-chart-pie"></i>
+                    <span>{% trans "Sacraments & Classes" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
                     </div>
-                    <div class="submenu-text">Budgets</div>
-                  </a>
-                  <a href="{% url 'pledge_list' %}" class="submenu-link {% if pledge_list_active %}active{% endif %}">
-                    <div class="submenu-icon">
-                      <i class="fas fa-hand-holding-heart"></i>
+                  </div>
+                  <div id="sacraments-submenu" class="submenu">
+                    <a href="{% url 'sacrament_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-scroll"></i>
+                      </div>
+                      <span>{% trans "All Sacraments" %}</span>
+                    </a>
+                    <a href="{% url 'class_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chalkboard"></i>
+                      </div>
+                      <span>{% trans "Classes" %}</span>
+                    </a>
+                    <a href="{% url 'catechesis_analytics' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <span>{% trans "Catechesis Analytics" %}</span>
+                    </a>
+                    <a href="{% url 'member_analytics' 1 %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-user-chart"></i>
+                      </div>
+                      <span>{% trans "Member Analytics" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'sacrament_calendar' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calendar-day"></i>
+                      </div>
+                      <span>{% trans "Sacrament Calendar" %}</span>
+                    </a>
+                  </div>
+                  <a
+                    href="{% url 'pending_requests' %}"
+                    class="nav-link-enhanced {% if catechesis_pending_request %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-tasks"></i>
                     </div>
-                    <div class="submenu-text">Event Pledges</div>
+                    <span>{% trans "Review Requests" %}</span>
+                    {% if pending_requests_count and pending_requests_count > 0 %}
+                    <span class="nav-item-count">{{ pending_requests_count }}</span>
+                    {% endif %}
                   </a>
                 </div>
               </div>
-
-              {% endif %}
-
-              <!-- Administration Section - Only for Admin -->
-              {% if user.is_superuser  or user.roles == 'admin' or user.is_staff %}
-              <div class="nav-section">
-                <div class="nav-label">Administration</div>
-
-                <!-- Users Management Dropdown -->
-                <div class="nav-item dropdown-menu">
-                  <div class="nav-link nav-toggle {% if users_active_add or users_active_list %}active{% endif %}" data-target="users-submenu">
-                    <div class="nav-icon">
-                      <i class="fas fa-user-shield"></i>
-                    </div>
-                    <div class="nav-text">User Management</div>
-                    <div class="nav-chevron">
-                      <i class="fas fa-chevron-down"></i>
-                    </div>
-                  </div>
-                  <div class="submenu" id="users-submenu" {% if users_active_add or users_active_list%} style="max-height: 500px;" {% endif %}>
-                    <a href="{% url 'add_user' %}" class="submenu-link {% if users_active_add %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-user-plus"></i>
-                      </div>
-                      <div class="submenu-text">Add New User</div>
-                    </a>
-                    <a href="{% url 'list_users' %}" class="submenu-link {% if users_active_list %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-users-cog"></i>
-                      </div>
-                      <div class="submenu-text">Manage Users</div>
-                    </a>
-                    <a href="{% url 'priest_role_management' %}" class="submenu-link {% if roles_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-user-tag"></i>
-                      </div>
-                      <div class="submenu-text">Role Management</div>
-                    </a>
-                  </div>
-                </div>
-
-                <!-- System Settings Dropdown -->
-                <div class="nav-item dropdown-menu">
-                  <div class="nav-link nav-toggle {% if settings_active %}active{% endif %}" data-target="settings-submenu">
-                    <div class="nav-icon">
-                      <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="nav-text">System Settings</div>
-                    <div class="nav-chevron">
-                      <i class="fas fa-chevron-down"></i>
-                    </div>
-                  </div>
-                  <div class="submenu" id="settings-submenu" {% if settings_active %} style="max-height: 500px;" {% endif %}>
-                    <a href="" class="submenu-link {% if system_settings_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-sliders-h"></i>
-                      </div>
-                      <div class="submenu-text">General Settings</div>
-                    </a>
-                    <a href="" class="submenu-link {% if audit_logs_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-history"></i>
-                      </div>
-                      <div class="submenu-text">Audit Logs</div>
-                    </a>
-                  </div>
-                </div>
-
-                <!-- Audit & Security Dropdown -->
-                <div class="nav-item dropdown-menu">
-                  <div class="nav-link nav-toggle {% if audit_active or audit_logs_active or login_history_active or alerts_active or backup_active %}active{% endif %}" data-target="audit-submenu">
-                    <div class="nav-icon">
-                      <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="nav-text">Audit & Security</div>
-                    <div class="nav-chevron">
-                      <i class="fas fa-chevron-down"></i>
-                    </div>
-                  </div>
-                  <div class="submenu" id="audit-submenu" {% if audit_active or audit_logs_active or login_history_active or alerts_active or backup_active %}style="max-height: 500px;" {% endif %}>
-                    <a href="{% url 'audit_dashboard' %}" class="submenu-link {% if audit_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                      </div>
-                      <div class="submenu-text">Security Dashboard</div>
-                    </a>
-                    <a href="{% url 'audit_log_list' %}" class="submenu-link {% if audit_logs_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-clipboard-list"></i>
-                      </div>
-                      <div class="submenu-text">Audit Logs</div>
-                    </a>
-                    <a href="{% url 'login_history_list' %}" class="submenu-link {% if login_history_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-user-clock"></i>
-                      </div>
-                      <div class="submenu-text">Login History</div>
-                    </a>
-                    <a href="{% url 'security_alerts' %}" class="submenu-link {% if alerts_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                      </div>
-                      <div class="submenu-text">Security Alerts</div>
-                    </a>
-                    <a href="{% url 'backup_list' %}" class="submenu-link {% if backup_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-database"></i>
-                      </div>
-                      <div class="submenu-text">Data Backups</div>
-                    </a>
-                  </div>
-                </div>
-
-                <!-- Analytics & Reports Dropdown -->
-                <div class="nav-item dropdown-menu">
-                  <div class="nav-link nav-toggle {% if analytics_active or analytics_tithe_active or analytics_finance_active or analytics_member_active %}active{% endif %}" data-target="analytics-submenu">
-                    <div class="nav-icon">
-                      <i class="fas fa-chart-pie"></i>
-                    </div>
-                    <div class="nav-text">Analytics & Reports</div>
-                    <div class="nav-chevron">
-                      <i class="fas fa-chevron-down"></i>
-                    </div>
-                  </div>
-                  <div class="submenu" id="analytics-submenu" {% if analytics_active or analytics_tithe_active or analytics_finance_active or analytics_member_active %}style="max-height: 500px;" {% endif %}>
-                    <a href="{% url 'analytics_dashboard' %}" class="submenu-link {% if analytics_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                      </div>
-                      <div class="submenu-text">Analytics Dashboard</div>
-                    </a>
-                    <a href="{% url 'tithing_report' %}" class="submenu-link {% if analytics_tithe_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-donate"></i>
-                      </div>
-                      <div class="submenu-text">Tithing Reports</div>
-                    </a>
-                    <a href="{% url 'financial_report' %}" class="submenu-link {% if analytics_finance_active %}active{% endif %}">
-                      <div class="submenu-icon">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                      </div>
-                      <div class="submenu-text">Financial Reports</div>
-                    </a>
-                  </div>
-                </div>
-              </div>
-              {% endif %}
             </div>
 
-            <!-- Quick Actions - Conditional based on role -->
+            <!-- Section 4: Community -->
+            <div class="nav-section-card" data-section="community">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon community">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <span>{% trans "Community" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <a
+                    href="{% url 'table_members' %}"
+                    class="nav-link-enhanced {% if members_active_list %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-users"></i>
+                    </div>
+                    <span>{% trans "All Members" %}</span>
+                  </a>
+                                    <a
+                    href="{% url 'add_member' %}"
+                    class="nav-link-enhanced {% if members_active_add %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-user-plus"></i>
+                    </div>
+                    <span>{% trans "Add Member" %}</span>
+                  </a>
+                  <div
+                    class="nav-link-enhanced nav-toggle"
+                    data-target="member-tools-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-tools"></i>
+                    </div>
+                    <span>{% trans "Member Tools" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="member-tools-submenu" class="submenu">
+                    <a href="{% url 'search_members' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-search"></i>
+                      </div>
+                      <span>{% trans "Search Members" %}</span>
+                    </a>
+                    <a href="{% url 'filter_members' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-filter"></i>
+                      </div>
+                      <span>{% trans "Advanced Filter" %}</span>
+                    </a>
+                    <a href="{% url 'list_deleted_members' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-trash-restore"></i>
+                      </div>
+                      <span>{% trans "Deleted Members" %}</span>
+                    </a>
+                  </div>
+                  <div class="nav-divider"></div>
+                  <a
+                    href="{% url 'family_list' %}"
+                    class="nav-link-enhanced {% if family_list_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-home"></i>
+                    </div>
+                    <span>{% trans "Families" %}</span>
+                  </a>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if ministries_active_list %}active{% endif %}"
+                    data-target="ministries-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-building"></i>
+                    </div>
+                    <span>{% trans "Ministries" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="ministries-submenu" class="submenu">
+                    <a href="{% url 'ministry_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-list"></i>
+                      </div>
+                      <span>{% trans "All Ministries" %}</span>
+                    </a>
+                    <a href="{% url 'create_ministry' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-plus-circle"></i>
+                      </div>
+                      <span>{% trans "Add Ministry" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if committee_active_list %}active{% endif %}"
+                    data-target="committees-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-users-cog"></i>
+                    </div>
+                    <span>{% trans "Committees" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="committees-submenu" class="submenu">
+                    <a href="{% url 'list_committees' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-list"></i>
+                      </div>
+                      <span>{% trans "All Committees" %}</span>
+                    </a>
+                    <a href="{% url 'create_committee' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-plus-circle"></i>
+                      </div>
+                      <span>{% trans "Add Committee" %}</span>
+                    </a>
+                  </div>
+                  <a
+                    href="{% url 'list_community' %}"
+                    class="nav-link-enhanced {% if shepherds_active_list %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <span>{% trans "Communities" %}</span>
+                  </a>
+                  <a
+                    href="{% url 'list_zones' %}"
+                    class="nav-link-enhanced {% if zones_active_list %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <span>{% trans "Zones" %}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 5: Finance (Restricted) -->
             {% if user.is_superuser or user.is_staff or user.roles == 'accountant' %}
-            <div class="nav-section">
-              <div class="nav-label">Quick Actions</div>
-
-              <div class="nav-item">
-                <a href="{% url 'tithepayment:tithepayment_create' %}" class="nav-link">
-                  <div class="nav-icon" style="color: var(--warning)">
-                    <i class="fas fa-plus-circle"></i>
+            <div class="nav-section-card" data-section="finance">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon finance">
+                    <i class="fas fa-money-bill-wave"></i>
                   </div>
-                  <div class="nav-text">Quick Tithe Entry</div>
+                  <span>{% trans "Finance" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <a
+                    href="{% url 'financial_dashboard' %}"
+                    class="nav-link-enhanced {% if financial_dashboard_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <span>{% trans "Finance Dashboard" %}</span>
+                  </a>
+                  <div class="nav-divider"></div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if tithepayment_active_list or tithepayment_active_create or tithe_receipts_active %}active{% endif %}"
+                    data-target="tithe-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-hand-holding-dollar"></i>
+                    </div>
+                    <span>{% trans "Tithe Management" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="tithe-submenu" class="submenu">
+                    <a
+                      href="{% url 'tithepayment:tithepayment_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-list"></i>
+                      </div>
+                      <span>{% trans "Tithe Payments" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:tithepayment_create' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-plus-circle"></i>
+                      </div>
+                      <span>{% trans "Record Tithe" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:tithepayment_summary' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-bar"></i>
+                      </div>
+                      <span>{% trans "Tithe Summary" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:analytics_dashboard' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <span>{% trans "Tithe Analytics" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:monthly_report' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calendar-alt"></i>
+                      </div>
+                      <span>{% trans "Monthly Reports" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:yearly_report' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calendar"></i>
+                      </div>
+                      <span>{% trans "Yearly Reports" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:receipt_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-receipt"></i>
+                      </div>
+                      <span>{% trans "Tithe Receipts" %}</span>
+                    </a>
+                  </div>
+                  <div class="nav-divider"></div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if offering_list_active or transaction_list_active %}active{% endif %}"
+                    data-target="finance-operations-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-coins"></i>
+                    </div>
+                    <span>{% trans "Financial Operations" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="finance-operations-submenu" class="submenu">
+                    <a href="{% url 'offering_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-donate"></i>
+                      </div>
+                      <span>{% trans "Offerings" %}</span>
+                    </a>
+                    <a href="{% url 'transaction_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-exchange-alt"></i>
+                      </div>
+                      <span>{% trans "Transactions" %}</span>
+                    </a>
+                    <a href="{% url 'category_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-tags"></i>
+                      </div>
+                      <span>{% trans "Categories" %}</span>
+                    </a>
+                    <a href="{% url 'pledge_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-hand-holding-heart"></i>
+                      </div>
+                      <span>{% trans "Pledge Management" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if payroll_list_active or budget_list_active %}active{% endif %}"
+                    data-target="finance-planning-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <span>{% trans "Planning & Reports" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="finance-planning-submenu" class="submenu">
+                    <a href="{% url 'payroll_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-calculator"></i>
+                      </div>
+                      <span>{% trans "Payroll" %}</span>
+                    </a>
+                    <a href="{% url 'budget_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-pie"></i>
+                      </div>
+                      <span>{% trans "Budget Management" %}</span>
+                    </a>
+                    <a href="{% url 'budget_reports' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <span>{% trans "Budget Analytics" %}</span>
+                    </a>
+                    <a href="{% url 'budget_transfer_request' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-exchange-alt"></i>
+                      </div>
+                      <span>{% trans "Budget Transfers" %}</span>
+                    </a>
+                    <a href="{% url 'budget_variances' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-exclamation-triangle"></i>
+                      </div>
+                      <span>{% trans "Budget Variances" %}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Section 6: Communications (Restricted) -->
+            {% if user.is_superuser or user.is_staff or user.roles == 'admin' %}
+            <div class="nav-section-card" data-section="communication">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon communication">
+                    <i class="fas fa-bell"></i>
+                  </div>
+                  <span>{% trans "Communications" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if notifications_list_active or notification_create_active %}active{% endif %}"
+                    data-target="notifications-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-bell"></i>
+                    </div>
+                    <span>{% trans "Notifications" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="notifications-submenu" class="submenu">
+                    <a
+                      href="{% url 'notification_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-list"></i>
+                      </div>
+                      <span>{% trans "All Notifications" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'notification_create' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-plus-circle"></i>
+                      </div>
+                      <span>{% trans "Send Notification" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if send_to_member_active or send_tithe_reminder_active %}active{% endif %}"
+                    data-target="messaging-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-envelope"></i>
+                    </div>
+                    <span>{% trans "Messaging" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="messaging-submenu" class="submenu">
+                    <a href="{% url 'send_to_member' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <span>{% trans "Send to Member" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'send_tithe_reminder' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                      </div>
+                      <span>{% trans "Tithe Reminders" %}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Section 7: Leadership (Priest/Admin only) -->
+            {% if user.is_superuser or user.is_staff or user.roles == 'priest' or user.roles == 'admin' %}
+            <div class="nav-section-card" data-section="leadership">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon leadership">
+                    <i class="fas fa-chess-king"></i>
+                  </div>
+                  <span>{% trans "Leadership" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if pending_approvals_active or pending_sacraments_active %}active{% endif %}"
+                    data-target="sacrament-approval-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <span>{% trans "Sacrament Approvals" %}</span>
+                    {% if pending_requests_count and pending_requests_count > 0 %}
+                    <span class="nav-item-count">{{ pending_requests_count }}</span>
+                    {% endif %}
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="sacrament-approval-submenu" class="submenu">
+                    <a href="{% url 'pending_requests' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-clipboard-check"></i>
+                      </div>
+                      <span>{% trans "Sacrament Requests" %}</span>
+                      {% if pending_requests_count and pending_requests_count > 0 %}
+                      <span class="nav-item-count">{{ pending_requests_count }}</span>
+                      {% endif %}
+                    </a>
+                    <a
+                      href="{% url 'pending_sacraments_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-stamp"></i>
+                      </div>
+                      <span>{% trans "Verify Sacraments" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if analytics_active or analytics_tithe_active %}active{% endif %}"
+                    data-target="leadership-reports-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <span>{% trans "Reports & Analytics" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="leadership-reports-submenu" class="submenu">
+                    <a
+                      href="{% url 'analytics:analytics_dashboard' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <span>{% trans "Analytics" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'analytics:tithing_report' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-donate"></i>
+                      </div>
+                      <span>{% trans "Tithing Reports" %}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Section 8: Administration (Admin only) -->
+            {% if user.is_superuser or user.roles == 'admin' %}
+            <div class="nav-section-card" data-section="admin">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon admin">
+                    <i class="fas fa-cog"></i>
+                  </div>
+                  <span>{% trans "Administration" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if users_active_list or users_active_add or member_accounts_active %}active{% endif %}"
+                    data-target="user-management-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-users-cog"></i>
+                    </div>
+                    <span>{% trans "User Management" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="user-management-submenu" class="submenu">
+                    <a href="{% url 'list_users' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-users-cog"></i>
+                      </div>
+                      <span>{% trans "User Management" %}</span>
+                    </a>
+                    <a href="{% url 'add_user' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-user-plus"></i>
+                      </div>
+                      <span>{% trans "Add User" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'church_member_management' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-user-cog"></i>
+                      </div>
+                      <span>{% trans "Member Accounts" %}</span>
+                    </a>
+                  </div>
+                  <div class="nav-divider"></div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if audit_active or audit_logs_active or backup_active %}active{% endif %}"
+                    data-target="security-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span>{% trans "Security & Maintenance" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="security-submenu" class="submenu">
+                    <a
+                      href="{% url 'audits:audit_dashboard' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-shield-alt"></i>
+                      </div>
+                      <span>{% trans "Security Dashboard" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'analytics:blocked_users' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-user-slash"></i>
+                      </div>
+                      <span>{% trans "Blocked Users" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'audits:audit_log_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-clipboard-list"></i>
+                      </div>
+                      <span>{% trans "Audit Logs" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'audits:backup_list' %}"
+                      class="submenu-link"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-database"></i>
+                      </div>
+                      <span>{% trans "Backups" %}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Section 9: Analytics Dashboard (Staff/Admin only) -->
+            {% if user.is_superuser or user.is_staff or user.roles == 'accountant' %}
+            <div class="nav-section-card" data-section="analytics">
+              <div class="nav-section-header" onclick="toggleSection(this)">
+                <div class="nav-section-title">
+                  <div class="nav-section-icon analytics">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <span>{% trans "Analytics Dashboard" %}</span>
+                </div>
+                <div class="nav-section-toggle">
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+              <div class="nav-section-content">
+                <div class="nav-section-items">
+                  <a
+                    href="{% url 'analytics:analytics_dashboard' %}"
+                    class="nav-link-enhanced {% if analytics_dashboard_active %}active{% endif %}"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <span>{% trans "Main Dashboard" %}</span>
+                  </a>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if analytics_reports_active %}active{% endif %}"
+                    data-target="analytics-reports-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-file-chart-line"></i>
+                    </div>
+                    <span>{% trans "Analytics Reports" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="analytics-reports-submenu" class="submenu">
+                    <a href="{% url 'analytics:tithing_report' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-donate"></i>
+                      </div>
+                      <span>{% trans "Tithing Reports" %}</span>
+                    </a>
+                    <a href="{% url 'analytics:financial_report' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-dollar-sign"></i>
+                      </div>
+                      <span>{% trans "Financial Reports" %}</span>
+                    </a>
+                    <a href="{% url 'budget_reports' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-pie"></i>
+                      </div>
+                      <span>{% trans "Budget Analytics" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if analytics_data_active %}active{% endif %}"
+                    data-target="analytics-data-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-database"></i>
+                    </div>
+                    <span>{% trans "Data Analytics" %}</span>
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="analytics-data-submenu" class="submenu">
+                    <a href="{% url 'analytics:member_analytics_api' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-users"></i>
+                      </div>
+                      <span>{% trans "Member Analytics" %}</span>
+                    </a>
+                    <a href="{% url 'analytics:finance_analytics_api' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <span>{% trans "Finance Analytics" %}</span>
+                    </a>
+                    <a href="{% url 'analytics:tithe_analytics_api' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                      </div>
+                      <span>{% trans "Tithe Analytics" %}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Access Favorites -->
+            <div class="favorites-section">
+              <div class="favorites-header">
+                <span class="favorites-title">{% trans "Quick Access" %}</span>
+              </div>
+              <div class="favorites-grid">
+                <a
+                  href="{% url 'tithepayment:tithepayment_create' %}"
+                  class="favorite-item"
+                  title="{% trans 'Quick Tithe' %}"
+                >
+                  <i
+                    class="fas fa-hand-holding-dollar"
+                    style="color: #43e97b"
+                  ></i>
+                  <span>{% trans "Tithe" %}</span>
+                </a>
+                <a
+                  href="{% url 'add_member' %}"
+                  class="favorite-item"
+                  title="{% trans 'Add Member' %}"
+                >
+                  <i class="fas fa-user-plus" style="color: #4facfe"></i>
+                  <span>{% trans "Member" %}</span>
+                </a>
+                <a
+                  href="{% url 'tithepayment:receipt_list' %}"
+                  class="favorite-item"
+                  title="{% trans 'Receipts' %}"
+                >
+                  <i class="fas fa-receipt" style="color: #f093fb"></i>
+                  <span>{% trans "Receipts" %}</span>
+                </a>
+                <a
+                  href="{% url 'calendar' %}"
+                  class="favorite-item"
+                  title="{% trans 'Calendar' %}"
+                >
+                  <i class="fas fa-calendar" style="color: #fa709a"></i>
+                  <span>{% trans "Calendar" %}</span>
                 </a>
               </div>
-              {% endif %}
-
-              <div class="nav-item">
-                <a href="{% url 'add_member' %}" class="nav-link">
-                  <div class="nav-icon" style="color: var(--success)">
-                    <i class="fas fa-user-plus"></i>
-                  </div>
-                  <div class="nav-text">Add New Member</div>
-                </a>
-              </div>
-
-              {% if user.is_superuser or user.is_staff or user.roles == 'Accountant' %}
-              <div class="nav-item">
-                <a href="{% url 'receipt_list' %}" class="nav-link">
-                  <div class="nav-icon" style="color: var(--info)">
-                    <i class="fas fa-print"></i>
-                  </div>
-                  <div class="nav-text">Print Receipts</div>
-                </a>
-              </div>
-              {% endif %}
             </div>
           </div>
 
-          <!-- Sidebar Footer - AVAILABLE TO ALL USERS -->
+          <!-- Sidebar Footer -->
           <div class="sidebar-footer">
             <div class="user-info">
-              <div class="user-avatar-sm">
-                <a href="{% url 'role_management' %}?status={% if user_active %}active{% else %}inactive{% endif %}">
-                <img src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}" alt="{{ user.username }}" />
-                </a>
-              </div>
+              <a href="{% url 'user_profile' %}" class="user-avatar">
+                <img
+                  src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}"
+                  alt="{{ user.username }}"
+                />
+              </a>
               <div class="user-details">
                 <div class="user-name">
                   {{ user.get_full_name|default:user.username }}
                 </div>
                 <div class="user-role">
-                  {% if user.is_superuser %}Administrator 
-                  {% elif user.roles == 'Accountant' %}Accountant
-                  {% elif user.roles == 'Priest' %} Priest 
-                  {% elif user.roles == 'Catechesis' %} Catechesis
-                  {% elif user.roles == 'Admin' %} Admin
-                  {% elif user.is_staff %}Staff 
-                  {% else %}Member {% endif %}
+                  {% if user.is_superuser %}{% trans "Administrator" %}{% elif user.roles == 'Accountant' %}{% trans "Accountant" %}{% elif user.roles == 'Priest' %}{% trans "Priest" %}{% elif user.roles == 'Catechesis' %}{% trans "Catechesis" %}{% elif user.roles == 'Admin' %}{% trans "Admin" %}{% elif user.is_staff %}{% trans "Staff" %}{% else %}{% trans "Member" %}{% endif %}
                 </div>
               </div>
             </div>
 
-            <!-- LOGOUT BUTTON - AVAILABLE TO ALL USERS -->
-            <button class="logout-btn" id="sidebarLogoutBtn">
-              <i class="fas fa-power-off"></i>
-              <span>Logout</span>
-            </button>
+            <form
+              method="post"
+              action="{% url '_logout' %}"
+              style="width: 100%"
+            >
+              {% csrf_token %}
+              <button type="submit" class="logout-btn" style="width: 100%">
+                <i class="fas fa-power-off"></i>
+                <span>{% trans "Logout" %}</span>
+              </button>
+            </form>
           </div>
         </nav>
       </aside>
@@ -601,534 +2680,646 @@
       <!-- Header -->
       <header class="app-header">
         <div class="header-left">
-          <button class="menu-toggle" id="menuToggle">
+          <button
+            class="menu-toggle"
+            id="menuToggle"
+            aria-label="{% trans 'Toggle menu' %}"
+          >
             <i class="fas fa-bars"></i>
           </button>
-          <h3 style="font-weight: 600; color: var(--primary)">
-            {% if user.is_superuser %}Admin Dashboard
-            {% elif user.groups.all.0.name == 'Accountant' %}Dashboard
-            {% else %}Member Dashboard {% endif %}
-          </h3>
+          <h1 class="header-title">
+            {% if user.is_superuser %}{% trans "Admin" %} {% elif user.groups.all.0.name == 'Accountant' %}{% trans "Accountant" %} {% else %}{% trans "Member" %}{% endif %}
+            <span>{% trans "Dashboard" %}</span>
+          </h1>
         </div>
 
         <div class="header-right">
-          <!-- Notification Dropdown -->
+          <!-- Notifications -->
           <div class="notification-dropdown">
-            <button class="notification-btn" id="notificationBtn">
+            <button
+              class="notification-btn"
+              id="notificationBtn"
+              aria-label="{% trans 'Notifications' %}"
+            >
               <i class="fas fa-bell"></i>
               {% if unread_count > 0 %}
               <span class="notification-badge">{{ unread_count }}</span>
               {% endif %}
             </button>
-            
-            <div class="notification-dropdown-content" id="notificationDropdown">
-              <!-- Header -->
+
+            <div
+              class="notification-dropdown-content"
+              id="notificationDropdown"
+            >
               <div class="notification-header">
-                <div class="notification-title">
-                  <h3>Notifications</h3>
-                  <span class="unread-count">{{ unread_count }} unread</span>
+                <div>
+                  <h3>{% trans "Notifications" %}</h3>
+                  <span class="unread-count"
+                    >{{ unread_count }} {% trans "unread" %}</span
+                  >
                 </div>
-                {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
-                <a href="{% url "notification_list" %}" class="mark-all-read">Dashboard</a>
-                {% endif %}
+                <a href="#" class="mark-all-read" id="markAllRead"
+                  >{% trans "Mark all read" %}</a
+                >
               </div>
-              <div>
-                <a href="" class="mark-all-read" style="float: right; margin-right: 16px; margin-top: -28px;">Mark all read</a>
-              </div>
-              
-              <!-- Notifications List -->
-              <div class="list" id="notificationList">
-                <!-- Will be populated by JavaScript -->
+
+              <div class="notification-list" id="notificationList">
                 <div class="notification-loading">
                   <i class="fas fa-spinner fa-spin"></i>
-                  <p>Loading notifications...</p>
+                  <p>{% trans "Loading notifications..." %}</p>
                 </div>
               </div>
-              
-              <!-- Footer -->
+
               <div class="notification-footer">
-                <a href="{% url 'notification_list' %}">View all notifications</a>
+                <a href="{% url 'my_notifications' %}"
+                  >{% trans "View all notifications" %}</a
+                >
               </div>
             </div>
           </div>
-          
-          <!-- User Menu -->
+
+          <!-- User Avatar -->
           <div class="user-menu">
-            <div class="user-avatar-sm" id="userMenuButton">
-                <a href="{% url 'role_management' %}?status={% if user_active %}active{% else %}inactive{% endif %}">
-              <img src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}" alt="{{ user.username }}" />
-                </a>
-            </div>
+            <a
+              href="{% url 'user_profile' %}"
+              class="user-avatar"
+              title="{{ user.get_full_name|default:user.username }}"
+            >
+              <img
+                src="{% if profile and profile.picture %}{{ profile.picture.url }}{% else %}{% static 'assets/images/avatar01.png' %}{% endif %}"
+                alt="{{ user.username }}"
+              />
+            </a>
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
       <main class="main-content">
+        <!-- Centralized Messages Display -->
+        {% block messages %}
+        {% if messages %}
+        <div class="messages-container" style="margin-bottom: 20px;">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
+               {% if message.tags == 'success' %}
+               style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #10b981; background: #f0fdf4; color: #065f46;"
+               {% elif message.tags == 'error' or message.tags == 'danger' %}
+               style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ef4444; background: #fef2f2; color: #991b1b;"
+               {% elif message.tags == 'warning' %}
+               style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f59e0b; background: #fffbeb; color: #92400e;"
+               {% else %}
+               style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #3b82f6; background: #eff6ff; color: #1e3a8a;"
+               {% endif %}>
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}" style="margin-right: 8px;"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="float: right; font-size: 16px; opacity: 0.7; border: none; background: none; cursor: pointer; margin-left: 10px;">&times;</button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endblock messages %}
+        
         {% block content %}
         <!-- Page-specific content goes here -->
         {% endblock content %}
       </main>
     </div>
     {% else %}
-    <!-- Redirect to login if not authenticated -->
-    <script>
-      window.location.href = "{% url '_login' %}";
-    </script>
+    <!-- Login required - please sign in -->
+    <div style="text-align: center; padding: 50px">
+      <p>Please <a href="{% url '_login' %}">log in</a> to access this page.</p>
+    </div>
     {% endif %}
 
-    <!-- LOGOUT MODAL - AVAILABLE TO ALL AUTHENTICATED USERS -->
+    <!-- Logout Modal -->
     {% if user.is_authenticated %}
     <div class="modal-overlay" id="logoutModal">
       <div class="modal">
         <div class="modal-header">
-          <h3 style="font-weight: 600">Confirm Logout</h3>
-          <button class="close-modal" style="background: none; border: none; cursor: pointer">
+          <h3>{% trans "Confirm Logout" %}</h3>
+          <button
+            class="close-modal"
+            id="closeLogoutModal"
+            aria-label="{% trans 'Close' %}"
+          >
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to logout?</p>
+          <p>{% trans "Are you sure you want to logout?" %}</p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" id="cancelLogout">
-            Cancel
+            {% trans "Cancel" %}
           </button>
-          <form method="post" action="{% url '_logout' %}" id="logoutForm" style="display: inline">
+          <form
+            method="post"
+            action="{% url '_logout' %}"
+            id="logoutForm"
+            style="display: inline"
+          >
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">
-              Logout
+              <i class="fas fa-power-off"></i>{% trans "Logout" %}
             </button>
           </form>
         </div>
       </div>
     </div>
     <!-- Sacrament Request Modal -->
-<div class="modal-overlay" id="sacramentRequestModal">
-  <div class="modal" style="max-width: 500px;">
-    <div class="modal-header">
-      <h3>Request Sacrament</h3>
-      <button class="close-modal" onclick="hideSacramentRequestModal()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="text-center mb-4">
-        <div class="mb-3">
-          <i class="fas fa-hands-praying fa-3x text-primary"></i>
-        </div>
-        <h4>Select a Member</h4>
-        <p class="text-muted">Choose a member to request sacrament for</p>
-      </div>
-      
-      <!-- Member Search -->
-      <div class="mb-4">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search member by name..." 
-                 id="memberSearch" onkeyup="searchMembers()">
-          <button class="btn btn-primary" type="button">
-            <i class="fas fa-search"></i>
+    <div class="modal-overlay" id="sacramentRequestModal">
+      <div class="modal" style="max-width: 500px">
+        <div class="modal-header">
+          <h3>Request Sacrament</h3>
+          <button class="close-modal" onclick="hideSacramentRequestModal()">
+            <i class="fas fa-times"></i>
           </button>
         </div>
-        <div id="memberSearchResults" class="mt-3" style="max-height: 250px; overflow-y: auto;">
-          <!-- Search results will appear here -->
-          <p class="text-muted small text-center">Type to search members</p>
-        </div>
-      </div>
-      
-      <!-- Recent Members -->
-      <div class="mb-3">
-        <h6 class="mb-2">Recent Members</h6>
-        <div class="list-group" id="recentMembers">
-          <!-- Will be populated by JavaScript -->
-          <div class="text-center py-3">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p class="text-muted small mt-2">Loading members...</p>
+        <div class="modal-body">
+          <div class="text-center mb-4">
+            <div class="mb-3">
+              <i class="fas fa-hands-praying fa-3x text-primary"></i>
+            </div>
+            <h4>Select a Member</h4>
+            <p class="text-muted">Choose a member to request sacrament for</p>
+          </div>
+
+          <!-- Member Search -->
+          <div class="mb-4">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search member by name..."
+                id="memberSearch"
+                onkeyup="searchMembers()"
+              />
+              <button class="btn btn-primary" type="button">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+            <div
+              id="memberSearchResults"
+              class="mt-3"
+              style="max-height: 250px; overflow-y: auto"
+            >
+              <!-- Search results will appear here -->
+              <p class="text-muted small text-center">Type to search members</p>
+            </div>
+          </div>
+
+          <!-- Recent Members -->
+          <div class="mb-3">
+            <h6 class="mb-2">Recent Members</h6>
+            <div class="list-group" id="recentMembers">
+              <!-- Will be populated by JavaScript -->
+              <div class="text-center py-3">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p class="text-muted small mt-2">Loading members...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <a
+              href="{% url 'member_list' %}"
+              class="btn btn-outline-primary btn-sm"
+            >
+              <i class="fas fa-users"></i> Browse All Members
+            </a>
+            <a
+              href="{% url 'member_register' %}"
+              class="btn btn-outline-success btn-sm ms-2"
+            >
+              <i class="fas fa-user-plus"></i> Register New Member
+            </a>
           </div>
         </div>
       </div>
-      
-      <div class="text-center mt-4">
-        <a href="{% url 'member_list' %}" class="btn btn-outline-primary btn-sm">
-          <i class="fas fa-users"></i> Browse All Members
-        </a>
-        <a href="{% url 'member_register' %}" class="btn btn-outline-success btn-sm ms-2">
-          <i class="fas fa-user-plus"></i> Register New Member
-        </a>
-      </div>
     </div>
-  </div>
-</div>
-    
+
     {% endif %}
     <script>
+      // ============================================
+      // CHRIST THE KING PARISH - MAIN APPLICATION JS
+      // ============================================
 
-// ============================================
-// CHRIST THE KING PARISH - MAIN APPLICATION JS
-// ============================================
+      /**
+       * Main application JavaScript for the parish management system
+       * Handles UI interactions, notifications, and user authentication
+       */
 
-/**
- * Main application JavaScript for the parish management system
- * Handles UI interactions, notifications, and user authentication
- */
+      // Wait for the HTML document to be fully loaded before running any code
+      document.addEventListener("DOMContentLoaded", function () {
+        // ============================================
+        // SECTION 1: CHECK USER AUTHENTICATION
+        // ============================================
 
-// Wait for the HTML document to be fully loaded before running any code
-document.addEventListener('DOMContentLoaded', function() {
-    // ============================================
-    // SECTION 1: CHECK USER AUTHENTICATION
-    // ============================================
-    
-    // If user is not logged in, redirect to login page
-    {% if not user.is_authenticated %}
-    window.location.href = "{% url '_login' %}";
-    return; // Stop execution of the rest of the code
-    {% endif %}
+        // Authentication check disabled to prevent redirect loops
+        // Login redirect handled by Django views instead
 
-    // ============================================
-    // SECTION 2: GET ALL HTML ELEMENTS WE NEED
-    // ============================================
-    
-    // Sidebar elements
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    
-    // Logout elements
-    const logoutModal = document.getElementById('logoutModal');
-    const logoutForm = document.getElementById('logoutForm');
-    const cancelLogout = document.getElementById('cancelLogout');
-    const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
-    
-    // Notification elements
-    const notificationBtn = document.getElementById('notificationBtn');
-    const notificationDropdown = document.getElementById('notificationDropdown');
-    const notificationList = document.getElementById('notificationList');
-    
-    // Close buttons (for modals and messages)
-    const closeButtons = document.querySelectorAll('.close-modal, .close-message');
+        // ============================================
+        // SECTION 2: GET ALL HTML ELEMENTS WE NEED
+        // ============================================
 
-    // ============================================
-    // SECTION 3: SIDEBAR FUNCTIONALITY
-    // ============================================
-    
-    // When hamburger menu is clicked, show/hide sidebar on mobile
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-            sidebarOverlay.classList.toggle('show');
+        // Sidebar elements
+        const sidebar = document.getElementById("sidebar");
+        const menuToggle = document.getElementById("menuToggle");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        // Logout elements
+        const logoutModal = document.getElementById("logoutModal");
+        const logoutForm = document.getElementById("logoutForm");
+        const cancelLogout = document.getElementById("cancelLogout");
+        const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+
+        // Notification elements
+        const notificationBtn = document.getElementById("notificationBtn");
+        const notificationDropdown = document.getElementById(
+          "notificationDropdown",
+        );
+        const notificationList = document.getElementById("notificationList");
+
+        // Close buttons (for modals and messages)
+        const closeButtons = document.querySelectorAll(
+          ".close-modal, .close-message",
+        );
+
+        // ============================================
+        // SECTION 3: SIDEBAR FUNCTIONALITY
+        // ============================================
+
+        // When hamburger menu is clicked, show/hide sidebar on mobile
+        if (menuToggle) {
+          menuToggle.addEventListener("click", function () {
+            sidebar.classList.toggle("show");
+            sidebarOverlay.classList.toggle("show");
+          });
+        }
+
+        // When overlay is clicked, hide sidebar (mobile only)
+        if (sidebarOverlay) {
+          sidebarOverlay.addEventListener("click", function () {
+            sidebar.classList.remove("show");
+            sidebarOverlay.classList.remove("show");
+          });
+        }
+
+        // ============================================
+        // SECTION 4: DROPDOWN MENUS IN SIDEBAR
+        // ============================================
+
+        // Function to toggle navigation sections
+        function toggleSection(headerElement) {
+          const sectionCard = headerElement.closest(".nav-section-card");
+          const sectionContent = sectionCard.querySelector(
+            ".nav-section-content",
+          );
+          const toggleIcon = headerElement.querySelector(
+            ".nav-section-toggle i",
+          );
+
+          if (sectionCard.classList.contains("expanded")) {
+            // Collapse
+            sectionCard.classList.remove("expanded");
+            sectionContent.style.maxHeight = "0px";
+            if (toggleIcon) toggleIcon.style.transform = "rotate(0deg)";
+          } else {
+            // Expand
+            sectionCard.classList.add("expanded");
+            sectionContent.style.maxHeight = sectionContent.scrollHeight + "px";
+            if (toggleIcon) toggleIcon.style.transform = "rotate(180deg)";
+          }
+        }
+
+        // Make toggleSection available globally for onclick handlers
+        window.toggleSection = toggleSection;
+
+        // Find all menu items that have dropdowns (like Ministries, Committees, etc.)
+        const navToggles = document.querySelectorAll(".nav-toggle");
+
+        // Initialize submenus that should be open on page load (based on active state)
+        navToggles.forEach(function (toggle) {
+          if (toggle.classList.contains("active")) {
+            const targetId = toggle.getAttribute("data-target");
+            const submenu = document.getElementById(targetId);
+            if (submenu) {
+              submenu.classList.add("open");
+            }
+          }
         });
-    }
 
-    // When overlay is clicked, hide sidebar (mobile only)
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
-            sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-        });
-    }
-
-    // ============================================
-    // SECTION 4: DROPDOWN MENUS IN SIDEBAR
-    // ============================================
-    
-    // Find all menu items that have dropdowns (like Ministries, Committees, etc.)
-    const navToggles = document.querySelectorAll('.nav-toggle');
-    
-    navToggles.forEach(function(toggle) {
-        toggle.addEventListener('click', function(event) {
+        navToggles.forEach(function (toggle) {
+          toggle.addEventListener("click", function (event) {
             // Stop the click from affecting other elements
             event.preventDefault();
             event.stopPropagation();
 
             // Get the ID of the submenu this toggle controls
-            const targetId = this.getAttribute('data-target');
+            const targetId = this.getAttribute("data-target");
             const submenu = document.getElementById(targetId);
 
             if (submenu) {
-                // Check if submenu is currently open
-                const isOpen = submenu.style.maxHeight && submenu.style.maxHeight !== '0px';
+              // Check if submenu is currently open
+              const isOpen = submenu.classList.contains("open");
 
-                // Close all other submenus first
-                document.querySelectorAll('.submenu').forEach(function(menu) {
-                    if (menu.id !== targetId) {
-                        menu.style.maxHeight = '0px';
-                        const otherToggle = menu.parentElement.querySelector('.nav-toggle');
-                        if (otherToggle) otherToggle.classList.remove('active');
-                    }
-                });
-
-                // Toggle (open/close) the current submenu
-                if (isOpen) {
-                    // Close it
-                    submenu.style.maxHeight = '0px';
-                    this.classList.remove('active');
-                } else {
-                    // Open it - set maxHeight to the actual content height
-                    submenu.style.maxHeight = submenu.scrollHeight + 'px';
-                    this.classList.add('active');
+              // Close all other submenus first (accordion behavior)
+              document.querySelectorAll(".submenu").forEach(function (menu) {
+                if (menu.id !== targetId) {
+                  menu.classList.remove("open");
+                  menu.style.maxHeight = "";
+                  const otherToggle =
+                    menu.parentElement.querySelector(".nav-toggle");
+                  if (otherToggle) otherToggle.classList.remove("active");
                 }
+              });
+
+              // Toggle (open/close) the current submenu
+              if (isOpen) {
+                // Close it
+                submenu.classList.remove("open");
+                submenu.style.maxHeight = "";
+                this.classList.remove("active");
+              } else {
+                // Open it with smooth animation
+                submenu.classList.add("open");
+                this.classList.add("active");
+              }
             }
+          });
         });
-    });
 
-    // ============================================
-    // SECTION 5: LOGOUT FUNCTIONALITY
-    // ============================================
-    
-    // When logout button is clicked, show the confirmation modal
-    if (sidebarLogoutBtn) {
-        sidebarLogoutBtn.addEventListener('click', function() {
-            logoutModal.classList.add('show');
-        });
-    }
+        // ============================================
+        // SECTION 5: LOGOUT FUNCTIONALITY
+        // ============================================
 
-    // When cancel button is clicked, hide the modal
-    if (cancelLogout) {
-        cancelLogout.addEventListener('click', function() {
-            logoutModal.classList.remove('show');
-        });
-    }
+        // When logout button is clicked, show the confirmation modal
+        if (sidebarLogoutBtn) {
+          sidebarLogoutBtn.addEventListener("click", function () {
+            logoutModal.classList.add("show");
+          });
+        }
 
-    // When clicking outside the modal, close it
-    if (logoutModal) {
-        logoutModal.addEventListener('click', function(event) {
+        // When cancel button is clicked, hide the modal
+        if (cancelLogout) {
+          cancelLogout.addEventListener("click", function () {
+            logoutModal.classList.remove("show");
+          });
+        }
+
+        // When clicking outside the modal, close it
+        if (logoutModal) {
+          logoutModal.addEventListener("click", function (event) {
             if (event.target === logoutModal) {
-                logoutModal.classList.remove('show');
+              logoutModal.classList.remove("show");
             }
-        });
-    }
+          });
+        }
 
-    // Handle the actual logout form submission
-    if (logoutForm) {
-        logoutForm.addEventListener('submit', function(event) {
+        // Handle the actual logout form submission
+        if (logoutForm) {
+          logoutForm.addEventListener("submit", function (event) {
             event.preventDefault(); // Don't submit the form normally
 
             // Show loading state on the button
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+            submitBtn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Logging out...';
             submitBtn.disabled = true;
 
             // Send the logout request to the server
             fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(new FormData(this))
+              method: "POST",
+              headers: {
+                "X-CSRFToken": this.querySelector("[name=csrfmiddlewaretoken]")
+                  .value,
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams(new FormData(this)),
             })
-            .then(function(response) {
+              .then(function (response) {
                 if (response.ok) {
-                    // Success! Redirect to login page
-                    window.location.href = "{% url '_login' %}";
+                  // Success! Redirect to login page
+                  window.location.href = "{% url '_login' %}";
                 } else {
-                    // Something went wrong
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                    alert('Logout failed. Please try again.');
+                  // Something went wrong
+                  submitBtn.innerHTML = originalText;
+                  submitBtn.disabled = false;
+                  alert("Logout failed. Please try again.");
                 }
-            })
-            .catch(function(error) {
+              })
+              .catch(function (error) {
                 // Network error
-                console.error('Logout error:', error);
+                console.error("Logout error:", error);
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                alert('Network error. Please try again.');
-            });
-        });
-    }
+                alert("Network error. Please try again.");
+              });
+          });
+        }
 
-    // Close any message cards when the X is clicked
-    closeButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            const messageCard = this.closest('.message-card');
-            if (messageCard) messageCard.style.display = 'none';
+        // Close any message cards when the X is clicked
+        closeButtons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            const messageCard = this.closest(".message-card");
+            if (messageCard) messageCard.style.display = "none";
+          });
         });
-    });
 
-    // ============================================
-    // SECTION 6: NOTIFICATION SYSTEM
-    // ============================================
-    
-    // Set up notification bell click handler
-    if (notificationBtn && notificationDropdown) {
-        notificationBtn.addEventListener('click', function(event) {
+        // ============================================
+        // SECTION 6: NOTIFICATION SYSTEM
+        // ============================================
+
+        // Set up notification bell click handler
+        if (notificationBtn && notificationDropdown) {
+          notificationBtn.addEventListener("click", function (event) {
             event.stopPropagation();
-            
-            // Show or hide the notification dropdown
-            notificationDropdown.classList.toggle('show');
-            
-            // If we're showing the dropdown, load the notifications
-            if (notificationDropdown.classList.contains('show')) {
-                fetchNotifications();
-            }
-        });
-        
-        // Close dropdown when clicking anywhere else on the page
-        document.addEventListener('click', function(event) {
-            if (notificationDropdown && 
-                !notificationDropdown.contains(event.target) && 
-                !notificationBtn.contains(event.target)) {
-                notificationDropdown.classList.remove('show');
-            }
-        });
-    }
 
-    // ============================================
-    // SECTION 7: KEYBOARD SHORTCUTS
-    // ============================================
-    
-    document.addEventListener('keydown', function(event) {
-        // ESC key - close any open modals or dropdowns
-        if (event.key === 'Escape') {
-            if (logoutModal) logoutModal.classList.remove('show');
-            if (notificationDropdown) notificationDropdown.classList.remove('show');
+            // Show or hide the notification dropdown
+            notificationDropdown.classList.toggle("show");
+
+            // If we're showing the dropdown, load the notifications
+            if (notificationDropdown.classList.contains("show")) {
+              fetchNotifications();
+            }
+          });
+
+          // Close dropdown when clicking anywhere else on the page
+          document.addEventListener("click", function (event) {
+            if (
+              notificationDropdown &&
+              !notificationDropdown.contains(event.target) &&
+              !notificationBtn.contains(event.target)
+            ) {
+              notificationDropdown.classList.remove("show");
+            }
+          });
+        }
+
+        // ============================================
+        // SECTION 7: KEYBOARD SHORTCUTS
+        // ============================================
+
+        document.addEventListener("keydown", function (event) {
+          // ESC key - close any open modals or dropdowns
+          if (event.key === "Escape") {
+            if (logoutModal) logoutModal.classList.remove("show");
+            if (notificationDropdown)
+              notificationDropdown.classList.remove("show");
 
             // Close sidebar on mobile
             if (window.innerWidth < 1200) {
-                sidebar.classList.remove('show');
-                sidebarOverlay.classList.remove('show');
+              sidebar.classList.remove("show");
+              sidebarOverlay.classList.remove("show");
             }
-        }
+          }
 
-        // Ctrl+L - quick logout (L for Logout)
-        if (event.ctrlKey && event.key === 'l') {
+          // Ctrl+L - quick logout (L for Logout)
+          if (event.ctrlKey && event.key === "l") {
             event.preventDefault();
-            if (logoutModal) logoutModal.classList.add('show');
-        }
-        
-        // Ctrl+N - open notifications (N for Notifications)
-        if (event.ctrlKey && event.key === 'n') {
+            if (logoutModal) logoutModal.classList.add("show");
+          }
+
+          // Ctrl+N - open notifications (N for Notifications)
+          if (event.ctrlKey && event.key === "n") {
             event.preventDefault();
             if (notificationBtn) {
-                notificationBtn.click();
+              notificationBtn.click();
             }
-        }
-    });
+          }
+        });
 
-    // ============================================
-    // SECTION 8: WINDOW RESIZE HANDLING
-    // ============================================
-    
-    window.addEventListener('resize', function() {
-        // On large screens, remove mobile sidebar classes
-        if (window.innerWidth >= 1200) {
-            sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-        }
-        
-        // Fix content positioning after resize
-        setTimeout(fixContentPosition, 100);
-    });
+        // ============================================
+        // SECTION 8: WINDOW RESIZE HANDLING
+        // ============================================
 
-    // ============================================
-    // SECTION 9: CONTENT POSITIONING
-    // ============================================
-    
-    /**
-     * Makes sure the main content area is positioned correctly
-     * below the header and fills the available space
-     */
-    function fixContentPosition() {
-        const mainContent = document.querySelector('.main-content');
-        const header = document.querySelector('.app-header');
-        
-        if (mainContent && header) {
+        window.addEventListener("resize", function () {
+          // On large screens, remove mobile sidebar classes
+          if (window.innerWidth >= 1200) {
+            sidebar.classList.remove("show");
+            sidebarOverlay.classList.remove("show");
+          }
+
+          // Fix content positioning after resize
+          setTimeout(fixContentPosition, 100);
+        });
+
+        // ============================================
+        // SECTION 9: CONTENT POSITIONING
+        // ============================================
+
+        /**
+         * Makes sure the main content area is positioned correctly
+         * below the header and fills the available space
+         */
+        function fixContentPosition() {
+          const mainContent = document.querySelector(".main-content");
+          const header = document.querySelector(".app-header");
+
+          if (mainContent && header) {
             // Get header height
             const headerHeight = header.offsetHeight;
-            
+
             // Position main content below the header
-            mainContent.style.top = headerHeight + 'px';
-            
+            mainContent.style.top = headerHeight + "px";
+
             // Calculate available height
             const viewportHeight = window.innerHeight;
             const contentHeight = viewportHeight - headerHeight;
-            
-            // Set main content height
-            mainContent.style.height = contentHeight + 'px';
-            mainContent.style.maxHeight = contentHeight + 'px';
-            mainContent.style.minHeight = contentHeight + 'px';
-            
-            // Adjust content wrapper if it exists
-            const contentWrapper = mainContent.querySelector('.content-wrapper');
-            if (contentWrapper) {
-                contentWrapper.style.minHeight = (contentHeight - 48) + 'px';
-            }
-            
-            // Adjust content card if it exists
-            const contentCard = mainContent.querySelector('.content-card');
-            if (contentCard) {
-                contentCard.style.minHeight = (contentHeight - 100) + 'px';
-            }
-        }
-    }
 
-    // Run it once when page loads
-    fixContentPosition();
-    
-    // Run again after everything is fully loaded
-    window.addEventListener('load', function() {
-        setTimeout(fixContentPosition, 300);
-    });
-    
-    // Watch for content changes and adjust if needed
-    const observer = new MutationObserver(function() {
-        setTimeout(fixContentPosition, 100);
-    });
-    
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
-        observer.observe(mainContent, {
+            // Set main content height
+            mainContent.style.height = contentHeight + "px";
+            mainContent.style.maxHeight = contentHeight + "px";
+            mainContent.style.minHeight = contentHeight + "px";
+
+            // Adjust content wrapper if it exists
+            const contentWrapper =
+              mainContent.querySelector(".content-wrapper");
+            if (contentWrapper) {
+              contentWrapper.style.minHeight = contentHeight - 48 + "px";
+            }
+
+            // Adjust content card if it exists
+            const contentCard = mainContent.querySelector(".content-card");
+            if (contentCard) {
+              contentCard.style.minHeight = contentHeight - 100 + "px";
+            }
+          }
+        }
+
+        // Run it once when page loads
+        fixContentPosition();
+
+        // Run again after everything is fully loaded
+        window.addEventListener("load", function () {
+          setTimeout(fixContentPosition, 300);
+        });
+
+        // Watch for content changes and adjust if needed
+        const observer = new MutationObserver(function () {
+          setTimeout(fixContentPosition, 100);
+        });
+
+        const mainContent = document.querySelector(".main-content");
+        if (mainContent) {
+          observer.observe(mainContent, {
             childList: true,
             subtree: true,
-            characterData: true
-        });
-    }
-});
+            characterData: true,
+          });
+        }
+      });
 
-// ============================================
-// SECTION 10: NOTIFICATION API FUNCTIONS
-// ============================================
+      // ============================================
+      // SECTION 10: NOTIFICATION API FUNCTIONS
+      // ============================================
 
-/**
- * Fetches unread notifications from the server
- */
-async function fetchNotifications() {
-    try {
-        // Show loading state
-        const notificationList = document.getElementById('notificationList');
-        if (notificationList) {
+      /**
+       * Fetches unread notifications from the server
+       */
+      async function fetchNotifications() {
+        try {
+          // Show loading state
+          const notificationList = document.getElementById("notificationList");
+          if (notificationList) {
             notificationList.innerHTML = `
                 <div class="notification-loading">
                     <i class="fas fa-spinner fa-spin"></i>
                     <p>Loading notifications...</p>
                 </div>
             `;
-        }
-        
-        const response = await fetch('/notifications/api/unread/');
-        
-        if (!response.ok) {
+          }
+
+          const response = await fetch("/notifications/api/unread/");
+
+          if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Notifications received:', data);
-        
-        // Update the notification list
-        updateNotificationList(data);
-        
-        // Update badge count
-        const unreadCount = data.length; // Since all are unread for now
-        updateNotificationBadge(unreadCount);
-        
-    } catch (error) {
-        console.error('Error fetching notifications:', error);
-        
-        // Show user-friendly error message
-        const notificationList = document.getElementById('notificationList');
-        if (notificationList) {
+          }
+
+          const data = await response.json();
+          console.log("Notifications received:", data);
+
+          // Handle both old format (array) and new format (object with notifications array)
+          const notifications = Array.isArray(data)
+            ? data
+            : data.notifications || [];
+          const unreadCount = Array.isArray(data)
+            ? data.length
+            : data.unread_count || 0;
+
+          // Update the notification list
+          updateNotificationList(notifications);
+
+          // Update badge count
+          updateNotificationBadge(unreadCount);
+        } catch (error) {
+          console.error("Error fetching notifications:", error);
+
+          // Show user-friendly error message
+          const notificationList = document.getElementById("notificationList");
+          if (notificationList) {
             notificationList.innerHTML = `
                 <div class="notification-empty">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -1138,197 +3329,253 @@ async function fetchNotifications() {
                     </small>
                 </div>
             `;
+          }
         }
-    }
-}
-/**
- * Updates the notification list in the dropdown with fetched notifications
- */
-function updateNotificationList(notifications) {
-    const notificationList = document.getElementById('notificationList');
-    if (!notificationList) return;
-    
-    // Show empty state if no notifications
-    if (!notifications || notifications.length === 0) {
-        notificationList.innerHTML = `
+      }
+      /**
+       * Updates the notification list in the dropdown with fetched notifications
+       */
+      function updateNotificationList(notifications) {
+        const notificationList = document.getElementById("notificationList");
+        if (!notificationList) return;
+
+        // Show empty state if no notifications
+        if (!notifications || notifications.length === 0) {
+          notificationList.innerHTML = `
             <div class="notification-empty">
                 <i class="far fa-bell-slash"></i>
                 <p>No notifications yet</p>
             </div>
         `;
-        return;
-    }
-    
-    // Build HTML for each notification
-    let html = '';
-    notifications.forEach(function(notification) {
-        const timeAgo = getTimeAgo(notification.created_at || notification.timestamp);
-        const typeClass = getNotificationTypeClass(notification.type || notification.category);
-        
-        html += `
-            <div class="notification-item ${notification.read ? '' : 'unread'}" 
-                data-id="${notification.id || notification.notification_id}"
-                onclick="markAsRead(${notification.id || notification.notification_id})">
+          return;
+        }
+
+        // Build HTML for each notification
+        let html = "";
+        notifications.forEach(function (notification) {
+          const timeAgo = getTimeAgo(
+            notification.created_at || notification.timestamp,
+          );
+          const typeClass = getNotificationTypeClass(
+            notification.type || notification.category,
+          );
+
+          const notificationId =
+            notification.id || notification.notification_id;
+          html += `
+            <a href="/notifications/my/${notificationId}/" class="notification-item ${notification.read ? "" : "unread"}" 
+                data-id="${notificationId}">
                 <div class="notification-item-header">
-                    <div class="notification-title-text">${notification.title || 'Notification'}</div>
+                    <div class="notification-title-text">${notification.title || "Notification"}</div>
                     <div class="notification-time">${timeAgo}</div>
                 </div>
-                <div class="notification-message">${notification.message || notification.content || 'No message'}</div>
+                <div class="notification-message">${notification.message || notification.content || "No message"}</div>
                 <span class="notification-type ${typeClass}">
-                    ${notification.type || notification.category || 'Notification'}
+                    ${notification.type || notification.category || "Notification"}
                 </span>
-            </div>
+            </a>
         `;
-    });
-    
-    notificationList.innerHTML = html;
-}
+        });
 
-/**
- * Updates the notification bell badge with the current unread count
- */
-function updateNotificationBadge(count) {
-    const badge = document.querySelector('.notification-badge');
-    const unreadCountSpan = document.querySelector('.unread-count');
-    
-    // Update the red badge on the bell icon
-    if (badge) {
-        if (count > 0) {
+        notificationList.innerHTML = html;
+      }
+
+      /**
+       * Updates the notification bell badge with the current unread count
+       */
+      function updateNotificationBadge(count) {
+        const badge = document.querySelector(".notification-badge");
+        const unreadCountSpan = document.querySelector(".unread-count");
+
+        // Update the red badge on the bell icon
+        if (badge) {
+          if (count > 0) {
             badge.textContent = count;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
+            badge.style.display = "flex";
+          } else {
+            badge.style.display = "none";
+          }
         }
-    }
-    
-    // Update the text in the dropdown header
-    if (unreadCountSpan) {
-        unreadCountSpan.textContent = count + ' unread';
-    }
-}
 
-/**
- * Shows an error message when notifications fail to load
- */
-function showNotificationError() {
-    const notificationList = document.getElementById('notificationList');
-    if (notificationList) {
-        notificationList.innerHTML = `
+        // Update the text in the dropdown header
+        if (unreadCountSpan) {
+          unreadCountSpan.textContent = count + " unread";
+        }
+      }
+
+      /**
+       * Shows an error message when notifications fail to load
+       */
+      function showNotificationError() {
+        const notificationList = document.getElementById("notificationList");
+        if (notificationList) {
+          notificationList.innerHTML = `
             <div class="notification-empty">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Failed to load notifications</p>
             </div>
         `;
-    }
-}
+        }
+      }
 
-/**
- * Converts a date string to a human-readable "time ago" format
- */
-function getTimeAgo(dateString) {
-    if (!dateString) return 'Recently';
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Recently';
-    
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return diffMins + 'm ago';
-    if (diffHours < 24) return diffHours + 'h ago';
-    if (diffDays < 7) return diffDays + 'd ago';
-    
-    // If it's older than a week, show the actual date
-    return date.toLocaleDateString();
-}
+      /**
+       * Converts a date string to a human-readable "time ago" format
+       */
+      function getTimeAgo(dateString) {
+        if (!dateString) return "Recently";
 
-/**
- * Returns the CSS class for a notification based on its type
- */
-function getNotificationTypeClass(type) {
-    if (!type) return 'notification-info';
-    
-    const typeMap = {
-        'success': 'notification-success',
-        'warning': 'notification-warning',
-        'info': 'notification-info',
-        'error': 'notification-danger',
-        'danger': 'notification-danger',
-        'alert': 'notification-warning',
-        'notice': 'notification-info'
-    };
-    
-    // Convert to lowercase to handle case differences
-    return typeMap[type.toLowerCase()] || 'notification-info';
-}
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "Recently";
 
-/**
- * Marks a notification as read when clicked
- */
-async function markAsRead(notificationId) {
-    try {
-        const response = await fetch('/notifications/api/mark-read/' + notificationId + '/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return diffMins + "m ago";
+        if (diffHours < 24) return diffHours + "h ago";
+        if (diffDays < 7) return diffDays + "d ago";
+
+        // If it's older than a week, show the actual date
+        return date.toLocaleDateString();
+      }
+
+      /**
+       * Returns the CSS class for a notification based on its type
+       */
+      function getNotificationTypeClass(type) {
+        if (!type) return "notification-info";
+
+        const typeMap = {
+          success: "notification-success",
+          warning: "notification-warning",
+          info: "notification-info",
+          error: "notification-danger",
+          danger: "notification-danger",
+          alert: "notification-warning",
+          notice: "notification-info",
+        };
+
+        // Convert to lowercase to handle case differences
+        return typeMap[type.toLowerCase()] || "notification-info";
+      }
+
+      /**
+       * Marks a notification as read when clicked
+       */
+      async function markAsRead(notificationId) {
+        try {
+          const response = await fetch(
+            "/notifications/api/mark-read/" + notificationId + "/",
+            {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json",
+              },
             },
-        });
-        
-        if (response.ok) {
-            // Update the UI - remove the 'unread' class
-            const notificationItem = document.querySelector('[data-id="' + notificationId + '"]');
-            if (notificationItem) {
-                notificationItem.classList.remove('unread');
-                
-                // Update the badge count
-                const currentCount = parseInt(document.querySelector('.notification-badge')?.textContent || '0');
-                if (currentCount > 0) {
-                    updateNotificationBadge(currentCount - 1);
-                }
-                
-                // Redirect if the server sends a redirect URL
-                const data = await response.json();
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-    }
-}
+          );
 
-/**
- * Gets a cookie value by name (used for CSRF token)
- */
-function getCookie(name) {
-    let cookieValue = null;
-    
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            
-            // Check if this cookie starts with the name we want
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+          if (response.ok) {
+            // Update the UI - remove the 'unread' class
+            const notificationItem = document.querySelector(
+              '[data-id="' + notificationId + '"]',
+            );
+            if (notificationItem) {
+              notificationItem.classList.remove("unread");
+
+              // Update the badge count
+              const currentCount = parseInt(
+                document.querySelector(".notification-badge")?.textContent ||
+                  "0",
+              );
+              if (currentCount > 0) {
+                updateNotificationBadge(currentCount - 1);
+              }
+
+              // Redirect if the server sends a redirect URL
+              const data = await response.json();
+              if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+              }
             }
+          }
+        } catch (error) {
+          console.error("Error marking notification as read:", error);
         }
-    }
-    
-    return cookieValue;
-}
+      }
+
+      /**
+       * Gets a cookie value by name (used for CSRF token)
+       */
+      function getCookie(name) {
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+
+            // Check if this cookie starts with the name we want
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1),
+              );
+              break;
+            }
+          }
+        }
+
+        return cookieValue;
+      }
     </script>
 
     {% block script %}
     <!-- Additional scripts will be inserted here -->
+    <script>
+        // Handle message dismissal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to message close buttons
+            const closeButtons = document.querySelectorAll('.btn-close[data-bs-dismiss="alert"]');
+            closeButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const alertDiv = this.closest('.alert');
+                    if (alertDiv) {
+                        alertDiv.style.transition = 'opacity 0.3s, transform 0.3s';
+                        alertDiv.style.opacity = '0';
+                        alertDiv.style.transform = 'translateY(-10px)';
+                        setTimeout(function() {
+                            alertDiv.remove();
+                        }, 300);
+                    }
+                });
+            });
+            
+            // Auto-dismiss messages after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    if (alert && alert.parentNode) {
+                        alert.style.transition = 'opacity 0.3s, transform 0.3s';
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateY(-10px)';
+                        setTimeout(function() {
+                            if (alert.parentNode) {
+                                alert.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            });
+        });
+    </script>
     {% endblock script %}
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

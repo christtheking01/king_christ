@@ -1,4 +1,41 @@
-{% extends 'notifications/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    .notification-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .status-badge {
+        font-size: 0.85rem;
+    }
+    .priority-indicator {
+        width: 4px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: 12px 0 0 12px;
+    }
+    .priority-urgent { background-color: #dc3545; }
+    .priority-high { background-color: #ffc107; }
+    .priority-normal { background-color: #0d6efd; }
+    .priority-low { background-color: #6c757d; }
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+</style>
+{% endblock internal_style %}
 
 {% block title %}{{ notification.title }}{% endblock %}
 {% block page_title %}Notification Details{% endblock %}
@@ -6,62 +43,134 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8">
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ notification.title }}</h5>
+        <div class="card notification-card mb-3 position-relative">
+            <!-- Priority Indicator -->
+            <div class="priority-indicator priority-{{ notification.priority|default:'normal' }}"></div>
+            
+            <div class="card-header d-flex justify-content-between align-items-center ps-4">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0">{{ notification.title }}</h5>
+                    {% if notification.priority == 'urgent' %}
+                        <span class="badge bg-danger">URGENT</span>
+                    {% elif notification.priority == 'high' %}
+                        <span class="badge bg-warning text-dark">HIGH</span>
+                    {% elif notification.priority == 'low' %}
+                        <span class="badge bg-secondary">LOW</span>
+                    {% endif %}
+                </div>
                 <div>
                     {% if notification.status == 'SENT' %}
-                        <span class="badge bg-success">Sent</span>
+                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Sent</span>
                     {% elif notification.status == 'FAILED' %}
-                        <span class="badge bg-danger">Failed</span>
+                        <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Failed</span>
                     {% elif notification.status == 'PENDING' %}
-                        <span class="badge bg-warning">Pending</span>
+                        <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Pending</span>
+                    {% elif notification.status == 'SENDING' %}
+                        <span class="badge bg-info"><i class="fas fa-spinner fa-spin me-1"></i>Sending</span>
                     {% else %}
                         <span class="badge bg-secondary">{{ notification.status }}</span>
                     {% endif %}
                 </div>
             </div>
-            <div class="card-body">
-                <h6>Message:</h6>
-                <p class="lead">{{ notification.message }}</p>
+            <div class="card-body ps-4">
+                <h6 class="text-muted mb-2">Message:</h6>
+                <div class="p-3 bg-light rounded mb-4">
+                    <p class="lead mb-0">{{ notification.message }}</p>
+                </div>
 
-                <hr>
-
-                <div class="row">
+                <div class="row mb-4">
                     <div class="col-md-6">
-                        <p><strong>Recipient Type:</strong> {{ notification.get_recipient_type_display }}</p>
-                        
+                        <h6 class="text-muted mb-3">Recipients</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-users me-2 text-primary"></i>
+                                <strong>Type:</strong> {{ notification.get_recipient_type_display }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-desktop me-2 text-info"></i>
+                                <strong>Target:</strong> {{ notification.get_target_audience_display|default:"All Users" }}
+                            </li>
                         {% if notification.member %}
-                            <p><strong>Member:</strong> {{ notification.member.name }}</p>
+                            <li class="mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                <strong>Member:</strong> {{ notification.member.name }}
+                            </li>
                         {% elif notification.ministry %}
-                            <p><strong>Ministry:</strong> {{ notification.ministry.name }}</p>
+                            <li class="mb-2">
+                                <i class="fas fa-church me-2"></i>
+                                <strong>Ministry:</strong> {{ notification.ministry.name }}
+                            </li>
                         {% elif notification.community %}
-                            <p><strong>Community:</strong> {{ notification.community.name }}</p>
+                            <li class="mb-2">
+                                <i class="fas fa-home me-2"></i>
+                                <strong>Community:</strong> {{ notification.community.name }}
+                            </li>
+                        {% elif notification.zone %}
+                            <li class="mb-2">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                <strong>Zone:</strong> {{ notification.zone.name }}
+                            </li>
+                        {% elif notification.custom_phone_numbers %}
+                            <li class="mb-2">
+                                <i class="fas fa-phone-alt me-2"></i>
+                                <strong>Custom Phones:</strong>
+                                <div class="mt-1 p-2 bg-light rounded small" style="white-space: pre-wrap;">{{ notification.custom_phone_numbers }}</div>
+                            </li>
                         {% endif %}
+                        </ul>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Created:</strong> {{ notification.created_at|date:"M d, Y H:i" }}</p>
-                        <p><strong>Created By:</strong> {{ notification.created_by.username }}</p>
-                        {% if notification.sent_at %}
-                            <p><strong>Sent At:</strong> {{ notification.sent_at|date:"M d, Y H:i" }}</p>
-                        {% endif %}
+                        <h6 class="text-muted mb-3">Details</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-calendar me-2 text-muted"></i>
+                                <strong>Created:</strong> {{ notification.created_at|date:"M d, Y H:i" }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-user me-2 text-muted"></i>
+                                <strong>By:</strong> {{ notification.created_by.get_full_name|default:notification.created_by.username }}
+                            </li>
+                            {% if notification.sent_at %}
+                            <li class="mb-2">
+                                <i class="fas fa-paper-plane me-2 text-success"></i>
+                                <strong>Sent:</strong> {{ notification.sent_at|date:"M d, Y H:i" }}
+                            </li>
+                            {% endif %}
+                            <li class="mb-2">
+                                <i class="fas fa-sms me-2 {% if notification.send_sms %}text-success{% else %}text-muted{% endif %}"></i>
+                                <strong>SMS:</strong> {% if notification.send_sms %}Enabled{% else %}Disabled{% endif %}
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
-                <hr>
-
-                <div class="row text-center">
-                    <div class="col-4">
-                        <h4>{{ notification.total_recipients }}</h4>
-                        <p class="text-muted">Total Recipients</p>
+                <!-- Stats Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number text-primary">{{ notification.total_recipients }}</div>
+                            <small class="text-muted">Total Recipients</small>
+                        </div>
                     </div>
-                    <div class="col-4">
-                        <h4 class="text-success">{{ notification.sms_sent_count }}</h4>
-                        <p class="text-muted">SMS Sent</p>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number text-info">{{ read_count }}</div>
+                            <small class="text-muted">Read/Open</small>
+                        </div>
                     </div>
-                    <div class="col-4">
-                        <h4 class="text-danger">{{ notification.sms_failed_count }}</h4>
-                        <p class="text-muted">SMS Failed</p>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number text-success">{{ notification.sms_sent_count }}</div>
+                            <small class="text-muted">SMS Sent</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number {% if notification.sms_failed_count > 0 %}text-danger{% else %}text-muted{% endif %}">
+                                {{ notification.sms_failed_count }}
+                            </div>
+                            <small class="text-muted">SMS Failed</small>
+                        </div>
                     </div>
                 </div>
 
@@ -83,9 +192,46 @@
                     <a href="{% url 'notification_list' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to List
                     </a>
+                    <a href="{% url 'notification_delete' notification.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
                 </div>
             </div>
         </div>
+
+        <!-- Read Status -->
+        {% if read_status %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-eye text-info"></i> Read By ({{ read_count }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Read At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for status in read_status %}
+                            <tr>
+                                <td>{{ status.user.get_full_name|default:status.user.username }}</td>
+                                <td>{{ status.read_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if read_status|length > 50 %}
+                <div class="text-center mt-2">
+                    <small class="text-muted">Showing first 50 readers</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- SMS Logs -->
         {% if logs %}
@@ -140,10 +286,19 @@
                     {% for recipient in recipients %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>{{ recipient.name }}</strong><br>
+                            {# Handle ZoneLeader objects which have 'name' field, not 'name' attribute #}
+                            {% if recipient.name %}
+                                <strong>{{ recipient.name }}</strong>
+                            {% elif recipient.leader_name %}
+                                <strong>{{ recipient.leader_name }}</strong>
+                            {% else %}
+                                <strong>Unknown</strong>
+                            {% endif %}<br>
                             <small class="text-muted">
                                 {% if recipient.telephone %}
                                     <i class="fas fa-phone"></i> {{ recipient.telephone }}
+                                {% elif recipient.phone %}
+                                    <i class="fas fa-phone"></i> {{ recipient.phone }}
                                 {% else %}
                                     <i class="fas fa-exclamation-triangle text-warning"></i> No phone
                                 {% endif %}

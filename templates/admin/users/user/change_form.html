@@ -1,0 +1,42 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    {% if original %}
+        {% if block_status == "blocked" %}
+            <li>
+                <a href="{% url 'admin:users_user_unblock' original.pk %}" class="historylink" style="background: #dc3545; color: white; font-weight: bold;">
+                    🔓 Unblock User
+                </a>
+            </li>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block after_field_sets %}
+    {{ block.super }}
+    {% if original %}
+        <div class="module" style="margin-top: 20px;">
+            <h2>Security Information</h2>
+            <div class="form-row">
+                <div style="padding: 10px;">
+                    <strong>Block Status:</strong>
+                    {% if block_status == "blocked" %}
+                        <span style="color: #dc3545; font-weight: bold; font-size: 16px;">
+                            🔒 ACCOUNT IS LOCKED
+                        </span>
+                        <p style="margin-top: 10px; color: #666;">
+                            This account has been temporarily locked due to multiple failed login attempts.
+                            <br>Use the "Unblock User" button above to restore access immediately.
+                        </p>
+                    {% else %}
+                        <span style="color: #28a745; font-weight: bold;">
+                            ✓ Account is active
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

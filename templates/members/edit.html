@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         <!-- Form Card -->
         <div class="form-card">
-            <form enctype="multipart/form-data" action="{% url 'update_member' member.pk %}" method="post" novalidate>
+            <form enctype="multipart/form-data" action="{% url 'edit_member' member.pk %}" method="post" novalidate>
                 {% csrf_token %}
                 
                 <!-- Avatar Section -->
@@ -664,12 +664,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     {% endif %}
                     
-                    <div class="checkbox-item">
-                        <input type="checkbox" 
-                               id="{{ form.new_believer_school.id_for_label }}" 
-                               name="{{ form.new_believer_school.name }}" 
-                               {% if form.new_believer_school.value|default:member.new_believer_school %}checked{% endif %}>
-                        <label for="{{ form.new_believer_school.id_for_label }}">New Believer's School</label>
+                    <div class="form-group">
+                        <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                        {{ form.gender }}
+                        {% if form.gender.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.gender.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.membership_category.id_for_label }}" class="form-label">Membership Category</label>
+                        {{ form.membership_category }}
+                        {% if form.membership_category.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.membership_category.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="checkbox-item">

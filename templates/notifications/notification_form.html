@@ -1,131 +1,1078 @@
-{% extends 'notifications/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
 
-{% block title %}Create Notification{% endblock %}
-{% block page_title %}Create New Notification{% endblock %}
+{% block internal_style %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+    :root {
+        --ink: #0d0d12;
+        --ink-soft: #3a3a4a;
+        --ink-muted: #8888a0;
+        --surface: #f7f7fb;
+        --surface-raised: #ffffff;
+        --accent: #5b3ff8;
+        --accent-soft: rgba(91, 63, 248, 0.10);
+        --accent-glow: rgba(91, 63, 248, 0.22);
+        --success: #17c964;
+        --warning: #f5a623;
+        --danger: #f31260;
+        --info: #006fe6;
+        --border: rgba(13, 13, 18, 0.10);
+        --border-focus: #5b3ff8;
+        --radius-sm: 8px;
+        --radius: 14px;
+        --radius-lg: 22px;
+        --shadow-sm: 0 1px 3px rgba(13,13,18,0.07), 0 1px 2px rgba(13,13,18,0.04);
+        --shadow: 0 4px 16px rgba(13,13,18,0.08), 0 1px 4px rgba(13,13,18,0.04);
+        --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { 
+        box-sizing: border-box; 
+    }
+
+    body, .notification-form-wrap {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+        background: var(--surface);
+    }
+
+    /* ── Page Layout ── */
+    .nf-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 0 0 60px;
+        align-items: start;
+    }
+    @media (max-width: 880px) {
+        .nf-layout { grid-template-columns: 1fr; }
+        .nf-sidebar { order: -1; }
+    }
+
+    /* ── Card ── */
+    .nf-card {
+        background: var(--surface-raised);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    .nf-card-header {
+        padding: 26px 30px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .nf-card-header-icon {
+        width: 42px;
+        height: 42px;
+        background: var(--accent);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .nf-card-header-text h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 2px;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+    }
+    .nf-card-header-text p {
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        margin: 0;
+    }
+    .nf-card-body { padding: 28px 30px; }
+
+    /* ── Section ── */
+    .nf-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid var(--border);
+    }
+    .nf-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .nf-section-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--ink-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .nf-section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    /* ── Form Fields ── */
+    .nf-field { margin-bottom: 18px; }
+    .nf-field:last-child { margin-bottom: 0; }
+
+    .nf-label {
+        display: block;
+        font-size: 0.865rem;
+        font-weight: 500;
+        color: var(--ink-soft);
+        margin-bottom: 7px;
+    }
+    .nf-label .req { color: var(--accent); margin-left: 2px; }
+
+    /* Override Django widget styles */
+    .nf-field input[type="text"],
+    .nf-field input[type="email"],
+    .nf-field input[type="number"],
+    .nf-field textarea,
+    .nf-field select,
+    .nf-select-wrap select {
+        width: 100%;
+        border: 1.5px solid var(--border) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 11px 14px !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 0.915rem !important;
+        color: var(--ink) !important;
+        background: var(--surface) !important;
+        transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+        outline: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        box-shadow: none !important;
+    }
+    .nf-field input:focus,
+    .nf-field textarea:focus,
+    .nf-field select:focus,
+    .nf-select-wrap select:focus {
+        border-color: var(--border-focus) !important;
+        box-shadow: 0 0 0 4px var(--accent-glow) !important;
+        background: var(--surface-raised) !important;
+    }
+    .nf-field textarea {
+        resize: vertical;
+        min-height: 108px;
+        line-height: 1.55;
+    }
+    .nf-field input::placeholder,
+    .nf-field textarea::placeholder { color: var(--ink-muted); }
+
+    .nf-select-wrap {
+        position: relative;
+    }
+    .nf-select-wrap::after {
+        content: '\f107';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--ink-muted);
+        pointer-events: none;
+        font-size: 0.85rem;
+        z-index: 1;
+    }
+    .nf-select-wrap select { padding-right: 36px !important; cursor: pointer; }
+
+    /* ── SMS Counter ── */
+    .sms-counter-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .sms-counter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent-soft);
+        border-radius: 100px;
+        padding: 4px 12px;
+        font-size: 0.79rem;
+        color: var(--accent);
+        font-weight: 500;
+        transition: all var(--transition);
+    }
+    .sms-counter-pill.warn  { background: rgba(245,166,35,0.13); color: var(--warning); }
+    .sms-counter-pill.over  { background: rgba(243,18,96,0.10);  color: var(--danger);  }
+    .sms-note {
+        font-size: 0.77rem;
+        color: var(--ink-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ── Priority Pills ── */
+    .priority-pills {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 9px;
+        margin-top: 10px;
+    }
+    .priority-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        font-size: 0.81rem;
+        color: var(--ink-soft);
+        line-height: 1.35;
+    }
+    .ppd { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ppd.low    { background: var(--ink-muted); }
+    .ppd.normal { background: var(--accent); }
+    .ppd.high   { background: var(--warning); }
+    .ppd.urgent { background: var(--danger); }
+    .priority-pill strong { color: var(--ink); }
+
+    /* ── Dynamic Recipient Fields ── FIXedit all categories template so it can be modern and match the model of categoryedit all categories template so it can be modern and match the model of category: removed !important so JS can override ── */
+    .recipient-dynamic-field {
+        display: none;
+        margin-top: 16px;
+    }
+    .recipient-dynamic-field.visible {
+        display: block;
+        animation: fadeSlide 0.22s ease both;
+    }
+
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Info Banner ── FIX: removed !important ── */
+    .recipient-info-item         { display: none; }
+    .recipient-info-item.visible { display: block; }
+
+    .info-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: linear-gradient(135deg, rgba(0,111,230,0.07) 0%, rgba(91,63,248,0.06) 100%);
+        border: 1px solid rgba(0,111,230,0.15);
+        border-radius: var(--radius-sm);
+        padding: 11px 14px;
+        margin-top: 12px;
+        font-size: 0.84rem;
+        color: var(--ink-soft);
+        line-height: 1.5;
+    }
+    .info-banner i { color: var(--info); flex-shrink: 0; margin-top: 2px; }
+
+    /* ── SMS Toggle ── */
+    .sms-toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 15px 16px;
+        background: var(--surface);
+        border-radius: var(--radius);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: border-color var(--transition), background var(--transition);
+    }
+    .sms-toggle-row.sms-on {
+        border-color: var(--success);
+        background: rgba(23,201,100,0.04);
+    }
+    .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    .toggle-switch input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+    .toggle-track {
+        position: absolute;
+        inset: 0;
+        background: #d1d1db;
+        border-radius: 100px;
+        transition: background var(--transition);
+        pointer-events: none;
+    }
+    .toggle-track::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: var(--shadow-sm);
+        transition: transform var(--transition);
+    }
+    .toggle-switch input:checked ~ .toggle-track { background: var(--success); }
+    .toggle-switch input:checked ~ .toggle-track::after { transform: translateX(20px); }
+
+    .toggle-text strong {
+        display: block;
+        font-size: 0.89rem;
+        font-weight: 500;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+    .toggle-text span {
+        font-size: 0.79rem;
+        color: var(--ink-muted);
+    }
+
+    /* ── Error ── */
+    .nf-error {
+        font-size: 0.81rem;
+        color: var(--danger);
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .nf-error-block {
+        background: rgba(243,18,96,0.07);
+        border: 1px solid rgba(243,18,96,0.2);
+        border-radius: var(--radius-sm);
+        padding: 11px 14px;
+        font-size: 0.875rem;
+        color: var(--danger);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    /* ── Submit Row ── */
+    .nf-submit-row {
+        display: flex;
+        gap: 11px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        margin-top: 28px;
+    }
+    .btn-send {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 12px 26px;
+        font-family: 'Syne', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        box-shadow: 0 4px 14px var(--accent-glow);
+        transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+        text-decoration: none;
+    }
+    .btn-send:hover {
+        background: #4a30e0;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px var(--accent-glow);
+        color: #fff;
+    }
+    .btn-send:active { transform: translateY(0); }
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        color: var(--ink-soft);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px 20px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color var(--transition), color var(--transition);
+    }
+    .btn-cancel:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+    /* ── Page Header ── */
+    .nf-page-header {
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+    .nf-page-header h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--ink);
+        margin: 0 0 4px;
+        letter-spacing: -0.02em;
+    }
+    .nf-page-header p { font-size: 0.88rem; color: var(--ink-muted); margin: 0; }
+
+    /* ── Steps ── */
+    .nf-steps {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        overflow-x: auto;
+    }
+    .nf-step {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.79rem;
+        color: var(--ink-muted);
+        white-space: nowrap;
+    }
+    .nf-step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: var(--ink-muted);
+    }
+    .nf-step.active { color: var(--accent); }
+    .nf-step.active .nf-step-num {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+    }
+    .nf-step-sep { flex: 1; min-width: 20px; height: 1px; background: var(--border); margin: 0 6px; }
+
+    /* ── Sidebar ── */
+    .nf-sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .nf-tip-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+        box-shadow: var(--shadow-sm);
+    }
+    .nf-tip-card h4 {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin: 0 0 13px;
+    }
+    .nf-tip-list { list-style: none; padding: 0; margin: 0; }
+    .nf-tip-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.83rem;
+        color: var(--ink-soft);
+        line-height: 1.45;
+    }
+    .nf-tip-list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .nf-tip-list li i { color: var(--accent); margin-top: 2px; flex-shrink: 0; width: 13px; font-size: 0.8rem; }
+
+    .nf-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .nf-stat {
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        padding: 13px 10px;
+        text-align: center;
+    }
+    .nf-stat-icon { color: var(--accent); font-size: 1.1rem; margin-bottom: 5px; }
+    .nf-stat-label { font-size: 0.73rem; color: var(--ink-muted); line-height: 1.3; }
+
+    /* Responsive */
+    @media (max-width: 580px) {
+        .nf-card-body { padding: 20px 16px; }
+        .nf-card-header { padding: 18px 16px 14px; }
+        .priority-pills { grid-template-columns: 1fr; }
+        .nf-submit-row { flex-direction: column; }
+        .btn-send, .btn-cancel { width: 100%; justify-content: center; }
+    }
+</style>
+{% endblock internal_style %}
+
+{% block title %}{% trans "Send Notification" %}{% endblock %}
+{% block page_title %}{% trans "Send Notification" %}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card">
-            <div class="card-body">
-                <form method="post" id="notificationForm">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.title.id_for_label }}" class="form-label">Title *</label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                            <div class="text-danger small">{{ form.title.errors }}</div>
-                        {% endif %}
-                    </div>
+<div class="notification-form-wrap">
 
-                    <div class="mb-3">
-                        <label for="{{ form.message.id_for_label }}" class="form-label">Message *</label>
-                        {{ form.message }}
-                        <div class="form-text">
-                            <span id="charCount">0</span>/160 characters (1 SMS)
+    <!-- Page Header -->
+    <div class="nf-page-header">
+        <h1>{% trans "New Notification" %}</h1>
+        <p>{% trans "Compose and send a message to members via SMS and in-app alerts." %}</p>
+    </div>
+
+    <!-- Steps -->
+    <div class="nf-steps">
+        <div class="nf-step active"><div class="nf-step-num">1</div><span>{% trans "Content" %}</span></div>
+        <div class="nf-step-sep"></div>
+        <div class="nf-step active"><div class="nf-step-num">2</div><span>{% trans "Priority" %}</span></div>
+        <div class="nf-step-sep"></div>
+        <div class="nf-step active"><div class="nf-step-num">3</div><span>{% trans "Recipients" %}</span></div>
+        <div class="nf-step-sep"></div>
+        <div class="nf-step active"><div class="nf-step-num">4</div><span>{% trans "Delivery" %}</span></div>
+    </div>
+
+    <!-- Layout -->
+    <div class="nf-layout">
+
+        <!-- ── Main Form ── -->
+        <div>
+            <div class="nf-card">
+                <div class="nf-card-header">
+                    <div class="nf-card-header-icon"><i class="fas fa-paper-plane"></i></div>
+                    <div class="nf-card-header-text">
+                        <h2>{% trans "Compose Notification" %}</h2>
+                        <p>{% trans "Fill in the details below to send your notification" %}</p>
+                    </div>
+                </div>
+
+                <div class="nf-card-body">
+                    <form method="post" id="notificationForm">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="nf-error-block">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>{{ form.non_field_errors }}</div>
                         </div>
-                        {% if form.message.errors %}
-                            <div class="text-danger small">{{ form.message.errors }}</div>
                         {% endif %}
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.recipient_type.id_for_label }}" class="form-label">Recipient Type *</label>
-                        {{ form.recipient_type }}
-                        {% if form.recipient_type.errors %}
-                            <div class="text-danger small">{{ form.recipient_type.errors }}</div>
-                        {% endif %}
-                    </div>
+                        <!-- ══ 1. Message Content ══ -->
+                        <div class="nf-section">
+                            <div class="nf-section-label">
+                                <i class="fas fa-edit" style="color:var(--accent);font-size:.7rem;"></i>
+                                {% trans "Message Content" %}
+                            </div>
 
-                    <div class="mb-3" id="memberField" style="display:none;">
-                        <label for="{{ form.member.id_for_label }}" class="form-label">Select Member</label>
-                        {{ form.member }}
-                        {% if form.member.errors %}
-                            <div class="text-danger small">{{ form.member.errors }}</div>
-                        {% endif %}
-                    </div>
+                            <div class="nf-field">
+                                <label class="nf-label" for="{{ form.title.id_for_label }}">
+                                    {% trans "Title" %}<span class="req">*</span>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
 
-                    <div class="mb-3" id="ministryField" style="display:none;">
-                        <label for="{{ form.ministry.id_for_label }}" class="form-label">Select Ministry</label>
-                        {{ form.ministry }}
-                        {% if form.ministry.errors %}
-                            <div class="text-danger small">{{ form.ministry.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3" id="communityField" style="display:none;">
-                        <label for="{{ form.community.id_for_label }}" class="form-label">Select Community</label>
-                        {{ form.community }}
-                        {% if form.community.errors %}
-                            <div class="text-danger small">{{ form.community.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        {{ form.send_sms }}
-                        <label class="form-check-label" for="{{ form.send_sms.id_for_label }}">
-                            Send SMS via AfricasTalking
-                        </label>
-                    </div>
-
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
+                            <div class="nf-field">
+                                <label class="nf-label" for="{{ form.message.id_for_label }}">
+                                    {% trans "Message" %}<span class="req">*</span>
+                                </label>
+                                {{ form.message }}
+                                <div class="sms-counter-row">
+                                    <div class="sms-counter-pill" id="smsCounterPill">
+                                        <i class="fas fa-comment-sms" style="font-size:.72rem;"></i>
+                                        <span id="charCountDisplay">0</span> / 160 &nbsp;·&nbsp;
+                                        <span id="smsCountDisplay">1 SMS</span>
+                                    </div>
+                                    <div class="sms-note">
+                                        <i class="fas fa-mobile-screen-button" style="font-size:.72rem;"></i>
+                                        {% trans "SMS + in-app" %}
+                                    </div>
+                                </div>
+                                {% if form.message.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.message.errors }}</div>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endif %}
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Create & Send
-                        </button>
-                        <a href="{% url 'notification_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                        <!-- ══ 2. Priority ══ -->
+                        <div class="nf-section">
+                            <div class="nf-section-label">
+                                <i class="fas fa-flag" style="color:var(--accent);font-size:.7rem;"></i>
+                                {% trans "Priority Level" %}
+                            </div>
+                            <div class="nf-field">
+                                <label class="nf-label" for="{{ form.priority.id_for_label }}">{% trans "Select priority" %}</label>
+                                <div class="nf-select-wrap">{{ form.priority }}</div>
+                                {% if form.priority.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.priority.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="priority-pills">
+                                <div class="priority-pill"><div class="ppd low"></div><div><strong>{% trans "Low" %}</strong> — {% trans "General info" %}</div></div>
+                                <div class="priority-pill"><div class="ppd normal"></div><div><strong>{% trans "Normal" %}</strong> — {% trans "Regular updates" %}</div></div>
+                                <div class="priority-pill"><div class="ppd high"></div><div><strong>{% trans "High" %}</strong> — {% trans "Important" %}</div></div>
+                                <div class="priority-pill"><div class="ppd urgent"></div><div><strong>{% trans "Urgent" %}</strong> — {% trans "Critical alert" %}</div></div>
+                            </div>
+                        </div>
+
+                        <!-- ══ 3. Recipients ══ -->
+                        <div class="nf-section">
+                            <div class="nf-section-label">
+                                <i class="fas fa-users" style="color:var(--accent);font-size:.7rem;"></i>
+                                {% trans "Recipients" %}
+                            </div>
+
+                            <div class="nf-field">
+                                <label class="nf-label" for="{{ form.recipient_type.id_for_label }}">
+                                    {% trans "Recipient Type" %}<span class="req">*</span>
+                                </label>
+                                <div class="nf-select-wrap">{{ form.recipient_type }}</div>
+                                {% if form.recipient_type.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.recipient_type.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Dynamic: Single Recipient Selector -->
+                            <div class="recipient-dynamic-field nf-field" id="recipientSelectorField">
+                                <label class="nf-label" id="recipientSelectorLabel">
+                                    <i class="fas fa-user" id="recipientSelectorIcon" style="color:var(--accent);margin-right:5px;font-size:.8rem;"></i>
+                                    <span id="recipientSelectorText">{% trans "Select Recipients" %}</span><span class="req">*</span>
+                                </label>
+                                <div class="nf-select-wrap">
+                                    <select id="recipientSelector" name="recipient_selector" class="form-control">
+                                        <option value="">{% trans "Choose an option..." %}</option>
+                                    </select>
+                                </div>
+                                <div id="recipientSelectorError" class="nf-error" style="display:none;"></div>
+                            </div>
+
+                            <!-- Hidden form fields for backend processing -->
+                            <div style="display:none;">
+                                {{ form.member }}
+                                {% if form.member.errors %}
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        var errorDiv = document.getElementById('recipientSelectorError');
+                                        errorDiv.innerHTML = '<i class="fas fa-circle-exclamation"></i>{{ form.member.errors }}';
+                                        errorDiv.style.display = 'block';
+                                        document.getElementById('recipientSelectorField').classList.add('visible');
+                                    });
+                                </script>
+                                {% endif %}
+                                {{ form.ministry }}
+                                {% if form.ministry.errors %}
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        var errorDiv = document.getElementById('recipientSelectorError');
+                                        errorDiv.innerHTML = '<i class="fas fa-circle-exclamation"></i>{{ form.ministry.errors }}';
+                                        errorDiv.style.display = 'block';
+                                        document.getElementById('recipientSelectorField').classList.add('visible');
+                                    });
+                                </script>
+                                {% endif %}
+                                {{ form.committee }}
+                                {% if form.committee.errors %}
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        var errorDiv = document.getElementById('recipientSelectorError');
+                                        errorDiv.innerHTML = '<i class="fas fa-circle-exclamation"></i>{{ form.committee.errors }}';
+                                        errorDiv.style.display = 'block';
+                                        document.getElementById('recipientSelectorField').classList.add('visible');
+                                    });
+                                </script>
+                                {% endif %}
+                                {{ form.community }}
+                                {% if form.community.errors %}
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        var errorDiv = document.getElementById('recipientSelectorError');
+                                        errorDiv.innerHTML = '<i class="fas fa-circle-exclamation"></i>{{ form.community.errors }}';
+                                        errorDiv.style.display = 'block';
+                                        document.getElementById('recipientSelectorField').classList.add('visible');
+                                    });
+                                </script>
+                                {% endif %}
+                            </div>
+
+                            <!-- Dynamic: Custom phones -->
+                            <div class="recipient-dynamic-field nf-field" id="customPhonesField">
+                                <label class="nf-label" for="{{ form.custom_phone_numbers.id_for_label }}">
+                                    <i class="fas fa-phone" style="color:var(--accent);margin-right:5px;font-size:.8rem;"></i>
+                                    {% trans "Phone Numbers" %}<span class="req">*</span>
+                                </label>
+                                {{ form.custom_phone_numbers }}
+                                <div style="font-size:.78rem;color:var(--ink-muted);margin-top:5px;">
+                                    {% trans "Separate with commas — e.g." %} +255712345678, +255723456789
+                                </div>
+                                {% if form.custom_phone_numbers.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.custom_phone_numbers.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Info Banners (one per recipient type) -->
+                            <div class="recipient-info-item" data-type="MEMBER">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Send to a specific individual member." %}</span></div>
+                            </div>
+                            <div class="recipient-info-item" data-type="MINISTRY">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Send to all members belonging to the selected ministry." %}</span></div>
+                            </div>
+                            <div class="recipient-info-item" data-type="COMMUNITY">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Send to all members belonging to selected community." %}</span></div>
+                            </div>
+                            <div class="recipient-info-item" data-type="TITHE_PAYERS">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Sends to all members who pay tithe." %}</span></div>
+                            </div>
+                            <div class="recipient-info-item" data-type="ALL">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Sends to all active members in the system." %}</span></div>
+                            </div>
+                            <div class="recipient-info-item" data-type="CUSTOM_PHONES">
+                                <div class="info-banner"><i class="fas fa-circle-info"></i><span>{% trans "Enter phone numbers manually to reach non-registered recipients." %}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- ══ 4. Portal Target ══ -->
+                        <div class="nf-section">
+                            <div class="nf-section-label">
+                                <i class="fas fa-desktop" style="color:var(--accent);font-size:.7rem;"></i>
+                                {% trans "Portal / App Delivery" %}
+                            </div>
+                            <div class="nf-field">
+                                <label class="nf-label" for="{{ form.target_audience.id_for_label }}">{% trans "Target Audience" %}</label>
+                                <div class="nf-select-wrap">{{ form.target_audience }}</div>
+                                <div style="font-size:.79rem;color:var(--ink-muted);margin-top:7px;line-height:1.55;">
+                                    {% trans "Controls who sees this inside the portal dashboard: All Users, Staff Only, Members Only, or Portal Members Only." %}
+                                </div>
+                                {% if form.target_audience.errors %}
+                                <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.target_audience.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- ══ 5. Delivery Options ══ -->
+                        <div class="nf-section">
+                            <div class="nf-section-label">
+                                <i class="fas fa-satellite-dish" style="color:var(--accent);font-size:.7rem;"></i>
+                                {% trans "Delivery Options" %}
+                            </div>
+                            <div class="sms-toggle-row" id="smsToggleRow">
+                                <div class="toggle-switch">
+                                    {{ form.send_sms }}
+                                    <div class="toggle-track"></div>
+                                </div>
+                                <div class="toggle-text">
+                                    <strong>{% trans "Send via Africa's Talking SMS" %}</strong>
+                                    <span>{% trans "Disable to send in-app notifications only" %}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="nf-submit-row">
+                            <button type="submit" class="btn-send">
+                                <i class="fas fa-paper-plane"></i>
+                                {% trans "Create & Send" %}
+                            </button>
+                            <a href="{% url 'notification_list' %}" class="btn-cancel">
+                                <i class="fas fa-arrow-left"></i>
+                                {% trans "Cancel" %}
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
+
+        <!-- ── Sidebar ── -->
+        <div class="nf-sidebar">
+
+            <div class="nf-tip-card">
+                <h4>{% trans "Quick Tips" %}</h4>
+                <ul class="nf-tip-list">
+                    <li><i class="fas fa-lightbulb"></i>{% trans "Keep SMS messages under 160 characters to avoid splitting costs." %}</li>
+                    <li><i class="fas fa-users-gear"></i>{% trans "Use 'All Members' only for major announcements, not routine reminders." %}</li>
+                    <li><i class="fas fa-triangle-exclamation"></i>{% trans "Urgent priority sends a push alert immediately to all connected devices." %}</li>
+                    <li><i class="fas fa-phone-slash"></i>{% trans "Disable SMS toggle for in-app-only messages to save credits." %}</li>
+                </ul>
+            </div>
+
+            <div class="nf-tip-card">
+                <h4>{% trans "Delivery Channels" %}</h4>
+                <div class="nf-stat-grid">
+                    <div class="nf-stat"><div class="nf-stat-icon"><i class="fas fa-sms"></i></div><div class="nf-stat-label">{% trans "Africa's Talking SMS" %}</div></div>
+                    <div class="nf-stat"><div class="nf-stat-icon"><i class="fas fa-bell"></i></div><div class="nf-stat-label">{% trans "In-app push alert" %}</div></div>
+                    <div class="nf-stat"><div class="nf-stat-icon"><i class="fas fa-desktop"></i></div><div class="nf-stat-label">{% trans "Portal dashboard" %}</div></div>
+                    <div class="nf-stat"><div class="nf-stat-icon"><i class="fas fa-mobile"></i></div><div class="nf-stat-label">{% trans "Mobile app" %}</div></div>
+                </div>
+            </div>
+
+            <div class="nf-tip-card">
+                <h4>{% trans "Priority Guide" %}</h4>
+                <ul class="nf-tip-list">
+                    <li><i class="fas fa-circle" style="color:var(--ink-muted);font-size:.5rem;margin-top:4px;"></i><div><strong>{% trans "Low" %}</strong> — {% trans "Newsletters, non-urgent info." %}</div></li>
+                    <li><i class="fas fa-circle" style="color:var(--accent);font-size:.5rem;margin-top:4px;"></i><div><strong>{% trans "Normal" %}</strong> — {% trans "Weekly updates, event reminders." %}</div></li>
+                    <li><i class="fas fa-circle" style="color:var(--warning);font-size:.5rem;margin-top:4px;"></i><div><strong>{% trans "High" %}</strong> — {% trans "Schedule changes, important dates." %}</div></li>
+                    <li><i class="fas fa-circle" style="color:var(--danger);font-size:.5rem;margin-top:4px;"></i><div><strong>{% trans "Urgent" %}</strong> — {% trans "Emergencies, service cancellations." %}</div></li>
+                </ul>
+            </div>
+
+        </div>
+
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block script %}
 <script>
-    // Character counter
-    const messageField = document.getElementById('{{ form.message.id_for_label }}');
-    const charCount = document.getElementById('charCount');
-    
-    messageField.addEventListener('input', function() {
-        charCount.textContent = this.value.length;
-    });
-    
-    // Update char count on load
-    charCount.textContent = messageField.value.length;
-    
-    // Show/hide recipient fields based on type
-    const recipientType = document.getElementById('{{ form.recipient_type.id_for_label }}');
-    const memberField = document.getElementById('memberField');
-    const ministryField = document.getElementById('ministryField');
-    const communityField = document.getElementById('communityField');
-    
-    function updateRecipientFields() {
-        const value = recipientType.value;
-        
-        memberField.style.display = 'none';
-        ministryField.style.display = 'none';
-        communityField.style.display = 'none';
-        
-        if (value === 'MEMBER') {
-            memberField.style.display = 'block';
-        } else if (value === 'MINISTRY') {
-            ministryField.style.display = 'block';
-        } else if (value === 'COMMUNITY') {
-            communityField.style.display = 'block';
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ═══════════════════════════════════════════════════
+       1. SMS / character counter
+    ═══════════════════════════════════════════════════ */
+    var messageEl   = document.getElementById('{{ form.message.id_for_label }}');
+    var charDisplay = document.getElementById('charCountDisplay');
+    var smsDisplay  = document.getElementById('smsCountDisplay');
+    var pill        = document.getElementById('smsCounterPill');
+
+    function updateSmsCounter() {
+        if (!messageEl || !charDisplay) return;
+        var len    = messageEl.value.length;
+        var smsNum = Math.ceil(len / 160) || 1;
+        charDisplay.textContent = len;
+        smsDisplay.textContent  = smsNum + ' SMS' + (smsNum > 1 ? 'es' : '');
+        pill.classList.remove('warn', 'over');
+        if      (len > 306) pill.classList.add('over');
+        else if (len > 140) pill.classList.add('warn');
+    }
+
+    if (messageEl) {
+        messageEl.addEventListener('input', updateSmsCounter);
+        updateSmsCounter();
+    }
+
+    /* ═══════════════════════════════════════════════════
+       2. Recipient type → show / hide dynamic fields
+       FIX: only use classList — no style.display overrides
+    ═══════════════════════════════════════════════════ */
+    var recipientSelect = document.getElementById('{{ form.recipient_type.id_for_label }}')
+                       || document.querySelector('select[name="recipient_type"]');
+
+    var FIELD_MAP = {
+        'MEMBER':        'recipientSelectorField',
+        'MINISTRY':      'recipientSelectorField',
+        'COMMITTEE':     'recipientSelectorField',
+        'COMMUNITY':     'recipientSelectorField',
+        'ALL':           null,
+        'TITHE_PAYERS':  null,
+        'CUSTOM_PHONES': 'customPhonesField'
+    };
+
+    // Data for populating the dynamic selector
+    var RECIPIENT_DATA = {
+        'MEMBER': {
+            label: '{% trans "Select Member" %}',
+            icon: 'fas fa-user',
+            options: [
+                {% for member in form.member.field.queryset %}
+                {value: '{{ member.pk }}', text: '{{ member.name }}'},
+                {% endfor %}
+            ]
+        },
+        'MINISTRY': {
+            label: '{% trans "Select Ministry" %}',
+            icon: 'fas fa-building',
+            options: [
+                {% for ministry in form.ministry.field.queryset %}
+                {value: '{{ ministry.pk }}', text: '{{ ministry.name }}'},
+                {% endfor %}
+            ]
+        },
+        'COMMITTEE': {
+            label: '{% trans "Select Committee" %}',
+            icon: 'fas fa-users',
+            options: [
+                {% for committee in form.committee.field.queryset %}
+                {value: '{{ committee.pk }}', text: '{{ committee.Commitee_name }} - {{ committee.position }}'},
+                {% endfor %}
+            ]
+        },
+        'COMMUNITY': {
+            label: '{% trans "Select Community" %}',
+            icon: 'fas fa-house',
+            options: [
+                {% for community in form.community.field.queryset %}
+                {value: '{{ community.pk }}', text: '{{ community.name }}'},
+                {% endfor %}
+            ]
+        }
+    };
+
+    var allDynamicFields = document.querySelectorAll('.recipient-dynamic-field');
+    var allInfoItems     = document.querySelectorAll('.recipient-info-item');
+
+    function updateRecipientUI() {
+        console.log('=== DEBUGGING updateRecipientUI ===');
+        console.log('Selected value:', recipientSelect ? recipientSelect.value : '');
+        console.log('FIELD_MAP:', FIELD_MAP);
+        console.log('All dynamic fields found:', allDynamicFields.length);
+        console.log('All info items found:', allInfoItems.length);
+
+        var value = recipientSelect ? recipientSelect.value : '';
+
+        /* hide all dynamic fields and info banners */
+        allDynamicFields.forEach(function(el) {
+            el.classList.remove('visible');
+            console.log('Hiding field:', el.id);
+        });
+        allInfoItems.forEach(function(el) {
+            el.classList.remove('visible');
+        });
+
+        if (value && FIELD_MAP[value]) {
+            var targetId = FIELD_MAP[value];
+            console.log('Looking for element with ID:', targetId);
+            var target = document.getElementById(targetId);
+            console.log('Found target element:', target);
+            if (target) {
+                target.classList.add('visible');
+                console.log('SUCCESS: Added visible class to', targetId);
+
+                // Populate the recipient selector if it's the dynamic field
+                if (targetId === 'recipientSelectorField' && RECIPIENT_DATA[value]) {
+                    var data = RECIPIENT_DATA[value];
+                    var selector = document.getElementById('recipientSelector');
+                    var labelEl = document.getElementById('recipientSelectorText');
+                    var iconEl = document.getElementById('recipientSelectorIcon');
+
+                    // Update label and icon
+                    labelEl.textContent = data.label;
+                    iconEl.className = data.icon + ' fa';
+
+                    // Clear existing options except the first one
+                    selector.innerHTML = '<option value="">{% trans "Choose an option..." %}</option>';
+
+                    // Add new options
+                    data.options.forEach(function(option) {
+                        var optionEl = document.createElement('option');
+                        optionEl.value = option.value;
+                        optionEl.textContent = option.text;
+                        selector.appendChild(optionEl);
+                    });
+
+                    console.log('Populated selector with', data.options.length, 'options');
+                }
+            } else {
+                console.error('ERROR: Element not found with ID:', targetId);
+            }
+        } else {
+            console.log('No field mapping for value:', value);
+        }
+
+        /* show matching info banner */
+        var infoItem = document.querySelector('.recipient-info-item[data-type="' + value + '"]');
+        console.log('Looking for info item with data-type:', value);
+        console.log('Found info item:', infoItem);
+        if (infoItem) {
+            infoItem.classList.add('visible');
+            console.log('SUCCESS: Added visible to info item for', value);
+        } else {
+            console.error('ERROR: Info item not found for type:', value);
+        }
+        console.log('=== END DEBUGGING ===');
+    }
+
+    if (recipientSelect) {
+        recipientSelect.addEventListener('change', updateRecipientUI);
+        updateRecipientUI(); /* run once on load to handle pre-selected value */
+    }
+
+    /* Handle form submission to map recipient selector to correct field */
+    var notificationForm = document.getElementById('notificationForm');
+    if (notificationForm) {
+        notificationForm.addEventListener('submit', function(e) {
+            var recipientType = recipientSelect ? recipientSelect.value : '';
+            var recipientSelector = document.getElementById('recipientSelector');
+            var selectedValue = recipientSelector ? recipientSelector.value : '';
+
+            if (recipientType && selectedValue) {
+                // Set the appropriate hidden form field
+                if (recipientType === 'MEMBER') {
+                    var memberField = document.querySelector('select[name="member"]');
+                    if (memberField) memberField.value = selectedValue;
+                } else if (recipientType === 'MINISTRY') {
+                    var ministryField = document.querySelector('select[name="ministry"]');
+                    if (ministryField) ministryField.value = selectedValue;
+                } else if (recipientType === 'COMMITTEE') {
+                    var committeeField = document.querySelector('select[name="committee"]');
+                    if (committeeField) committeeField.value = selectedValue;
+                } else if (recipientType === 'COMMUNITY') {
+                    var communityField = document.querySelector('select[name="community"]');
+                    if (communityField) communityField.value = selectedValue;
+                }
+            }
+        });
+    }
+
+    /* ═══════════════════════════════════════════════════
+       3. Priority border accent
+    ═══════════════════════════════════════════════════ */
+    var priorityEl = document.getElementById('{{ form.priority.id_for_label }}');
+    var PRIORITY_COLORS = { urgent: '#f31260', high: '#f5a623', low: '#8888a0' };
+
+    function updatePriorityAccent() {
+        if (!priorityEl) return;
+        priorityEl.style.borderLeftWidth = '3px';
+        priorityEl.style.borderLeftStyle = 'solid';
+        priorityEl.style.borderLeftColor = PRIORITY_COLORS[priorityEl.value] || '#5b3ff8';
+    }
+
+    if (priorityEl) {
+        priorityEl.addEventListener('change', updatePriorityAccent);
+        updatePriorityAccent();
+    }
+
+    /* ═══════════════════════════════════════════════════
+       4. SMS toggle row visual state
+    ═══════════════════════════════════════════════════ */
+    var smsCheckbox = document.getElementById('{{ form.send_sms.id_for_label }}');
+    var toggleRow   = document.getElementById('smsToggleRow');
+
+    function updateToggleRow() {
+        if (!toggleRow) return;
+        if (smsCheckbox && smsCheckbox.checked) {
+            toggleRow.classList.add('sms-on');
+        } else {
+            toggleRow.classList.remove('sms-on');
         }
     }
-    
-    recipientType.addEventListener('change', updateRecipientFields);
-    updateRecipientFields(); // Initialize on load
+
+    if (smsCheckbox) {
+        smsCheckbox.addEventListener('change', updateToggleRow);
+        updateToggleRow();
+    }
+
+});
 </script>
 {% endblock %}

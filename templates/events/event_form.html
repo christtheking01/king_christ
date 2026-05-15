@@ -3,20 +3,329 @@
 
 {% block title %}{% if event %}Edit{% else %}Create{% endif %} Event - Christ King Church{% endblock %}
 
+{% block internal_style %}
+<style>
+    /* Modern Glassmorphism Form Styles */
+    .form-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header */
+    .form-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .form-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Glass Cards */
+    .glass-form-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .glass-form-card:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    .glass-form-card-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .glass-form-card-header i {
+        font-size: 1.1rem;
+    }
+
+    .glass-form-card-header h5 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .glass-form-card-header.success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .glass-form-card-header.info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .glass-form-card-header.secondary { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+
+    .glass-form-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form Controls */
+    .form-field {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-field label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-field label .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        background: white;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea.form-control-modern {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-help-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.35rem;
+    }
+
+    /* Checkbox */
+    .form-check-modern {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .form-check-modern:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .form-check-modern input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    .form-check-modern label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* Ministry Checkboxes */
+    .ministry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .ministry-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ministry-check:hover {
+        border-color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .ministry-check input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+    }
+
+    .ministry-check label {
+        margin: 0;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    /* Conditional Fields */
+    .conditional-fields {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* Image Preview */
+    .image-preview {
+        max-width: 200px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        margin-top: 0.75rem;
+    }
+
+    /* Buttons */
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary-modern {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-secondary-modern {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary-modern:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-lg-modern {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-wrapper {
+            padding: 0.75rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-modern {
+            width: 100%;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .glass-form-card {
+        animation: fadeInUp 0.4s ease forwards;
+    }
+
+    .glass-form-card:nth-child(1) { animation-delay: 0.05s; }
+    .glass-form-card:nth-child(2) { animation-delay: 0.1s; }
+    .glass-form-card:nth-child(3) { animation-delay: 0.15s; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
+<div class="form-wrapper">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1">
-                <i class="fas fa-{% if event %}edit{% else %}plus-circle{% endif %} text-primary me-2"></i>
+    <div class="form-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h1>
+                <i class="fas fa-{% if event %}edit{% else %}plus-circle{% endif %}"></i>
                 {% if event %}Edit{% else %}Create{% endif %} Event
             </h1>
-            <p class="text-muted mb-0">{% if event %}Update event details{% else %}Create a new church event{% endif %}</p>
+            <a href="{% url 'event_list' %}" class="btn-modern btn-secondary-modern">
+                <i class="fas fa-arrow-left"></i> Back to Events
+            </a>
         </div>
-        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i>Back to Events
-        </a>
     </div>
 
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
@@ -26,141 +335,147 @@
             <!-- Left Column -->
             <div class="col-lg-8">
                 <!-- Basic Information -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h5>Basic Information</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Event Title <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="title" name="title" 
+                    <div class="glass-form-card-body">
+                        <div class="form-field">
+                            <label for="title">Event Title <span class="required">*</span></label>
+                            <input type="text" class="form-control-modern" id="title" name="title" 
                                    value="{{ event.title|default:'' }}" required>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row">
                             <div class="col-md-6">
-                                <label for="event_type" class="form-label">Event Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="event_type" name="event_type" required>
-                                    {% for type_code, type_name in event_types %}
-                                    <option value="{{ type_code }}" {% if event.event_type == type_code %}selected{% endif %}>
-                                        {{ type_name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                <div class="form-field">
+                                    <label for="event_type">Event Type <span class="required">*</span></label>
+                                    <select class="form-control-modern" id="event_type" name="event_type" required>
+                                        {% for type_code, type_name in event_types %}
+                                        <option value="{{ type_code }}" {% if event.event_type == type_code %}selected{% endif %}>
+                                            {{ type_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category">
-                                    <option value="">-- Select Category --</option>
-                                    {% for cat in categories %}
-                                    <option value="{{ cat.id }}" {% if event.category.id == cat.id %}selected{% endif %}>
-                                        {{ cat.name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                <div class="form-field">
+                                    <label for="category">Category</label>
+                                    <input type="text" class="form-control-modern" id="category" name="category" 
+                                           value="{{ event.category.name|default:'' }}" 
+                                           placeholder="e.g., Mass, Meeting, Celebration">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="4">{{ event.description|default:'' }}</textarea>
+                        <div class="form-field">
+                            <label for="description">Description</label>
+                            <textarea class="form-control-modern" id="description" name="description" rows="4">{{ event.description|default:'' }}</textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="banner_image" class="form-label">Banner Image</label>
-                            <input type="file" class="form-control" id="banner_image" name="banner_image" accept="image/*">
+                        <div class="form-field">
+                            <label for="banner_image">Banner Image</label>
+                            <input type="file" class="form-control-modern" id="banner_image" name="banner_image" accept="image/*">
                             {% if event.banner_image %}
-                            <div class="mt-2">
-                                <img src="{{ event.banner_image.url }}" alt="Current banner" class="img-thumbnail" style="max-height: 150px;">
-                                <p class="small text-muted mt-1">Current banner image</p>
-                            </div>
+                            <img src="{{ event.banner_image.url }}" alt="Current banner" class="image-preview">
+                            <p class="form-help-text">Current banner image</p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <!-- Date and Time -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Date and Time</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h5>Date and Time</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="start_date" name="start_date" 
-                                       value="{{ event.start_date|date:'Y-m-d'|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="end_date" class="form-label">End Date</label>
-                                <input type="date" class="form-control" id="end_date" name="end_date" 
-                                       value="{{ event.end_date|date:'Y-m-d'|default:'' }}">
-                                <div class="form-text">Leave blank for single-day events</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="start_time" class="form-label">Start Time</label>
-                                <input type="time" class="form-control" id="start_time" name="start_time" 
-                                       value="{{ event.start_time|time:'H:i'|default:'' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="end_time" class="form-label">End Time</label>
-                                <input type="time" class="form-control" id="end_time" name="end_time" 
-                                       value="{{ event.end_time|time:'H:i'|default:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="all_day" name="all_day" 
-                                   {% if event.all_day %}checked{% endif %}>
-                            <label class="form-check-label" for="all_day">All Day Event</label>
-                        </div>
-
-                        <hr>
-
-                        <h6 class="mb-3">Recurrence (Optional)</h6>
+                    <div class="glass-form-card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="recurrence" class="form-label">Repeat</label>
-                                <select class="form-select" id="recurrence" name="recurrence">
-                                    {% for rec_code, rec_name in recurrence_choices %}
-                                    <option value="{{ rec_code }}" {% if event.recurrence == rec_code %}selected{% endif %}>
-                                        {{ rec_name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="start_date">Start Date <span class="required">*</span></label>
+                                    <input type="date" class="form-control-modern" id="start_date" name="start_date" 
+                                           value="{{ event.start_date|date:'Y-m-d'|default:'' }}" required>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="recurrence_end_date" class="form-label">Repeat Until</label>
-                                <input type="date" class="form-control" id="recurrence_end_date" name="recurrence_end_date" 
-                                       value="{{ event.recurrence_end_date|date:'Y-m-d'|default:'' }}">
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" class="form-control-modern" id="end_date" name="end_date" 
+                                           value="{{ event.end_date|date:'Y-m-d'|default:'' }}">
+                                    <p class="form-help-text">Leave blank for single-day events</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="start_time">Start Time</label>
+                                    <input type="time" class="form-control-modern" id="start_time" name="start_time" 
+                                           value="{{ event.start_time|time:'H:i'|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="end_time">End Time</label>
+                                    <input type="time" class="form-control-modern" id="end_time" name="end_time" 
+                                           value="{{ event.end_time|time:'H:i'|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check-modern">
+                            <input type="checkbox" id="all_day" name="all_day" {% if event.all_day %}checked{% endif %}>
+                            <label for="all_day">All Day Event</label>
+                        </div>
+
+                        <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+
+                        <h6 style="font-weight: 600; margin-bottom: 1rem;">Recurrence (Optional)</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="recurrence">Repeat</label>
+                                    <select class="form-control-modern" id="recurrence" name="recurrence">
+                                        {% for rec_code, rec_name in recurrence_choices %}
+                                        <option value="{{ rec_code }}" {% if event.recurrence == rec_code %}selected{% endif %}>
+                                            {{ rec_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="recurrence_end_date">Repeat Until</label>
+                                    <input type="date" class="form-control-modern" id="recurrence_end_date" name="recurrence_end_date" 
+                                           value="{{ event.recurrence_end_date|date:'Y-m-d'|default:'' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Location -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Location</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header secondary">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h5>Location</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="location" class="form-label">Venue</label>
-                            <select class="form-select" id="location" name="location">
-                                <option value="">-- Select Location --</option>
-                                {% for loc in locations %}
-                                <option value="{{ loc.id }}" {% if event.location.id == loc.id %}selected{% endif %}>
-                                    {{ loc.name }}{% if loc.capacity %} (Capacity: {{ loc.capacity }}){% endif %}
-                                </option>
-                                {% endfor %}
-                            </select>
+                    <div class="glass-form-card-body">
+                        <div class="form-field">
+                            <label for="location">Venue</label>
+                            <input type="text" class="form-control-modern" id="location" name="location" 
+                                   value="{{ event.location.name|default:'' }}"
+                                   placeholder="e.g., Main Church Hall, Parish Office">
                         </div>
-                        <div class="mb-3">
-                            <label for="location_details" class="form-label">Location Details</label>
-                            <textarea class="form-control" id="location_details" name="location_details" rows="2" 
+                        <div class="form-field">
+                            <label for="location_details">Location Details</label>
+                            <textarea class="form-control-modern" id="location_details" name="location_details" rows="2" 
                                       placeholder="Room number, directions, etc.">{{ event.location_details|default:'' }}</textarea>
                         </div>
                     </div>
@@ -170,15 +485,16 @@
             <!-- Right Column -->
             <div class="col-lg-4">
                 <!-- Status -->
-                <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Status & Visibility</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header secondary">
+                        <i class="fas fa-cog"></i>
+                        <h5>Status & Visibility</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="glass-form-card-body">
                         {% if event %}
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Event Status</label>
-                            <select class="form-select" id="status" name="status">
+                        <div class="form-field">
+                            <label for="status">Event Status</label>
+                            <select class="form-control-modern" id="status" name="status">
                                 <option value="DRAFT" {% if event.status == 'DRAFT' %}selected{% endif %}>Draft</option>
                                 <option value="PUBLISHED" {% if event.status == 'PUBLISHED' %}selected{% endif %}>Published</option>
                                 <option value="CANCELLED" {% if event.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
@@ -186,85 +502,89 @@
                         </div>
                         {% endif %}
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="is_public" name="is_public" 
+                        <div class="form-check-modern">
+                            <input type="checkbox" id="is_public" name="is_public" 
                                    {% if not event or event.is_public %}checked{% endif %}>
-                            <label class="form-check-label" for="is_public">Public Event</label>
-                            <div class="form-text">Visible to everyone including non-members</div>
+                            <label for="is_public">Public Event <span class="form-help-text">Visible to everyone</span></label>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="featured" name="featured" 
+                        <div class="form-check-modern">
+                            <input type="checkbox" id="featured" name="featured" 
                                    {% if event.featured %}checked{% endif %}>
-                            <label class="form-check-label" for="featured">Featured Event</label>
-                            <div class="form-text">Appears prominently on the website</div>
+                            <label for="featured">Featured Event <span class="form-help-text">Appears prominently</span></label>
                         </div>
                     </div>
                 </div>
 
                 <!-- Registration Settings -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Registration</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header success">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h5>Registration</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="requires_registration" name="requires_registration" 
+                    <div class="glass-form-card-body">
+                        <div class="form-check-modern">
+                            <input type="checkbox" id="requires_registration" name="requires_registration" 
                                    {% if event.requires_registration %}checked{% endif %}
                                    onchange="toggleRegistrationFields()">
-                            <label class="form-check-label" for="requires_registration">Requires Registration</label>
+                            <label for="requires_registration">Requires Registration</label>
                         </div>
 
-                        <div id="registration-fields" style="{% if not event.requires_registration %}display: none;{% endif %}">
-                            <div class="mb-3">
-                                <label for="max_attendees" class="form-label">Maximum Attendees</label>
-                                <input type="number" class="form-control" id="max_attendees" name="max_attendees" 
+                        <div id="registration-fields" class="conditional-fields" style="{% if not event.requires_registration %}display: none;{% endif %}">
+                            <div class="form-field">
+                                <label for="max_attendees">Maximum Attendees</label>
+                                <input type="number" class="form-control-modern" id="max_attendees" name="max_attendees" 
                                        value="{{ event.max_attendees|default:'' }}" min="1">
-                                <div class="form-text">Leave blank for unlimited</div>
+                                <p class="form-help-text">Leave blank for unlimited</p>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="registration_deadline" class="form-label">Registration Deadline</label>
-                                <input type="datetime-local" class="form-control" id="registration_deadline" name="registration_deadline" 
+                            <div class="form-field">
+                                <label for="registration_deadline">Registration Deadline</label>
+                                <input type="datetime-local" class="form-control-modern" id="registration_deadline" name="registration_deadline" 
                                        value="{{ event.registration_deadline|date:'Y-m-d\\TH:i'|default:'' }}">
                             </div>
 
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="registration_open" name="registration_open" 
+                            <div class="form-check-modern">
+                                <input type="checkbox" id="registration_open" name="registration_open" 
                                        {% if not event or event.registration_open %}checked{% endif %}>
-                                <label class="form-check-label" for="registration_open">Registration Open</label>
+                                <label for="registration_open">Registration Open</label>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Ministries -->
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Organizing Ministries</h5>
+                <div class="glass-form-card">
+                    <div class="glass-form-card-header info">
+                        <i class="fas fa-users"></i>
+                        <h5>Organizing Ministries</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
+                    <div class="glass-form-card-body">
+                        {% if ministries %}
+                        <div class="ministry-grid">
                             {% for ministry in ministries %}
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="ministry_{{ ministry.id }}" 
+                            <div class="ministry-check">
+                                <input type="checkbox" id="ministry_{{ ministry.id }}" 
                                        name="ministries" value="{{ ministry.id }}"
                                        {% if ministry.id in selected_ministries %}checked{% endif %}>
-                                <label class="form-check-label" for="ministry_{{ ministry.id }}">{{ ministry.name }}</label>
+                                <label for="ministry_{{ ministry.id }}">{{ ministry.name }}</label>
                             </div>
-                            {% empty %}
-                            <p class="text-muted">No ministries available</p>
                             {% endfor %}
                         </div>
+                        {% else %}
+                        <p class="form-help-text" style="text-align: center; padding: 1rem;">No ministries available</p>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Submit -->
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save me-2"></i>{% if event %}Update{% else %}Create{% endif %} Event
+                <div class="form-actions">
+                    <button type="submit" class="btn-modern btn-primary-modern btn-lg-modern w-100">
+                        <i class="fas fa-save"></i> {% if event %}Update{% else %}Create{% endif %} Event
                     </button>
-                    <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <a href="{% url 'event_list' %}" class="btn-modern btn-secondary-modern w-100">
+                        Cancel
+                    </a>
                 </div>
             </div>
         </div>

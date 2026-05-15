@@ -1,0 +1,117 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - Home{% endblock %}
+
+{% block content %}
+<style>
+    .payment-type-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .payment-card {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .payment-card:hover {
+        transform: translateY(-4px);
+        border-color: #4cc9f0;
+        box-shadow: 0 8px 24px rgba(76, 201, 240, 0.2);
+    }
+    
+    .payment-card i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        color: #4cc9f0;
+    }
+    
+    .payment-card h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+    
+    .payment-card p {
+        margin: 4px 0 0 0;
+        font-size: 0.75rem;
+        color: #a0a0a0;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .section-title i {
+        color: #4cc9f0;
+    }
+</style>
+
+<div class="section-title">
+    <i class="fas fa-coins"></i>
+    <span>Payments</span>
+</div>
+
+<div class="payment-type-cards">
+    <a href="{% url 'tithepayment:pos_tithe' %}" class="payment-card">
+        <i class="fas fa-hand-holding-usd"></i>
+        <h3>Tithe</h3>
+        <p>Record tithe payments</p>
+    </a>
+    
+    <a href="{% url 'tithepayment:pos_offering' %}" class="payment-card">
+        <i class="fas fa-donate"></i>
+        <h3>Offering</h3>
+        <p>Record offerings</p>
+    </a>
+    
+    <a href="{% url 'tithepayment:pos_pledge' %}" class="payment-card">
+        <i class="fas fa-file-contract"></i>
+        <h3>Pledge</h3>
+        <p>Record pledge payments</p>
+    </a>
+</div>
+
+<div class="section-title" style="margin-top: 24px;">
+    <i class="fas fa-cogs"></i>
+    <span>Management</span>
+</div>
+
+<div class="payment-type-cards">
+    <a href="{% url 'tithepayment:pos_dashboard' %}" class="payment-card">
+        <i class="fas fa-chart-line"></i>
+        <h3>Dashboard</h3>
+        <p>View statistics and overview</p>
+    </a>
+    
+    <a href="{% url 'tithepayment:pos_reports' %}" class="payment-card">
+        <i class="fas fa-file-alt"></i>
+        <h3>Reports</h3>
+        <p>Daily, weekly, monthly summaries</p>
+    </a>
+    
+    <a href="{% url 'tithepayment:pos_new_member' %}" class="payment-card">
+        <i class="fas fa-user-plus"></i>
+        <h3>New Member</h3>
+        <p>Register new members</p>
+    </a>
+</div>
+{% endblock %}

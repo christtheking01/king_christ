@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Member Account Management" %}{% endblock %}
+
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+    .management-hero {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .management-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .management-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-create {
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.2);
+        color: white;
+        font-weight: 600;
+        transition: all var(--transition-fast);
+        backdrop-filter: blur(10px);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-create:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        text-align: center;
+        transition: transform var(--transition-fast);
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .stat-card.warning .stat-value { color: var(--warning); }
+    .stat-card.success .stat-value { color: var(--success); }
+    .stat-card.info .stat-value { color: var(--info); }
+    .stat-card.danger .stat-value { color: var(--danger); }
+
+    /* Filter Tabs */
+    .filter-tabs {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    .filter-tabs .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0 1rem;
+    }
+    .filter-tabs .nav-link {
+        padding: 1rem 1.25rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        border: none;
+        border-bottom: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-tabs .nav-link:hover {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    .filter-tabs .nav-link.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        background: transparent;
+    }
+    .filter-tabs .badge {
+        background: var(--warning) !important;
+        color: white;
+    }
+
+    /* Search Bar */
+    .search-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .search-bar .form-control {
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        padding: 0.625rem 1rem;
+    }
+
+    /* Members Table */
+    .members-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .members-table th {
+        background: var(--bg-secondary);
+        padding: 0.875rem 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+    .members-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    .members-table tr:hover td {
+        background: var(--bg-secondary);
+    }
+
+    /* Member Avatar */
+    .member-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+    }
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+    }
+    .status-badge.blocked {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+    }
+
+    /* Link Badge */
+    .link-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .link-badge.linked {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+    }
+    .link-badge.unlinked {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        transition: all var(--transition-fast);
+    }
+    .btn-action:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    .btn-action.success:hover {
+        background: var(--success);
+        border-color: var(--success);
+    }
+    .btn-action.warning:hover {
+        background: var(--warning);
+        border-color: var(--warning);
+    }
+    .btn-action.danger:hover {
+        background: var(--danger);
+        border-color: var(--danger);
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .page-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+    }
+
+    /* Bulk Actions */
+    .bulk-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="management-hero">
+        <div>
+            <h1><i class="fas fa-user-shield"></i>{% trans "Member Account Management" %}</h1>
+        </div>
+        <a href="{% url 'portal_register' %}" class="btn-create">
+            <i class="fas fa-user-plus"></i>{% trans "Create Member Account" %}
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">{% trans "Pending Approval" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-value">{{ approved_count }}</div>
+                <div class="stat-label">{% trans "Active Members" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <div class="stat-value">{{ total_count }}</div>
+                <div class="stat-label">{% trans "Total Accounts" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <div class="stat-value">{{ blocked_count }}</div>
+                <div class="stat-label">{% trans "Blocked/Inactive" %}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <div class="card-header">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link {% if filter_status == 'pending' %}active{% endif %}" href="?status=pending">
+                        <i class="fas fa-clock text-warning"></i>{% trans "Pending Approval" %}
+                        {% if pending_count > 0 %}
+                            <span class="badge ms-1">{{ pending_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if filter_status == 'approved' %}active{% endif %}" href="?status=approved">
+                        <i class="fas fa-check-circle text-success"></i>{% trans "Approved" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if filter_status == 'all' %}active{% endif %}" href="?status=all">
+                        <i class="fas fa-users text-primary"></i>{% trans "All Accounts" %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Search -->
+            <div class="search-bar">
+                <form method="get" class="d-flex gap-2 w-100">
+                    <input type="hidden" name="status" value="{{ filter_status }}">
+                    <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by name, email, or phone...' %}" value="{{ search_query }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if search_query %}
+                    <a href="?status={{ filter_status }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Members Table -->
+            <div class="table-responsive">
+                <table class="members-table">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
+                            <th>{% trans "Member" %}</th>
+                            <th>{% trans "Contact" %}</th>
+                            <th>{% trans "Linked Member" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Registered" %}</th>
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for church_member in church_members %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input member-checkbox" value="{{ church_member.id }}">
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="member-avatar me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ church_member.get_full_name }}</h6>
+                                        <small class="text-muted">@{{ church_member.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div><i class="fas fa-envelope me-1 text-muted"></i>{{ church_member.email }}</div>
+                                <div><i class="fas fa-phone me-1 text-muted"></i>{{ church_member.phone }}</div>
+                            </td>
+                            <td>
+                                {% if church_member.member %}
+                                    <span class="link-badge linked">
+                                        <i class="fas fa-link"></i>{{ church_member.member_code }}
+                                    </span>
+                                {% else %}
+                                    <span class="link-badge unlinked">
+                                        <i class="fas fa-unlink"></i>{% trans "Unlinked" %}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if church_member.is_portal_active %}
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle"></i>{% trans "Active" %}
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge pending">
+                                        <i class="fas fa-clock"></i>{% trans "Pending" %}
+                                    </span>
+                                {% endif %}
+                                {% if not church_member.user.is_active %}
+                                    <span class="status-badge blocked">
+                                        <i class="fas fa-ban"></i>{% trans "Blocked" %}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ church_member.created_at|date:"M d, Y" }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    {% if church_member.link_status == 'unlinked' %}
+                                        <a href="{% url 'church_member_manual_link' church_member.id %}" class="btn-action" title="{% trans 'Link to Member' %}">
+                                            <i class="fas fa-link"></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if not church_member.is_portal_active %}
+                                        <form method="post" action="{% url 'church_member_approve' church_member.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action success" title="{% trans 'Approve' %}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    {% if church_member.is_portal_active %}
+                                        <form method="post" action="{% url 'church_member_block' church_member.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action warning" title="{% trans 'Block' %}">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    <form method="post" action="{% url 'church_member_delete' church_member.id %}" class="d-inline" onsubmit="return confirm('{% trans "Are you sure you want to delete this account?"|escapejs %}');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-action danger" title="{% trans 'Delete' %}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox mb-3" style="font-size: 3rem; opacity: 0.4;"></i><br>
+                                <p class="mb-0">{% trans "No member accounts found." %}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination-container">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ filter_status }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&status={{ filter_status }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ filter_status }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+            <!-- Bulk Actions -->
+            {% if church_members %}
+            <div class="bulk-actions">
+                <form method="post" action="{% url 'church_member_bulk_approve' %}" id="bulkApproveForm" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="ids" id="bulkApproveIds">
+                    <button type="submit" class="btn btn-success btn-sm" disabled id="bulkApproveBtn">
+                        <i class="fas fa-check me-1"></i>{% trans "Approve Selected" %}
+                    </button>
+                </form>
+                <form method="post" action="{% url 'church_member_bulk_block' %}" id="bulkBlockForm" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="ids" id="bulkBlockIds">
+                    <button type="submit" class="btn btn-warning btn-sm" disabled id="bulkBlockBtn">
+                        <i class="fas fa-ban me-1"></i>{% trans "Block Selected" %}
+                    </button>
+                </form>
+                <form method="post" action="{% url 'church_member_bulk_delete' %}" id="bulkDeleteForm" class="d-inline" onsubmit="return confirm('{% trans "Are you sure you want to delete selected accounts?"|escapejs %}');">
+                    {% csrf_token %}
+                    <input type="hidden" name="ids" id="bulkDeleteIds">
+                    <button type="submit" class="btn btn-danger btn-sm" disabled id="bulkDeleteBtn">
+                        <i class="fas fa-trash me-1"></i>{% trans "Delete Selected" %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Select all checkbox
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.member-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkButtons();
+    });
+
+    // Individual checkboxes
+    document.querySelectorAll('.member-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateBulkButtons);
+    });
+
+    function updateBulkButtons() {
+        const checked = document.querySelectorAll('.member-checkbox:checked');
+        const ids = Array.from(checked).map(cb => cb.value).join(',');
+        
+        document.getElementById('bulkApproveIds').value = ids;
+        document.getElementById('bulkBlockIds').value = ids;
+        document.getElementById('bulkDeleteIds').value = ids;
+        
+        document.getElementById('bulkApproveBtn').disabled = checked.length === 0;
+        document.getElementById('bulkBlockBtn').disabled = checked.length === 0;
+        document.getElementById('bulkDeleteBtn').disabled = checked.length === 0;
+    }
+</script>
+{% endblock %}

@@ -89,7 +89,7 @@ class LoginHistory(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     failure_reason = models.CharField(max_length=255, blank=True)
-    session_key = models.CharField(max_length=100, blank=True)
+    session_key = models.CharField(max_length=100, blank=True, default='')
 
     class Meta:
         ordering = ['-timestamp']

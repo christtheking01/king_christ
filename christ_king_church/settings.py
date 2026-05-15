@@ -10,16 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
+import logging
 from dotenv import load_dotenv,find_dotenv
 import africastalking
 import dj_database_url
 from django.contrib import messages
 
-load_dotenv(find_dotenv())  
-"""print(f"DEBUG: Username is |{os.getenv('AFRICASTALKING_USERNAME')}|")
-print(f"DEBUG: API Key is |{os.getenv('AFRICASTALKING_API_KEY')}|")"""
+load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,34 +31,43 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-]
+# CSRF trusted origins - must include exact domains or wildcards
+# Render uses https://<random-name>.onrender.com
+_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://www.christtheking.space',
+        'https://*.onrender.com',
+        'http://christtheking.space',
+    ]
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-"""DEBUG = config('DEBUG', default=False, cast=bool)"""
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+"""CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Flutter web
+    "exp://127.0.0.1:19000",  # Flutter dev
+]"""
+ 
+CORS_ALLOW_CREDENTIALS = True
 
-
-
-"""ALLOWED_HOSTS = config('ALLOWED_HOST',default=''.split(',') )
- # Allow all Render subdomains """
-
-ALLOWED_HOSTS = [
-    'calm-connection-production.up.railway.app',  # Your Railway domain
-    'localhost',
-    '127.0.0.1',
-]
+# ALLOWED_HOSTS - read from env or use defaults
+# Render generates random subdomain like 'kristo-mfalme-8kid.onrender.com'
+_default_hosts = 'localhost,127.0.0.1,.onrender.com,christtheking.space, www.christtheking.space'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', _default_hosts).split(',')
+# Remove empty strings
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
 
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,11 +85,17 @@ INSTALLED_APPS = [
     'audits',
     'analytics',
     'events',
+    'dbbackup',
+    'storages',
+    'chartjs',
+    'channels',
+    'rest_framework_simplejwt',
+    'corsheaders'
 ]
 
-LOGIN_URL = 'login_user'  
-LOGIN_REDIRECT_URL = 'home' 
-LOGOUT_REDIRECT_URL = 'login_user'  
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = '/accounts/login/'  
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -88,8 +103,11 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'security_middleware.SecurityHeadersMiddleware',
+    'security_middleware.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'christ_king_church.translation_middleware.OptimizedLocaleMiddleware',  # After Session, before Common
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -97,7 +115,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'audits.middleware.AuditMiddleware',
     'audits.middleware.LoginHistoryMiddleware',
-    #'users.middleware.ForcePasswordChangeMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'christ_king_church.urls'
@@ -110,16 +128,19 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',  # Language context
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'catechesis.context_processors.get_catechesis_context', 
+                'catechesis.context_processors.get_catechesis_context',
                 'notifications.context_processors.notification_context',
+                'christ_king_church.context_processors.language_context',  # Custom language context
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'christ_king_church.wsgi.application'
+ASGI_APPLICATION = 'christ_king_church.asgi.application'
 
 
 # Database
@@ -127,12 +148,29 @@ WSGI_APPLICATION = 'christ_king_church.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # Change this from sqlite3
+        'NAME': 'church_db',                        # Make sure this DB exists in Postgres
+        'USER': 'postgres',
+        'PASSWORD': 'Simwimba@3008',            # The password you just changed
+        'HOST': '127.0.0.1', 
+        'PORT': '5432',
     }
 }
 
-
+database_url = os.getenv('DATABASE_URL')
+"""
+if database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(database_url, conn_max_age=600)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+"""
 
 
 # Password validation
@@ -170,6 +208,19 @@ LANGUAGES = [
     ('sw', 'Swahili'),
 ]
 
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year
+LANGUAGE_COOKIE_DOMAIN = None
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_HTTPONLY = False
+LANGUAGE_COOKIE_SECURE = False
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
+
 AUTH_USER_MODEL = 'users.User'
 
 # Static files (CSS, JavaScript, Images)
@@ -191,22 +242,47 @@ MESSAGE_TAGS = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, "static_local"),
 ]
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "static_root")
+# Static and media files - stored inside project for deployment
+STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "media_root")
+MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
 
-"""STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'"""
+# Whitenoise for serving static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Africa's Talking Configuration (for testing)
-SEND_SMS_ENABLED = True 
-AFRICASTALKING_USERNAME = os.getenv('AFRICASTALKING_USERNAME')  
-AFRICASTALKING_API_KEY = os.getenv('AFRICASTALKING_API_KEY')
+# Email Configuration - Brevo Recommended for Production (300 emails/day free)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp-relay.brevo.com')  # Brevo SMTP server
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')  # Your Brevo email or SMTP login
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')  # Your Brevo SMTP Master Password
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'christtheking01@yahoo.com')
 
-africastalking.initialize(AFRICASTALKING_USERNAME, AFRICASTALKING_API_KEY)
-sms = africastalking.SMS
+# Church Contact Info for error messages
+CHURCH_ADMIN_EMAIL = os.getenv('CHURCH_ADMIN_EMAIL', DEFAULT_FROM_EMAIL)
+CHURCH_ADMIN_PHONE = os.getenv('CHURCH_ADMIN_PHONE', '+255123456789')
+
+# Africa's Talking Configuration
+SEND_SMS_ENABLED = os.getenv('SEND_SMS_ENABLED', 'False').lower() == 'true'
+AFRICASTALKING_SENDER_ID = os.getenv('AFRICASTALKING_SENDER_ID','')
+AFRICASTALKING_USERNAME = os.getenv('AFRICASTALKING_USERNAME', '')
+AFRICASTALKING_API_KEY = os.getenv('AFRICASTALKING_API_KEY', '')
+
+# Only initialize Africa's Talking when credentials are configured
+# This prevents crashes during development or when SMS is not configured
+sms = None
+if SEND_SMS_ENABLED and AFRICASTALKING_USERNAME and AFRICASTALKING_API_KEY:
+    try:
+        africastalking.initialize(AFRICASTALKING_USERNAME, AFRICASTALKING_API_KEY)
+        sms = africastalking.SMS
+    except Exception as e:
+        logging.warning(f"Failed to initialize Africa's Talking: {e}")
+        sms = None
 
 """# Or NextSMS Configuration
 NEXTSMS_API_KEY = 'your_nextsms_api_key'
@@ -221,3 +297,262 @@ BEEM_SENDER_NAME = os.getenv('BEEM_SENDER_NAME')
 """# Choose which provider to use
 SMS_PROVIDER = 'africastalking'  # Change to 'nextsms' when ready
 SEND_SMS_ENABLED = True"""
+
+# =============================================================================
+# BACKUP CONFIGURATION
+# =============================================================================
+
+# Database Backup Settings
+DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DBBACKUP_STORAGE_OPTIONS = {
+    'access_key': os.getenv('AWS_ACCESS_KEY_ID'),
+    'secret_key': os.getenv('AWS_SECRET_ACCESS_KEY'),
+    'bucket_name': os.getenv('BACKUP_BUCKET_NAME', 'church-backups'),
+    'region_name': os.getenv('AWS_REGION', 'us-east-1'),
+    'endpoint_url': os.getenv('AWS_ENDPOINT_URL'),  # For Cloudflare R2, MinIO
+}
+
+# Backup filenames
+DBBACKUP_FILENAME_TEMPLATE = '{databasename}-{servername}-{datetime}.{extension}'
+DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'media-{servername}-{datetime}.{extension}'
+
+# Gzip compression
+DBBACKUP_CONNECTORS = {
+    'default': {
+        'DUMP_SUFFIX': '--if-exists',  # PostgreSQL specific
+        'RESTORE_SUFFIX': '--if-exists',
+    }
+}
+
+# Backup retention (number of backups to keep)
+DBBACKUP_CLEANUP_KEEP = 30  # Keep 30 days of backups
+DBBACKUP_CLEANUP_KEEP_MEDIA = 30
+
+# =============================================================================
+# CLOUD STORAGE CONFIGURATION (for media files)
+# =============================================================================
+
+# Use S3/Cloudflare R2 for media file backups and storage
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('MEDIA_BUCKET_NAME', 'church-media')
+AWS_S3_REGION_NAME = os.getenv('AWS_REGION', 'us-east-1')
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_ENDPOINT_URL')  # For Cloudflare R2
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = 'private'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+# If no cloud storage configured, fall back to local (development)
+if not AWS_ACCESS_KEY_ID:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# =============================================================================
+# CHURCH CONFIGURATION (for receipts)
+# =============================================================================
+CHURCH_NAME = os.getenv('CHURCH_NAME', 'PAROKIA YA KRISTO MFALME ')
+CHURCH_ADDRESS = os.getenv('CHURCH_ADDRESS', 'S.L.P 1310')
+CHURCH_PHONE = os.getenv('CHURCH_PHONE', '')
+
+# =============================================================================
+# POS / TITHE CONFIGURATION
+# =============================================================================
+# Enable automatic receipt generation when tithe is created
+TITHE_AUTO_GENERATE_RECEIPT = os.getenv('TITHE_AUTO_GENERATE_RECEIPT', 'True').lower() == 'true'
+
+# Enable automatic print trigger after tithe submission (for POS machines)
+TITHE_AUTO_PRINT_RECEIPT = os.getenv('TITHE_AUTO_PRINT_RECEIPT', 'True').lower() == 'true'
+
+# POS API authentication (REQUIRED - for securing POS endpoints)
+POS_API_KEY = os.getenv('POS_API_KEY', '')
+POS_SECRET_KEY = os.getenv('POS_SECRET_KEY', '')
+POS_API_ENABLED = os.getenv('POS_API_ENABLED', 'True').lower() == 'true'
+POS_ALLOWED_IPS = os.getenv('POS_ALLOWED_IPS', '').split(',') if os.getenv('POS_ALLOWED_IPS') else []
+
+# REST API Authentication Settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    }
+}
+
+# =============================================================================
+# SECURITY SETTINGS
+# =============================================================================
+
+# Additional security headers
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+X_FRAME_OPTIONS = 'DENY'
+
+# Security middleware settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# SSL/HTTPS settings - ENFORCED for production
+# Disable SSL redirect for localhost/development
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Always set this on Render
+SECURE_SSL_REDIRECT = False 
+"""SECURE_SSL_REDIRECT = not DEBUG and not any(host in ['localhost', '127.0.0.1', '[::1]'] for host in ALLOWED_HOSTS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if os.getenv('BEHIND_PROXY', 'False').lower() == 'true' else None"""
+
+# HSTS settings - ENFORCED for production
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Secure cookie settings - ONLY in production (DEBUG=False)
+SESSION_COOKIE_SECURE = not DEBUG  # Only HTTPS when not in debug
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_COOKIE_AGE = 3600  # 1 hour session timeout
+SESSION_SAVE_EVERY_REQUEST = True  # Refresh session expiry on every request
+
+# CSRF cookie settings - ONLY in production (DEBUG=False)
+CSRF_COOKIE_SECURE = not DEBUG  # Only HTTPS when not in debug
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Login security
+LOGIN_ATTEMPTS_BEFORE_LOCKOUT = 5
+LOGIN_LOCKOUT_DURATION = 1800  # 30 minutes in seconds
+
+# Cache configuration for rate limiting (fallback to local memory cache)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# =============================================================================
+# CHANNELS CONFIGURATION (WebSocket support for live notifications)
+# =============================================================================
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.getenv('REDIS_HOST', '127.0.0.1'), int(os.getenv('REDIS_PORT', 6379)))],
+        },
+    },
+}
+
+# Fallback to in-memory channel layer for development (if Redis is not available)
+if os.getenv('USE_INMEMORY_CHANNEL_LAYER', 'False').lower() == 'true':
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        }
+    }
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'security': {
+            'format': 'SECURITY [{levelname}] {asctime} - {module} - IP:{funcName} - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 10,
+            'formatter': 'security',
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+            'formatter': 'verbose',
+            'include_html': True,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['security_file', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'church_app': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'security': {
+            'handlers': ['security_file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# =============================================================================
+# restframework configiration
+# =============================================================================
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES' : (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES':(
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

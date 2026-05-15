@@ -1,147 +1,216 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Audit Logs{% endblock %}
+
+{% block internal_style %}
+<style>
+  .audit-container { padding: 20px; max-width: 100%; box-sizing: border-box; }
+  .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .audit-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+  .audit-header h1 i { color: var(--primary); }
+  .audit-header p { color: var(--text-muted); margin: 4px 0 0 0; }
+  
+  .content-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--bg-secondary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+  .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-header h5 i { color: var(--primary); }
+  .card-body { padding: 20px; }
+  
+  .filter-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 768px) { .filter-form { grid-template-columns: 1fr; } }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .filter-group input, .filter-group select { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+  .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+  .filter-actions { display: flex; gap: 10px; }
+  .btn { padding: 10px 20px; border-radius: var(--border-radius-sm); font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+  .btn-primary { background: var(--gradient-primary); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+  .btn-outline:hover { background: var(--bg-tertiary); }
+  
+  .table-wrapper { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .audit-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+  .audit-table th { background: var(--bg-secondary); padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
+  .audit-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.85rem; }
+  .audit-table tr:hover td { background: var(--bg-secondary); }
+  .audit-table .empty-cell { text-align: center; padding: 40px; color: var(--text-muted); }
+  .audit-table .empty-cell i { font-size: 2rem; opacity: 0.5; margin-bottom: 12px; display: block; }
+  
+  .user-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; }
+  .user-badge.admin { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .user-badge.member { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .user-badge.system { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  .action-badge { background: var(--bg-tertiary); color: var(--text-secondary); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .status-icon { font-size: 1.1rem; }
+  .status-icon.success { color: var(--success); }
+  .status-icon.error { color: var(--danger); }
+  
+  .pagination { display: flex; justify-content: center; gap: 4px; padding: 16px; list-style: none; margin: 0; }
+  .page-link { padding: 8px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; }
+  .page-link:hover { background: var(--bg-secondary); border-color: var(--primary); }
+  .page-link.active { background: var(--gradient-primary); color: white; border-color: transparent; }
+  
+  .type-pills { display: flex; gap: 8px; flex-wrap: wrap; max-width: 100%; }
+  .type-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 0.875rem; font-weight: 600; background: var(--bg-secondary); color: var(--text-secondary); }
+  .type-pill i { font-size: 0.875rem; }
+  .type-pill.admin { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .type-pill.member { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .type-pill.system { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  .type-pill .count { background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <h1 class="page-title">
-            <i class="fas fa-clipboard-list"></i> Audit Logs
-        </h1>
+<div class="audit-container">
+  <!-- Header -->
+  <div class="audit-header">
+    <div>
+      <h1><i class="fas fa-clipboard-list"></i>Audit Logs</h1>
+      <p>View and search all system audit logs</p>
     </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row">
-                <div class="col-md-2">
-                    <label>User</label>
-                    <select name="user" class="form-control form-control-sm">
-                        <option value="">All Users</option>
-                        {% for u in users %}
-                        <option value="{{ u.id }}" {% if filters.user == u.id|stringformat:"s" %}selected{% endif %}>
-                            {{ u.username }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Action</label>
-                    <select name="action" class="form-control form-control-sm">
-                        <option value="">All Actions</option>
-                        {% for action, label in action_choices %}
-                        <option value="{{ action }}" {% if filters.action == action %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Date From</label>
-                    <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
-                </div>
-                <div class="col-md-2">
-                    <label>Date To</label>
-                    <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
-                </div>
-                <div class="col-md-2">
-                    <label>Status</label>
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">All</option>
-                        <option value="SUCCESS" {% if filters.status == 'SUCCESS' %}selected{% endif %}>Success</option>
-                        <option value="FAILED" {% if filters.status == 'FAILED' %}selected{% endif %}>Failed</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Search</label>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ filters.search }}">
-                </div>
-                <div class="col-md-12 mt-2">
-                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    <a href="{% url 'audit_log_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
-                </div>
-            </form>
-        </div>
+    <div class="type-pills">
+      <div class="type-pill admin">
+        <i class="fas fa-user-shield"></i> Admin: {{ user_type_counts.administrator|default:"0" }}
+      </div>
+      <div class="type-pill member">
+        <i class="fas fa-users"></i> Members: {{ user_type_counts.church_member|default:"0" }}
+      </div>
+      <div class="type-pill system">
+        <i class="fas fa-robot"></i> System: {{ user_type_counts.unknown|default:"0" }}
+      </div>
     </div>
+  </div>
 
-    <!-- Logs Table -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>User</th>
-                            <th>Action</th>
-                            <th>Model</th>
-                            <th>Object</th>
-                            <th>IP Address</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in page_obj %}
-                        <tr>
-                            <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
-                            <td>
-                                {% if log.user %}
-                                    <a href="{% url 'view_user' log.user.id %}">{{ log.user.username }}</a>
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge badge-{% if log.action == 'CREATE' %}success{% elif log.action == 'UPDATE' %}info{% elif log.action == 'DELETE' %}danger{% elif log.action == 'VIEW' %}secondary{% else %}primary{% endif %}">
-                                    {{ log.action }}
-                                </span>
-                            </td>
-                            <td>{{ log.model_name|default:"-" }}</td>
-                            <td>{{ log.object_repr|truncatechars:40|default:"-" }}</td>
-                            <td>{{ log.ip_address|default:"-" }}</td>
-                            <td>
-                                {% if log.status == 'SUCCESS' %}
-                                    <span class="badge badge-success">Success</span>
-                                {% else %}
-                                    <span class="badge badge-danger">Failed</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'audit_log_detail' log.pk %}" class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">No audit logs found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+  <!-- Filters -->
+  <div class="content-card">
+    <div class="card-header">
+      <h5><i class="fas fa-filter"></i>Filters</h5>
+    </div>
+    <div class="card-body">
+      <form method="get">
+        <div class="filter-form">
+          <div class="filter-group">
+            <label>User</label>
+            <select name="user">
+              <option value="">All Users</option>
+              {% for u in users %}
+              <option value="{{ u.id }}" {% if filters.user == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Action</label>
+            <select name="action">
+              <option value="">All Actions</option>
+              {% for action, label in action_choices %}
+              <option value="{{ action }}" {% if filters.action == action %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>From</label>
+            <input type="date" name="date_from" value="{{ filters.date_from }}">
+          </div>
+          <div class="filter-group">
+            <label>To</label>
+            <input type="date" name="date_to" value="{{ filters.date_to }}">
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="">All</option>
+              <option value="SUCCESS" {% if filters.status == 'SUCCESS' %}selected{% endif %}>Success</option>
+              <option value="FAILED" {% if filters.status == 'FAILED' %}selected{% endif %}>Failed</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Search</label>
+            <input type="text" name="search" placeholder="Search..." value="{{ filters.search }}">
+          </div>
         </div>
-        {% if page_obj.has_other_pages %}
-        <div class="card-footer">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
-                    </li>
-                    {% endif %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    </li>
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i>Apply Filters</button>
+          <a href="{% url 'audits:audit_log_list' %}" class="btn btn-outline"><i class="fas fa-undo"></i>Clear</a>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Logs Table -->
+  <div class="content-card">
+    <div class="card-body table-wrapper" style="padding: 0;">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Type</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Model</th>
+            <th>Object</th>
+            <th>IP</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in page_obj %}
+          <tr>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+            <td>
+              {% if log.user %}
+                {% if log.user.is_superuser or log.user.is_staff or log.user.roles in 'admin,Admin,chairperson,vice_chairperson,secretary,accountant,treasurer,priest,catechist,coordinator' %}
+                  <span class="user-badge admin"><i class="fas fa-user-shield"></i>Admin</span>
+                {% else %}
+                  <span class="user-badge member"><i class="fas fa-user"></i>Member</span>
+                {% endif %}
+              {% else %}
+                <span class="user-badge system"><i class="fas fa-robot"></i>System</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if log.user %}<a href="{% url 'view_user' log.user.id %}">{{ log.user.username }}</a>
+              {% else %}<span style="color: var(--text-muted);">-</span>{% endif %}
+            </td>
+            <td><span class="action-badge">{{ log.action }}</span></td>
+            <td>{{ log.model_name|default:"-" }}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ log.object_repr|truncatechars:30|default:"-" }}</td>
+            <td><code style="font-size: 0.75rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">{{ log.ip_address|default:"-" }}</code></td>
+            <td>
+              {% if log.status == 'SUCCESS' %}<i class="fas fa-check-circle status-icon success"></i>
+              {% else %}<i class="fas fa-times-circle status-icon error"></i>{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'audits:audit_log_detail' log.pk %}" style="color: var(--primary);"><i class="fas fa-eye"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="empty-cell"><i class="fas fa-inbox"></i>No audit logs found matching your filters</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-left"></i></a></li>
         {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+          <li><span class="page-link active">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li><a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-right"></i></a></li>
+        {% endif %}
+      </ul>
     </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid dashboard-content">
+    <div class="row">
+        <div class="col-xl-8 col-lg-10 col-md-12 mx-auto">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Sacrament Record Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Status Banner -->
+                    <div class="alert 
+                        {% if sacrament.verification_status == 'verified' %}alert-success
+                        {% elif sacrament.verification_status == 'pending' %}alert-warning
+                        {% elif sacrament.verification_status == 'under_review' %}alert-info
+                        {% else %}alert-danger{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Status:</strong> {{ sacrament.get_verification_status_display }}
+                                {% if sacrament.verified_by %}
+                                <br><small>by {{ sacrament.verified_by.get_full_name|default:sacrament.verified_by.username }} 
+                                on {{ sacrament.verification_date|date:"F d, Y" }}</small>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if sacrament.verification_status == 'verified' %}
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                {% elif sacrament.verification_status == 'pending' %}
+                                    <i class="fas fa-clock fa-2x"></i>
+                                {% elif sacrament.verification_status == 'under_review' %}
+                                    <i class="fas fa-search fa-2x"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle fa-2x"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Person Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-user mr-2"></i>Person Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                <strong>Name:</strong> 
+                                {% if target_person.get_full_name %}
+                                    {{ target_person.get_full_name }}
+                                {% else %}
+                                    {{ target_person.username|default:target_person.name }}
+                                {% endif %}<br>
+                                {% if target_person.email %}
+                                <strong>Email:</strong> {{ target_person.email }}<br>
+                                {% endif %}
+                                {% if target_person.phone %}
+                                <strong>Phone:</strong> {{ target_person.phone }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Sacrament Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-church mr-2"></i>Sacrament Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="30%"><strong>Sacrament:</strong></td>
+                                    <td><h5>{{ sacrament.get_sacrament_type_display }}</h5></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date Received:</strong></td>
+                                    <td>{{ sacrament.date_received|default:"<span class='text-muted'>Not specified</span>"|safe }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Place Received:</strong></td>
+                                    <td>{{ sacrament.place_received|default:"<span class='text-muted'>Not specified</span>"|safe }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Minister:</strong></td>
+                                    <td>{{ sacrament.minister_name|default:"<span class='text-muted'>Not specified</span>"|safe }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-file-alt mr-2"></i>Documents</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if sacrament.certificate_file %}
+                            <div class="mb-3">
+                                <strong>Sacrament Certificate:</strong><br>
+                                <a href="{{ sacrament.certificate_file.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-file-pdf mr-1"></i>View Certificate
+                                </a>
+                            </div>
+                            {% else %}
+                            <p class="text-muted"><i class="fas fa-times mr-1"></i>No certificate uploaded</p>
+                            {% endif %}
+
+                            {% if sacrament.supporting_document %}
+                            <div>
+                                <strong>Supporting Document:</strong><br>
+                                <a href="{{ sacrament.supporting_document.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-file mr-1"></i>View Document
+                                </a>
+                            </div>
+                            {% else %}
+                            <p class="text-muted"><i class="fas fa-times mr-1"></i>No supporting document</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Verification Notes -->
+                    {% if sacrament.verification_notes %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-comment mr-2"></i>Verification Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ sacrament.verification_notes|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Meta Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-history mr-2"></i>Record History</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td width="30%"><strong>Submitted:</strong></td>
+                                    <td>{{ sacrament.created_at|date:"F d, Y at H:i" }}</td>
+                                </tr>
+                                {% if sacrament.requested_by %}
+                                <tr>
+                                    <td><strong>Submitted By:</strong></td>
+                                    <td>{{ sacrament.requested_by.get_full_name|default:sacrament.requested_by.username }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td><strong>Last Updated:</strong></td>
+                                    <td>{{ sacrament.updated_at|date:"F d, Y at H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="form-group mt-4">
+                        <a href="{% url 'pending_sacraments_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to List
+                        </a>
+                        {% if can_verify and sacrament.verification_status == 'pending' or sacrament.verification_status == 'under_review' %}
+                        <a href="{% url 'verify_sacrament' sacrament.id %}" class="btn btn-success ml-2">
+                            <i class="fas fa-clipboard-check mr-2"></i>Review & Verify
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

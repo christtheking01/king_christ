@@ -1,834 +1,487 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Community - Christ King Church{% endblock %}
 
 {% block internal_style %}
 <style>
-    /* Form Container */
-    .form-container {
-        max-width: 600px;
+    .edit-wrapper {
+        max-width: 1000px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 1rem;
     }
 
-    /* Card Styles */
-    .card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--divider);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
+    /* Header */
+    .edit-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    .card-header {
-        padding: 16px 20px;
-        background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
-        color: white;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
+    .edit-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
         font-weight: 600;
+        color: var(--text-primary);
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.75rem;
     }
 
-    .card-body {
-        padding: 20px;
+    .edit-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    /* Form Styles */
-    .form {
-        width: 100%;
+    /* Glass Cards */
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 1.5rem;
     }
 
-    .form-group {
-        margin-bottom: 16px;
+    .glass-card-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
     }
 
-    .form-label {
+    .glass-card-header i {
+        font-size: 1.1rem;
+    }
+
+    .glass-card-header h5 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .glass-card-header.secondary {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    }
+
+    .glass-card-header.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .glass-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form Fields */
+    .form-field {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-field label {
         display: block;
-        margin-bottom: 6px;
+        font-size: 0.9rem;
         font-weight: 500;
         color: var(--text-primary);
-        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
     }
 
-    .form-control {
+    .form-field label .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
+    }
+
+    .form-control-modern {
         width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--divider);
-        border-radius: var(--radius-md);
-        font-family: inherit;
-        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        background: white;
         color: var(--text-primary);
-        background: var(--surface);
-        transition: all 0.2s;
+        transition: all 0.2s ease;
     }
 
-    .form-control:focus {
+    .form-control-modern:focus {
         outline: none;
-        border-color: var(--warning);
-        box-shadow: 0 0 0 2px rgba(251, 188, 4, 0.1);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    /* Leaders Container */
-    .leaders-container {
-        margin: 20px 0;
+    /* Leader Cards */
+    .leader-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .leader-card {
-        background: var(--background);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--divider);
-        padding: 16px;
-        margin-bottom: 12px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
         position: relative;
-        animation: fadeIn 0.3s ease;
+        transition: all 0.2s ease;
+    }
+
+    .leader-card:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
     }
 
     .leader-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid var(--divider);
+        margin-bottom: 1rem;
     }
 
-    .leader-title {
-        font-size: 0.9375rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    /* Leader Grid */
-    .leader-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    @media (max-width: 480px) {
-        .leader-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .full-width {
-        grid-column: 1 / -1;
-    }
-
-    /* Select Dropdown */
-    .select-control {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 14px;
-        padding-right: 35px;
-    }
-
-    /* Buttons */
-    .btn {
+    .leader-role {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: var(--radius-md);
-        font-family: inherit;
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        white-space: nowrap;
-        user-select: none;
-    }
-
-    .btn-cancel {
-        background: var(--background);
-        border: 1px solid var(--divider);
-        color: var(--text-primary);
-    }
-
-    .btn-cancel:hover {
-        background: var(--surface);
-        border-color: var(--text-secondary);
-    }
-
-    .btn-submit {
-        background: var(--success);
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--gradient-primary);
         color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
         font-weight: 600;
     }
 
-    .btn-submit:hover {
-        background: var(--secondary-dark);
-        transform: translateY(-1px);
+    .btn-remove {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
     }
 
-    /* Textarea */
-    .form-control.textarea {
-        min-height: 80px;
-        resize: vertical;
-        font-size: 0.875rem;
+    .btn-remove:hover {
+        background: var(--danger);
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .leader-form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    /* Add Leader Button */
+    .btn-add-leader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 1rem;
+        border: 2px dashed var(--border-color);
+        border-radius: var(--border-radius);
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .btn-add-leader:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
     }
 
     /* Form Actions */
     .form-actions {
         display: flex;
-        justify-content: space-between;
-        margin-top: 24px;
-        padding-top: 16px;
-        border-top: 1px solid var(--divider);
+        gap: 1rem;
+        margin-top: 2rem;
     }
 
-    /* Messages */
-    .alert-message {
-        padding: 12px 16px;
-        border-radius: var(--radius-md);
-        margin-bottom: 16px;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        font-size: 0.875rem;
-        animation: slideUp 0.3s ease;
-    }
-
-    .alert-success {
-        background: rgba(52, 168, 83, 0.1);
-        border: 1px solid rgba(52, 168, 83, 0.2);
-        color: var(--success);
-    }
-
-    .alert-danger {
-        background: rgba(234, 67, 53, 0.1);
-        border: 1px solid rgba(234, 67, 53, 0.2);
-        color: var(--danger);
-    }
-
-    .alert-close {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        padding: 2px;
-        font-size: 0.875rem;
-        opacity: 0.7;
-        margin-left: auto;
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Section Title */
-    .section-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 24px 0 16px 0;
-        padding-bottom: 8px;
-        border-bottom: 2px solid var(--warning);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    /* Phone Input */
-    .phone-input {
-        position: relative;
-    }
-
-    .phone-prefix {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-        pointer-events: none;
-    }
-
-    .phone-input .form-control {
-        padding-left: 40px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .form-container {
-            padding: 15px;
-        }
-        
-        .card-body {
-            padding: 16px;
-        }
-        
-        .leader-card {
-            padding: 12px;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .form-actions .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-
-    /* Confirmation Modal Styles */
-    .confirmation-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
+    .btn-modern {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        z-index: 2000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        padding: 20px;
-    }
-
-    .confirmation-modal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .modal-dialog {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        width: 100%;
-        max-width: 400px;
-        box-shadow: var(--shadow-xl);
-        transform: translateY(-20px);
-        transition: transform 0.3s ease;
-    }
-
-    .confirmation-modal.show .modal-dialog {
-        transform: translateY(0);
-    }
-
-    .modal-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--divider);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .modal-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-    }
-
-    .modal-body {
-        padding: 24px;
-    }
-
-    .modal-message {
-        color: var(--text-secondary);
-        line-height: 1.5;
-        margin: 0;
-    }
-
-    .modal-footer {
-        padding: 16px 24px 24px;
-        border-top: 1px solid var(--divider);
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-    }
-
-    /* Modal Buttons */
-    .modal-btn {
-        padding: 10px 20px;
-        border-radius: var(--radius-md);
-        font-family: inherit;
-        font-size: 0.9375rem;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
         font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
         border: none;
         cursor: pointer;
-        transition: all 0.2s;
-        min-width: 80px;
     }
 
-    .modal-btn-cancel {
-        background: var(--background);
-        border: 1px solid var(--divider);
-        color: var(--text-primary);
+    .btn-primary-modern {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
-    .modal-btn-cancel:hover {
-        background: var(--surface);
-        border-color: var(--text-secondary);
-    }
-
-    .modal-btn-confirm {
-        background: var(--danger);
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         color: white;
     }
 
-    .modal-btn-confirm:hover {
-        background: #d32f2f;
-        transform: translateY(-1px);
+    .btn-secondary-modern {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
     }
 
-    /* Warning Icon */
-    .warning-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(234, 67, 53, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--danger);
-        font-size: 1.25rem;
+    .btn-secondary-modern:hover {
+        background: var(--text-secondary);
+        color: white;
     }
 
-    /* Responsive Modal */
-    @media (max-width: 576px) {
-        .modal-dialog {
-            max-width: 100%;
-            margin: 10px;
-        }
-        
-        .modal-header,
-        .modal-body,
-        .modal-footer {
-            padding: 16px;
-        }
-        
-        .modal-footer {
-            flex-direction: column;
-        }
-        
-        .modal-btn {
-            width: 100%;
-        }
-        
-        .confirmation-modal {
-            padding: 10px;
-        }
+    .btn-danger-modern {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    /* Animation for deletion */
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-        20%, 40%, 60%, 80% { transform: translateX(2px); }
+    .btn-danger-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        color: white;
     }
 
-    .shaking {
-        animation: shake 0.5s ease;
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+
+    .glass-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .glass-card:nth-child(1) { animation-delay: 0.05s; }
+    .glass-card:nth-child(2) { animation-delay: 0.1s; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <!-- Messages -->
-    {% if messages %}
-    <div class="messages-container">
-        {% for message in messages %}
-        <div class="alert-message alert-{{ message.tags }}">
-            <i class="fas fa-{% if message.tags == 'alert-danger' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
-            <span>{{ message }}</span>
-            <button type="button" class="alert-close" aria-label="Close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        {% endfor %}
+<div class="edit-wrapper">
+    <div class="edit-header">
+        <h1><i class="fas fa-edit"></i> Edit Community</h1>
+        <a href="{% url 'community_list' %}" class="btn-modern btn-secondary-modern">
+            <i class="fas fa-arrow-left"></i> Back to Communities
+        </a>
     </div>
-    {% endif %}
 
-    <!-- Edit Community Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-edit"></i>
-                Edit Community: {{ community.name }}
-            </h2>
-        </div>
-        
-        <div class="card-body">
-            <form method="post" class="form" id="editCommunityForm">
-                {% csrf_token %}
-                
-                <!-- Community Name -->
-                <div class="form-group">
-                    <label for="community_name" class="form-label">Community Name</label>
-                    <input type="text" 
-                           class="form-control" 
-                           id="community_name" 
-                           name="community_name" 
-                           value="{{ community.name }}" 
-                           required
-                           placeholder="Enter community name">
+    <form method="post" action="{% url 'edit_community' community.id %}">
+        {% csrf_token %}
+
+        <!-- Community Information -->
+        <div class="glass-card">
+            <div class="glass-card-header secondary">
+                <i class="fas fa-info-circle"></i>
+                <h5>Community Information</h5>
+            </div>
+            <div class="glass-card-body">
+                <div class="form-field">
+                    <label for="community_name">Community Name <span class="required">*</span></label>
+                    <input type="text" class="form-control-modern" id="community_name" name="community_name" 
+                           value="{{ community.name }}" required>
                 </div>
 
-                <!-- Leaders List -->
-                <h3 class="section-title">
-                    <i class="fas fa-user-tie"></i>
-                    Community Leaders
-                </h3>
-                
-                <div class="leaders-container" id="leadersContainer">
-                    {% for leader in leaders %}
-                    <div class="leader-card">
-                        <div class="leader-header">
-                            <div class="leader-title">
-                                <i class="fas fa-user"></i>
-                                Leader #{{ forloop.counter }}
-                            </div>
-                        </div>
-                        
-                        <input type="hidden" name="leader_ids[]" value="{{ leader.id }}">
-                        
-                        <div class="leader-grid">
-                            <!-- Full Name -->
-                            <div class="form-group">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       name="leader_names[]" 
-                                       value="{{ leader.name }}" 
-                                       required
-                                       placeholder="Leader's full name">
-                            </div>
-                            
-                            <!-- Position -->
-                            <div class="form-group">
-                                <label class="form-label">Position</label>
-                                <select class="form-control select-control" name="leader_positions[]" required>
-                                    <option value="">Select Position</option>
-                                    <option value="CHAIR PERSON" {% if leader.leader == "CHAIR PERSON" %}selected{% endif %}>Chair Person</option>
-                                    <option value="VICE CHAIR" {% if leader.leader == "VICE CHAIR" %}selected{% endif %}>Vice Chair</option>
-                                    <option value="SECRETARY" {% if leader.leader == "SECRETARY" %}selected{% endif %}>Secretary</option>
-                                    <option value="VICE SECRETARY" {% if leader.leader == "VICE SECRETARY" %}selected{% endif %}>Vice Secretary</option>
-                                    <option value="ACCOUNTANT" {% if leader.leader == "ACCOUNTANT" %}selected{% endif %}>Accountant</option>
-                                    <option value="CHAIRPERSON" {% if leader.leader == "CHAIRPERSON" %}selected{% endif %}>Chairperson</option>
-                                </select>
-                            </div>
-                            
-                            <!-- Phone Number -->
-                            <div class="form-group full-width">
-                                <label class="form-label">Phone Number</label>
-                                <div class="phone-input">
-                                    <span class="phone-prefix">+255</span>
-                                    <input type="tel" 
-                                           class="form-control" 
-                                           name="leader_phones[]" 
-                                           value="{{ leader.phone|default:'' }}" 
-                                           placeholder="XXXXXXXXX" 
-                                           pattern="[0-9]{9}" 
-                                           inputmode="tel">
-                                </div>
-                            </div>
-                            
-                            <!-- Description -->
-                            <div class="form-group full-width">
-                                <label class="form-label">Description (Optional)</label>
-                                <textarea class="form-control textarea" 
-                                          name="leader_descriptions[]" 
-                                          rows="2"
-                                          placeholder="Additional information about this leader">{{ leader.description|default:'' }}</textarea>
-                            </div>
+                <div class="form-field">
+                    <label for="description">Description</label>
+                    <textarea class="form-control-modern" id="description" name="description" rows="3">{{ community.description }}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-field">
+                            <label for="zone">Zone</label>
+                            <select class="form-control-modern" id="zone" name="zone">
+                                <option value="">-- Select Zone --</option>
+                                {% for zone in zones %}
+                                <option value="{{ zone.id }}" {% if community.zone_id == zone.id %}selected{% endif %}>
+                                    {{ zone.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    {% empty %}
-                    <div class="alert-message alert-warning" style="background: rgba(251, 188, 4, 0.1); border-color: rgba(251, 188, 4, 0.2); color: var(--warning);">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>No leaders added to this community yet.</span>
+                    <div class="col-md-6">
+                        <div class="form-field">
+                            <label for="meeting_day">Meeting Day</label>
+                            <select class="form-control-modern" id="meeting_day" name="meeting_day">
+                                <option value="">-- Select Day --</option>
+                                {% for day_code, day_name in meeting_days %}
+                                <option value="{{ day_code }}" {% if community.meeting_day == day_code %}selected{% endif %}>
+                                    {{ day_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Leaders -->
+        <div class="glass-card">
+            <div class="glass-card-header success">
+                <i class="fas fa-users-cog"></i>
+                <h5>Community Leaders</h5>
+            </div>
+            <div class="glass-card-body">
+                <div id="leaders-container" class="leader-list">
+                    {% for leader in community.leaders.all %}
+                    <div class="leader-card" data-leader-id="{{ leader.id }}">
+                        <div class="leader-header">
+                            <span class="leader-role">
+                                <i class="fas fa-user-tie"></i> {{ leader.get_leader_display }}
+                            </span>
+                            <button type="button" class="btn-remove" onclick="removeLeader(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="leader-form-row">
+                            <div class="form-field">
+                                <label>Full Name <span class="required">*</span></label>
+                                <input type="text" class="form-control-modern" name="leader_name_{{ leader.id }}" 
+                                       value="{{ leader.name }}" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Phone Number</label>
+                                <input type="tel" class="form-control-modern" name="leader_phone_{{ leader.id }}" 
+                                       value="{{ leader.phone }}">
+                            </div>
+                            <div class="form-field">
+                                <label>Email</label>
+                                <input type="email" class="form-control-modern" name="leader_email_{{ leader.id }}" 
+                                       value="{{ leader.email }}">
+                            </div>
+                        </div>
+                        <input type="hidden" name="leader_role_{{ leader.id }}" value="{{ leader.leader }}">
+                        <input type="hidden" name="leader_id_{{ leader.id }}" value="{{ leader.id }}">
                     </div>
                     {% endfor %}
                 </div>
 
-                <!-- Form Actions -->
-                <div class="form-actions">
-                    <a href="{% url 'list_community' %}" class="btn btn-cancel">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-submit">
-                        <i class="fas fa-save"></i> Update Community
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div class="confirmation-modal" id="confirmationModal">
-    <div class="modal-dialog">
-        <div class="modal-header">
-            <div class="warning-icon">
-                <i class="fas fa-exclamation-triangle"></i>
+                <button type="button" class="btn-add-leader" onclick="addLeader()">
+                    <i class="fas fa-plus-circle"></i> Add Another Leader
+                </button>
             </div>
-            <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
         </div>
-        <div class="modal-body">
-            <p class="modal-message" id="modalMessage">Are you sure you want to perform this action?</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">
-                Cancel
+
+        <div class="form-actions">
+            <button type="submit" class="btn-modern btn-primary-modern">
+                <i class="fas fa-save"></i> Save Changes
             </button>
-            <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">
-                Confirm
+            <a href="{% url 'community_list' %}" class="btn-modern btn-secondary-modern">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="button" class="btn-modern btn-danger-modern" onclick="confirmDelete()">
+                <i class="fas fa-trash-alt"></i> Delete Community
             </button>
         </div>
-    </div>
+    </form>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('editCommunityForm');
-    const confirmationModal = document.getElementById('confirmationModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalMessage = document.getElementById('modalMessage');
-    const modalCancel = document.getElementById('modalCancel');
-    const modalConfirm = document.getElementById('modalConfirm');
-    
-    let currentAction = null;
-    
-    // Confirmation Modal Functions
-    function showConfirmation(title, message, onConfirm) {
-        modalTitle.textContent = title;
-        modalMessage.textContent = message;
-        confirmationModal.classList.add('show');
-        currentAction = onConfirm;
-        
-        // Focus on cancel button for accessibility
-        modalCancel.focus();
-    }
-    
-    function hideConfirmation() {
-        confirmationModal.classList.remove('show');
-        currentAction = null;
-    }
-    
-    // Modal Event Listeners
-    modalCancel.addEventListener('click', hideConfirmation);
-    
-    modalConfirm.addEventListener('click', function() {
-        if (currentAction) {
-            currentAction();
-        }
-        hideConfirmation();
-    });
-    
-    // Close modal on ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && confirmationModal.classList.contains('show')) {
-            hideConfirmation();
-        }
-    });
-    
-    // Close modal when clicking outside
-    confirmationModal.addEventListener('click', function(e) {
-        if (e.target === confirmationModal) {
-            hideConfirmation();
-        }
-    });
-    
-    // Close alerts
-    document.querySelectorAll('.alert-close').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.alert-message').style.display = 'none';
-        });
-    });
-
-    // Auto-remove alerts after 5 seconds
-    document.querySelectorAll('.alert-message').forEach(alert => {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            alert.style.transition = 'opacity 0.3s';
-            setTimeout(() => {
-                if (alert.parentNode) alert.style.display = 'none';
-            }, 300);
-        }, 5000);
-    });
-
-    // Phone number formatting
-    document.addEventListener('input', function(e) {
-        if (e.target.name === 'leader_phones[]' && e.target.type === 'tel') {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 9) value = value.substring(0, 9);
-            e.target.value = value;
-        }
-    });
-
-    // Form validation
-    form.addEventListener('submit', function(e) {
-        const communityName = document.getElementById('community_name').value.trim();
-        
-        if (!communityName) {
-            e.preventDefault();
-            showNotification('Please enter a community name', 'error');
-            document.getElementById('community_name').focus();
-            return false;
-        }
-
-        // Validate phone numbers
-        let valid = true;
-        const phoneInputs = document.querySelectorAll('input[name="leader_phones[]"]');
-        phoneInputs.forEach(input => {
-            const value = input.value.trim();
-            if (value) {
-                const digits = value.replace(/\D/g, '');
-                if (digits.length !== 9) {
-                    valid = false;
-                    input.style.borderColor = 'var(--danger)';
-                }
-            }
-        });
-        
-        if (!valid) {
-            e.preventDefault();
-            showNotification('Please enter valid 9-digit phone numbers', 'error');
-            return false;
-        }
-
-        // Show loading state
-        const submitBtn = this.querySelector('.btn-submit');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-        submitBtn.disabled = true;
-    });
-
-    // Show notification
-    function showNotification(message, type = 'info') {
-        // Remove existing notification
-        const existing = document.querySelector('.notification-toast');
-        if (existing) existing.remove();
-
-        // Create notification
-        const notification = document.createElement('div');
-        notification.className = `notification-toast ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="notification-close">
+<!-- Leader Template -->
+<template id="leader-template">
+    <div class="leader-card" data-leader-id="NEW_ID">
+        <div class="leader-header">
+            <select class="leader-role" name="leader_role_NEW_ID" required>
+                <option value="">Select Role</option>
+                <option value="CHAIR PERSON">Chair Person</option>
+                <option value="VICE CHAIR">Vice Chair</option>
+                <option value="SECRETARY">Secretary</option>
+                <option value="VICE SECRETARY">Vice Secretary</option>
+                <option value="ACCOUNTANT">Accountant</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <button type="button" class="btn-remove" onclick="removeLeader(this)">
                 <i class="fas fa-times"></i>
             </button>
-        `;
+        </div>
+        <div class="leader-form-row">
+            <div class="form-field">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" class="form-control-modern" name="leader_name_NEW_ID" required>
+            </div>
+            <div class="form-field">
+                <label>Phone Number</label>
+                <input type="tel" class="form-control-modern" name="leader_phone_NEW_ID">
+            </div>
+            <div class="form-field">
+                <label>Email</label>
+                <input type="email" class="form-control-modern" name="leader_email_NEW_ID">
+            </div>
+        </div>
+        <input type="hidden" name="leader_id_NEW_ID" value="NEW_ID">
+    </div>
+</template>
 
-        // Add styles
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'error' ? 'var(--danger)' : 'var(--success)'};
-            color: white;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            animation: slideUp 0.3s ease;
-            max-width: 300px;
-            font-size: 0.875rem;
-        `;
+<script>
+let leaderCounter = {{ community.leaders.count|default:0 }};
 
-        document.body.appendChild(notification);
-
-        // Add close event
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.remove();
-        });
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.3s';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }
-        }, 5000);
-    }
-
-    // Example: Add confirmation to a delete link (if you have one)
-    const deleteBtn = document.querySelector('.btn-delete');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = this.href;
-            
-            showConfirmation(
-                'Delete Community',
-                `Are you sure you want to delete "${community.name}"? This action cannot be undone.`,
-                function() {
-                    // Add visual feedback
-                    deleteBtn.classList.add('shaking');
-                    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-                    deleteBtn.disabled = true;
-                    
-                    // Navigate to delete URL after animation
-                    setTimeout(() => {
-                        window.location.href = url;
-                    }, 500);
-                }
-            );
-        });
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + S to save
-        if ((e.ctrlKey || e.metaKey) && e.key === 's' && !confirmationModal.classList.contains('show')) {
-            e.preventDefault();
-            form.requestSubmit();
-        }
-
-        // Escape to cancel
-        if (e.key === 'Escape' && !confirmationModal.classList.contains('show')) {
-            window.history.back();
-        }
+function addLeader() {
+    leaderCounter++;
+    const template = document.getElementById('leader-template');
+    const container = document.getElementById('leaders-container');
+    
+    const clone = template.content.cloneNode(true);
+    const newId = 'new_' + leaderCounter;
+    
+    // Replace all NEW_ID with the actual ID
+    clone.querySelectorAll('[name*="NEW_ID"]').forEach(el => {
+        el.name = el.name.replace('NEW_ID', newId);
     });
-});
+    clone.querySelector('.leader-card').dataset.leaderId = newId;
+    
+    container.appendChild(clone);
+}
+
+function removeLeader(btn) {
+    const card = btn.closest('.leader-card');
+    card.style.animation = 'fadeOut 0.3s ease';
+    setTimeout(() => card.remove(), 300);
+}
+
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this community? This action cannot be undone.')) {
+        window.location.href = '{% url "delete_community" community.id %}';
+    }
+}
+
+// Add fadeOut animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(-20px); }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

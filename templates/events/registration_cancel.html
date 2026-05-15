@@ -3,49 +3,209 @@
 
 {% block title %}Cancel Registration - Christ King Church{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Cancel Registration</h4>
-                </div>
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-ticket-alt fa-4x text-warning mb-4"></i>
-                    <h5 class="card-title">Are you sure?</h5>
-                    <p class="card-text">
-                        You are about to cancel your registration for:<br>
-                        <strong class="h5">"{{ registration.event.title }}"</strong>
-                    </p>
-                    <p class="text-muted">
-                        Scheduled for {{ registration.event.start_date|date:"F j, Y" }}
-                        {% if registration.event.start_time %} at {{ registration.event.start_time|time:"g:i A" }}{% endif %}
-                    </p>
-                    
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Your spot will be released for others to register.
-                    </div>
+{% block internal_style %}
+<style>
+    .cancel-wrapper {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 1rem;
+    }
 
-                    <p class="text-warning">
-                        <i class="fas fa-undo me-2"></i>
-                        You can re-register later if spots are available.
-                    </p>
-                </div>
-                <div class="card-footer bg-transparent d-flex justify-content-center gap-3">
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-times me-2"></i>Yes, Cancel Registration
-                        </button>
-                    </form>
-                    <a href="{% url 'my_registrations' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Keep Registration
-                    </a>
-                </div>
-            </div>
+    .cancel-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .cancel-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    }
+
+    .cancel-icon i {
+        font-size: 3rem;
+        color: white;
+    }
+
+    .cancel-card h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .cancel-card p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .event-info-box {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .event-info-box h4 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.75rem 0;
+    }
+
+    .event-info-box p {
+        margin: 0.25rem 0;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    .event-info-box p i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+        width: 20px;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #92400e;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: left;
+    }
+
+    .warning-box i {
+        font-size: 1.25rem;
+        color: #f59e0b;
+        flex-shrink: 0;
+    }
+
+    .btn-confirm-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-confirm-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        color: white;
+    }
+
+    .btn-keep {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        margin-left: 1rem;
+    }
+
+    .btn-keep:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    @media (max-width: 600px) {
+        .cancel-card {
+            padding: 1.5rem;
+        }
+
+        .cancel-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-confirm-cancel, .btn-keep {
+            width: 100%;
+            margin: 0;
+            justify-content: center;
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .cancel-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cancel-wrapper">
+    <div class="cancel-card">
+        <div class="cancel-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
+        <h1>Cancel Registration</h1>
+        <p>Are you sure you want to cancel your registration?</p>
+        
+        <div class="event-info-box">
+            <h4><i class="fas fa-calendar-day me-2"></i>{{ registration.event.title }}</h4>
+            <p><i class="fas fa-calendar"></i>{{ registration.event.start_date|date:"F j, Y" }}</p>
+            {% if registration.event.start_time %}
+            <p><i class="fas fa-clock"></i>{{ registration.event.start_time|time:"g:i A" }}</p>
+            {% endif %}
+            {% if registration.event.location %}
+            <p><i class="fas fa-map-marker-alt"></i>{{ registration.event.location.name }}</p>
+            {% endif %}
+        </div>
+
+        <div class="warning-box">
+            <i class="fas fa-info-circle"></i>
+            <span>Your spot will be released and you may need to register again if you change your mind.</span>
+        </div>
+
+        <form method="post" class="cancel-actions">
+            {% csrf_token %}
+            <button type="submit" class="btn-confirm-cancel">
+                <i class="fas fa-times-circle"></i> Yes, Cancel Registration
+            </button>
+            <a href="{% url 'my_registrations' %}" class="btn-keep">
+                <i class="fas fa-check"></i> Keep My Registration
+            </a>
+        </form>
     </div>
 </div>
 {% endblock %}

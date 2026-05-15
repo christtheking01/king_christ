@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block internal_style %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+    :root {
+        --ink: #0d0d12;
+        --ink-soft: #3a3a4a;
+        --ink-muted: #8888a0;
+        --surface: #f7f7fb;
+        --surface-raised: #ffffff;
+        --accent: #5b3ff8;
+        --accent-soft: rgba(91, 63, 248, 0.10);
+        --accent-glow: rgba(91, 63, 248, 0.22);
+        --success: #17c964;
+        --warning: #f5a623;
+        --danger: #f31260;
+        --info: #006fe6;
+        --border: rgba(13, 13, 18, 0.10);
+        --border-focus: #5b3ff8;
+        --radius-sm: 8px;
+        --radius: 14px;
+        --radius-lg: 22px;
+        --shadow-sm: 0 1px 3px rgba(13,13,18,0.07), 0 1px 2px rgba(13,13,18,0.04);
+        --shadow: 0 4px 16px rgba(13,13,18,0.08), 0 1px 4px rgba(13,13,18,0.04);
+        --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nf-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 0 60px;
+    }
+
+    .nf-card {
+        background: var(--surface-raised);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .nf-card-header {
+        padding: 26px 30px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: linear-gradient(135deg, rgba(245, 166, 35, 0.1) 0%, transparent 100%);
+    }
+
+    .nf-card-header-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--warning);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .nf-card-header-text h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: var(--ink);
+    }
+
+    .nf-card-header-text p {
+        font-size: 0.85rem;
+        color: var(--ink-muted);
+        margin: 0;
+    }
+
+    .nf-card-body { padding: 30px; }
+
+    .nf-field { margin-bottom: 22px; }
+    .nf-field:last-child { margin-bottom: 0; }
+
+    .nf-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--ink-soft);
+        margin-bottom: 8px;
+    }
+
+    .nf-label .req { color: var(--accent); margin-left: 2px; }
+
+    .nf-field input[type="text"],
+    .nf-field textarea,
+    .nf-field select {
+        width: 100%;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: var(--ink);
+        background: var(--surface);
+        transition: border-color var(--transition), box-shadow var(--transition);
+        outline: none;
+    }
+
+    .nf-field input:focus,
+    .nf-field textarea:focus,
+    .nf-field select:focus {
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 4px var(--accent-glow);
+        background: var(--surface-raised);
+    }
+
+    .nf-field textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+
+    .phone-textarea {
+        font-family: 'DM Mono', 'DM Sans', monospace;
+        font-size: 0.9rem;
+    }
+
+    .sms-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent-soft);
+        border-radius: 100px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        color: var(--accent);
+        font-weight: 500;
+        margin-top: 10px;
+    }
+
+    .sms-counter.warn { background: rgba(245,166,35,0.13); color: var(--warning); }
+    .sms-counter.over { background: rgba(243,18,96,0.10); color: var(--danger); }
+
+    .priority-select { margin-top: 8px; }
+    .priority-select select { border-left: 3px solid transparent; }
+
+    .nf-submit-row {
+        display: flex;
+        gap: 12px;
+        padding-top: 28px;
+        border-top: 1px solid var(--border);
+        margin-top: 30px;
+    }
+
+    .btn-send {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 14px 28px;
+        font-family: 'Syne', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 14px var(--accent-glow);
+        transition: transform var(--transition), box-shadow var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: transparent;
+        color: var(--ink-soft);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px 22px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color var(--transition), color var(--transition);
+    }
+
+    .btn-cancel:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+    .nf-error {
+        font-size: 0.82rem;
+        color: var(--danger);
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .phone-help {
+        background: var(--accent-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        margin-top: 12px;
+    }
+
+    .phone-help-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--ink-soft);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .phone-help ul {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 0.78rem;
+        color: var(--ink-muted);
+        line-height: 1.6;
+    }
+
+    .phone-help li { margin-bottom: 3px; }
+
+    @media (max-width: 580px) {
+        .nf-card-body { padding: 20px; }
+        .nf-card-header { padding: 20px; flex-direction: column; text-align: center; }
+        .nf-submit-row { flex-direction: column; }
+        .btn-send, .btn-cancel { width: 100%; justify-content: center; }
+    }
+</style>
+{% endblock internal_style %}
+
+{% block title %}{% trans "Send to Custom Numbers" %}{% endblock %}
+{% block page_title %}{% trans "Send to Custom Phone Numbers" %}{% endblock %}
+
+{% block content %}
+<div class="nf-container">
+    <div class="nf-card">
+        <div class="nf-card-header">
+            <div class="nf-card-header-icon"><i class="fas fa-phone-alt"></i></div>
+            <div class="nf-card-header-text">
+                <h2>{% trans "Send to Custom Numbers" %}</h2>
+                <p>{% trans "Send notifications to any phone numbers (registered or non-registered)" %}</p>
+            </div>
+        </div>
+
+        <div class="nf-card-body">
+            <form method="post" id="customNotificationForm">
+                {% csrf_token %}
+
+                <!-- Phone Numbers -->
+                <div class="nf-field">
+                    <label class="nf-label" for="{{ form.custom_phone_numbers.id_for_label }}">
+                        <i class="fas fa-phone" style="color:var(--warning);margin-right:5px;"></i>
+                        {% trans "Phone Numbers" %}<span class="req">*</span>
+                    </label>
+                    {{ form.custom_phone_numbers }}
+                    <div class="phone-help">
+                        <div class="phone-help-title">
+                            <i class="fas fa-lightbulb" style="color:var(--accent);"></i>
+                            {% trans "Formatting Tips" %}
+                        </div>
+                        <ul>
+                            <li>{% trans "Enter numbers separated by commas" %}</li>
+                            <li>{% trans "Include country code: +255712345678" %}</li>
+                            <li>{% trans "Example: +255712345678, +255723456789, +255734567890" %}</li>
+                            <li>{% trans "Numbers will be validated before sending" %}</li>
+                        </ul>
+                    </div>
+                    {% if form.custom_phone_numbers.errors %}
+                    <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.custom_phone_numbers.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Title -->
+                <div class="nf-field">
+                    <label class="nf-label" for="{{ form.title.id_for_label }}">
+                        {% trans "Title" %}<span class="req">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.title.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Message -->
+                <div class="nf-field">
+                    <label class="nf-label" for="{{ form.message.id_for_label }}">
+                        {% trans "Message" %}<span class="req">*</span>
+                    </label>
+                    {{ form.message }}
+                    <div class="sms-counter" id="smsCounter">
+                        <i class="fas fa-comment-sms"></i>
+                        <span id="charCount">0</span> / 160 · <span id="smsCount">1 SMS</span>
+                    </div>
+                    {% if form.message.errors %}
+                    <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.message.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Priority -->
+                <div class="nf-field">
+                    <label class="nf-label" for="{{ form.priority.id_for_label }}">
+                        {% trans "Priority" %}
+                    </label>
+                    <div class="nf-select-wrap priority-select">
+                        {{ form.priority }}
+                    </div>
+                    {% if form.priority.errors %}
+                    <div class="nf-error"><i class="fas fa-circle-exclamation"></i>{{ form.priority.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Submit -->
+                <div class="nf-submit-row">
+                    <button type="submit" class="btn-send">
+                        <i class="fas fa-paper-plane"></i>
+                        {% trans "Send Notification" %}
+                    </button>
+                    <a href="{% url 'notification_list' %}" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i>
+                        {% trans "Cancel" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter
+    var messageEl = document.getElementById('{{ form.message.id_for_label }}');
+    var charDisplay = document.getElementById('charCount');
+    var smsDisplay = document.getElementById('smsCount');
+    var counterPill = document.getElementById('smsCounter');
+
+    function updateCounter() {
+        if (!messageEl) return;
+        var len = messageEl.value.length;
+        var smsNum = Math.ceil(len / 160) || 1;
+        charDisplay.textContent = len;
+        smsDisplay.textContent = smsNum + ' SMS' + (smsNum > 1 ? 'es' : '');
+        counterPill.classList.remove('warn', 'over');
+        if (len > 306) counterPill.classList.add('over');
+        else if (len > 140) counterPill.classList.add('warn');
+    }
+
+    if (messageEl) {
+        messageEl.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+
+    // Priority border color
+    var priorityEl = document.getElementById('{{ form.priority.id_for_label }}');
+    var colors = { urgent: '#f31260', high: '#f5a623', low: '#8888a0' };
+
+    if (priorityEl) {
+        priorityEl.addEventListener('change', function() {
+            this.style.borderLeftColor = colors[this.value] || '#5b3ff8';
+        });
+        priorityEl.style.borderLeftWidth = '3px';
+        priorityEl.style.borderLeftStyle = 'solid';
+        priorityEl.style.borderLeftColor = colors[priorityEl.value] || '#5b3ff8';
+    }
+});
+</script>
+{% endblock %}

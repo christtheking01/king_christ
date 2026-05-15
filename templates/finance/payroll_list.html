@@ -4,117 +4,502 @@
 {% block title %}Payroll Management{% endblock %}
 
 {% block internal_style %}
-<link rel="stylesheet" href="{% static 'style/css/finance.css' %}">
+<style>
+    /* Hero Header */
+    .payroll-hero {
+        background: linear-gradient(135deg, rgba(245, 87, 108, 0.95) 0%, rgba(240, 147, 251, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .payroll-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .payroll-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-create {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-create:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+    }
+    .stat-card.warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card.info::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .stat-card.primary::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .stat-card.success::before { background: linear-gradient(90deg, #11998e, #38ef7d); }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    .filter-card .card-body {
+        padding: 1.25rem;
+    }
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-group label i {
+        color: var(--primary);
+    }
+
+    /* Card */
+    .card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .card-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    /* Table Styles */
+    .payroll-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .payroll-table th {
+        background: var(--bg-secondary);
+        padding: 0.875rem 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .payroll-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    .payroll-table tr:hover td {
+        background: var(--bg-secondary);
+    }
+    .payroll-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Employee Avatar */
+    .employee-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        color: #f59e0b;
+    }
+    .badge-verifying {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+        color: #4facfe;
+    }
+    .badge-verified {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+        color: #667eea;
+    }
+    .badge-processed {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        color: #10b981;
+    }
+    .badge-paid {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.05));
+        color: #11998e;
+    }
+    .badge-cancelled {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        color: #ef4444;
+    }
+    .badge-method {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+        color: #6366f1;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-action:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+    .btn-action.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+    }
+    .btn-action.primary:hover {
+        opacity: 0.9;
+        color: white;
+    }
+    .btn-action.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border-color: transparent;
+        color: white;
+    }
+    .btn-action.success:hover {
+        opacity: 0.9;
+        color: white;
+    }
+    .btn-action.danger {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+    .btn-action.danger:hover {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    }
+    .btn-action.icon-only {
+        padding: 0.5rem;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+    }
+    .btn-export {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-export:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .page-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .payroll-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+        .payroll-table {
+            font-size: 0.875rem;
+        }
+        .payroll-table th,
+        .payroll-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="finance-container">
-    <!-- Page Header -->
-    <div class="finance-page-header">
+<div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="payroll-hero">
         <div>
-            <h1>Payroll Management</h1>
-            <p>Generate and manage employee payroll</p>
+            <h1><i class="fas fa-calculator"></i>Payroll Management</h1>
         </div>
-        <div class="finance-btn-group">
-            <a href="{% url 'generate_payroll' %}" class="finance-btn finance-btn-primary">
-                <i class="fas fa-plus"></i> Generate Payroll
+        <div class="d-flex gap-2">
+            <a href="{% url 'employee_list' %}" class="btn-secondary">
+                <i class="fas fa-users"></i>Manage Employees
             </a>
-            <a href="{% url 'employee_list' %}" class="finance-btn finance-btn-outline">
-                <i class="fas fa-users"></i> Manage Employees
+            <a href="{% url 'generate_payroll' %}" class="btn-create">
+                <i class="fas fa-plus"></i>Generate Payroll
             </a>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="finance-card">
-        <div class="finance-card-header"><h6>Filters</h6></div>
-        <div class="finance-card-body">
-            <form method="get" class="finance-filters">
-                <div class="finance-filter-group">
-                    <label for="status">Status</label>
-                    <select name="status" id="status">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <div class="stat-value">{{ pending_verification_count|default:0 }}</div>
+                <div class="stat-label">Pending Verification</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <div class="stat-value">{{ verified_count|default:0 }}</div>
+                <div class="stat-label">Verified</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-value">TSH {{ total_net_salary|floatformat:0 }}</div>
+                <div class="stat-label">Total Amount</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <div class="card-body">
+            <form method="get" class="filter-row">
+                <div class="filter-group">
+                    <label><i class="fas fa-check-circle"></i> Status</label>
+                    <select name="status" class="form-control">
                         <option value="">All Status</option>
                         <option value="PENDING" {% if request.GET.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="PENDING_VERIFICATION" {% if request.GET.status == 'PENDING_VERIFICATION' %}selected{% endif %}>Pending Verification</option>
+                        <option value="VERIFIED" {% if request.GET.status == 'VERIFIED' %}selected{% endif %}>Verified</option>
                         <option value="PROCESSED" {% if request.GET.status == 'PROCESSED' %}selected{% endif %}>Processed</option>
                         <option value="PAID" {% if request.GET.status == 'PAID' %}selected{% endif %}>Paid</option>
                         <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
                     </select>
                 </div>
-                <div class="finance-filter-group">
-                    <label for="month">Month</label>
-                    <select name="month" id="month">
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> Month</label>
+                    <select name="month" class="form-control">
                         <option value="">All Months</option>
                         {% for i in "123456789101112"|make_list %}
                             <option value="{{ i }}" {% if request.GET.month == i %}selected{% endif %}>Month {{ i }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="finance-filter-group" style="justify-content: flex-end;">
+                <div class="filter-group">
                     <label>&nbsp;</label>
-                    <div class="finance-btn-group">
-                        <button type="submit" class="finance-btn finance-btn-primary">Filter</button>
-                        <a href="{% url 'payroll_list' %}" class="finance-btn finance-btn-secondary">Clear</a>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <a href="{% url 'payroll_list' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-undo"></i> Clear
+                        </a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Payroll Statistics -->
-    <div class="finance-stats-grid">
-        <div class="finance-stat-card warning">
-            <div class="finance-stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="finance-stat-content">
-                <div class="finance-stat-label">Pending</div>
-                <div class="finance-stat-value">{{ pending_count }}</div>
-            </div>
-        </div>
-        <div class="finance-stat-card info">
-            <div class="finance-stat-icon"><i class="fas fa-cogs"></i></div>
-            <div class="finance-stat-content">
-                <div class="finance-stat-label">Processed</div>
-                <div class="finance-stat-value">{{ processed_count }}</div>
-            </div>
-        </div>
-        <div class="finance-stat-card success">
-            <div class="finance-stat-icon"><i class="fas fa-check-circle"></i></div>
-            <div class="finance-stat-content">
-                <div class="finance-stat-label">Paid</div>
-                <div class="finance-stat-value">{{ paid_count }}</div>
-            </div>
-        </div>
-        <div class="finance-stat-card primary">
-            <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
-            <div class="finance-stat-content">
-                <div class="finance-stat-label">Total Amount</div>
-                <div class="finance-stat-value">Tsh {{ total_net_salary|floatformat:2 }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payroll List -->
-    <div class="finance-card">
-        <div class="finance-card-header">
-            <h6>All Payroll Records</h6>
-            <div class="finance-btn-group">
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportPayroll()">
-                    <i class="fas fa-download"></i> Export
-                </button>
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printPayroll()">
+    <!-- Payroll Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-list me-2"></i>All Payroll Records</h5>
+            <div class="d-flex gap-2">
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.month %}month={{ request.GET.month }}&{% endif %}export=csv" class="btn-export">
+                    <i class="fas fa-file-csv"></i> CSV
+                </a>
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.month %}month={{ request.GET.month }}&{% endif %}export=pdf" class="btn-export">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <button class="btn-export" onclick="window.print()">
                     <i class="fas fa-print"></i> Print
                 </button>
             </div>
         </div>
-        <div class="finance-card-body">
-            {% if payrolls %}
-                <table class="finance-table">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="payroll-table">
                     <thead>
                         <tr>
                             <th>Employee</th>
                             <th>Period</th>
+                            <th>Basic Salary</th>
                             <th>Gross Salary</th>
-                            <th>Deductions</th>
                             <th>Net Salary</th>
+                            <th>Method</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -123,72 +508,141 @@
                         {% for payroll in payrolls %}
                         <tr>
                             <td>
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    {% if payroll.employee.member.picture %}
-                                        <img src="{{ payroll.employee.member.picture.url }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="{{ payroll.employee.member.name }}">
-                                    {% else %}
-                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-user" style="color: #999;"></i>
-                                        </div>
-                                    {% endif %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="employee-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
                                     <div>
-                                        <div style="font-weight: 600;">{{ payroll.employee.member.name }}</div>
-                                        <small style="color: #666;">{{ payroll.employee.position }}</small>
+                                        <strong>{{ payroll.employee.name }}</strong>
+                                        <div class="text-muted small">{{ payroll.employee.position }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div>{{ payroll.pay_period_start|date:"M d, Y" }}</div>
-                                <small style="color: #666;">to {{ payroll.pay_period_end|date:"M d, Y" }}</small>
+                                <div class="text-muted small">to {{ payroll.pay_period_end|date:"M d, Y" }}</div>
                             </td>
-                            <td style="font-weight: 600;">${{ payroll.gross_salary|floatformat:2 }}</td>
-                            <td style="color: #dc3545;">${{ payroll.tax_deduction|add:payroll.other_deductions|floatformat:2 }}</td>
-                            <td style="color: #28a745; font-weight: 600;">Tsh{{ payroll.net_salary|floatformat:2 }}</td>
+                            <td class="text-primary" style="font-weight: 600;">TSH {{ payroll.basic_salary|floatformat:2 }}</td>
+                            <td class="text-info" style="font-weight: 600;">TSH {{ payroll.gross_salary|floatformat:2 }}</td>
+                            <td class="text-success" style="font-weight: 700;">TSH {{ payroll.net_salary|floatformat:2 }}</td>
+                            <td><span class="badge badge-method">{{ payroll.get_payment_method_display }}</span></td>
                             <td>
-                                {% if payroll.status == 'PENDING' %}<span class="finance-badge finance-badge-warning">Pending</span>
-                                {% elif payroll.status == 'PROCESSED' %}<span class="finance-badge finance-badge-info">Processed</span>
-                                {% elif payroll.status == 'PAID' %}<span class="finance-badge finance-badge-success">Paid</span>
-                                {% else %}<span class="finance-badge finance-badge-danger">Cancelled</span>{% endif %}
+                                {% if payroll.status == 'PENDING' %}<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                                {% elif payroll.status == 'PENDING_VERIFICATION' %}<span class="badge badge-verifying"><i class="fas fa-hourglass-half"></i> Verifying</span>
+                                {% elif payroll.status == 'VERIFIED' %}<span class="badge badge-verified"><i class="fas fa-check-circle"></i> Verified</span>
+                                {% elif payroll.status == 'PROCESSED' %}<span class="badge badge-processed"><i class="fas fa-cog"></i> Processed</span>
+                                {% elif payroll.status == 'PAID' %}<span class="badge badge-paid"><i class="fas fa-check-double"></i> Paid</span>
+                                {% else %}<span class="badge badge-cancelled"><i class="fas fa-times-circle"></i> Cancelled</span>{% endif %}
                             </td>
                             <td>
-                                <div class="finance-btn-group">
+                                <div class="d-flex gap-1 flex-wrap">
                                     {% if payroll.status == 'PENDING' %}
-                                        <a href="{% url 'process_payroll' payroll.pk %}" class="finance-btn finance-btn-sm finance-btn-success" onclick="return confirm('Process this payroll?')">
+                                        <a href="{% url 'submit_payroll_for_verification' payroll.pk %}" class="btn-action primary" onclick="return confirm('Submit this payroll for verification?')">
+                                            <i class="fas fa-paper-plane"></i> Submit
+                                        </a>
+                                    {% elif payroll.status == 'PENDING_VERIFICATION' %}
+                                        {% if user.roles == 'priest' or user.roles == 'chairperson' or user.roles == 'admin' or user.is_superuser %}
+                                            <a href="{% url 'verify_payroll' payroll.pk %}" class="btn-action success" onclick="return confirm('Verify this payroll?')">
+                                                <i class="fas fa-check-circle"></i> Verify
+                                            </a>
+                                            <a href="{% url 'reject_payroll' payroll.pk %}" class="btn-action danger" onclick="return confirm('Reject this payroll?')">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="badge badge-verifying">Awaiting Verification</span>
+                                        {% endif %}
+                                    {% elif payroll.status == 'VERIFIED' %}
+                                        <a href="{% url 'process_payroll' payroll.pk %}" class="btn-action success" onclick="return confirm('Process this payroll?')">
                                             <i class="fas fa-check"></i> Process
                                         </a>
                                     {% endif %}
-                                    <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="viewPayroll({{ payroll.pk }})">
+                                    <button class="btn-action icon-only view-payroll" data-payroll-id="{{ payroll.pk }}" title="View">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printPayslip({{ payroll.pk }})">
+                                    <button class="btn-action icon-only print-payslip" data-payroll-id="{{ payroll.pk }}" title="Print Payslip">
                                         <i class="fas fa-file-invoice"></i>
                                     </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-calculator"></i>
+                                    <h3>No Payroll Records Found</h3>
+                                    <p>Generate your first payroll to start processing employee payments.</p>
+                                    <a href="{% url 'generate_payroll' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Generate Payroll
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            {% else %}
-                <div class="finance-empty-state">
-                    <i class="fas fa-calculator"></i>
-                    <h5>No payroll records found</h5>
-                    <p>Generate your first payroll to start processing employee payments.</p>
-                    <a href="{% url 'generate_payroll' %}" class="finance-btn finance-btn-primary">
-                        <i class="fas fa-plus"></i> Generate Payroll
-                    </a>
-                </div>
-            {% endif %}
+            </div>
         </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block scripts %}
 <script>
-function exportPayroll() { alert('Export functionality would be implemented here'); }
-function printPayroll() { window.print(); }
-function viewPayroll(id) { alert('View payroll ' + id); }
-function printPayslip(id) { alert('Print payslip ' + id); }
+// Handle payroll view and print buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // View payroll buttons
+    document.querySelectorAll('.view-payroll').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-payroll-id');
+            window.location.href = '/financial/payroll/' + id + '/';
+        });
+    });
+    
+    // Print payslip buttons
+    document.querySelectorAll('.print-payslip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-payroll-id');
+            window.open('/financial/payroll/' + id + '/payslip/', '_blank');
+        });
+    });
+});
 </script>
 {% endblock %}

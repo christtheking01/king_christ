@@ -1,0 +1,86 @@
+{% load static %}
+<!-- Modern Notification Dropdown Component -->
+<div class="dropdown" id="notificationDropdown">
+    <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-bell fa-lg"></i>
+        <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if unread_count == 0 %}d-none{% endif %}">
+            {{ unread_count }}
+            <span class="visually-hidden">unread notifications</span>
+        </span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu" style="width: 380px; max-height: 500px;">
+        <div class="notification-header d-flex justify-content-between align-items-center p-3 border-bottom">
+            <h6 class="m-0 fw-bold">Notifications</h6>
+            <div class="d-flex gap-2">
+                <a href="{% url 'my_notifications' %}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+                {% if unread_count > 0 %}
+                <button id="markAllReadBtn" class="btn btn-sm btn-link text-decoration-none text-muted">Mark all read</button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="notification-list" class="notification-list" style="max-height: 350px; overflow-y: auto;">
+            {% if notifications %}
+                {% for un in notifications %}
+                <a href="{% url 'user_notification_detail' un.id %}" class="dropdown-item notification-item p-3 border-bottom {% if un.notification.priority == 'urgent' %}bg-danger bg-opacity-10{% elif un.notification.priority == 'high' %}bg-warning bg-opacity-10{% endif %}">
+                    <div class="d-flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="notification-icon rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px; background: {% if un.notification.priority == 'urgent' %}#dc3545{% elif un.notification.priority == 'high' %}#ffc107{% elif un.notification.priority == 'low' %}#6c757d{% else %}#0d6efd{% endif %}; color: white;">
+                                <i class="fas {% if un.notification.recipient_type == 'Staff' %}fa-user-tie{% elif un.notification.recipient_type == 'MINISTRY' %}fa-users{% else %}fa-bell{% endif %}"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 text-truncate fw-semibold" style="max-width: 200px;">{{ un.notification.title }}</h6>
+                                <small class="text-muted flex-shrink-0 ms-2">{{ un.sent_at|timesince }} ago</small>
+                            </div>
+                            <p class="mb-0 text-truncate text-muted" style="font-size: 0.875rem;">{{ un.notification.message|truncatewords:10 }}</p>
+                            <div class="mt-1">
+                                {% if un.notification.priority == 'urgent' %}
+                                <span class="badge bg-danger">Urgent</span>
+                                {% elif un.notification.priority == 'high' %}
+                                <span class="badge bg-warning text-dark">High</span>
+                                {% elif un.notification.priority == 'low' %}
+                                <span class="badge bg-secondary">Low</span>
+                                {% endif %}
+                                <span class="badge bg-info">{{ un.notification.get_target_audience_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="text-center p-4 text-muted">
+                    <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                    <p class="mb-0">No new notifications</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="notification-footer p-2 border-top text-center">
+            <a href="{% url 'my_notifications' %}" class="text-decoration-none small">See all notifications</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.notification-item {
+    transition: background-color 0.2s;
+}
+.notification-item:hover {
+    background-color: #f8f9fa !important;
+}
+.notification-dropdown-menu {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: none;
+}
+@keyframes notification-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.notification-badge-pulse {
+    animation: notification-pulse 0.5s ease-in-out;
+}
+</style>

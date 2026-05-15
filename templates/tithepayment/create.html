@@ -139,39 +139,47 @@
         }
     }
 
-    /* Card Styles */
+    /* Modern Glass Card Styles */
     .card {
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border-radius: var(--radius-lg);
-        border: 1px solid var(--divider);
-        box-shadow: var(--shadow-sm);
-        transition: all var(--transition-base);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        transition: all var(--transition-smooth);
     }
 
     .card:hover {
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 12px 40px rgba(31, 38, 135, 0.15);
+        transform: translateY(-2px);
     }
 
     .card-header {
-        padding: 20px 20px 0;
+        padding: 24px 24px 0;
     }
 
     .card-body {
-        padding: 20px;
+        padding: 24px;
     }
 
     .card-title {
-        font-size: 1.25rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.375rem;
         font-weight: 600;
         color: var(--text-primary);
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
 
     .card-title i {
-        color: var(--primary);
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.5rem;
     }
 
     /* Form Styles */
@@ -280,7 +288,7 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: var(--surface);
+        background: #ffffff;
         border: 1px solid var(--divider);
         border-radius: var(--radius-md);
         box-shadow: var(--shadow-lg);
@@ -451,26 +459,55 @@
     }
 
     .btn-primary {
-        background: var(--primary);
+        background: var(--gradient-primary);
         color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
     }
 
     .btn-primary:hover:not(:disabled) {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary i {
+        transition: transform var(--transition-fast);
+    }
+
+    .btn-primary:hover i {
+        transform: scale(1.1);
     }
 
     .btn-secondary {
-        background: var(--background);
-        border: 1px solid var(--divider);
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(102, 126, 234, 0.2);
         color: var(--text-primary);
+        transition: all var(--transition-fast);
     }
 
     .btn-secondary:hover:not(:disabled) {
-        background: var(--surface);
+        background: white;
         border-color: var(--primary);
         color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     }
 
     .btn-outline {
@@ -682,7 +719,7 @@
                             <div class="selected-member-header">
                                 <div class="selected-member-info">
                                     <div class="selected-member-name" id="selected_member_name">
-                                        {% if form.instance.name %}{{ form.instance.name.name }}{% endif %}
+                                        {% if form.instance.name %}{{ form.instance.name.name }}{% if form.instance.name.code %} ({{ form.instance.name.code }}){% endif %}{% endif %}
                                     </div>
                                     <div class="selected-member-phone" id="selected_member_telephone">
                                         {% if form.instance.name %}{{ form.instance.name.telephone|default:"No telephone" }}{% endif %}
@@ -994,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     resultItem.innerHTML = `
                         <div class="search-result-name">
                             ${highlightText(member.name || '', query)}
+                            ${member.code ? `<span style="color: var(--primary); font-weight: 600; margin-left: 8px;">(${member.code})</span>` : ''}
                         </div>
                         <div class="search-result-phone">
                             ${member.telephone || 'No telephone'}
@@ -1004,7 +1042,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectMember(
                             member.id,
                             member.name,
-                            member.telephone || ''
+                            member.telephone || '',
+                            member.code || ''
                         );
                     });
                     
@@ -1023,11 +1062,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Select member
-    function selectMember(memberId, name, telephone) {
+    function selectMember(memberId, name, telephone, code) {
         selectedMemberId.value = memberId;
         telephoneDisplay.value = telephone;
         contactNumberInput.value = telephone;
-        selectedMemberName.textContent = name;
+        selectedMemberName.textContent = name + (code ? ` (${code})` : '');
         selectedMemberTelephone.textContent = telephone || 'No telephone';
         selectedMemberDisplay.style.display = 'block';
         

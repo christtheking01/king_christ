@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Professional Budget Management{% endblock %}
+
+{% block internal_style %}
+<style>
+/* Enhanced Budget Management Styles */
+.budget-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+.budget-page-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 24px; 
+    padding-bottom: 16px; 
+    border-bottom: 2px solid #e0e0e0; 
+}
+
+.budget-page-header h1 { margin: 0; font-size: 28px; font-weight: 600; color: #333; }
+.budget-page-header p { margin: 4px 0 0 0; color: #666; font-size: 14px; }
+
+.budget-btn { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 10px 16px; 
+    font-size: 14px; 
+    font-weight: 500; 
+    text-decoration: none; 
+    border-radius: 6px; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+}
+
+.budget-btn-primary { background-color: #007bff; color: white; }
+.budget-btn-primary:hover { background-color: #0056b3; }
+.budget-btn-secondary { background-color: #6c757d; color: white; }
+.budget-btn-secondary:hover { background-color: #545b62; }
+.budget-btn-success { background-color: #28a745; color: white; }
+.budget-btn-success:hover { background-color: #1e7e34; }
+.budget-btn-warning { background-color: #ffc107; color: #212529; }
+.budget-btn-warning:hover { background-color: #e0a800; }
+.budget-btn-outline { background-color: transparent; border: 1px solid #007bff; color: #007bff; }
+.budget-btn-outline:hover { background-color: #007bff; color: white; }
+.budget-btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.budget-stats-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 20px; 
+    margin-bottom: 24px; 
+}
+
+.budget-stat-card { 
+    background: white; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    padding: 24px; 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; 
+    border-left: 4px solid #ddd; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.budget-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
+
+.budget-stat-card.primary { border-left-color: #007bff; }
+.budget-stat-card.success { border-left-color: #28a745; }
+.budget-stat-card.warning { border-left-color: #ffc107; }
+.budget-stat-card.danger { border-left-color: #dc3545; }
+.budget-stat-card.info { border-left-color: #17a2b8; }
+
+.budget-stat-icon { 
+    width: 56px; 
+    height: 56px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    background: #f8f9fa; 
+    border-radius: 12px; 
+    font-size: 24px; 
+}
+
+.budget-stat-content { flex: 1; }
+.budget-stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 4px; }
+.budget-stat-value { font-size: 28px; font-weight: 700; color: #333; }
+.budget-stat-change { font-size: 12px; margin-top: 4px; }
+
+.budget-card { 
+    background: white; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    margin-bottom: 24px; 
+    overflow: hidden;
+}
+
+.budget-card-header { 
+    padding: 20px 24px; 
+    border-bottom: 1px solid #e0e0e0; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background: #f8f9fa;
+}
+
+.budget-card-header h6 { margin: 0; font-size: 18px; font-weight: 600; color: #333; }
+.budget-card-body { padding: 24px; }
+
+.budget-filters { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 16px; 
+    margin-bottom: 20px; 
+}
+
+.budget-filter-group { display: flex; flex-direction: column; gap: 6px; }
+.budget-filter-group label { 
+    font-size: 12px; 
+    font-weight: 600; 
+    color: #666; 
+    text-transform: uppercase; 
+}
+
+.budget-filter-group select, .budget-filter-group input { 
+    padding: 10px 12px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    font-size: 14px; 
+    transition: border-color 0.2s ease;
+}
+
+.budget-filter-group select:focus, .budget-filter-group input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.budget-table { width: 100%; border-collapse: collapse; }
+.budget-table th, .budget-table td { 
+    padding: 16px 12px; 
+    text-align: left; 
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+.budget-table th { 
+    background: #f8f9fa; 
+    font-weight: 600; 
+    font-size: 12px; 
+    text-transform: uppercase; 
+    color: #666; 
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.budget-table tbody tr:hover { background: #f8f9fa; }
+
+.budget-progress { 
+    width: 100%; 
+    height: 24px; 
+    background: #e0e0e0; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    position: relative;
+}
+
+.budget-progress-bar { 
+    height: 100%; 
+    border-radius: 12px; 
+    transition: width 0.3s ease; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-size: 11px; 
+    font-weight: 600; 
+}
+
+.budget-progress-bar.success { background: linear-gradient(135deg, #28a745, #20c997); }
+.budget-progress-bar.warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: #333; }
+.budget-progress-bar.danger { background: linear-gradient(135deg, #dc3545, #e83e8c); }
+
+.budget-badge { 
+    display: inline-block; 
+    padding: 6px 12px; 
+    font-size: 11px; 
+    font-weight: 600; 
+    border-radius: 20px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+}
+
+.budget-badge-draft { background: #e2e3e5; color: #383d41; }
+.budget-badge-pending { background: #fff3cd; color: #856404; }
+.budget-badge-active { background: #d4edda; color: #155724; }
+.budget-badge-completed { background: #cce5ff; color: #004085; }
+.budget-badge-cancelled { background: #f8d7da; color: #721c24; }
+
+.budget-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.budget-empty-state { 
+    text-align: center; 
+    padding: 64px 20px; 
+    background: #f8f9fa; 
+    border-radius: 12px; 
+}
+
+.budget-empty-state i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
+.budget-empty-state h5 { margin: 0 0 12px 0; color: #666; font-size: 20px; }
+.budget-empty-state p { color: #999; margin-bottom: 20px; font-size: 16px; }
+
+.budget-type-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.budget-type-operating { background-color: #007bff; }
+.budget-type-capital { background-color: #28a745; }
+.budget-type-program { background-color: #ffc107; }
+.budget-type-event { background-color: #fd7e14; }
+.budget-type-mission { background-color: #6f42c1; }
+.budget-type-emergency { background-color: #dc3545; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .budget-stats-grid { grid-template-columns: 1fr; }
+    .budget-page-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .budget-filters { grid-template-columns: 1fr; }
+    .budget-table { font-size: 12px; }
+    .budget-table th, .budget-table td { padding: 8px 6px; }
+    .budget-btn-group { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="budget-container">
+    <!-- Page Header -->
+    <div class="budget-page-header">
+        <div>
+            <h1>Professional Budget Management</h1>
+            <p>Comprehensive budget planning, tracking, and analysis with accounting controls</p>
+        </div>
+        <div class="budget-btn-group">
+            <a href="{% url 'budget_reports' %}" class="budget-btn budget-btn-outline">
+                <i class="fas fa-chart-line"></i> Reports
+            </a>
+            <a href="{% url 'create_budget' %}" class="budget-btn budget-btn-primary">
+                <i class="fas fa-plus"></i> Create Budget
+            </a>
+        </div>
+    </div>
+
+    <!-- Budget Statistics -->
+    <div class="budget-stats-grid">
+        <div class="budget-stat-card primary">
+            <div class="budget-stat-icon"><i class="fas fa-chart-pie"></i></div>
+            <div class="budget-stat-content">
+                <div class="budget-stat-label">Total Budgets</div>
+                <div class="budget-stat-value">{{ budgets|length }}</div>
+                <div class="budget-stat-change text-muted">Active financial plans</div>
+            </div>
+        </div>
+        <div class="budget-stat-card success">
+            <div class="budget-stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="budget-stat-content">
+                <div class="budget-stat-label">Total Budgeted</div>
+                <div class="budget-stat-value">TSH {{ total_budget_amount|floatformat:0 }}</div>
+                <div class="budget-stat-change text-success">Approved: TSH {{ total_approved_amount|floatformat:0 }}</div>
+            </div>
+        </div>
+        <div class="budget-stat-card warning">
+            <div class="budget-stat-icon"><i class="fas fa-shopping-cart"></i></div>
+            <div class="budget-stat-content">
+                <div class="budget-stat-label">Total Spent</div>
+                <div class="budget-stat-value">TSH {{ total_spent_amount|floatformat:0 }}</div>
+                <div class="budget-stat-change text-warning">{{ utilization_percentage|floatformat:1 }}% utilized</div>
+            </div>
+        </div>
+        <div class="budget-stat-card info">
+            <div class="budget-stat-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div class="budget-stat-content">
+                <div class="budget-stat-label">Remaining</div>
+                <div class="budget-stat-value">TSH {{ total_remaining_amount|floatformat:0 }}</div>
+                <div class="budget-stat-change text-info">Available funds</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="budget-card">
+        <div class="budget-card-header">
+            <h6><i class="fas fa-filter"></i> Budget Filters</h6>
+            <button class="budget-btn budget-btn-sm budget-btn-outline" onclick="toggleAdvancedFilters()">
+                <i class="fas fa-cog"></i> Advanced
+            </button>
+        </div>
+        <div class="budget-card-body">
+            <form method="get" class="budget-filters">
+                <div class="budget-filter-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">All Status</option>
+                        <option value="DRAFT" {% if request.GET.status == 'DRAFT' %}selected{% endif %}>Draft</option>
+                        <option value="PENDING_APPROVAL" {% if request.GET.status == 'PENDING_APPROVAL' %}selected{% endif %}>Pending Approval</option>
+                        <option value="ACTIVE" {% if request.GET.status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                        <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="budget-filter-group">
+                    <label for="budget_type">Budget Type</label>
+                    <select name="budget_type" id="budget_type">
+                        <option value="">All Types</option>
+                        {% for type_value, type_label in budget_types %}
+                        <option value="{{ type_value }}" {% if request.GET.budget_type == type_value %}selected{% endif %}>{{ type_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="budget-filter-group">
+                    <label for="department">Department</label>
+                    <select name="department" id="department">
+                        <option value="">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if request.GET.department == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="budget-filter-group">
+                    <label for="fiscal_year">Fiscal Year</label>
+                    <select name="fiscal_year" id="fiscal_year">
+                        <option value="">All Years</option>
+                        {% for year in fiscal_years %}
+                        <option value="{{ year }}" {% if request.GET.fiscal_year == year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="budget-filter-group" style="justify-content: flex-end;">
+                    <label>&nbsp;</label>
+                    <div class="budget-btn-group">
+                        <button type="submit" class="budget-btn budget-btn-primary">
+                            <i class="fas fa-search"></i> Filter
+                        </button>
+                        <a href="{% url 'budget_list' %}" class="budget-btn budget-btn-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget List -->
+    <div class="budget-card">
+        <div class="budget-card-header">
+            <h6><i class="fas fa-list"></i> Budget Register</h6>
+            <div class="budget-btn-group">
+                <a href="{% url 'export_budgets' %}" class="budget-btn budget-btn-sm budget-btn-outline">
+                    <i class="fas fa-download"></i> Export
+                </a>
+                <button class="budget-btn budget-btn-sm budget-btn-outline" onclick="printBudgets()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="budget-card-body">
+            {% if budgets %}
+                <div class="table-responsive">
+                    <table class="budget-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Type</th>
+                                <th>Period</th>
+                                <th>Budgeted</th>
+                                <th>Approved</th>
+                                <th>Spent</th>
+                                <th>Remaining</th>
+                                <th>Usage %</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for budget in budgets %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: #333;">{{ budget.name }}</div>
+                                    {% if budget.department %}
+                                    <small style="color: #666;">
+                                        <i class="fas fa-building"></i> {{ budget.department }}
+                                    </small><br>
+                                    {% endif %}
+                                    {% if budget.description %}
+                                    <small style="color: #888;">{{ budget.description|truncatechars:60 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="budget-type-indicator budget-type-{{ budget.budget_type|lower }}"></span>
+                                    {{ budget.get_budget_type_display }}
+                                </td>
+                                <td>
+                                    <div>{{ budget.start_date|date:"M d, Y" }}</div>
+                                    <small style="color: #666;">to {{ budget.end_date|date:"M d, Y" }}</small>
+                                    {% if budget.fiscal_year %}
+                                    <br><small style="color: #888;">FY {{ budget.fiscal_year }}</small>
+                                    {% endif %}
+                                </td>
+                                <td style="font-weight: 600; color: #333;">
+                                    TSH {{ budget.total_amount|floatformat:0 }}
+                                </td>
+                                <td style="font-weight: 600; color: #28a745;">
+                                    {% if budget.approved_amount %}
+                                        TSH {{ budget.approved_amount|floatformat:0 }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: #ffc107; font-weight: 600;">
+                                    TSH {{ budget.spent_amount|floatformat:0 }}
+                                </td>
+                                <td style="color: #28a745; font-weight: 600;">
+                                    TSH {{ budget.remaining_amount|floatformat:0 }}
+                                </td>
+                                <td>
+                                    {% if budget.usage_percentage > 0 %}
+                                    <div class="budget-progress">
+                                        <div class="budget-progress-bar {% if budget.usage_percentage > 90 %}danger{% elif budget.usage_percentage > 70 %}warning{% else %}success{% endif %}" 
+                                             style="width: {{ budget.usage_percentage|floatformat:1 }}%">
+                                            {{ budget.usage_percentage|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="budget-progress">
+                                        <div class="budget-progress-bar" style="width: 0%; background: #6c757d;">0%</div>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if budget.status == 'DRAFT' %}
+                                        <span class="budget-badge budget-badge-draft">Draft</span>
+                                    {% elif budget.status == 'PENDING_APPROVAL' %}
+                                        <span class="budget-badge budget-badge-pending">Pending</span>
+                                    {% elif budget.status == 'ACTIVE' %}
+                                        <span class="budget-badge budget-badge-active">Active</span>
+                                    {% elif budget.status == 'COMPLETED' %}
+                                        <span class="budget-badge budget-badge-completed">Completed</span>
+                                    {% elif budget.status == 'CANCELLED' %}
+                                        <span class="budget-badge budget-badge-cancelled">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="budget-btn-group">
+                                        <a href="{% url 'budget_detail' budget.pk %}" class="budget-btn budget-btn-sm budget-btn-outline" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if budget.status == 'DRAFT' %}
+                                            <a href="{% url 'submit_budget_for_approval' budget.pk %}" class="budget-btn budget-btn-sm budget-btn-warning" title="Submit for Approval">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </a>
+                                        {% endif %}
+                                        {% if budget.status == 'PENDING_APPROVAL' %}
+                                            <a href="{% url 'approve_budget' budget.pk %}" class="budget-btn budget-btn-sm budget-btn-success" title="Approve">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{% url 'reject_budget' budget.pk %}" class="budget-btn budget-btn-sm budget-btn-danger" title="Reject">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="budget-empty-state">
+                    <i class="fas fa-chart-pie"></i>
+                    <h5>No budgets found</h5>
+                    <p>Create your first professional budget to start tracking church finances with proper accounting controls.</p>
+                    <a href="{% url 'create_budget' %}" class="budget-btn budget-btn-primary">
+                        <i class="fas fa-plus"></i> Create Your First Budget
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportBudgets() {
+    // Implementation for budget export
+    alert('Export functionality would export to Excel/CSV with full budget details');
+}
+
+function printBudgets() {
+    window.print();
+}
+
+function toggleAdvancedFilters() {
+    // Implementation for advanced filters
+    alert('Advanced filters would include date ranges, amount ranges, and custom criteria');
+}
+
+// Auto-refresh for real-time updates
+setInterval(function() {
+    // Could implement AJAX refresh for real-time budget updates
+}, 60000); // Refresh every minute
+</script>
+{% endblock %}

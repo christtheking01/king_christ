@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ member }} - Sacrament Progress{% endblock %}
+
+{% block internal_style %}
+<style>
+.progress-container {
+    padding: 20px;
+}
+
+.member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.progress-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.overall-progress {
+    text-align: center;
+}
+
+.progress-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.progress-circle::before {
+    content: '';
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+}
+
+.progress-text {
+    position: relative;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.stat-box {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.stat-box.completed {
+    background: #d4edda;
+}
+
+.stat-box.in-progress {
+    background: #fff3cd;
+}
+
+.stat-box.pending {
+    background: #f8d7da;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.sacrament-list {
+    margin-top: 20px;
+}
+
+.sacrament-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sacrament-item:last-child {
+    border-bottom: none;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.pending {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.scheduled {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.approved {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="progress-container">
+    <div class="member-header">
+        <div>
+            <h2><i class="fas fa-user text-primary"></i> {{ member }}</h2>
+            <p class="text-muted">{{ member.member_category|title }} | {{ member.age }} years old</p>
+        </div>
+        <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </a>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="progress-card overall-progress">
+        <h4>Sacrament Journey Progress</h4>
+        <div class="progress-circle" style="background: conic-gradient(#28a745 {{ progress_percentage }}%, #e9ecef 0);">
+            <span class="progress-text">{{ progress_percentage|floatformat:0 }}%</span>
+        </div>
+        <p class="text-muted">{{ completed }} of 7 sacraments completed</p>
+        
+        <div class="stats-row">
+            <div class="stat-box completed">
+                <div class="stat-number text-success">{{ completed }}</div>
+                <div class="text-muted">Completed</div>
+            </div>
+            <div class="stat-box in-progress">
+                <div class="stat-number text-warning">{{ in_progress }}</div>
+                <div class="text-muted">In Progress</div>
+            </div>
+            <div class="stat-box pending">
+                <div class="stat-number text-danger">{{ pending }}</div>
+                <div class="text-muted">Pending</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sacrament List -->
+    <div class="progress-card">
+        <h4><i class="fas fa-list"></i> Sacrament Status</h4>
+        <div class="sacrament-list">
+            {% for request in sacrament_requests %}
+            <div class="sacrament-item">
+                <div>
+                    <strong>{{ request.sacrament|title }}</strong>
+                    {% if request.scheduled_date %}
+                    <br><small class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ request.scheduled_date|date:"M d, Y" }}
+                    </small>
+                    {% endif %}
+                </div>
+                <span class="status-badge {{ request.status }}">
+                    {{ request.get_status_display }}
+                </span>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center">No sacrament requests yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

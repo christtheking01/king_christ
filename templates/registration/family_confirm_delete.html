@@ -2,45 +2,233 @@
 
 {% block title %}Delete Family - {{ family.name }}{% endblock %}
 
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .delete-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    }
+
+    .delete-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .warning-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .delete-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--danger);
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-card p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-glass-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--warning);
+        text-align: left;
+    }
+
+    .info-box {
+        background: rgba(102, 126, 234, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .info-box h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .info-box p {
+        margin: 0 0 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .info-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-box strong {
+        color: var(--text-primary);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-glass-danger {
+        position: relative;
+        overflow: hidden;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex: 1;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-glass-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-glass-outline {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        flex: 1;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    @media (max-width: 480px) {
+        .delete-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-wrapper">
-    <div class="content-card">
-        <div class="card-header">
-            <h3 class="card-title text-danger">Delete Family</h3>
-            <p class="text-muted">Confirm deletion of family and all associated data</p>
+<div class="delete-page">
+    <div class="delete-card">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
 
-        <div class="card-body">
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+        <h3>Delete Family</h3>
+        <p>Confirm deletion of family and all associated data</p>
+
+        <div class="alert-glass-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>
                 <strong>Warning:</strong> This action cannot be undone. All family memberships will be removed.
             </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5>Family Information</h5>
-                            <p><strong>Name:</strong> {{ family.name }}</p>
-                            <p><strong>Members:</strong> {{ family.member_count }}</p>
-                            <p><strong>Created:</strong> {{ family.created_at|date:"M d, Y" }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <form method="post" class="mt-4">
-                {% csrf_token %}
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'family_detail' family.pk %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Delete Family "{{ family.name }}"
-                    </button>
-                </div>
-            </form>
         </div>
+
+        <div class="info-box">
+            <h5>Family Information</h5>
+            <p><strong>Name:</strong> {{ family.name }}</p>
+            <p><strong>Members:</strong> {{ family.member_count }}</p>
+            <p><strong>Created:</strong> {{ family.created_at|date:"M d, Y" }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'family_detail' family.pk %}" class="btn-glass-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-glass-danger">
+                    <i class="fas fa-trash"></i>
+                    Delete "{{ family.name }}"
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

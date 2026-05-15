@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Member, Ministry,MinistryLeader, CommunityLeader,Community,Committee, TestDb
+from .models import Member, Ministry, MinistryLeader, CommunityLeader, Community, Committee, TestDb, Zone, CommunityZone
 
 # Register your models here.
 
@@ -9,3 +9,5 @@ admin.site.register(CommunityLeader)
 admin.site.register(Community)
 admin.site.register(Committee)
 admin.site.register(MinistryLeader)
+admin.site.register(Zone)
+admin.site.register(CommunityZone)

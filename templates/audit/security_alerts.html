@@ -1,177 +1,224 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Security Alerts{% endblock %}
+
+{% block internal_style %}
+<style>
+  .audit-container { padding: 20px; max-width: 100%; box-sizing: border-box; }
+  .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .audit-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+  .audit-header h1 i { color: var(--danger); }
+  .audit-header p { color: var(--text-muted); margin: 4px 0 0 0; }
+  
+  .content-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--bg-secondary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+  .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-header h5 i { color: var(--primary); }
+  .card-body { padding: 20px; }
+  
+  .filter-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 768px) { .filter-form { grid-template-columns: 1fr; } }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .filter-group input, .filter-group select { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+  .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+  .filter-actions { display: flex; gap: 10px; }
+  .btn { padding: 10px 20px; border-radius: var(--border-radius-sm); font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+  .btn-primary { background: var(--gradient-primary); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+  .btn-outline:hover { background: var(--bg-tertiary); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+  .btn-sm { padding: 6px 12px; font-size: 0.875rem; }
+  
+  .table-wrapper { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .audit-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  .audit-table th { background: var(--bg-secondary); padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
+  .audit-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.85rem; }
+  .audit-table tr:hover td { background: var(--bg-secondary); }
+  .audit-table tr.new-alert { background: rgba(245, 158, 11, 0.05); }
+  .audit-table .empty-cell { text-align: center; padding: 40px; color: var(--text-muted); }
+  .audit-table .empty-cell i { font-size: 2rem; opacity: 0.5; margin-bottom: 12px; display: block; }
+  
+  .type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: var(--primary); color: white; }
+  .severity-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+  .severity-badge.critical { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .severity-badge.high { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .severity-badge.medium { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .severity-badge.low { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .status-badge.new { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .status-badge.investigating { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .status-badge.resolved { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .resolution-note { color: var(--success); font-size: 0.8rem; padding: 8px 16px; background: rgba(16, 185, 129, 0.05); }
+  
+  .pagination { display: flex; justify-content: center; gap: 4px; padding: 16px; list-style: none; margin: 0; }
+  .page-link { padding: 8px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; }
+  .page-link:hover { background: var(--bg-secondary); border-color: var(--primary); }
+  .page-link.active { background: var(--gradient-primary); color: white; border-color: transparent; }
+  
+  /* Custom Modal */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-xl); width: 100%; max-width: 500px; margin: 20px; }
+  .modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h5 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+  .modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 6px; }
+  .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.9rem; resize: vertical; }
+  .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-exclamation-triangle"></i> Security Alerts
-        </h1>
+<div class="audit-container">
+  <!-- Header -->
+  <div class="audit-header">
+    <div>
+      <h1><i class="fas fa-exclamation-triangle"></i>Security Alerts</h1>
+      <p>Monitor and manage security alerts</p>
     </div>
+  </div>
 
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row">
-                <div class="col-md-3">
-                    <label>Severity</label>
-                    <select name="severity" class="form-control form-control-sm">
-                        <option value="">All Severities</option>
-                        {% for sev, label in severity_choices %}
-                        <option value="{{ sev }}" {% if filters.severity == sev %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label>Status</label>
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">All Statuses</option>
-                        {% for stat, label in status_choices %}
-                        <option value="{{ stat }}" {% if filters.status == stat %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label>Alert Type</label>
-                    <select name="type" class="form-control form-control-sm">
-                        <option value="">All Types</option>
-                        {% for type, label in alert_type_choices %}
-                        <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    <a href="{% url 'security_alerts' %}" class="btn btn-sm btn-outline-secondary ml-2">Clear</a>
-                </div>
-            </form>
-        </div>
+  <!-- Filters -->
+  <div class="content-card">
+    <div class="card-header">
+      <h5><i class="fas fa-filter"></i>Filters</h5>
     </div>
-
-    <!-- Alerts Table -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Created</th>
-                            <th>Type</th>
-                            <th>Severity</th>
-                            <th>Title</th>
-                            <th>User</th>
-                            <th>IP Address</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for alert in page_obj %}
-                        <tr class="{% if alert.status == 'NEW' %}table-warning{% endif %}">
-                            <td>{{ alert.created_at|date:"Y-m-d H:i" }}</td>
-                            <td>
-                                <span class="badge badge-info">{{ alert.alert_type }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-{% if alert.severity == 'CRITICAL' %}danger{% elif alert.severity == 'HIGH' %}warning{% elif alert.severity == 'MEDIUM' %}info{% else %}secondary{% endif %}">
-                                    {{ alert.severity }}
-                                </span>
-                            </td>
-                            <td>{{ alert.title }}</td>
-                            <td>
-                                {% if alert.user %}
-                                    {{ alert.user.username }}
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ alert.ip_address|default:"-" }}</td>
-                            <td>
-                                <span class="badge badge-{% if alert.status == 'NEW' %}danger{% elif alert.status == 'INVESTIGATING' %}warning{% elif alert.status == 'RESOLVED' %}success{% else %}secondary{% endif %}">
-                                    {{ alert.status }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if alert.status == 'NEW' or alert.status == 'INVESTIGATING' %}
-                                <button class="btn btn-sm btn-success" onclick="resolveAlert('{{ alert.id }}')">
-                                    <i class="fas fa-check"></i> Resolve
-                                </button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="8" class="bg-light">
-                                <small class="text-muted">{{ alert.description }}</small>
-                                {% if alert.resolution_notes %}
-                                <br><small class="text-success"><strong>Resolution:</strong> {{ alert.resolution_notes }}</small>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">No security alerts found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="card-body">
+      <form method="get">
+        <div class="filter-form">
+          <div class="filter-group">
+            <label>Severity</label>
+            <select name="severity">
+              <option value="">All Severities</option>
+              {% for sev, label in severity_choices %}
+              <option value="{{ sev }}" {% if filters.severity == sev %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="">All Statuses</option>
+              {% for stat, label in status_choices %}
+              <option value="{{ stat }}" {% if filters.status == stat %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Alert Type</label>
+            <select name="type">
+              <option value="">All Types</option>
+              {% for type, label in alert_type_choices %}
+              <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; align-items: end;">
+            <div class="filter-actions">
+              <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i>Apply</button>
+              <a href="{% url 'audits:security_alerts' %}" class="btn btn-outline"><i class="fas fa-undo"></i>Clear</a>
             </div>
+          </div>
         </div>
-        {% if page_obj.has_other_pages %}
-        <div class="card-footer">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
-                    </li>
-                    {% endif %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    </li>
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
+      </form>
     </div>
+  </div>
+
+  <!-- Alerts Table -->
+  <div class="content-card">
+    <div class="card-body table-wrapper" style="padding: 0;">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>User</th>
+            <th>IP</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in page_obj %}
+          <tr class="{% if alert.status == 'NEW' %}new-alert{% endif %}">
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ alert.created_at|date:"Y-m-d H:i" }}</td>
+            <td><span class="type-badge">{{ alert.alert_type }}</span></td>
+            <td><span class="severity-badge {% if alert.severity == 'CRITICAL' %}critical{% elif alert.severity == 'HIGH' %}high{% elif alert.severity == 'MEDIUM' %}medium{% else %}low{% endif %}">{{ alert.severity }}</span></td>
+            <td><strong>{{ alert.title }}</strong></td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ alert.description|truncatechars:50 }}</td>
+            <td>{% if alert.user %}<a href="{% url 'view_user' alert.user.id %}">{{ alert.user.username }}</a>{% else %}<span style="color: var(--text-muted);">-</span>{% endif %}</td>
+            <td><code style="font-size: 0.75rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">{{ alert.ip_address|default:"-" }}</code></td>
+            <td><span class="status-badge {% if alert.status == 'NEW' %}new{% elif alert.status == 'INVESTIGATING' %}investigating{% else %}resolved{% endif %}">{{ alert.status }}</span></td>
+            <td>
+              {% if alert.status == 'NEW' or alert.status == 'INVESTIGATING' %}
+              <button class="btn btn-success btn-sm" onclick="resolveAlert('{{ alert.id }}')"><i class="fas fa-check"></i></button>
+              {% endif %}
+            </td>
+          </tr>
+          {% if alert.resolution_notes %}
+          <tr><td colspan="9" class="resolution-note"><i class="fas fa-check-double"></i> <strong>Resolution:</strong> {{ alert.resolution_notes }}</td></tr>
+          {% endif %}
+          {% empty %}
+          <tr><td colspan="9" class="empty-cell"><i class="fas fa-shield-alt" style="color: var(--success);"></i>No security alerts found. System is secure!</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+          <li><span class="page-link active">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li><a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"><i class="fas fa-chevron-right"></i></a></li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Resolve Modal -->
-<div class="modal fade" id="resolveModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Resolve Alert</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="resolveForm">
-                    {% csrf_token %}
-                    <input type="hidden" id="alertId" name="alert_id">
-                    <div class="form-group">
-                        <label>Resolution Notes</label>
-                        <textarea class="form-control" name="resolution_notes" rows="3" placeholder="Enter notes about how this was resolved..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="submitResolve()">Resolve Alert</button>
-            </div>
-        </div>
+<div class="modal-overlay" id="resolveModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5>Resolve Alert</h5>
+      <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
     </div>
+    <div class="modal-body">
+      <form id="resolveForm">
+        {% csrf_token %}
+        <input type="hidden" id="alertId" name="alert_id">
+        <div class="form-group">
+          <label>Resolution Notes</label>
+          <textarea name="resolution_notes" rows="3" placeholder="Enter notes about how this was resolved..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button type="button" class="btn btn-success" onclick="submitResolve()">Resolve Alert</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -180,7 +227,11 @@ let currentAlertId = null;
 function resolveAlert(alertId) {
     currentAlertId = alertId;
     document.getElementById('alertId').value = alertId;
-    $('#resolveModal').modal('show');
+    document.getElementById('resolveModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('resolveModal').classList.remove('active');
 }
 
 function submitResolve() {
@@ -203,5 +254,10 @@ function submitResolve() {
         }
     });
 }
+
+// Close modal when clicking outside
+document.getElementById('resolveModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
 </script>
 {% endblock %}

@@ -1,0 +1,340 @@
+{% extends 'portal/base_portal.html' %}
+
+{% block title %}Tithe History - Christ King Church{% endblock %}
+
+{% block content %}
+<style>
+    /* Tithe History - Modern Data Display */
+    .tithe-header {
+        background: linear-gradient(135deg, var(--accent-success) 0%, #00a86b 100%);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tithe-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .tithe-header p {
+        color: rgba(255,255,255,0.8);
+        margin: 0.5rem 0 0 2.5rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Yearly Stats */
+    .yearly-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .year-stat {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem 1rem;
+        text-align: center;
+        transition: var(--transition);
+    }
+    
+    .year-stat:hover {
+        border-color: var(--accent-success);
+    }
+    
+    .year-stat.current {
+        background: rgba(0, 186, 124, 0.1);
+        border-color: var(--accent-success);
+    }
+    
+    .year-stat h5 {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .year-stat .amount {
+        font-size: 1.375rem;
+        font-weight: 800;
+        color: var(--accent-success);
+        margin-bottom: 0.25rem;
+    }
+    
+    .year-stat .badge-current {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.625rem;
+        font-weight: 600;
+        background: var(--accent-success);
+        color: white;
+        text-transform: uppercase;
+    }
+    
+    /* Payment Table */
+    .payments-table-container {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+    
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .payments-table th {
+        background: var(--bg-tertiary);
+        padding: 0.875rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border-primary);
+    }
+    
+    .payments-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+    }
+    
+    .payments-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .payments-table tr:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .payment-amount {
+        font-weight: 700;
+        color: var(--accent-success);
+        font-size: 1rem;
+    }
+    
+    .payment-method {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .payment-method.cash {
+        background: rgba(0, 186, 124, 0.15);
+        color: var(--accent-success);
+    }
+    
+    .payment-method.card {
+        background: rgba(29, 155, 240, 0.15);
+        color: var(--accent-primary);
+    }
+    
+    .payment-method.mobile {
+        background: rgba(120, 86, 255, 0.15);
+        color: var(--accent-purple);
+    }
+    
+    .receipt-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+    
+    .date-cell {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .date-cell i {
+        margin-right: 0.5rem;
+        color: var(--text-muted);
+    }
+    
+    @media (max-width: 768px) {
+        .tithe-header {
+            padding: 1.25rem;
+        }
+        
+        .tithe-header h1 {
+            font-size: 1.125rem;
+        }
+        
+        .yearly-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .year-stat {
+            padding: 1rem;
+        }
+        
+        .year-stat .amount {
+            font-size: 1.125rem;
+        }
+        
+        /* Table horizontal scroll for mobile */
+        .payments-table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .payments-table {
+            font-size: 0.875rem;
+            min-width: 500px;
+        }
+        
+        .payments-table th,
+        .payments-table td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .payment-amount {
+            font-size: 0.9375rem;
+        }
+        
+        .payment-method {
+            font-size: 0.6875rem;
+            padding: 0.2rem 0.5rem;
+        }
+        
+        .date-cell {
+            font-size: 0.8125rem;
+        }
+        
+        .date-cell i {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .yearly-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .year-stat h5 {
+            font-size: 0.8125rem;
+        }
+        
+        .year-stat .amount {
+            font-size: 1rem;
+        }
+        
+        .receipt-badge {
+            font-size: 0.625rem;
+            padding: 0.15rem 0.375rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-hand-holding-usd" style="color: var(--accent-success);"></i> My Tithe History</h1>
+    <p>Track your giving journey</p>
+</div>
+
+{% if member %}
+<!-- Yearly Summary -->
+{% if yearly_totals %}
+<div class="yearly-stats">
+    {% for year, total in yearly_totals.items %}
+    <div class="year-stat {% if year == current_year %}current{% endif %}">
+        <h5>{{ year }}</h5>
+        <div class="amount">TSh {{ total|floatformat:0|default:"0" }}</div>
+        {% if year == current_year %}
+            <span class="badge-current"><i class="fas fa-calendar"></i> Current</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Payment History -->
+<div class="payments-table-container">
+    {% if tithe_payments %}
+    <table class="payments-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Receipt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in tithe_payments %}
+            <tr>
+                <td class="date-cell">
+                    <i class="far fa-calendar"></i>
+                    {{ payment.date|date:"M d, Y" }}
+                </td>
+                <td class="payment-amount">TSh {{ payment.amount|floatformat:2 }}</td>
+                <td>
+                    <span class="payment-method {{ payment.status|default:'cash' }}">
+                        <i class="fas {% if payment.status == 'cash' %}fa-money-bill{% elif payment.status == 'card' %}fa-credit-card{% else %}fa-mobile-alt{% endif %}"></i>
+                        {{ payment.get_status_display|default:"Cash" }}
+                    </span>
+                </td>
+                <td>
+                    {% if payment.receipt %}
+                        <span class="receipt-badge">
+                            <i class="fas fa-receipt"></i>
+                            {{ payment.receipt.receipt_number }}
+                        </span>
+                    {% else %}
+                        <span style="color: var(--text-muted);">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding: 3rem 2rem;">
+        <div class="empty-state-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <h6>No Tithe Records</h6>
+        <p>No tithe payment records found for your account.</p>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <i class="fas fa-exclamation-triangle" style="color: var(--accent-warning);"></i>
+    </div>
+    <h6>Account Not Linked</h6>
+    <p>Your account is not linked to a member record. Please contact an administrator.</p>
+</div>
+{% endif %}
+
+<div class="mt-4">
+    <a href="{% url 'portal_dashboard' %}" class="btn-portal btn-portal-outline">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

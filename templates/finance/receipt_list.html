@@ -83,10 +83,10 @@
             </div>
         </div>
         <div class="finance-stat-card success">
-            <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="finance-stat-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Total Amount</div>
-                <div class="finance-stat-value">${{ total_amount|floatformat:2 }}</div>
+                <div class="finance-stat-value">TSH {{ total_amount|floatformat:2 }}</div>
             </div>
         </div>
         <div class="finance-stat-card info">
@@ -94,7 +94,7 @@
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Average</div>
                 <div class="finance-stat-value">
-                    {% if total_count > 0 %}${{ total_amount|div:total_count|floatformat:2 }}{% else %}$0.00{% endif %}
+                    TSH {{ average_amount|floatformat:2 }}
                 </div>
             </div>
         </div>
@@ -148,8 +148,8 @@
         <div class="finance-card-header">
             <h6>All Receipts</h6>
             <div class="finance-btn-group">
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportReceipts()">
-                    <i class="fas fa-download"></i> Export
+                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="window.print()">
+                    <i class="fas fa-download"></i> Export/Print
                 </button>
                 <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="printReceipts()">
                     <i class="fas fa-print"></i> Print
@@ -184,7 +184,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="color: #28a745; font-weight: 600;">${{ receipt.amount|floatformat:2 }}</td>
+                            <td style="color: #28a745; font-weight: 600;">TSH {{ receipt.amount|floatformat:2 }}</td>
                             <td>
                                 {% if receipt.payment_method == 'cash' %}<span class="finance-badge finance-badge-success">Cash</span>
                                 {% elif receipt.payment_method == 'bank' %}<span class="finance-badge finance-badge-info">Bank Transfer</span>

@@ -15,6 +15,9 @@
             <a href="{% url 'add_transaction' %}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Transaction
             </a>
+            <a href="{% url 'add_categories' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Category
+            </a>
             <a href="{% url 'generate_payroll' %}" class="btn btn-success">
                 <i class="fas fa-calculator"></i> Generate Payroll
             </a>
@@ -30,7 +33,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Total Income</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_income|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ total_income|floatformat:2 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
@@ -47,7 +50,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Total Expenses</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_expenses|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ total_expenses|floatformat:2 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
@@ -64,10 +67,10 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Balance</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ balance|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ balance|floatformat:2 }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -81,7 +84,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Monthly Payroll</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_monthly_payroll|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ total_monthly_payroll|floatformat:2 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -155,7 +158,7 @@
                             <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-                            <a class="dropdown-item" href="#">Export Data</a>
+                            <a class="dropdown-item" href="{% url 'transaction_list' %}?export=csv">Export Data</a>
                             <a class="dropdown-item" href="#">View Details</a>
                         </div>
                     </div>
@@ -191,7 +194,7 @@
                             </div>
                             <div class="flex-shrink-0 text-end">
                                 <div class="fw-bold {% if transaction.type == 'Income' %}text-success{% else %}text-danger{% endif %}">
-                                    {% if transaction.type == 'Income' %}+{% endif %}${{ transaction.amount|floatformat:2 }}
+                                    {% if transaction.type == 'Income' %}+{% endif %}TSH {{ transaction.amount|floatformat:2 }}
                                 </div>
                             </div>
                         </div>
@@ -218,8 +221,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="{% url 'add_transaction' %}" class="btn btn-outline-primary btn-block">
-                                <i class="fas fa-plus-circle"></i> Add Transaction
+                            <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-plus-circle"></i> Category
                             </a>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-3">
@@ -245,7 +248,7 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Financial Chart
@@ -286,7 +289,7 @@ const financialChart = new Chart(ctx, {
                 beginAtZero: true,
                 ticks: {
                     callback: function(value) {
-                        return '$' + value.toLocaleString();
+                        return 'TSH ' + value.toLocaleString();
                     }
                 }
             }

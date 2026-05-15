@@ -117,7 +117,9 @@ body {
 }
 
 .ministry-badge::before {
-    content: "🏛️";
+    content: "\f67f";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
     font-size: 1rem;
 }
 
@@ -142,9 +144,9 @@ body {
     font-size: 1.125rem;
 }
 
-.contact-item.phone::before { content: "📱"; }
-.contact-item.location::before { content: "📍"; }
-.contact-item.shepherd::before { content: "👨‍🦱"; }
+.contact-item.phone::before { content: "\f3cd"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.contact-item.location::before { content: "\f3c5"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.contact-item.shepherd::before { content: "\f500"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 
 /* Grid Layout */
 .info-grid {
@@ -451,6 +453,19 @@ body {
     justify-content: center;
 }
 
+.family-icon i {
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.committee-icon i {
+    color: var(--md-sys-color-on-tertiary-container);
+}
+
+.empty-icon i {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -490,7 +505,133 @@ body {
     }
 }
 
-/* Responsive */
+/* Payment History */
+.payment-history-card {
+    grid-column: span 2;
+}
+
+.payment-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: 4px;
+}
+
+.payment-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+}
+
+.payment-info {
+    flex: 1;
+}
+
+.payment-date {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.payment-description {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface);
+}
+
+.payment-amount {
+    font-weight: 600;
+    color: var(--md-sys-color-success);
+}
+
+.payment-amount.pledge {
+    color: var(--md-sys-color-tertiary);
+}
+
+/* Committees */
+.committee-list {
+    list-style: none;
+}
+
+.committee-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.committee-item:last-child {
+    border-bottom: none;
+}
+
+.committee-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--md-sys-color-tertiary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-sys-color-on-tertiary-container);
+}
+
+.committee-details {
+    flex: 1;
+}
+
+.committee-name {
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+}
+
+.committee-position {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.empty-text {
+    font-size: 0.875rem;
+}
 @media (max-width: 768px) {
     .dashboard-wrapper {
         padding: 12px;
@@ -507,6 +648,10 @@ body {
     .info-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+    
+    .payment-history-card {
+        grid-column: span 1;
     }
     
     .info-card {
@@ -573,6 +718,9 @@ body {
                 <div class="name-section">
                     <div>
                         <h1 class="member-name">{{ member.name }}</h1>
+                        {% if member.code %}
+                        <div class="member-code">Code: {{ member.code }}</div>
+                        {% endif %}
                         <div class="ministry-badge">Ministry: {{ member.ministry }}</div>
                     </div>
                 </div>
@@ -596,15 +744,15 @@ body {
             <!-- Status Card -->
             <div class="info-card">
                 <div class="card-header">
-                    <div class="card-icon">📊</div>
+                    <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
                     <h3 class="card-title">Status</h3>
                 </div>
                 <div class="status-grid">
                     <span class="status-chip {% if member.pays_tithe %}active{% endif %}">
                         {{ member.pays_tithe|yesno:"Pays Tithe,No Tithe" }} <br>
                     </span>
-                    <span class="status-chip {% if member.new_believer_school %}active{% endif %}">
-                        {{ member.new_believer_school|yesno:"New Believer,Not New Believer" }} <br>
+                    <span class="status-chip {% if member.gender %}active{% endif %}">
+                        {{ member.get_gender_display|default:"Not Specified" }} <br>
                     </span>
                     <span class="status-chip {% if member.working %}active{% endif %}">
                         {{ member.working|yesno:"Working,Not Working" }}<br>
@@ -621,13 +769,13 @@ body {
             <!-- Family Card -->
             <div class="info-card">
                 <div class="card-header">
-                    <div class="card-icon">👨‍👩‍👧‍👦</div>
+                    <div class="card-icon"><i class="fas fa-users"></i></div>
                     <h3 class="card-title">Family</h3>
                 </div>
                 <ul class="family-list">
                     {% if member.fathers_name %}
                     <li class="family-item">
-                        <div class="family-icon">👨</div>
+                        <div class="family-icon"><i class="fas fa-male"></i></div>
                         <div class="family-details">
                             <div class="family-relation">Father</div>
                             <div class="family-name">Mr. {{ member.fathers_name }}</div>
@@ -637,7 +785,7 @@ body {
                     
                     {% if member.mothers_name %}
                     <li class="family-item">
-                        <div class="family-icon">👩</div>
+                        <div class="family-icon"><i class="fas fa-female"></i></div>
                         <div class="family-details">
                             <div class="family-relation">Mother</div>
                             <div class="family-name">Mrs. {{ member.mothers_name }}</div>
@@ -647,7 +795,7 @@ body {
                     
                     {% if member.guardians_name %}
                     <li class="family-item">
-                        <div class="family-icon">👤</div>
+                        <div class="family-icon"><i class="fas fa-user-shield"></i></div>
                         <div class="family-details">
                             <div class="family-relation">Guardian</div>
                             <div class="family-name">{{ member.guardians_name }}</div>
@@ -656,23 +804,143 @@ body {
                     {% endif %}
                 </ul>
             </div>
+
+            <!-- Committees Card -->
+            <div class="info-card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <h3 class="card-title">Committees</h3>
+                </div>
+                {% if committees %}
+                <ul class="committee-list">
+                    {% for committee in committees %}
+                    <li class="committee-item">
+                        <div class="committee-icon"><i class="fas fa-users-cog"></i></div>
+                        <div class="committee-details">
+                            <div class="committee-name">{{ committee.Commitee_name }}</div>
+                            <div class="committee-position">{{ committee.get_position_display|default:"Member" }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="empty-text">Not assigned to any committees</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment History Card -->
+        <div class="info-card payment-history-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-donate"></i></div>
+                <h3 class="card-title">Payment History</h3>
+            </div>
+            
+            <!-- Payment Statistics -->
+            <div class="payment-stats">
+                <div class="stat-box">
+                    <div class="stat-value">{{ payment_stats.total_tithe|default:0|floatformat:0 }}</div>
+                    <div class="stat-label">Total Tithe (TZS)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ payment_stats.total_offerings|default:0|floatformat:0 }}</div>
+                    <div class="stat-label">Total Offerings (TZS)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ payment_stats.total_paid_pledges|default:0|floatformat:0 }}</div>
+                    <div class="stat-label">Paid Pledges (TZS)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ payment_stats.pledge_balance|default:0|floatformat:0 }}</div>
+                    <div class="stat-label">Pledge Balance (TZS)</div>
+                </div>
+            </div>
+
+            <!-- Tabs for different payment types -->
+            <div style="margin-top: 24px;">
+                <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--md-sys-color-on-surface);">Tithe Payments</h4>
+                {% if tithe_receipts %}
+                <div class="payment-list">
+                    {% for receipt in tithe_receipts %}
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <div class="payment-description">Receipt #{{ receipt.receipt_number }}</div>
+                            <div class="payment-date">{{ receipt.date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="payment-amount">TZS {{ receipt.amount|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-text">No tithe records found</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--md-sys-color-on-surface);">Offerings</h4>
+                {% if offerings %}
+                <div class="payment-list">
+                    {% for offering in offerings %}
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <div class="payment-description">{{ offering.get_offering_type_display }}</div>
+                            <div class="payment-date">{{ offering.date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="payment-amount">TZS {{ offering.amount|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-text">No offering records found</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--md-sys-color-on-surface);">Event Pledges</h4>
+                {% if pledges %}
+                <div class="payment-list">
+                    {% for pledge in pledges %}
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <div class="payment-description">{{ pledge.event.title }}</div>
+                            <div class="payment-date">{{ pledge.get_status_display }}</div>
+                        </div>
+                        <div class="payment-amount pledge">
+                            {{ pledge.paid_amount|floatformat:0 }} / {{ pledge.promised_amount|floatformat:0 }} TZS
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-text">No pledge records found</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons">
             <a href="{% url 'edit_member' member.pk %}" class="fab-button edit">
-                <span class="fab-icon">✏️</span>
+                <span class="fab-icon"><i class="fas fa-edit"></i></span>
                 <span>Edit Member</span>
             </a>
             
             {% if member.active %}
             <button class="fab-button delete modal-trigger" data-action="delete">
-                <span class="fab-icon">🗑️</span>
+                <span class="fab-icon"><i class="fas fa-trash-alt"></i></span>
                 <span>Remove Member</span>
             </button>
             {% else %}
             <button class="fab-button restore modal-trigger" data-action="restore">
-                <span class="fab-icon">↩️</span>
+                <span class="fab-icon"><i class="fas fa-undo"></i></span>
                 <span>Restore Member</span>
             </button>
             {% endif %}
@@ -684,7 +952,7 @@ body {
 <div class="modal-overlay" id="modal">
     <div class="modal-card">
         <div class="modal-icon">
-            {% if member.active %}⚠️{% else %}↩️{% endif %}
+            {% if member.active %}<i class="fas fa-exclamation-triangle"></i>{% else %}<i class="fas fa-undo"></i>{% endif %}
         </div>
         <h3 class="modal-title">
             {% if member.active %}Remove Member{% else %}Restore Member{% endif %}

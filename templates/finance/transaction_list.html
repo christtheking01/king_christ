@@ -3,36 +3,398 @@
 
 {% block title %}Transactions{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'style/css/finance.css' %}">
+{% block internal_style %}
+<style>
+    /* Hero Header */
+    .finance-hero {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(6, 182, 212, 0.95) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .finance-hero h1 {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .finance-hero i {
+        margin-right: 0.75rem;
+    }
+    .btn-create {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-create:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+    }
+    .stat-card.primary::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .stat-card.success::before { background: linear-gradient(90deg, #11998e, #38ef7d); }
+    .stat-card.danger::before { background: linear-gradient(90deg, #eb3349, #f45c43); }
+    .stat-card.info::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    .filter-card .card-body {
+        padding: 1.25rem;
+    }
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-group label i {
+        color: var(--primary);
+    }
+
+    /* Table Styles */
+    .card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .transactions-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .transactions-table th {
+        background: var(--bg-secondary);
+        padding: 0.875rem 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .transactions-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    .transactions-table tr:hover td {
+        background: var(--bg-secondary);
+    }
+    .transactions-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-income {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        color: #10b981;
+    }
+    .badge-expense {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        color: #ef4444;
+    }
+    .badge-completed {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        color: #10b981;
+    }
+    .badge-pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        color: #f59e0b;
+    }
+    .badge-cancelled {
+        background: linear-gradient(135deg, rgba(107, 114, 128, 0.1), rgba(107, 114, 128, 0.05));
+        color: #6b7280;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    .btn-action:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+    .btn-action.delete:hover {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: white;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .page-link:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .finance-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+        .transactions-table {
+            font-size: 0.875rem;
+        }
+        .transactions-table th,
+        .transactions-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="finance-container">
-    <!-- Page Header -->
-    <div class="finance-page-header">
+<div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="finance-hero">
         <div>
-            <h1>Transactions</h1>
-            <p>Manage income and expense transactions</p>
+            <h1><i class="fas fa-exchange-alt"></i>Transactions</h1>
         </div>
-        <a href="{% url 'add_transaction' %}" class="finance-btn finance-btn-primary">
-            <i class="fas fa-plus"></i> Add Transaction
+        <a href="{% url 'add_transaction' %}" class="btn-create">
+            <i class="fas fa-plus"></i>Add Transaction
         </a>
     </div>
 
-    <!-- Transaction List -->
-    <div class="finance-card">
-        <div class="finance-card-header">
-            <h6>All Transactions</h6>
-            <div class="finance-btn-group">
-                <button class="finance-btn finance-btn-sm finance-btn-outline" onclick="exportTransactions()">
-                    <i class="fas fa-download"></i> Export
-                </button>
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <div class="stat-value">{{ transactions.paginator.count|default:transactions|length }}</div>
+                <div class="stat-label">Total Transactions</div>
             </div>
         </div>
-        <div class="finance-card-body">
-            {% if transactions %}
-                <table class="finance-table">
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-value">
+                    {% with income_total=0 %}
+                        {% for t in transactions %}
+                            {% if t.type == 'Income' %}{% with income_total=income_total|add:t.amount %}{% endwith %}{% endif %}
+                        {% endfor %}
+                        TSH {{ income_total|floatformat:0 }}
+                    {% endwith %}
+                </div>
+                <div class="stat-label">Total Income</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <div class="stat-value">
+                    {% with expense_total=0 %}
+                        {% for t in transactions %}
+                            {% if t.type == 'Expense' %}{% with expense_total=expense_total|add:t.amount %}{% endwith %}{% endif %}
+                        {% endfor %}
+                        TSH {{ expense_total|floatformat:0 }}
+                    {% endwith %}
+                </div>
+                <div class="stat-label">Total Expenses</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <div class="stat-value">
+                    {% with completed_count=0 %}
+                        {% for t in transactions %}
+                            {% if t.status == 'COMPLETED' %}{% with completed_count=completed_count|add:1 %}{% endwith %}{% endif %}
+                        {% endfor %}
+                        {{ completed_count }}
+                    {% endwith %}
+                </div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <div class="card-body">
+            <form method="get" class="filter-row">
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i> Type</label>
+                    <select name="type" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Types</option>
+                        <option value="Income" {% if request.GET.type == 'Income' %}selected{% endif %}>Income</option>
+                        <option value="Expense" {% if request.GET.type == 'Expense' %}selected{% endif %}>Expense</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-folder"></i> Category</label>
+                    <select name="category" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-check-circle"></i> Status</label>
+                    <select name="status" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                        <option value="PENDING" {% if request.GET.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo"></i> Reset Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="transactions-table" id="transactionsTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -48,45 +410,97 @@
                         {% for transaction in transactions %}
                         <tr>
                             <td>{{ transaction.date|date:"M d, Y" }}</td>
-                            <td>{{ transaction.category.name }}</td>
-                            <td>{{ transaction.description|truncatechars:50 }}</td>
                             <td>
-                                {% if transaction.type == 'Income' %}<span class="finance-badge finance-badge-success">Income</span>
-                                {% else %}<span class="finance-badge finance-badge-danger">Expense</span>{% endif %}
+                                <span class="badge" style="background: var(--bg-secondary); color: var(--text-primary);">
+                                    {{ transaction.category.name }}
+                                </span>
                             </td>
-                            <td style="font-weight: 600;">${{ transaction.amount|floatformat:2 }}</td>
+                            <td>{{ transaction.description|truncatechars:50|default:"-" }}</td>
                             <td>
-                                {% if transaction.status == 'COMPLETED' %}<span class="finance-badge finance-badge-success">Completed</span>
-                                {% elif transaction.status == 'PENDING' %}<span class="finance-badge finance-badge-warning">Pending</span>
-                                {% else %}<span class="finance-badge finance-badge-danger">Cancelled</span>{% endif %}
+                                {% if transaction.type == 'Income' %}
+                                    <span class="badge badge-income"><i class="fas fa-arrow-up"></i> Income</span>
+                                {% else %}
+                                    <span class="badge badge-expense"><i class="fas fa-arrow-down"></i> Expense</span>
+                                {% endif %}
+                            </td>
+                            <td class="{% if transaction.type == 'Income' %}text-success{% else %}text-danger{% endif %}" style="font-weight: 700;">
+                                {% if transaction.type == 'Income' %}+{% else %}-{% endif %}TSH {{ transaction.amount|floatformat:2 }}
                             </td>
                             <td>
-                                <div class="finance-btn-group">
-                                    <a href="{% url 'edit_transaction' transaction.pk %}" class="finance-btn finance-btn-sm finance-btn-outline"><i class="fas fa-edit"></i></a>
-                                    <a href="{% url 'delete_transaction' transaction.pk %}" class="finance-btn finance-btn-sm finance-btn-outline" style="border-color: #dc3545; color: #dc3545;" onclick="return confirm('Delete this transaction?')"><i class="fas fa-trash"></i></a>
+                                {% if transaction.status == 'COMPLETED' %}
+                                    <span class="badge badge-completed"><i class="fas fa-check"></i> Completed</span>
+                                {% elif transaction.status == 'PENDING' %}
+                                    <span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                                {% else %}
+                                    <span class="badge badge-cancelled"><i class="fas fa-times"></i> Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'edit_transaction' transaction.pk %}" class="btn-action" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'delete_transaction' transaction.pk %}" class="btn-action delete" title="Delete" onclick="return confirm('Delete this transaction?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <h3>No Transactions Found</h3>
+                                    <p>Add your first transaction to start tracking income and expenses.</p>
+                                    <a href="{% url 'add_transaction' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Add First Transaction
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            {% else %}
-                <div class="finance-empty-state">
-                    <i class="fas fa-exchange-alt"></i>
-                    <h5>No transactions found</h5>
-                    <p>Add your first transaction to start tracking.</p>
-                    <a href="{% url 'add_transaction' %}" class="finance-btn finance-btn-primary">
-                        <i class="fas fa-plus"></i> Add Transaction
-                    </a>
-                </div>
-            {% endif %}
+            </div>
         </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function exportTransactions() { alert('Export functionality would be implemented here'); }
-</script>
 {% endblock %}

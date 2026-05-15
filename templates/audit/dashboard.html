@@ -1,184 +1,289 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Audit & Security Dashboard{% endblock %}
+
+{% block internal_style %}
+<style>
+  .audit-container { padding: 20px; }
+  .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .audit-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+  .audit-header h1 i { color: var(--primary); }
+  .audit-header p { color: var(--text-muted); margin: 4px 0 0 0; }
+  .audit-btn { background: var(--gradient-primary); color: white; padding: 10px 20px; border-radius: var(--border-radius-sm); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .audit-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); color: white; }
+  
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); padding: 20px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 16px; }
+  .stat-card.admin { border-left: 4px solid var(--danger); }
+  .stat-card.member { border-left: 4px solid var(--info); }
+  .stat-card.system { border-left: 4px solid var(--text-muted); }
+  .stat-card.warning { border-left: 4px solid var(--warning); }
+  .stat-icon { width: 48px; height: 48px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+  .stat-card.admin .stat-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .stat-card.member .stat-icon { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .stat-card.system .stat-icon { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  .stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .stat-content h6 { font-size: 0.8rem; color: var(--text-muted); margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-content h3 { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+  .stat-content h3.warning { color: var(--warning); }
+  
+  .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media (max-width: 1200px) { .content-grid { grid-template-columns: 1fr; } }
+  
+  .content-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); overflow: hidden; }
+  .card-header { background: var(--bg-secondary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+  .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-header h5 i { color: var(--primary); }
+  .card-body { padding: 0; }
+  
+  .tabs { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); }
+  .tab-btn { padding: 12px 20px; background: transparent; border: none; cursor: pointer; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; transition: all var(--transition-fast); position: relative; }
+  .tab-btn:hover { color: var(--primary); background: var(--bg-tertiary); }
+  .tab-btn.active { color: var(--primary); }
+  .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gradient-primary); }
+  .tab-badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+  .tab-badge.danger { background: var(--danger); }
+  .tab-badge.info { background: var(--info); }
+  .tab-badge.secondary { background: var(--text-muted); }
+  
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  
+  .audit-table { width: 100%; border-collapse: collapse; }
+  .audit-table th { background: var(--bg-secondary); padding: 12px 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid var(--border-color); }
+  .audit-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.9rem; }
+  .audit-table tr:hover td { background: var(--bg-secondary); }
+  .audit-table .empty-cell { text-align: center; padding: 40px; color: var(--text-muted); }
+  .audit-table .empty-cell i { font-size: 2rem; opacity: 0.5; margin-bottom: 12px; display: block; }
+  
+  .user-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; }
+  .user-badge.admin { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .user-badge.member { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .user-badge.system { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+  .action-badge { background: var(--bg-tertiary); color: var(--text-secondary); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .status-icon { font-size: 1.1rem; }
+  .status-icon.success { color: var(--success); }
+  .status-icon.error { color: var(--danger); }
+  
+  .alert-list { max-height: 300px; overflow-y: auto; }
+  .alert-item { padding: 16px; border-bottom: 1px solid var(--border-color); }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-item.empty { text-align: center; color: var(--text-muted); }
+  .alert-item.empty i { font-size: 2rem; color: var(--success); margin-bottom: 8px; }
+  .alert-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+  .alert-header h6 { margin: 0; font-size: 0.9rem; color: var(--text-primary); }
+  .alert-header small { color: var(--text-muted); font-size: 0.75rem; }
+  .alert-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .severity-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+  .severity-tag.critical { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .severity-tag.high { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .severity-tag.medium { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .severity-tag.low { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
+  
+  .quick-actions { display: flex; flex-direction: column; gap: 10px; padding: 20px; }
+  .quick-action-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--border-radius-sm); text-decoration: none; font-weight: 500; transition: all var(--transition-fast); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); }
+  .quick-action-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .quick-action-btn.primary { border-color: var(--primary); color: var(--primary); }
+  .quick-action-btn.primary:hover { background: var(--primary); color: white; }
+  .quick-action-btn.info { border-color: var(--info); color: var(--info); }
+  .quick-action-btn.info:hover { background: var(--info); color: white; }
+  .quick-action-btn.warning { border-color: var(--warning); color: var(--warning); }
+  .quick-action-btn.warning:hover { background: var(--warning); color: white; }
+  .quick-action-btn.success { border-color: var(--success); color: var(--success); }
+  .quick-action-btn.success:hover { background: var(--success); color: white; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-shield-alt"></i> Audit & Security Dashboard
-        </h1>
+<div class="audit-container">
+  <!-- Header -->
+  <div class="audit-header">
+    <div>
+      <h1><i class="fas fa-shield-alt"></i>Audit & Security Dashboard</h1>
+      <p>Monitor system activity and security across all user types</p>
+    </div>
+    <a href="{% url 'audits:audit_log_list' %}" class="audit-btn">
+      <i class="fas fa-list"></i>View All Logs
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card admin">
+      <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+      <div class="stat-content">
+        <h6>Admin Actions Today</h6>
+        <h3>{{ stats.admin_logs_today|default:"0" }}</h3>
+      </div>
+    </div>
+    <div class="stat-card member">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div class="stat-content">
+        <h6>Member Actions Today</h6>
+        <h3>{{ stats.member_logs_today|default:"0" }}</h3>
+      </div>
+    </div>
+    <div class="stat-card system">
+      <div class="stat-icon"><i class="fas fa-robot"></i></div>
+      <div class="stat-content">
+        <h6>System Actions Today</h6>
+        <h3>{{ stats.unknown_logs_today|default:"0" }}</h3>
+      </div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="stat-content">
+        <h6>Failed Logins Today</h6>
+        <h3 class="warning">{{ stats.failed_logins_today|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Activity Tabs -->
+    <div class="content-card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('admin')" data-tab="admin">
+          <i class="fas fa-user-shield"></i> Administrators
+          <span class="tab-badge danger">{{ grouped_logs.administrator|length }}</span>
+        </button>
+        <button class="tab-btn" onclick="showTab('member')" data-tab="member">
+          <i class="fas fa-users"></i> Members
+          <span class="tab-badge info">{{ grouped_logs.church_member|length }}</span>
+        </button>
+        <button class="tab-btn" onclick="showTab('system')" data-tab="system">
+          <i class="fas fa-robot"></i> System
+          <span class="tab-badge secondary">{{ grouped_logs.unknown|length }}</span>
+        </button>
+      </div>
+      
+      <div class="card-body">
+        <!-- Admin Tab -->
+        <div id="tab-admin" class="tab-panel active">
+          <table class="audit-table">
+            <thead>
+              <tr><th>User</th><th>Action</th><th>Model</th><th>Time</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for log in grouped_logs.administrator %}
+              <tr>
+                <td><span class="user-badge admin"><i class="fas fa-user-shield"></i>{{ log.user.username }}</span></td>
+                <td><span class="action-badge">{{ log.action }}</span></td>
+                <td>{{ log.model_name|default:"-" }}</td>
+                <td style="color: var(--text-muted); font-size: 0.8rem;">{{ log.timestamp|timesince }} ago</td>
+                <td>
+                  {% if log.status == 'SUCCESS' %}<i class="fas fa-check-circle status-icon success"></i>
+                  {% else %}<i class="fas fa-times-circle status-icon error"></i>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="empty-cell"><i class="fas fa-inbox"></i>No administrator activity recorded</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Member Tab -->
+        <div id="tab-member" class="tab-panel">
+          <table class="audit-table">
+            <thead>
+              <tr><th>User</th><th>Action</th><th>Model</th><th>Time</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for log in grouped_logs.church_member %}
+              <tr>
+                <td><span class="user-badge member"><i class="fas fa-user"></i>{{ log.user.username }}</span></td>
+                <td><span class="action-badge">{{ log.action }}</span></td>
+                <td>{{ log.model_name|default:"-" }}</td>
+                <td style="color: var(--text-muted); font-size: 0.8rem;">{{ log.timestamp|timesince }} ago</td>
+                <td>
+                  {% if log.status == 'SUCCESS' %}<i class="fas fa-check-circle status-icon success"></i>
+                  {% else %}<i class="fas fa-times-circle status-icon error"></i>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="empty-cell"><i class="fas fa-inbox"></i>No member activity recorded</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- System Tab -->
+        <div id="tab-system" class="tab-panel">
+          <table class="audit-table">
+            <thead>
+              <tr><th>Source</th><th>Action</th><th>Model</th><th>Time</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for log in grouped_logs.unknown %}
+              <tr>
+                <td><span class="user-badge system"><i class="fas fa-robot"></i>System</span></td>
+                <td><span class="action-badge">{{ log.action }}</span></td>
+                <td>{{ log.model_name|default:"-" }}</td>
+                <td style="color: var(--text-muted); font-size: 0.8rem;">{{ log.timestamp|timesince }} ago</td>
+                <td>
+                  {% if log.status == 'SUCCESS' %}<i class="fas fa-check-circle status-icon success"></i>
+                  {% else %}<i class="fas fa-times-circle status-icon error"></i>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="empty-cell"><i class="fas fa-inbox"></i>No system activity recorded</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon bg-primary">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>{{ stats.total_logs_today }}</h3>
-                    <p>Actions Today</p>
-                </div>
-            </div>
+    <!-- Sidebar -->
+    <div>
+      <!-- Security Alerts -->
+      <div class="content-card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h5><i class="fas fa-bell" style="color: var(--warning);"></i>Security Alerts</h5>
+          <a href="{% url 'audits:security_alerts' %}" class="btn-outline" style="padding: 6px 12px; border-radius: var(--border-radius-sm); text-decoration: none; font-size: 0.8rem;">View All</a>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon bg-info">
-                    <i class="fas fa-history"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>{{ stats.total_logs_month }}</h3>
-                    <p>Actions This Month</p>
-                </div>
+        <div class="alert-list">
+          {% for alert in recent_alerts %}
+          <div class="alert-item">
+            <div class="alert-header">
+              <h6>{{ alert.title }}</h6>
+              <small>{{ alert.created_at|timesince }} ago</small>
             </div>
+            <div class="alert-desc">{{ alert.description|truncatechars:60 }}</div>
+            <span class="severity-tag {% if alert.severity == 'CRITICAL' %}critical{% elif alert.severity == 'HIGH' %}high{% elif alert.severity == 'MEDIUM' %}medium{% else %}low{% endif %}">{{ alert.severity }}</span>
+          </div>
+          {% empty %}
+          <div class="alert-item empty">
+            <i class="fas fa-check-circle"></i><br>No security alerts
+          </div>
+          {% endfor %}
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon bg-warning">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>{{ stats.failed_logins_today }}</h3>
-                    <p>Failed Logins Today</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon bg-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>{{ stats.alerts_count }}</h3>
-                    <p>Active Alerts</p>
-                </div>
-            </div>
-        </div>
-    </div>
+      </div>
 
-    <div class="row">
-        <!-- Recent Activity -->
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-list-alt"></i> Recent Activity</h5>
-                    <a href="{% url 'audit_log_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Model</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for log in recent_logs %}
-                                <tr>
-                                    <td>
-                                        {% if log.user %}
-                                            {{ log.user.username }}
-                                        {% else %}
-                                            <span class="text-muted">System</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-{% if log.action == 'CREATE' %}success{% elif log.action == 'UPDATE' %}info{% elif log.action == 'DELETE' %}danger{% else %}secondary{% endif %}">
-                                            {{ log.action }}
-                                        </span>
-                                    </td>
-                                    <td>{{ log.model_name|default:"-" }}</td>
-                                    <td>{{ log.timestamp|timesince }} ago</td>
-                                    <td>
-                                        {% if log.status == 'SUCCESS' %}
-                                            <span class="text-success"><i class="fas fa-check-circle"></i></span>
-                                        {% else %}
-                                            <span class="text-danger"><i class="fas fa-times-circle"></i></span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">No recent activity</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+      <!-- Quick Actions -->
+      <div class="content-card">
+        <div class="card-header">
+          <h5><i class="fas fa-bolt" style="color: var(--primary);"></i>Quick Actions</h5>
         </div>
-
-        <!-- Security Alerts -->
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-bell"></i> Security Alerts</h5>
-                    <a href="{% url 'security_alerts' %}" class="btn btn-sm btn-outline-danger">View All</a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for alert in recent_alerts %}
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ alert.title }}</h6>
-                                <small class="text-muted">{{ alert.created_at|timesince }} ago</small>
-                            </div>
-                            <p class="mb-1 text-muted small">{{ alert.description|truncatechars:60 }}</p>
-                            <span class="badge badge-{% if alert.severity == 'CRITICAL' %}danger{% elif alert.severity == 'HIGH' %}warning{% elif alert.severity == 'MEDIUM' %}info{% else %}secondary{% endif %}">
-                                {{ alert.severity }}
-                            </span>
-                            <span class="badge badge-light">{{ alert.alert_type }}</span>
-                        </div>
-                        {% empty %}
-                        <div class="list-group-item text-center py-4 text-muted">
-                            No security alerts
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+        <div class="quick-actions">
+          <a href="{% url 'audits:audit_log_list' %}" class="quick-action-btn primary"><i class="fas fa-search"></i>Search All Logs</a>
+          <a href="{% url 'audits:login_history_list' %}" class="quick-action-btn info"><i class="fas fa-user-clock"></i>Login History</a>
+          <a href="{% url 'audits:security_alerts' %}" class="quick-action-btn warning"><i class="fas fa-exclamation-triangle"></i>Manage Alerts</a>
+          <a href="{% url 'audits:backup_list' %}" class="quick-action-btn success"><i class="fas fa-database"></i>Data Backups</a>
         </div>
+      </div>
     </div>
-
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <a href="{% url 'audit_log_list' %}" class="btn btn-outline-primary btn-block">
-                                <i class="fas fa-search"></i> Search Logs
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'login_history_list' %}" class="btn btn-outline-info btn-block">
-                                <i class="fas fa-user-clock"></i> Login History
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'security_alerts' %}" class="btn btn-outline-warning btn-block">
-                                <i class="fas fa-exclamation-triangle"></i> Manage Alerts
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'backup_list' %}" class="btn btn-outline-success btn-block">
-                                <i class="fas fa-database"></i> Backups
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
+
+<script>
+function showTab(tabName) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  document.querySelector('.tab-btn[data-tab="' + tabName + '"]').classList.add('active');
+}
+</script>
 {% endblock %}

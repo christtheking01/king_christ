@@ -1,53 +1,69 @@
-
 from django.conf import settings
 import africastalking
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Initialize Africa's Talking SDK
-# Ensure these are in your settings.py (Username should be 'sandbox' for testing)
-africastalking.initialize(
-    getattr(settings, 'AFRICASTALKING_USERNAME', 'sandbox'),
-    getattr(settings, 'AFRICASTALKING_API_KEY', '')
-)
-at_sms = africastalking.SMS
+_at_sms = None
+
+def _get_sms_client():
+    """Lazy initialization of Africa's Talking SMS client"""
+    global _at_sms
+    if _at_sms is None:
+        if not getattr(settings, 'SEND_SMS_ENABLED', False):
+            logger.warning("SMS sending is disabled. Set SEND_SMS_ENABLED=True to enable.")
+            return None
+        
+        username = getattr(settings, 'AFRICASTALKING_USERNAME', '')
+        api_key = getattr(settings, 'AFRICASTALKING_API_KEY', '')
+        
+        if not username or not api_key:
+            logger.error("Africa's Talking credentials not configured. Set AFRICASTALKING_USERNAME and AFRICASTALKING_API_KEY.")
+            return None
+        
+        try:
+            africastalking.initialize(username, api_key)
+            _at_sms = africastalking.SMS
+            logger.info("Africa's Talking SMS client initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Africa's Talking: {e}")
+            return None
+    
+    return _at_sms
 
 class SMSService:
     def send_sms(self, phone_number, message):
-        """
-        Sends SMS via Africa's Talking. 
-        Uses Sandbox if username is set to 'sandbox'.
-        """
-        # 1. Validation for International Format (Required by AT)
+        if not getattr(settings, 'SEND_SMS_ENABLED', False):
+            logger.warning("SMS sending is disabled. Set SEND_SMS_ENABLED=True to enable.")
+            return {'success': False, 'error': 'SMS sending is disabled', 'provider': 'africastalking'}
+        
         if not phone_number.startswith('+'):
             logger.error(f"Invalid phone format: {phone_number}. Must start with +")
             return {'success': False, 'error': 'Phone number must be in international format (e.g., +255...)'}
 
-        # 2. Get Sender ID (Use None or a Sandbox Shortcode like '12345' for testing)
+        at_sms = _get_sms_client()
+        if at_sms is None:
+            return {'success': False, 'error': 'SMS client not initialized. Check credentials and SEND_SMS_ENABLED setting.', 'provider': 'africastalking'}
+
         sender_id = getattr(settings, 'AFRICASTALKING_SENDER_ID', None)
 
         try:
-            # Prepare parameters
-            # AT Python SDK uses 'recipients' (list) and 'message' (string)
+            # Add prefix to message
+            prefixed_message = f"Parokia ya Kristo Mfalme:\n{message}"
+            
             params = {
-                'message': message,
+                'message': prefixed_message,
                 'recipients': [phone_number]
             }
             if sender_id:
                 params['sender_id'] = sender_id
 
-            # 3. Send via SDK
             response = at_sms.send(**params)
-            
-            # 4. Parse Africa's Talking Response
-            # Response structure: {'SMSMessageData': {'Message': '...', 'Recipients': [{...}]}}
             recipients = response['SMSMessageData']['Recipients']
             
             if recipients:
                 status = recipients[0]['status']
                 msg_id = recipients[0].get('messageId', 'no_id')
-                
                 is_success = status.lower() in ['success', 'sent']
 
                 logger.info(
@@ -72,5 +88,4 @@ class SMSService:
                 'provider': 'africastalking'
             }
 
-# Instantiate for use across the project
 sms_service = SMSService()

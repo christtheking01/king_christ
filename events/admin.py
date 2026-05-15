@@ -66,6 +66,11 @@ class EventAdmin(admin.ModelAdmin):
         }),
     )
 
+    def save_model(self, request, obj, form, change):
+        if not change:  # New object being created
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
 
 @admin.register(EventRegistration)
 class EventRegistrationAdmin(admin.ModelAdmin):

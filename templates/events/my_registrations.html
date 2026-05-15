@@ -1,93 +1,340 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Registrations - Christ King Church{% endblock %}
+{% block title %}My Event Registrations - Christ King Church{% endblock %}
+
+{% block internal_style %}
+<style>
+    .registrations-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .registrations-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .registrations-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .registrations-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .stat-item strong {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+    }
+
+    .registration-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .registration-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        display: flex;
+        gap: 1.25rem;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+    .registration-card:hover {
+        transform: translateX(4px);
+        box-shadow: var(--glass-shadow);
+    }
+
+    .event-date-badge {
+        width: 70px;
+        height: 70px;
+        background: var(--gradient-primary);
+        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .event-date-badge.upcoming { background: var(--gradient-primary); }
+    .event-date-badge.past { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+
+    .event-date-badge .month {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .event-date-badge .day {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .registration-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .registration-details h3 {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .registration-details p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .registration-status {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-confirmed {
+        background: var(--success);
+        color: white;
+    }
+
+    .status-pending {
+        background: var(--warning);
+        color: white;
+    }
+
+    .status-cancelled {
+        background: var(--danger);
+        color: white;
+    }
+
+    .status-attended {
+        background: var(--info);
+        color: white;
+    }
+
+    .registration-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon-action {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-icon-action:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .btn-icon-action.danger:hover {
+        background: var(--danger);
+        border-color: var(--danger);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 2px dashed var(--border-color);
+        border-radius: var(--border-radius-lg);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .registration-card {
+            flex-wrap: wrap;
+        }
+
+        .registration-actions {
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .registration-card {
+        animation: fadeInUp 0.4s ease forwards;
+    }
+
+    .registration-card:nth-child(1) { animation-delay: 0.05s; }
+    .registration-card:nth-child(2) { animation-delay: 0.1s; }
+    .registration-card:nth-child(3) { animation-delay: 0.15s; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1"><i class="fas fa-ticket-alt text-primary me-2"></i>My Event Registrations</h1>
-            <p class="text-muted mb-0">View and manage your event registrations</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'event_list' %}" class="btn btn-outline-primary">
-                <i class="fas fa-calendar me-1"></i>Browse Events
-            </a>
-            <a href="{% url 'calendar' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-calendar-alt me-1"></i>Calendar
-            </a>
+<div class="registrations-wrapper">
+    <div class="registrations-header">
+        <h1><i class="fas fa-ticket-alt"></i> My Event Registrations</h1>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <strong>{{ registrations|length }}</strong>
+                <span>Total Registrations</span>
+            </div>
+            <div class="stat-item">
+                <strong>{{ upcoming_count|default:0 }}</strong>
+                <span>Upcoming Events</span>
+            </div>
+            <div class="stat-item">
+                <strong>{{ past_count|default:0 }}</strong>
+                <span>Past Events</span>
+            </div>
         </div>
     </div>
 
-    <!-- Registrations -->
-    <div class="row">
-        {% for reg in registrations %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100 {% if reg.event.is_past %}border-secondary{% endif %}">
-                {% if reg.event.banner_image %}
-                <img src="{{ reg.event.banner_image.url }}" class="card-img-top" alt="{{ reg.event.title }}" style="height: 150px; object-fit: cover;">
-                {% else %}
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
-                    <i class="fas fa-calendar-day fa-3x text-muted"></i>
-                </div>
-                {% endif %}
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="badge bg-primary">{{ reg.get_status_display }}</span>
-                        {% if reg.event.is_past %}
-                        <span class="badge bg-secondary">Completed</span>
-                        {% elif reg.event.is_ongoing %}
-                        <span class="badge bg-success">Today</span>
-                        {% endif %}
-                    </div>
-                    <h5 class="card-title">{{ reg.event.title }}</h5>
-                    <p class="card-text text-muted small">{{ reg.event.description|truncatewords:15 }}</p>
-                    
-                    <ul class="list-unstyled small mb-3">
-                        <li><i class="fas fa-calendar text-primary me-2"></i>{{ reg.event.start_date|date:"F j, Y" }}</li>
-                        {% if reg.event.start_time %}
-                        <li><i class="fas fa-clock text-primary me-2"></i>{{ reg.event.start_time|time:"g:i A" }}</li>
-                        {% endif %}
-                        {% if reg.event.location %}
-                        <li><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ reg.event.location.name }}</li>
-                        {% endif %}
-                    </ul>
-
-                    <div class="alert alert-light border mb-0">
-                        <small class="text-muted">
-                            <strong>Registered:</strong> {{ reg.registered_at|date:"M j, Y" }}<br>
-                            <strong>Confirmation #:</strong> {{ reg.id }}
-                        </small>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'event_detail' reg.event.id %}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-eye me-1"></i>View Event
-                        </a>
-                        {% if not reg.event.is_past and reg.status != 'CANCELLED' %}
-                        <a href="{% url 'registration_cancel' reg.id %}" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-times me-1"></i>Cancel Registration
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
+    {% if registrations %}
+    <div class="registration-list">
+        {% for registration in registrations %}
+        <div class="registration-card">
+            <div class="event-date-badge {% if registration.event.is_past %}past{% else %}upcoming{% endif %}">
+                <span class="month">{{ registration.event.start_date|date:"M" }}</span>
+                <span class="day">{{ registration.event.start_date|date:"j" }}</span>
             </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="text-center py-5">
-                <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
-                <h4>No Registrations Yet</h4>
-                <p class="text-muted">You haven't registered for any events. Browse upcoming events to register!</p>
-                <a href="{% url 'event_list' %}" class="btn btn-primary">
-                    <i class="fas fa-calendar me-2"></i>Browse Events
+            <div class="registration-details">
+                <h3>{{ registration.event.title }}</h3>
+                <p>
+                    <i class="fas fa-calendar"></i>
+                    {{ registration.event.start_date|date:"F j, Y" }}
+                    {% if registration.event.start_time %}
+                    <i class="fas fa-clock ms-2"></i>
+                    {{ registration.event.start_time|time:"g:i A" }}
+                    {% endif %}
+                </p>
+            </div>
+            <span class="registration-status status-{{ registration.status|lower }}">
+                {{ registration.get_status_display }}
+            </span>
+            <div class="registration-actions">
+                <a href="{% url 'event_detail' registration.event.id %}" class="btn-icon-action" title="View Event">
+                    <i class="fas fa-eye"></i>
                 </a>
+                {% if not registration.event.is_past and registration.status != 'CANCELLED' %}
+                <a href="{% url 'registration_cancel' registration.id %}" class="btn-icon-action danger" title="Cancel Registration">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-ticket-alt"></i>
+        <h3>No Registrations Yet</h3>
+        <p>You haven't registered for any events. Browse upcoming events and join us!</p>
+        <a href="{% url 'event_list' %}" class="btn-primary-modern">
+            <i class="fas fa-calendar-day"></i> Browse Events
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

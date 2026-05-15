@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block internal_style %}
 
 <style>
     :root {
@@ -10,35 +10,149 @@
         --text: #1e293b;
     }
 
-    .edit-wrapper { padding: 2rem 1.5rem; font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; }
-    .edit-card { background: var(--card); max-width: 950px; margin: 0 auto; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .edit-wrapper { 
+        padding: 1rem; 
+        font-family: 'Inter', sans-serif; 
+        background: var(--bg); 
+        min-height: 100vh; 
+    }
     
-    .header { border-bottom: 2px solid var(--border); margin-bottom: 2rem; padding-bottom: 1rem; }
+    @media (min-width: 768px) {
+        .edit-wrapper {
+            padding: 2rem 1.5rem;
+        }
+    }
     
-    .main-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .edit-card { 
+        background: var(--card); 
+        max-width: 1000px; 
+        margin: 0 auto; 
+        padding: 1.5rem; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+    }
+
+    @media (min-width: 768px) {
+        .edit-card {
+            padding: 2.5rem;
+        }
+    }
+    
+    .header { 
+        border-bottom: 2px solid var(--border); 
+        margin-bottom: 1.5rem; 
+        padding-bottom: 1rem; 
+    }
+    
+    .main-fields { 
+        display: grid; 
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+        margin-bottom: 1.5rem; 
+    }
+
+    @media (min-width: 768px) {
+        .main-fields {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+    }
     
     .member-row {
         display: grid;
-        grid-template-columns: 2fr 1.5fr 1.5fr;
-        gap: 1rem;
-        background: #f1f5f9;
-        padding: 1.25rem;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        background: #f8fafc;
+        padding: 1rem;
         border-radius: 10px;
         margin-bottom: 1rem;
         border: 1px solid var(--border);
         position: relative;
+        animation: fadeIn 0.3s ease;
     }
 
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    label { font-size: 0.8rem; font-weight: 700; color: var(--text); text-transform: uppercase; }
+    @media (min-width: 768px) {
+        .member-row {
+            grid-template-columns: 2fr 1.5fr 1.5fr auto;
+            gap: 1rem;
+            padding: 1.25rem;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.35rem; 
+    }
+    
+    label { 
+        font-size: 0.8rem; 
+        font-weight: 600; 
+        color: var(--text); 
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
     
     .input-field {
-        padding: 0.8rem;
-        border: 1px solid var(--border);
+        padding: 0.75rem;
+        border: 1.5px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
         width: 100%;
         background: white;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .input-field:read-only {
+        background-color: #f1f5f9;
+        color: var(--text-muted);
+    }
+
+    /* Remove button */
+    .btn-remove {
+        background: transparent;
+        color: #ef4444;
+        border: 1.5px solid #ef4444;
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        height: fit-content;
+        align-self: flex-end;
+        margin-top: 1.4rem;
+    }
+
+    @media (max-width: 767px) {
+        .btn-remove {
+            margin-top: 0;
+            width: 100%;
+        }
+    }
+
+    .btn-remove:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-remove:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .btn-add {
@@ -51,6 +165,20 @@
         cursor: pointer;
         font-weight: 600;
         margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add:hover:not(:disabled) {
+        background: #e0e7ff;
+    }
+
+    .btn-add:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .btn-update {
@@ -58,12 +186,342 @@
         color: white;
         border: none;
         width: 100%;
-        padding: 1.25rem;
+        padding: 1rem;
         border-radius: 8px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-update:hover:not(:disabled) {
+        background: #4338ca;
+        transform: translateY(-1px);
+    }
+
+    .btn-update:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Validation styles */
+    .input-field.error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Loading spinner */
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Section label */
+    .section-label {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Row counter */
+    .row-counter {
+        background: var(--primary);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+
+    .hint-text {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .main-fields, .member-row { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+
+<style>
+    :root {
+        --primary: #4f46e5;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #e2e8f0;
+        --text: #1e293b;
+    }
+
+    .edit-wrapper { 
+        padding: 1rem; 
+        font-family: 'Inter', sans-serif; 
+        background: var(--bg); 
+        min-height: 100vh; 
+    }
+    
+    @media (min-width: 768px) {
+        .edit-wrapper {
+            padding: 2rem 1.5rem;
+        }
+    }
+    
+    .edit-card { 
+        background: var(--card); 
+        max-width: 1000px; 
+        margin: 0 auto; 
+        padding: 1.5rem; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+    }
+
+    @media (min-width: 768px) {
+        .edit-card {
+            padding: 2.5rem;
+        }
+    }
+    
+    .header { 
+        border-bottom: 2px solid var(--border); 
+        margin-bottom: 1.5rem; 
+        padding-bottom: 1rem; 
+    }
+    
+    .main-fields { 
+        display: grid; 
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+        margin-bottom: 1.5rem; 
+    }
+
+    @media (min-width: 768px) {
+        .main-fields {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+    }
+    
+    .member-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        position: relative;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @media (min-width: 768px) {
+        .member-row {
+            grid-template-columns: 2fr 1.5fr 1.5fr auto;
+            gap: 1rem;
+            padding: 1.25rem;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.35rem; 
+    }
+    
+    label { 
+        font-size: 0.8rem; 
+        font-weight: 600; 
+        color: var(--text); 
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .input-field {
+        padding: 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        background: white;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .input-field:read-only {
+        background-color: #f1f5f9;
+        color: var(--text-muted);
+    }
+
+    /* Remove button */
+    .btn-remove {
+        background: transparent;
+        color: #ef4444;
+        border: 1.5px solid #ef4444;
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        height: fit-content;
+        align-self: flex-end;
+        margin-top: 1.4rem;
+    }
+
+    @media (max-width: 767px) {
+        .btn-remove {
+            margin-top: 0;
+            width: 100%;
+        }
+    }
+
+    .btn-remove:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-remove:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-add {
+        background: #f0f4ff;
+        color: var(--primary);
+        border: 2px dashed var(--primary);
+        width: 100%;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add:hover:not(:disabled) {
+        background: #e0e7ff;
+    }
+
+    .btn-add:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-update {
+        background: var(--primary);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-update:hover:not(:disabled) {
+        background: #4338ca;
+        transform: translateY(-1px);
+    }
+
+    .btn-update:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Validation styles */
+    .input-field.error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Loading spinner */
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Section label */
+    .section-label {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Row counter */
+    .row-counter {
+        background: var(--primary);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+
+    .hint-text {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .main-fields, .member-row { grid-template-columns: 1fr; }
     }
 </style>
 
@@ -74,13 +532,13 @@
             <p>Modify members or add new positions to this group.</p>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="edit-committee-form">
             {% csrf_token %}
 
             <!-- Committee Global Details -->
             <div class="main-fields">
                 <div class="form-group">
-                    <label>Committee Name</label>
+                    <label>Committee Name *</label>
                     <input type="text" name="commitee_name" value="{{ name }}" class="input-field" required>
                 </div>
                 <div class="form-group">
@@ -89,17 +547,23 @@
                 </div>
             </div>
 
-            <label style="margin-bottom: 1rem; display: block;">Members & Assignments</label>
+            <label class="section-label">
+                Members & Assignments
+                <span class="row-counter" id="member-count">{{ committee_members|length }}</span>
+            </label>
+            <p class="hint-text">Manage committee members and their positions.</p>
             
             <div id="row-container">
                 {% for entry in committee_members %}
-                <div class="member-row">
+                <div class="member-row" data-row="{{ forloop.counter }}">
                     <div class="form-group">
-                        <label>Member Name</label>
-                        <input type="text" name="members[]" list="member-list" value="{{ entry.member.name }}" class="input-field member-search" placeholder="Search Member..." required>
+                        <label>Member Name *</label>
+                        <input type="text" name="members[]" list="member-list" 
+                               value="{{ entry.member.name }}" class="input-field member-search" 
+                               placeholder="Search Member..." required>
                     </div>
                     <div class="form-group">
-                        <label>Position</label>
+                        <label>Position *</label>
                         <select name="positions[]" class="input-field" required>
                             {% for val, label in positions %}
                             <option value="{{ val }}" {% if entry.position == val %}selected{% endif %}>{{ label }}</option>
@@ -108,8 +572,13 @@
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" name="phones[]" value="{{ entry.phone|default:'' }}" class="input-field phone-display" readonly>
+                        <input type="text" name="phones[]" value="{{ entry.phone|default:'' }}" 
+                               class="input-field phone-display" readonly>
                     </div>
+                    <button type="button" class="btn-remove" onclick="removeRow(this)" 
+                            {% if committee_members|length == 1 %}disabled{% endif %}>
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </div>
                 {% endfor %}
             </div>
@@ -117,12 +586,16 @@
             <!-- Global Datalist Source -->
             <datalist id="member-list">
                 {% for m in members %}
-                <option value="{{ m.name }}" data-phone="{{ m.phone|default:'' }}">
+                <option value="{{ m.name }}" data-phone="{{ m.telephone|default:'' }}">
                 {% endfor %}
             </datalist>
 
-            <button type="button" class="btn-add" id="add-row-btn">+ Add Another Position to Committee</button>
-            <button type="submit" class="btn-update">UPDATE COMMITTEE RECORDS</button>
+            <button type="button" class="btn-add" id="add-row-btn">
+                <i class="fas fa-plus"></i> Add Another Position
+            </button>
+            <button type="submit" class="btn-update" id="submit-btn">
+                <span>Update Committee</span>
+            </button>
         </form>
     </div>
 </div>
@@ -142,7 +615,8 @@
 
             if (option) {
                 const phone = option.getAttribute('data-phone');
-                phoneField.value = phone ? phone : "---";
+                phoneField.value = phone || "---";
+                input.classList.remove('error');
             }
         }
     });
@@ -156,11 +630,122 @@
         const newRow = rows[0].cloneNode(true);
         
         // Reset values for new row
-        newRow.querySelectorAll('input').forEach(i => i.value = '');
+        newRow.querySelectorAll('input').forEach(i => {
+            i.value = '';
+            i.classList.remove('error');
+        });
         newRow.querySelector('select').selectedIndex = 0;
-
+        
+        // Enable remove button
+        const removeBtn = newRow.querySelector('.btn-remove');
+        removeBtn.disabled = false;
+        
+        // Update row counter
+        const rowCount = rows.length + 1;
+        newRow.setAttribute('data-row', rowCount);
+        
         container.appendChild(newRow);
+        updateMemberCount();
+        
+        // Focus first input
+        newRow.querySelector('.member-search').focus();
     });
+
+    // 3. REMOVE ROW LOGIC
+    function removeRow(btn) {
+        const row = btn.closest('.member-row');
+        const container = document.getElementById('row-container');
+        
+        // Animate removal
+        row.style.transition = 'all 0.3s ease';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            row.remove();
+            updateMemberCount();
+            
+            // If only one row left, disable its remove button
+            const remainingRows = container.querySelectorAll('.member-row');
+            if (remainingRows.length === 1) {
+                remainingRows[0].querySelector('.btn-remove').disabled = true;
+            }
+        }, 300);
+    }
+
+    // 4. UPDATE MEMBER COUNT
+    function updateMemberCount() {
+        const count = document.querySelectorAll('.member-row').length;
+        document.getElementById('member-count').textContent = count;
+    }
+
+    // 5. FORM VALIDATION
+    document.getElementById('edit-committee-form').addEventListener('submit', function(e) {
+        let isValid = true;
+        const rows = document.querySelectorAll('.member-row');
+        
+        rows.forEach(row => {
+            const memberInput = row.querySelector('.member-search');
+            const positionSelect = row.querySelector('select');
+            
+            if (!memberInput.value.trim()) {
+                memberInput.classList.add('error');
+                isValid = false;
+            } else {
+                memberInput.classList.remove('error');
+            }
+            
+            if (!positionSelect.value) {
+                positionSelect.classList.add('error');
+                isValid = false;
+            } else {
+                positionSelect.classList.remove('error');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Member Name and Position) for each row.');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Updating...';
+    });
+
+    // 6. CLEAR ERROR ON INPUT
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('input-field')) {
+            e.target.classList.remove('error');
+        }
+    });
+
+    // 7. CHECK FOR DUPLICATE POSITIONS
+    document.addEventListener('change', function(e) {
+        if (e.target.tagName === 'SELECT' && e.target.name === 'positions[]') {
+            checkDuplicatePositions();
+        }
+    });
+
+    function checkDuplicatePositions() {
+        const selects = document.querySelectorAll('select[name="positions[]"]');
+        const positions = {};
+        
+        selects.forEach(select => {
+            select.classList.remove('error');
+            const value = select.value;
+            if (value) {
+                if (positions[value]) {
+                    select.classList.add('error');
+                    positions[value].classList.add('error');
+                } else {
+                    positions[value] = select;
+                }
+            }
+        });
+    }
 </script>
 
 {% endblock %}

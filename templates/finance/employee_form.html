@@ -58,18 +58,11 @@
                     <div>
                         <h6 style="color: #666; margin-bottom: 16px;">Basic Information</h6>
                         
-                        {% if not employee %}
                         <div class="finance-form-group">
-                            <label for="member">Select Member *</label>
-                            <select name="member" id="member" required>
-                                <option value="">Choose a member...</option>
-                                {% for member in members %}
-                                    <option value="{{ member.id }}">{{ member.name }} - {{ member.location }}</option>
-                                {% endfor %}
-                            </select>
+                            <label for="name">Employee Name *</label>
+                            <input type="text" name="name" id="name" value="{% if employee %}{{ employee.name }}{% endif %}" required>
                         </div>
-                        {% endif %}
-                        
+
                         <div class="finance-form-group">
                             <label for="employee_id">Employee ID *</label>
                             <input type="text" name="employee_id" id="employee_id" value="{% if employee %}{{ employee.employee_id }}{% endif %}" required>
@@ -105,27 +98,12 @@
                     <!-- Salary Information -->
                     <div>
                         <h6 style="color: #666; margin-bottom: 16px;">Salary Information</h6>
-                        
+
                         <div class="finance-form-group">
-                            <label for="base_salary">Base Salary ($) *</label>
+                            <label for="base_salary">Salary (TSH) *</label>
                             <input type="number" name="base_salary" id="base_salary" value="{% if employee %}{{ employee.base_salary }}{% endif %}" step="0.01" min="0" required>
                         </div>
-                        
-                        <div class="finance-form-group">
-                            <label for="housing_allowance">Housing Allowance (Tsh)</label>
-                            <input type="number" name="housing_allowance" id="housing_allowance" value="{% if employee %}{{ employee.housing_allowance }}{% else %}0{% endif %}" step="0.01" min="0">
-                        </div>
-                        
-                        <div class="finance-form-group">
-                            <label for="transport_allowance">Transport Allowance (Tsh)</label>
-                            <input type="number" name="transport_allowance" id="transport_allowance" value="{% if employee %}{{ employee.transport_allowance }}{% else %}0{% endif %}" step="0.01" min="0">
-                        </div>
-                        
-                        <div class="finance-form-group">
-                            <label for="other_allowance">Other Allowances (Tsh)</label>
-                            <input type="number" name="other_allowances" id="other_allowance" value="{% if employee %}{{ employee.other_allowances }}{% else %}0{% endif %}" step="0.01" min="0">
-                        </div>
-                        
+
                         <div class="finance-form-group">
                             <label for="payment_type">Payment Type</label>
                             <select name="payment_type" id="payment_type">
@@ -133,10 +111,6 @@
                                 <option value="WEEKLY" {% if employee.payment_type == 'WEEKLY' %}selected{% endif %}>Weekly</option>
                                 <option value="BI_WEEKLY" {% if employee.payment_type == 'BI_WEEKLY' %}selected{% endif %}>Bi-Weekly</option>
                             </select>
-                        </div>
-                        
-                        <div class="finance-alert finance-alert-info">
-                            <strong>Total Monthly Salary: $<span id="total_salary">0.00</span></strong>
                         </div>
                     </div>
                 </div>
@@ -175,19 +149,9 @@
 
 {% block extra_js %}
 <script>
-function calculateTotalSalary() {
-    const baseSalary = parseFloat(document.getElementById('base_salary').value) || 0;
-    const housingAllowance = parseFloat(document.getElementById('housing_allowance').value) || 0;
-    const transportAllowance = parseFloat(document.getElementById('transport_allowance').value) || 0;
-    const otherAllowance = parseFloat(document.getElementById('other_allowance').value) || 0;
-    const total = baseSalary + housingAllowance + transportAllowance + otherAllowance;
-    document.getElementById('total_salary').textContent = total.toFixed(2);
-}
-
-document.getElementById('base_salary').addEventListener('input', calculateTotalSalary);
-document.getElementById('housing_allowance').addEventListener('input', calculateTotalSalary);
-document.getElementById('transport_allowance').addEventListener('input', calculateTotalSalary);
-document.getElementById('other_allowance').addEventListener('input', calculateTotalSalary);
-calculateTotalSalary();
+// Simple salary display - no calculations needed as there's only base salary
+document.getElementById('base_salary').addEventListener('input', function() {
+    // Just ensuring the field has a value
+});
 </script>
 {% endblock %}

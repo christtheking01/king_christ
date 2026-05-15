@@ -1,0 +1,453 @@
+{% extends "tithepayment/pos_base.html" %}
+{% load static %}
+
+{% block title %}POS - Offering{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        background: linear-gradient(145deg, #1e2a4a 0%, #16213e 100%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .form-container h2 {
+        margin: 0 0 20px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-container h2 i {
+        color: #4cc9f0;
+    }
+    
+    .anonymous-option {
+        background: rgba(76, 201, 240, 0.1);
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+    }
+    
+    .anonymous-option label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+    
+    .anonymous-option input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4cc9f0;
+    }
+    
+    .search-wrapper {
+        position: relative;
+    }
+    
+    .autocomplete-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #1e2a4a;
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        margin-top: 4px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .autocomplete-results.show {
+        display: block;
+    }
+    
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background 0.2s;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+        background: rgba(76, 201, 240, 0.1);
+    }
+    
+    .autocomplete-item-name {
+        font-weight: 500;
+        color: #e0e0e0;
+        margin-bottom: 2px;
+    }
+    
+    .autocomplete-item-code {
+        font-size: 0.8125rem;
+        color: #a0a0a0;
+    }
+    
+    .selected-member {
+        background: rgba(76, 201, 240, 0.1);
+        border: 2px solid rgba(76, 201, 240, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .selected-member-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    
+    .selected-member-info {
+        flex: 1;
+    }
+    
+    .selected-member-name {
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 4px;
+    }
+    
+    .selected-member-remove {
+        background: none;
+        border: none;
+        color: #e94560;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        border-radius: 8px;
+    }
+    
+    .selected-member-remove:hover {
+        background: rgba(233, 69, 96, 0.1);
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 12px;
+        background: rgba(76, 201, 240, 0.05);
+        border-radius: 12px;
+        border: 2px solid rgba(76, 201, 240, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: rgba(76, 201, 240, 0.1);
+        border-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4cc9f0;
+    }
+    
+    .checkbox-wrapper span {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+</style>
+
+<div class="form-container">
+    <h2><i class="fas fa-gift"></i> Offering Payment</h2>
+    
+    <form id="offeringForm" method="post" action="{% url 'tithepayment:pos_offering' %}">
+        {% csrf_token %}
+        
+        <div class="pos-form-group">
+            <label><i class="fas fa-tag"></i> Offering Type</label>
+            <select name="offering_type" class="pos-select">
+                <option value="SUNDAY">Sunday Collection</option>
+                <option value="SPECIAL">Special Collection</option>
+                <option value="THANKSGIVING">Thanksgiving</option>
+                <option value="BUILDING">Building Fund</option>
+                <option value="MISSIONS">Missions</option>
+                <option value="CHARITY">Charity</option>
+                <option value="OTHER">Other</option>
+            </select>
+        </div>
+        
+        <div class="anonymous-option">
+            <label>
+                <input type="checkbox" name="is_anonymous" id="anonymousCheck">
+                <span>Anonymous Offering (no member required)</span>
+            </label>
+        </div>
+        
+        <div class="pos-form-group search-wrapper" id="memberSearchGroup">
+            <label><i class="fas fa-user"></i> Search Member (optional)</label>
+            <input 
+                type="text" 
+                id="memberSearch" 
+                class="pos-input" 
+                placeholder="Search by name or code..."
+                autocomplete="off"
+            >
+            <input type="hidden" name="member_id" id="selectedMemberId">
+            <div id="memberResults" class="autocomplete-results"></div>
+        </div>
+
+        <div id="selectedMemberDisplay" class="selected-member" style="display: none;">
+            <div class="selected-member-header">
+                <div class="selected-member-info">
+                    <div class="selected-member-name" id="selectedMemberName">-</div>
+                </div>
+                <button type="button" class="selected-member-remove" id="removeMember" title="Remove Member">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="pos-form-group" id="donorNameGroup" style="display: none;">
+            <label><i class="fas fa-user"></i> Donor Name</label>
+            <input 
+                type="text" 
+                name="donor_name" 
+                class="pos-input" 
+                placeholder="Enter donor name"
+            >
+        </div>
+
+        <div class="pos-form-group">
+            <label><i class="fas fa-money-bill"></i> Amount (Tsh)</label>
+            <input 
+                type="number" 
+                name="amount" 
+                class="pos-input" 
+                placeholder="Enter amount"
+                step="0.01"
+                min="0"
+                required
+                id="amountInput"
+            >
+        </div>
+
+        <div class="quick-amounts">
+            <button type="button" class="quick-amount-btn" onclick="setAmount(1000)">1,000</button>
+            <button type="button" class="quick-amount-btn" onclick="setAmount(5000)">5,000</button>
+            <button type="button" class="quick-amount-btn" onclick="setAmount(10000)">10,000</button>
+            <button type="button" class="quick-amount-btn" onclick="setAmount(20000)">20,000</button>
+            <button type="button" class="quick-amount-btn" onclick="setAmount(50000)">50,000</button>
+            <button type="button" class="quick-amount-btn" onclick="setAmount(100000)">100,000</button>
+        </div>
+
+        <div class="pos-form-group">
+            <label><i class="fas fa-credit-card"></i> Payment Method</label>
+            <select name="payment_method" class="pos-select" id="paymentMethod">
+                <option value="CASH">Cash</option>
+                <option value="BANK">Bank Transfer</option>
+                <option value="MOBILE">Mobile Money</option>
+                <option value="CHEQUE">Cheque</option>
+            </select>
+        </div>
+
+        <div class="pos-form-group">
+            <label><i class="fas fa-phone"></i> Contact Number (for SMS)</label>
+            <input 
+                type="tel" 
+                name="donor_phone" 
+                class="pos-input" 
+                placeholder="Phone number"
+                required
+                id="donorPhone"
+            >
+        </div>
+
+        <div class="pos-form-group">
+            <label class="checkbox-wrapper">
+                <input type="checkbox" name="send_sms" checked>
+                <span>Send SMS confirmation</span>
+            </label>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-check"></i> Process Offering
+        </button>
+    </form>
+</div>
+
+<script>
+    let selectedMember = null;
+    let searchTimeout = null;
+
+    const memberSearch = document.getElementById('memberSearch');
+    const memberResults = document.getElementById('memberResults');
+    const selectedMemberId = document.getElementById('selectedMemberId');
+    const selectedMemberDisplay = document.getElementById('selectedMemberDisplay');
+    const selectedMemberName = document.getElementById('selectedMemberName');
+    const anonymousCheck = document.getElementById('anonymousCheck');
+    const memberSearchGroup = document.getElementById('memberSearchGroup');
+    const donorNameGroup = document.getElementById('donorNameGroup');
+    const offeringForm = document.getElementById('offeringForm');
+    const removeMemberBtn = document.getElementById('removeMember');
+
+    // Toggle anonymous
+    anonymousCheck.addEventListener('change', function() {
+        if (this.checked) {
+            memberSearchGroup.style.display = 'none';
+            donorNameGroup.style.display = 'block';
+            selectedMemberId.value = '';
+            selectedMemberDisplay.style.display = 'none';
+            selectedMember = null;
+        } else {
+            memberSearchGroup.style.display = 'block';
+            donorNameGroup.style.display = 'none';
+        }
+    });
+
+    if (memberSearch) {
+        memberSearch.addEventListener('input', function() {
+            const query = this.value.trim();
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                memberResults.classList.remove('show');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/tithe/search-members/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            memberResults.innerHTML = data.map(member => {
+                                const safeName = member.name.replace(/'/g, "\\'");
+                                const safeCode = (member.code || '').replace(/'/g, "\\'");
+                                return `
+                                    <div class="autocomplete-item" onclick="selectMember(${member.id}, '${safeName}', '${safeCode}')">
+                                        <div class="autocomplete-item-name">${member.name}</div>
+                                        <div class="autocomplete-item-code">${member.code || 'No code'}</div>
+                                    </div>
+                                `;
+                            }).join('');
+                            memberResults.classList.add('show');
+                        } else {
+                            memberResults.innerHTML = '<div class="autocomplete-item" style="color: #a0a0a0;">No members found</div>';
+                            memberResults.classList.add('show');
+                        }
+                    });
+            }, 300);
+        });
+
+        function selectMember(id, name, code) {
+            selectedMember = { id, name, code };
+            selectedMemberId.value = id;
+            memberSearch.value = name;
+            memberResults.classList.remove('show');
+            selectedMemberDisplay.style.display = 'block';
+            selectedMemberName.textContent = name + (code ? ` (${code})` : '');
+        }
+
+        function clearMemberSelection() {
+            selectedMember = null;
+            selectedMemberId.value = '';
+            memberSearch.value = '';
+            memberResults.classList.remove('show');
+            selectedMemberDisplay.style.display = 'none';
+        }
+
+        if (removeMemberBtn) {
+            removeMemberBtn.addEventListener('click', clearMemberSelection);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) {
+                memberResults.classList.remove('show');
+            }
+        });
+
+        function setAmount(amount) {
+            document.getElementById('amountInput').value = amount;
+        }
+
+        // Handle form submission and print receipt
+        if (offeringForm) {
+            offeringForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(offeringForm);
+                const amount = parseFloat(formData.get('amount'));
+                const paymentMethod = document.getElementById('paymentMethod').value;
+                const donorPhone = formData.get('donor_phone');
+                const donorName = formData.get('donor_name');
+                const isAnonymous = formData.get('is_anonymous') === 'on';
+                
+                // Submit form via AJAX
+                fetch(offeringForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Print receipt if printer is connected
+                        if (window.thermalPrinter && window.thermalPrinter.isConnected) {
+                            const memberName = isAnonymous ? donorName : (selectedMember ? selectedMember.name : donorName);
+                            const memberCode = isAnonymous ? '' : (selectedMember ? selectedMember.code : '');
+                            
+                            printReceipt(
+                                'Offering',
+                                memberName || 'Anonymous',
+                                memberCode,
+                                amount,
+                                paymentMethod,
+                                donorPhone
+                            );
+                        }
+                        
+                        // Reset form
+                        offeringForm.reset();
+                        selectedMemberDisplay.style.display = 'none';
+                        selectedMember = null;
+                        
+                        // Show success message
+                        alert(data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    // Fallback to normal form submission
+                    offeringForm.submit();
+                });
+            });
+        }
+    }
+</script>
+{% endblock %}

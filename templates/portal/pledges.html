@@ -1,0 +1,492 @@
+{% extends 'portal/base_portal.html' %}
+
+{% block title %}My Pledges - Christ King Church{% endblock %}
+
+{% block content %}
+<style>
+    /* Pledges Page - Dark Theme */
+    .pledges-header {
+        background: linear-gradient(135deg, var(--accent-warning) 0%, #e6a817 100%);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .pledges-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .pledges-header p {
+        color: rgba(255,255,255,0.8);
+        margin: 0.5rem 0 0 2.5rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Stats Grid */
+    .pledge-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .pledge-stat {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        text-align: center;
+    }
+    
+    .pledge-stat .icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        background: var(--bg-tertiary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1.25rem;
+    }
+    
+    .pledge-stat .icon.primary {
+        color: var(--accent-primary);
+    }
+    
+    .pledge-stat .icon.success {
+        color: var(--accent-success);
+    }
+    
+    .pledge-stat .icon.warning {
+        color: var(--accent-warning);
+    }
+    
+    .pledge-stat .value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .pledge-stat .value.success {
+        color: var(--accent-success);
+    }
+    
+    .pledge-stat .value.warning {
+        color: var(--accent-warning);
+    }
+    
+    .pledge-stat .label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Progress Section */
+    .progress-section {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-header span {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .progress-header .percentage {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--accent-success);
+    }
+    
+    .progress-bar-container {
+        height: 8px;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-success) 0%, #00a86b 100%);
+        border-radius: var(--radius-full);
+        transition: width 0.3s ease;
+    }
+    
+    .progress-footer {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    /* Pledge Cards */
+    .pledge-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .pledge-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-left: 4px solid var(--accent-warning);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+    
+    .pledge-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .pledge-card-header h6 {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .pledge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .pledge-status.completed {
+        background: rgba(0, 186, 124, 0.15);
+        color: var(--accent-success);
+    }
+    
+    .pledge-status.partial {
+        background: rgba(255, 173, 31, 0.15);
+        color: var(--accent-warning);
+    }
+    
+    .pledge-status.pending {
+        background: rgba(29, 155, 240, 0.15);
+        color: var(--accent-primary);
+    }
+    
+    .pledge-status.overdue {
+        background: rgba(244, 33, 46, 0.15);
+        color: var(--accent-danger);
+    }
+    
+    .pledge-card-body {
+        padding: 1.25rem;
+    }
+    
+    .pledge-due-date {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+    
+    .pledge-due-date i {
+        color: var(--text-muted);
+        margin-right: 0.5rem;
+    }
+    
+    .pledge-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-sm);
+    }
+    
+    .pledge-stat-item {
+        text-align: center;
+    }
+    
+    .pledge-stat-item .label {
+        font-size: 0.6875rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+    
+    .pledge-stat-item .value {
+        font-weight: 700;
+        font-size: 0.9375rem;
+    }
+    
+    .pledge-stat-item .value.primary {
+        color: var(--accent-primary);
+    }
+    
+    .pledge-stat-item .value.success {
+        color: var(--accent-success);
+    }
+    
+    .pledge-stat-item .value.warning {
+        color: var(--accent-warning);
+    }
+    
+    .pledge-progress-text {
+        text-align: right;
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+        margin-top: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .pledges-header {
+            padding: 1.25rem;
+        }
+        
+        .pledges-header h1 {
+            font-size: 1.125rem;
+        }
+        
+        .pledge-stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .pledge-stat {
+            padding: 1rem;
+        }
+        
+        .pledge-stat .icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+        }
+        
+        .pledge-stat .value {
+            font-size: 1.125rem;
+        }
+        
+        .pledge-stat .label {
+            font-size: 0.625rem;
+        }
+        
+        .progress-section {
+            padding: 1rem;
+        }
+        
+        .progress-header .percentage {
+            font-size: 1.25rem;
+        }
+        
+        .progress-footer {
+            font-size: 0.8125rem;
+        }
+        
+        .pledge-card-header {
+            padding: 0.875rem 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .pledge-card-body {
+            padding: 1rem;
+        }
+        
+        .pledge-due-date {
+            font-size: 0.8125rem;
+        }
+        
+        .pledge-stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            padding: 0.75rem;
+        }
+        
+        .pledge-stat-item .label {
+            font-size: 0.625rem;
+        }
+        
+        .pledge-stat-item .value {
+            font-size: 0.8125rem;
+        }
+        
+        .pledge-progress-text {
+            font-size: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .pledge-stats {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .pledge-stats-grid {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .pledge-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pledge-stat-item .label {
+            margin-bottom: 0;
+        }
+        
+        .pledge-status {
+            font-size: 0.6875rem;
+            padding: 0.2rem 0.5rem;
+        }
+        
+        .pledge-card-header h6 {
+            font-size: 0.9375rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-donate" style="color: var(--accent-warning);"></i> My Pledges</h1>
+    <p>Track your commitments and contributions</p>
+</div>
+
+{% if church_member.member %}
+<!-- Summary Stats -->
+<div class="pledge-stats">
+    <div class="pledge-stat">
+        <div class="icon primary">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="value">TSh {{ total_promised|floatformat:0|default:"0" }}</div>
+        <div class="label">Total Promised</div>
+    </div>
+    
+    <div class="pledge-stat">
+        <div class="icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="value success">TSh {{ total_paid|floatformat:0|default:"0" }}</div>
+        <div class="label">Total Paid</div>
+    </div>
+    
+    <div class="pledge-stat">
+        <div class="icon warning">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="value warning">TSh {{ total_remaining|floatformat:0|default:"0" }}</div>
+        <div class="label">Remaining</div>
+    </div>
+</div>
+
+<!-- Overall Progress -->
+{% if total_promised > 0 %}
+<div class="progress-section">
+    <div class="progress-header">
+        <span><i class="fas fa-chart-line me-2"></i>Overall Progress</span>
+        {% widthratio total_paid total_promised 100 as percentage %}
+        <span class="percentage">{{ percentage|floatformat:1|default:"0" }}%</span>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" style="width: {{ percentage }}%;"></div>
+    </div>
+    <div class="progress-footer">
+        <i class="fas fa-info-circle me-1"></i>You have paid {{ percentage|floatformat:1|default:"0" }}% of your total pledges
+    </div>
+</div>
+{% endif %}
+
+<!-- Pledges List -->
+<div class="feed-card">
+    <div class="card-header">
+        <i class="fas fa-list" style="color: var(--accent-warning);"></i>
+        <h5>My Pledge Details</h5>
+        <a href="{% url 'portal_dashboard' %}" class="btn-portal btn-portal-outline" style="padding: 0.375rem 0.75rem; font-size: 0.75rem; margin-left: auto;">
+            <i class="fas fa-arrow-left"></i>Back
+        </a>
+    </div>
+    <div class="card-body">
+        {% if pledges %}
+            <div class="pledge-list">
+                {% for pledge in pledges %}
+                <div class="pledge-card">
+                    <div class="pledge-card-header">
+                        <h6>{{ pledge.event.title }}</h6>
+                        <span class="pledge-status {{ pledge.status }}">
+                            {{ pledge.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="pledge-card-body">
+                        <div class="pledge-due-date">
+                            <i class="far fa-calendar-alt"></i>
+                            Due: {{ pledge.due_date|date:"M d, Y"|default:"Not set" }}
+                        </div>
+                        
+                        <div class="pledge-stats-grid">
+                            <div class="pledge-stat-item">
+                                <div class="label">Promised</div>
+                                <div class="value primary">TSh {{ pledge.promised_amount|floatformat:0 }}</div>
+                            </div>
+                            <div class="pledge-stat-item">
+                                <div class="label">Paid</div>
+                                <div class="value success">TSh {{ pledge.paid_amount|floatformat:0 }}</div>
+                            </div>
+                            <div class="pledge-stat-item">
+                                <div class="label">Remaining</div>
+                                <div class="value warning">TSh {{ pledge.remaining_amount|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: {{ pledge.progress_percentage }}%;"></div>
+                        </div>
+                        <div class="pledge-progress-text">{{ pledge.progress_percentage|floatformat:1 }}% complete</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h6>No Pledges Found</h6>
+                <p>You haven't made any pledges yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert-portal alert-portal-warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Your account is not linked to a member record. Please contact an administrator.</span>
+</div>
+{% endif %}
+
+<div class="mt-4">
+    <a href="{% url 'portal_dashboard' %}" class="btn-portal btn-portal-outline">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

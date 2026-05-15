@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<style>
+    /* POS Receipt Optimized Styles */
+    .pos-receipt-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    /* Modern Receipt Paper */
+    .receipt-paper {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 20px 15px;
+        font-family: 'Courier New', Monaco, monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    /* Header */
+    .receipt-header {
+        text-align: center;
+        border-bottom: 2px dashed #333;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .church-name {
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        color: #8B0000;
+    }
+
+    .church-info {
+        font-size: 11px;
+        color: #333;
+    }
+
+    .receipt-title {
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        margin: 15px 0;
+        text-transform: uppercase;
+        border: 2px solid #8B0000;
+        padding: 8px;
+        display: inline-block;
+        width: 100%;
+        box-sizing: border-box;
+        background: #f8f9fa;
+        color: #8B0000;
+        border-radius: 4px;
+    }
+
+    /* Details */
+    .receipt-details {
+        margin: 15px 0;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 8px 0;
+        padding: 5px 0;
+        border-bottom: 1px dotted #ccc;
+    }
+
+    .detail-label {
+        font-weight: bold;
+    }
+
+    .detail-value {
+        text-align: right;
+    }
+
+    /* Amount Box */
+    .amount-box {
+        border: 2px solid #8B0000;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+    }
+
+    .amount-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        color: #8B0000;
+        font-weight: bold;
+    }
+
+    .amount-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #8B0000;
+    }
+
+    .amount-currency {
+        font-size: 11px;
+        margin-top: 5px;
+        color: #666;
+    }
+
+    /* Verification Section */
+    .verification-box {
+        border: 2px dashed #8B0000;
+        padding: 12px;
+        margin: 15px 0;
+        text-align: center;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+
+    .verification-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    .verification-code {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        color: #8B0000;
+    }
+
+    /* Footer */
+    .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px dashed #333;
+    }
+
+    .generated-info {
+        font-size: 10px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .thank-you {
+        font-weight: bold;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #8B0000;
+    }
+
+    /* QR Code Area */
+    .qr-area {
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        border: 1px dashed #999;
+        background: white;
+        border-radius: 4px;
+    }
+
+    .qr-label {
+        font-size: 9px;
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    /* Print Controls */
+    .print-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: var(--surface);
+        border-radius: 8px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-print {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: var(--background);
+        border: 1px solid var(--divider);
+        color: var(--text-primary);
+    }
+
+    /* Status indicator */
+    .print-status {
+        text-align: center;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .print-status-success {
+        background: rgba(52, 168, 83, 0.1);
+        border: 1px solid var(--success);
+        color: var(--success);
+    }
+
+    .print-status-pending {
+        background: rgba(251, 188, 4, 0.1);
+        border: 1px solid var(--warning);
+        color: var(--warning);
+    }
+
+    /* Print-specific styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        
+        .receipt-paper,
+        .receipt-paper * {
+            visibility: visible;
+        }
+        
+        .receipt-paper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 80mm;
+            padding: 5mm;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        
+        .print-controls {
+            display: none !important;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-receipt-container">
+    <!-- Print Status -->
+    {% if receipt.is_printed %}
+    <div class="print-status print-status-success no-print">
+        <i class="fas fa-check-circle"></i> Printed on {{ receipt.printed_at|date:"Y-m-d H:i" }}
+    </div>
+    {% else %}
+    <div class="print-status print-status-pending no-print">
+        <i class="fas fa-clock"></i> Not printed yet
+    </div>
+    {% endif %}
+
+    <!-- Receipt Paper -->
+    <div class="receipt-paper" id="receiptContent">
+        <!-- Header -->
+        <div class="receipt-header">
+            <div class="church-name">{{ print_data.church_name|default:"CHRIST THE KING" }}</div>
+            <div class="church-info">
+                {{ print_data.church_address|default:"P.O BOX 1310" }}<br>
+                {% if print_data.church_phone %}Tel: {{ print_data.church_phone }}{% endif %}
+            </div>
+        </div>
+
+        <!-- Receipt Title -->
+        <div style="text-align: center;">
+            <div class="receipt-title">TITHE RECEIPT</div>
+        </div>
+
+        <!-- Receipt Details -->
+        <div class="receipt-details">
+            <div class="detail-row">
+                <span class="detail-label">Receipt No:</span>
+                <span class="detail-value">{{ print_data.receipt_number }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">{{ payment.date|date:"Y-m-d" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">{{ payment.date|date:"H:i" }}</span>
+            </div>
+        </div>
+
+        <!-- Member Info -->
+        <div class="receipt-details">
+            <div class="detail-row">
+                <span class="detail-label">Member:</span>
+                <span class="detail-value">{{ payment.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Member ID:</span>
+                <span class="detail-value">{{ payment.name.member_id|default:payment.name.id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">{{ payment.contact_number|default:"N/A" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Method:</span>
+                <span class="detail-value">{{ payment.get_status_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Period:</span>
+                <span class="detail-value">{{ payment.date|date:"F Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Amount -->
+        <div class="amount-box">
+            <div class="amount-label">Amount Paid</div>
+            <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
+            <div class="amount-currency">Tanzanian Shillings</div>
+        </div>
+
+        <!-- Verification Box -->
+        <div class="verification-box">
+            <div class="verification-label">Verification Code</div>
+            <div class="verification-code">{{ receipt.receipt_number|slice:":8" }}</div>
+        </div>
+
+        <!-- QR Area -->
+        <div class="qr-area">
+            <div class="qr-label">SCAN TO VERIFY</div>
+            <i class="fas fa-qrcode" style="font-size: 2.5rem; color: #8B0000;"></i>
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+            <div class="generated-info">
+                Generated: {{ receipt.generated_at|date:"Y-m-d H:i" }}<br>
+                By: {{ receipt.generated_by|default:"System" }}
+            </div>
+            <div class="thank-you">☨ ASANTE KWA SADAKA YAKO ☨</div>
+        </div>
+    </div>
+
+    <!-- Print Controls -->
+    <div class="print-controls no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+        <a href="{% url 'tithepayment:receipt_list' %}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> All Receipts
+        </a>
+    </div>
+</div>
+
+<script>
+function printReceipt() {
+    fetch("{% url 'tithepayment:pos_print_receipt' receipt.id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.print();
+        } else {
+            alert('Error marking receipt as printed: ' + data.message);
+            window.print();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        window.print();
+    });
+}
+
+// Auto-print if requested
+{% if request.GET.auto_print == 'true' %}
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(printReceipt, 500);
+});
+{% endif %}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        printReceipt();
+    }
+    if (e.key === 'Escape') {
+        window.history.back();
+    }
+});
+</script>
+{% endblock %}

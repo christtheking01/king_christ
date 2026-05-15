@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Records - {{ sacrament_class.name }} - Christ King Church{% endblock %}
+
+{% block internal_style %}
+<style>
+    .attendance-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header */
+    .attendance-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .attendance-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .attendance-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .class-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        background: white;
+        color: var(--text-primary);
+    }
+
+    .btn-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-filter-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-filter-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Date Buttons */
+    .dates-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .dates-card h5 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .date-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .date-btn:hover {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Records Table */
+    .records-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .records-card-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .records-card-header h5 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .records-count {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        padding: 14px 18px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--primary-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.15);
+    }
+
+    .data-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .status-badge.present {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.absent {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .status-badge.late {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-action-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-action-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-action-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dates-card, .records-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .dates-card { animation-delay: 0.1s; }
+    .records-card { animation-delay: 0.2s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="attendance-wrapper">
+    <div class="attendance-header">
+        <h1><i class="fas fa-clipboard-list"></i> Attendance Records</h1>
+        <p class="class-subtitle">
+            <i class="fas fa-chalkboard-teacher"></i> {{ sacrament_class.name }} ({{ sacrament_class.get_sacrament_type_display }})
+        </p>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="filter-card">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <label><i class="fas fa-calendar me-2"></i>From Date</label>
+                <input type="date" name="start_date" class="filter-input" 
+                       value="{{ request.GET.start_date }}">
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-calendar me-2"></i>To Date</label>
+                <input type="date" name="end_date" class="filter-input" 
+                       value="{{ request.GET.end_date }}">
+            </div>
+            <button type="submit" class="btn-filter">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            <a href="{% url 'view_attendance' sacrament_class.pk %}" class="btn-filter btn-filter-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </form>
+    </div>
+
+    <!-- Class Dates -->
+    {% if dates %}
+    <div class="dates-card">
+        <h5><i class="fas fa-calendar-check"></i> Class Dates with Records</h5>
+        <div class="dates-grid">
+            {% for date in dates %}
+            <a href="{% url 'take_attendance' sacrament_class.pk %}?date={{ date|date:'Y-m-d' }}" class="date-btn">
+                <i class="fas fa-edit"></i> {{ date|date:"M d, Y" }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Attendance Records Table -->
+    <div class="records-card">
+        <div class="records-card-header">
+            <h5><i class="fas fa-list-alt"></i> Detailed Attendance Records</h5>
+            <span class="records-count">{{ attendance_records.count }} records</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Member</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Recorded By</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td><strong>{{ record.class_date|date:"M d, Y" }}</strong></td>
+                        <td>{{ record.catechesis_member.first_name }} {{ record.catechesis_member.last_name }}</td>
+                        <td>
+                            <span class="status-badge {{ record.status|lower }}">
+                                <i class="fas fa-{% if record.status == 'PRESENT' %}check-circle{% elif record.status == 'ABSENT' %}times-circle{% else %}clock{% endif %}"></i>
+                                {{ record.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ record.notes|default:"-" }}</td>
+                        <td>{{ record.recorded_by.get_full_name|default:"System" }}</td>
+                        <td><small style="color: var(--text-muted);">{{ record.recorded_at|date:"H:i" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-clipboard"></i>
+                            <h5>No attendance records found</h5>
+                            <p>Start taking attendance to see records here</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'class_list' %}" class="btn-action btn-action-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Classes
+        </a>
+        <a href="{% url 'take_attendance' sacrament_class.pk %}" class="btn-action btn-action-primary">
+            <i class="fas fa-clipboard-check"></i> Take Attendance
+        </a>
+    </div>
+</div>
+{% endblock %}

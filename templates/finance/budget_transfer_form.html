@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budget Transfer Request{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Budget Transfer Request</h1>
+            <p class="text-muted">Request to transfer funds between budgets</p>
+        </div>
+        <div>
+            <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Budgets
+            </a>
+        </div>
+    </div>
+
+    <!-- Transfer Form -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Transfer Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Source Budget -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="source_budget" class="form-label">Source Budget *</label>
+                            <select name="source_budget" id="source_budget" class="form-select" required>
+                                <option value="">Select source budget</option>
+                                {% for budget in budgets %}
+                                <option value="{{ budget.id }}">{{ budget.name }} (TSH {{ budget.remaining_amount|floatformat:2 }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Target Budget -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="target_budget" class="form-label">Target Budget *</label>
+                            <select name="target_budget" id="target_budget" class="form-select" required>
+                                <option value="">Select target budget</option>
+                                {% for budget in budgets %}
+                                <option value="{{ budget.id }}">{{ budget.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <!-- Transfer Type -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="transfer_type" class="form-label">Transfer Type *</label>
+                            <select name="transfer_type" id="transfer_type" class="form-select" required>
+                                <option value="">Select transfer type</option>
+                                {% for type_code, type_name in transfer_types %}
+                                <option value="{{ type_code }}">{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Amount -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount (TSH) *</label>
+                            <input type="number" name="amount" id="amount" class="form-control" 
+                                   placeholder="0.00" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <!-- Reason -->
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Transfer *</label>
+                            <textarea name="reason" id="reason" class="form-control" rows="4" 
+                                      placeholder="Explain why this transfer is needed..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'budget_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Transfer Request
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Prevent selecting same budget for source and target
+document.getElementById('source_budget').addEventListener('change', function() {
+    const targetSelect = document.getElementById('target_budget');
+    const sourceValue = this.value;
+    
+    for (let option of targetSelect.options) {
+        if (option.value === sourceValue) {
+            option.disabled = true;
+        } else {
+            option.disabled = false;
+        }
+    }
+});
+
+document.getElementById('target_budget').addEventListener('change', function() {
+    const sourceSelect = document.getElementById('source_budget');
+    const targetValue = this.value;
+    
+    for (let option of sourceSelect.options) {
+        if (option.value === targetValue) {
+            option.disabled = true;
+        } else {
+            option.disabled = false;
+        }
+    }
+});
+</script>
+{% endblock %}

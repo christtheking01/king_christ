@@ -1,30 +1,16 @@
-{% extends 'finance/layout.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block body %}
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'financial_dashboard' %}" class="nav-brand">Finance Tracker</a>
-            <div class="nav-links">
-                <a href="{% url 'financial_dashboard' %}">Dashboard</a>
-                <a href="{% url 'transaction_list' %}">Transactions</a>
-                <a href="{% url 'category_list' %}">Categories</a>
-                <a href="{% url 'role_management' %}">Profile</a>
-                <a href="{% url '_logout' %}" class="btn-logout">Logout</a>
-            </div>
+{% block content %}
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
-    </nav>
-
-    <main class="main-content">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% endif %}
 
         <div class="card form-container">
             <div class="card-header">
@@ -81,9 +67,4 @@
                 </div>
             </form>
         </div>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2025 Kristo Mfalme. All rights reserved.</p>
-    </footer>
 {% endblock %}

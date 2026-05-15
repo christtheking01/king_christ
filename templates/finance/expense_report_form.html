@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-0">Create Expense Report</h1>
-            <p class="text-muted">Submit a new expense report for approval</p>
+            <p class="text-muted">Add expense items and submit for approval</p>
         </div>
         <div>
             <a href="{% url 'expense_report_list' %}" class="btn btn-outline-secondary">
@@ -18,20 +18,17 @@
         </div>
     </div>
 
-    <!-- Expense Report Form -->
-    <div class="card shadow">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Expense Report Details</h6>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                
+    <form method="post" id="expenseReportForm">
+        {% csrf_token %}
+        
+        <!-- Report Header -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Report Information</h6>
+            </div>
+            <div class="card-body">
                 <div class="row">
-                    <!-- Basic Information -->
                     <div class="col-md-6">
-                        <h6 class="text-muted mb-3">Report Information</h6>
-                        
                         <div class="mb-3">
                             <label for="title" class="form-label">Report Title *</label>
                             <input type="text" name="title" id="title" class="form-control" 
@@ -44,132 +41,245 @@
                                 <option value="">Select an employee...</option>
                                 {% for employee in employees %}
                                     <option value="{{ employee.id }}">
-                                        {{ employee.member.name }} - {{ employee.position }}
+                                        {{ employee.name }} - {{ employee.position }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        
+                    </div>
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea name="description" id="description" class="form-control" rows="4" 
                                       placeholder="Provide details about this expense report..."></textarea>
                         </div>
                     </div>
-                    
-                    <!-- Instructions -->
-                    <div class="col-md-6">
-                        <h6 class="text-muted mb-3">Instructions</h6>
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-info-circle"></i> How to Complete Your Report</h6>
-                            <ol class="mb-0">
-                                <li>Fill in the basic report information</li>
-                                <li>Submit this form to create the report</li>
-                                <li>Add individual expense items from the report detail page</li>
-                                <li>Attach receipts for each expense item</li>
-                                <li>Submit for approval</li>
-                            </ol>
-                        </div>
-                        
-                        <div class="alert alert-warning">
-                            <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
-                            <ul class="mb-0">
-                                <li>All expenses must be business-related</li>
-                                <li>Keep original receipts for verification</li>
-                                <li>Submit reports within 30 days of expenses</li>
-                                <li>Maximum report amount: $5,000</li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
-                
-                <!-- Form Actions -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-end">
-                            <a href="{% url 'expense_report_list' %}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Create Expense Report
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <!-- Expense Items -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Expense Items</h6>
+                <button type="button" class="btn btn-success btn-sm" id="addItemBtn">
+                    <i class="fas fa-plus"></i> Add Item
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" id="expenseItemsTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 120px;">Date</th>
+                                <th style="width: 150px;">Category</th>
+                                <th>Description</th>
+                                <th style="width: 150px;">Amount (TSH)</th>
+                                <th style="width: 120px;">Receipt #</th>
+                                <th style="width: 80px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseItemsBody">
+                            <!-- Dynamic rows will be added here -->
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td colspan="3" class="text-end font-weight-bold">Total:</td>
+                                <td class="font-weight-bold text-primary" id="totalAmount">0.00</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div id="noItemsMessage" class="text-center py-4 text-muted">
+                    <i class="fas fa-receipt fa-2x mb-2"></i>
+                    <p>No expense items added. Click "Add Item" to add expenses.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compact Instructions -->
+        <div class="mb-4">
+            <small class="text-muted">
+                <i class="fas fa-info-circle"></i> 
+                Add expense items with date, category, description & amount. Total auto-calculates. 
+                <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Keep receipts for verification.</span>
+            </small>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'expense_report_list' %}" class="btn btn-secondary me-2">Cancel</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                <i class="fas fa-save"></i> Create Expense Report
+            </button>
+        </div>
+    </form>
 </div>
+
+<!-- Hidden Template for New Row -->
+<template id="expenseItemTemplate">
+    <tr class="expense-item-row">
+        <td>
+            <input type="date" name="item_date[]" class="form-control form-control-sm item-date" required>
+        </td>
+        <td>
+            <select name="item_category[]" class="form-select form-select-sm item-category" required>
+                <option value="">Select...</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="text" name="item_description[]" class="form-control form-control-sm item-description" 
+                   placeholder="e.g., Hotel room - 2 nights" required>
+        </td>
+        <td>
+            <input type="number" name="item_amount[]" class="form-control form-control-sm item-amount" 
+                   placeholder="0.00" min="0.01" step="0.01" required>
+        </td>
+        <td>
+            <input type="text" name="item_receipt[]" class="form-control form-control-sm item-receipt" 
+                   placeholder="Receipt #">
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-danger btn-sm remove-item-btn" title="Remove Item">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
-    const title = document.getElementById('title').value.trim();
+document.addEventListener('DOMContentLoaded', function() {
+    const addItemBtn = document.getElementById('addItemBtn');
+    const expenseItemsBody = document.getElementById('expenseItemsBody');
+    const expenseItemTemplate = document.getElementById('expenseItemTemplate');
+    const noItemsMessage = document.getElementById('noItemsMessage');
+    const totalAmountDisplay = document.getElementById('totalAmount');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('expenseReportForm');
     
-    if (!title) {
-        e.preventDefault();
-        alert('Please enter a report title');
-        return;
-    }
+    let itemCount = 0;
     
-    if (title.length < 5) {
-        e.preventDefault();
-        alert('Report title must be at least 5 characters long');
-        return;
-    }
-});
-
-// Character counter for description
-document.getElementById('description').addEventListener('input', function() {
-    const charCount = this.value.length;
-    const maxChars = 500;
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
     
-    if (charCount > maxChars) {
-        this.value = this.value.substring(0, maxChars);
-    }
-});
-
-// Auto-save draft functionality
-let autoSaveTimer;
-function autoSave() {
-    const formData = new FormData(document.querySelector('form'));
-    localStorage.setItem('expense_report_draft', JSON.stringify({
-        title: formData.get('title'),
-        employee: formData.get('employee'),
-        description: formData.get('description'),
-        timestamp: new Date().toISOString()
-    }));
-}
-
-// Auto-save on input changes
-document.querySelectorAll('input, textarea, select').forEach(element => {
-    element.addEventListener('input', function() {
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(autoSave, 1000);
-    });
-});
-
-// Load draft on page load
-window.addEventListener('load', function() {
-    const draft = localStorage.getItem('expense_report_draft');
-    if (draft) {
-        const data = JSON.parse(draft);
-        const draftDate = new Date(data.timestamp);
-        const hoursAgo = (Date.now() - draftDate) / (1000 * 60 * 60);
+    // Add new expense item row
+    function addExpenseItem() {
+        const clone = expenseItemTemplate.content.cloneNode(true);
+        const row = clone.querySelector('tr');
         
-        if (hoursAgo < 24) { // Only show draft if less than 24 hours old
-            if (confirm('Found a draft from ' + draftDate.toLocaleString() + '. Would you like to restore it?')) {
-                document.getElementById('title').value = data.title || '';
-                document.getElementById('employee').value = data.employee || '';
-                document.getElementById('description').value = data.description || '';
-            }
+        // Set default date
+        const dateInput = row.querySelector('.item-date');
+        dateInput.value = today;
+        
+        // Add event listeners to the new row
+        const amountInput = row.querySelector('.item-amount');
+        const removeBtn = row.querySelector('.remove-item-btn');
+        
+        amountInput.addEventListener('input', calculateTotal);
+        removeBtn.addEventListener('click', function() {
+            removeExpenseItem(row);
+        });
+        
+        expenseItemsBody.appendChild(row);
+        itemCount++;
+        updateUI();
+    }
+    
+    // Remove expense item row
+    function removeExpenseItem(row) {
+        row.remove();
+        itemCount--;
+        updateUI();
+        calculateTotal();
+    }
+    
+    // Calculate total amount
+    function calculateTotal() {
+        let total = 0;
+        const amountInputs = document.querySelectorAll('.item-amount');
+        
+        amountInputs.forEach(input => {
+            const value = parseFloat(input.value) || 0;
+            total += value;
+        });
+        
+        totalAmountDisplay.textContent = total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        return total;
+    }
+    
+    // Update UI state
+    function updateUI() {
+        if (itemCount > 0) {
+            noItemsMessage.style.display = 'none';
+            submitBtn.disabled = false;
+        } else {
+            noItemsMessage.style.display = 'block';
+            submitBtn.disabled = true;
         }
     }
-});
-
-// Clear draft on successful submission
-document.querySelector('form').addEventListener('submit', function() {
-    localStorage.removeItem('expense_report_draft');
+    
+    // Add item button click
+    addItemBtn.addEventListener('click', addExpenseItem);
+    
+    // Form validation before submit
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        
+        if (!title || title.length < 3) {
+            e.preventDefault();
+            alert('Please enter a report title (at least 3 characters)');
+            document.getElementById('title').focus();
+            return;
+        }
+        
+        if (itemCount === 0) {
+            e.preventDefault();
+            alert('Please add at least one expense item');
+            return;
+        }
+        
+        // Validate all rows have required fields
+        const rows = document.querySelectorAll('.expense-item-row');
+        let valid = true;
+        
+        rows.forEach((row, index) => {
+            const category = row.querySelector('.item-category').value;
+            const description = row.querySelector('.item-description').value.trim();
+            const amount = row.querySelector('.item-amount').value;
+            
+            if (!category || !description || !amount) {
+                valid = false;
+                row.style.backgroundColor = '#ffebee';
+            } else {
+                row.style.backgroundColor = '';
+            }
+        });
+        
+        if (!valid) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Category, Description, Amount) for each expense item');
+            return;
+        }
+        
+        // Confirm submission
+        const total = calculateTotal();
+        if (!confirm(`Create expense report with ${itemCount} items totaling TSH ${total.toLocaleString('en-US', {minimumFractionDigits: 2})}?`)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Add first item row on page load
+    addExpenseItem();
 });
 </script>
 {% endblock %}

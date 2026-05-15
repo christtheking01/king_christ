@@ -105,8 +105,8 @@
                                             {% if member.pays_tithe %}
                                                 <span class="badge bg-success">Pays Tithe</span>
                                             {% endif %}
-                                            {% if member.new_believer_school %}
-                                                <span class="badge bg-info">New Believer</span>
+                                            {% if member.gender %}
+                                                <span class="badge bg-info">{{ member.get_gender_display }}</span>
                                             {% endif %}
                                             {% if member.working %}
                                                 <span class="badge bg-warning text-dark">Working</span>

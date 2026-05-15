@@ -5,955 +5,1418 @@
     {% if mode == 'single' %}Add New Member{% else %}Add Multiple Members{% endif %}
 {% endblock %}
 
-{% block content %}
-<div class="dashboard-main-wrapper">
-    <div class="dashboard-wrapper">
-        <div class="dashboard-inner">
-            <div class="container-fluid dashboard-content">
-                <!-- Page Header -->
-                <div class="row">
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div class="page-header">
-                            <h2 class="pageheader-title">
-                                <i class="fas {% if mode == 'single' %}fa-user-plus{% else %}fa-users{% endif %} me-2"></i>
-                                {% if mode == 'single' %}Add New Member{% else %}Add Multiple Members{% endif %}
-                            </h2>
-                            <div class="page-breadcrumb">
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="breadcrumb-link">Home</a></li>
-                                        <li class="breadcrumb-item"><a href="{% url 'table_members' %}" class="breadcrumb-link">Members</a></li>
-                                        <li class="breadcrumb-item active" aria-current="page">
-                                            {% if mode == 'single' %}Add Member{% else %}Add Multiple Members{% endif %}
-                                        </li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Messages -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- Main Form Card -->
-                <div class="row">
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas {% if mode == 'single' %}fa-user{% else %}fa-users{% endif %} me-2"></i>
-                                    Member Information
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <form method="post" enctype="multipart/form-data" novalidate>
-                                    {% csrf_token %}
-                                    
-                                    {% if mode == 'single' %}
-                                        <!-- Single Member Form -->
-                                        <div class="row">
-                                            <div class="col-xl-8 col-lg-8 col-md-7">
-                                                <div class="member-form-section">
-                                                    {% include 'members/partials/member_form_fields.html' with form=form %}
-                                                </div>
-                                            </div>
-                                            <div class="col-xl-4 col-lg-4 col-md-5">
-                                                <!-- Quick Actions Card -->
-                                                <div class="card border-primary mb-4">
-                                                    <div class="card-header bg-primary text-white">
-                                                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quick Info</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <p class="small text-muted mb-2">
-                                                            <i class="fas fa-asterisk text-danger small"></i> Required fields
-                                                        </p>
-                                                        <p class="small text-muted mb-2">
-                                                            <i class="fas fa-phone text-info"></i> Phone format: +255 XXX XXX XXX
-                                                        </p>
-                                                        <p class="small text-muted mb-2">
-                                                            <i class="fas fa-id-card text-warning"></i> Code format: 001PT
-                                                        </p>
-                                                        <hr class="my-3">
-                                                        <p class="small text-muted">
-                                                            <strong>Note:</strong> Ensure all required fields are filled before saving.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Mode Switch Card -->
-                                                <div class="card border-info">
-                                                    <div class="card-body text-center">
-                                                        <p class="mb-2 text-muted">Need to add multiple members?</p>
-                                                        <a href="{% url 'create_member' %}" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-users me-1"></i> Add Multiple Members
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <!-- Multiple Member Forms -->
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            You can add up to 3 members at once. Fill at least the required fields for each member you want to add.
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-xl-4 col-lg-4 col-md-6">
-                                                <div class="card border-primary mb-4">
-                                                    <div class="card-header bg-primary text-white">
-                                                        <h6 class="mb-0">Member 1</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        {% include 'members/partials/member_form_fields.html' with form=form1 %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-xl-4 col-lg-4 col-md-6">
-                                                <div class="card border-success mb-4">
-                                                    <div class="card-header bg-success text-white">
-                                                        <h6 class="mb-0">Member 2</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        {% include 'members/partials/member_form_fields.html' with form=form2 %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-xl-4 col-lg-4 col-md-6">
-                                                <div class="card border-warning mb-4">
-                                                    <div class="card-header bg-warning text-white">
-                                                        <h6 class="mb-0">Member 3</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        {% include 'members/partials/member_form_fields.html' with form=form3 %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Mode Switch for Multiple -->
-                                        <div class="row mt-2">
-                                            <div class="col-12">
-                                                <div class="card border-info">
-                                                    <div class="card-body text-center">
-                                                        <p class="mb-0 text-muted">Only need to add one member? 
-                                                            <a href="{% url 'add_member' %}" class="btn btn-outline-primary btn-sm ms-2">
-                                                                <i class="fas fa-user-plus me-1"></i> Add Single Member
-                                                            </a>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-
-                                    <!-- Submit Buttons -->
-                                    <div class="row mt-4">
-                                        <div class="col-12">
-                                            <div class="border-top pt-4">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <a href="{% url 'table_members' %}" class="btn btn-secondary">
-                                                        <i class="fas fa-arrow-left me-2"></i> Back to List
-                                                    </a>
-                                                    <div>
-                                                        {% if mode == 'single' %}
-                                                            <button type="submit" class="btn btn-primary">
-                                                                <i class="fas fa-save me-2"></i> Save Member
-                                                            </button>
-                                                        {% else %}
-                                                            <button type="submit" class="btn btn-success">
-                                                                <i class="fas fa-save me-2"></i> Save All Members
-                                                            </button>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
 {% block internal_style %}
 <style>
-/* Modern Minimal CSS with Flutter-like Styling */
-
 :root {
-    /* Color Palette - Material/Flutter inspired */
     --primary: #6750A4;
     --primary-container: #EADDFF;
     --on-primary: #FFFFFF;
     --secondary: #625B71;
     --secondary-container: #E8DEF8;
-    --surface: #FFFFFF;
-    --surface-variant: #F7F2FA;
+    --surface: #FEF7FF;
+    --surface-variant: #F8F9FA;
+    --background: #FFFBFE;
+    --error: #BA1A1A;
+    --success: #0D904F;
+    --warning: #F59E0B;
     --outline: #79747E;
     --outline-variant: #CAC4D0;
-    --error: #BA1A1A;
-    --error-container: #FFDAD6;
-    --success: #0D904F;
-    --success-container: #A7F3D0;
-    --warning: #F59E0B;
-    --warning-container: #FEF3C7;
-    --info: #0284C7;
-    --info-container: #E0F2FE;
     
-    /* Spacing - 4px grid system */
-    --space-0: 0;
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 20px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --space-10: 40px;
-    --space-12: 48px;
+    /* Modern spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
     
-    /* Typography */
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-size-sm: 0.875rem;    /* 14px */
-    --font-size-base: 1rem;      /* 16px */
-    --font-size-lg: 1.125rem;    /* 18px */
-    --font-size-xl: 1.25rem;     /* 20px */
-    --font-size-2xl: 1.5rem;     /* 24px */
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
+    /* Modern typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
     
-    /* Border Radius */
+    /* Modern border radius */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
     --radius-full: 9999px;
-    
-    /* Shadows - Material Design elevation */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    
-    /* Transitions */
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Reset & Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    line-height: 1.5;
-    color: #1F2937;
-    background-color: #F9FAFB;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Layout System */
-.container-fluid {
-    width: 100%;
-    padding: 0 var(--space-4);
+/* Modern form container */
+.modern-form-container {
+    max-width: 800px;
     margin: 0 auto;
-}
-
-@media (min-width: 640px) {
-    .container-fluid {
-        max-width: 640px;
-    }
-}
-
-@media (min-width: 768px) {
-    .container-fluid {
-        max-width: 768px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .container-fluid {
-        max-width: 1024px;
-    }
-}
-
-@media (min-width: 1280px) {
-    .container-fluid {
-        max-width: 1280px;
-    }
-}
-
-/* Grid System - Minimal & Efficient */
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 calc(-1 * var(--space-2));
-}
-
-.col {
-    flex: 1 0 0%;
-    padding: 0 var(--space-2);
-}
-
-@media (min-width: 640px) {
-    .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
-}
-
-@media (min-width: 768px) {
-    .col-md-5 { flex: 0 0 41.6667%; max-width: 41.6667%; }
-    .col-md-6 { flex: 0 0 50%; max-width: 50%; }
-    .col-md-7 { flex: 0 0 58.3333%; max-width: 58.3333%; }
-    .col-md-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
-    .col-md-12 { flex: 0 0 100%; max-width: 100%; }
-}
-
-@media (min-width: 1024px) {
-    .col-lg-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
-    .col-lg-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
-    .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
-}
-
-@media (min-width: 1280px) {
-    .col-xl-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
-    .col-xl-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
-    .col-xl-12 { flex: 0 0 100%; max-width: 100%; }
-}
-
-/* Typography */
-.page-header {
-    padding: var(--space-6) 0;
-    margin-bottom: var(--space-6);
-}
-
-.page-header-title {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: #111827;
-    margin-bottom: var(--space-3);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-}
-
-.page-breadcrumb {
-    font-size: var(--font-size-sm);
-    color: var(--secondary);
-}
-
-.breadcrumb {
-    display: flex;
-    list-style: none;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.breadcrumb-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.breadcrumb-link {
-    text-decoration: none;
-    color: var(--secondary);
-    transition: color var(--transition-fast);
-}
-
-.breadcrumb-link:hover {
-    color: var(--primary);
-}
-
-.breadcrumb-item.active {
-    color: var(--primary);
-    font-weight: var(--font-weight-medium);
-}
-
-/* Cards - Flutter-like Material Design */
-.card {
     background: var(--surface);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--outline-variant);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    transition: transform var(--transition-base), box-shadow var(--transition-base);
-    margin-bottom: var(--space-4);
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.card.border-primary {
-    border-color: var(--primary-container);
-}
-
-.card.border-success {
-    border-color: var(--success-container);
-}
-
-.card.border-warning {
-    border-color: var(--warning-container);
-}
-
-.card.border-info {
-    border-color: var(--info-container);
-}
-
-.card-header {
-    padding: var(--space-4);
-    background: var(--surface-variant);
-    border-bottom: 1px solid var(--outline-variant);
-}
-
-.card-header.bg-primary {
-    background: var(--primary);
+/* Modern form header */
+.form-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #5A4A8C 100%);
     color: var(--on-primary);
+    padding: var(--space-xl);
+    text-align: center;
 }
 
-.card-header.bg-success {
-    background: var(--success);
-    color: white;
+.form-title {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
 }
 
-.card-header.bg-warning {
-    background: var(--warning);
-    color: #1F2937;
+.form-subtitle {
+    font-size: var(--text-base);
+    opacity: 0.9;
 }
 
-.card-header h5, .card-header h6 {
-    font-weight: var(--font-weight-semibold);
+/* Mode toggle */
+.mode-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    padding: var(--space-xs);
+    margin: var(--space-lg) 0;
+}
+
+.mode-toggle button {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.mode-toggle button.active {
+    background: var(--on-primary);
+    color: var(--primary);
+}
+
+/* Modern form body */
+.form-body {
+    padding: var(--space-xl);
+}
+
+/* Form sections */
+.form-section {
+    margin-bottom: var(--space-xl);
+}
+
+.section-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: var(--space-md);
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    margin: 0;
+    gap: var(--space-sm);
 }
 
-.card-body {
-    padding: var(--space-4);
+.section-title i {
+    font-size: var(--text-base);
 }
 
-/* Form Elements - Modern & Clean */
-.form {
-    width: 100%;
+/* Modern form groups */
+.form-group-modern {
+    margin-bottom: var(--space-lg);
 }
 
-.form-group {
-    margin-bottom: var(--space-4);
-}
-
-.form-label {
+.form-label-modern {
     display: block;
-    margin-bottom: var(--space-1);
-    font-weight: var(--font-weight-medium);
-    color: #374151;
-    font-size: var(--font-size-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--secondary);
+    margin-bottom: var(--space-xs);
 }
 
-.form-label.required::after {
-    content: " *";
+.form-label-modern.required::after {
+    content: ' *';
     color: var(--error);
 }
 
-.form-control,
-.form-select {
+.form-input-modern,
+.form-select-modern {
     width: 100%;
-    padding: var(--space-3) var(--space-4);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    line-height: 1.5;
-    color: #1F2937;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--outline-variant);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    transition: all 0.3s ease;
     background: var(--surface);
-    border: 1px solid var(--outline);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 
-.form-control:focus,
-.form-select:focus {
+.form-input-modern:focus,
+.form-select-modern:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
 }
 
-.form-control::placeholder {
-    color: #9CA3AF;
+.form-input-modern.error,
+.form-select-modern.error {
+    border-color: var(--error);
 }
 
-.form-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2379747E' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right var(--space-4) center;
-    background-size: 16px;
-    padding-right: var(--space-8);
+.form-help-text {
+    font-size: var(--text-sm);
+    color: var(--outline);
+    margin-top: var(--space-xs);
 }
 
-.form-check {
+.form-error-text {
+    font-size: var(--text-sm);
+    color: var(--error);
+    margin-top: var(--space-xs);
+}
+
+/* Modern checkbox group */
+.checkbox-group-modern {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.checkbox-item-modern {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-2);
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--outline-variant);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.form-check-input {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    border: 2px solid var(--outline);
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
+.checkbox-item-modern:hover {
+    border-color: var(--primary);
+    background: var(--primary-container);
+}
+
+.checkbox-item-modern input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+}
+
+.checkbox-item-modern label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    user-select: none;
+}
+
+/* Modern file upload */
+.file-upload-modern {
     position: relative;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
 }
 
-.form-check-input:checked {
-    background: var(--primary);
-    border-color: var(--primary);
-}
-
-.form-check-input:checked::after {
-    content: "✓";
+.file-upload-modern input[type="file"] {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.form-check-label {
-    font-size: var(--font-size-sm);
-    color: #374151;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
     cursor: pointer;
 }
 
-/* File Input Styling */
-.form-control[type="file"] {
-    padding: var(--space-2) var(--space-3);
-    background: var(--surface-variant);
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
     border: 2px dashed var(--outline-variant);
-    cursor: pointer;
+    border-radius: var(--radius-sm);
+    background: var(--surface-variant);
+    transition: all 0.3s ease;
 }
 
-.form-control[type="file"]:hover {
+.file-upload-modern:hover .file-upload-label {
     border-color: var(--primary);
-    background: rgba(103, 80, 164, 0.05);
+    background: var(--primary-container);
 }
 
-.form-control[type="file"]::-webkit-file-upload-button {
-    background: var(--primary);
-    color: white;
+.file-preview {
+    margin-top: var(--space-sm);
+    text-align: center;
+}
+
+.file-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+/* Modern buttons */
+.btn-modern {
+    padding: var(--space-sm) var(--space-xl);
     border: none;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    margin-right: var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    font-weight: 500;
     cursor: pointer;
-    font-weight: var(--font-weight-medium);
-    transition: background-color var(--transition-fast);
-}
-
-.form-control[type="file"]::-webkit-file-upload-button:hover {
-    background: #5A4494;
-}
-
-/* Buttons - Material Design Inspired */
-.btn {
+    transition: all 0.3s ease;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-    text-decoration: none;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    position: relative;
-    overflow: hidden;
-    user-select: none;
-    white-space: nowrap;
+    gap: var(--space-sm);
 }
 
-.btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.3);
-    opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%, -50%);
-    transform-origin: 50% 50%;
-}
-
-.btn:focus:not(:active)::after {
-    animation: ripple 1s ease-out;
-}
-
-@keyframes ripple {
-    0% {
-        transform: scale(0, 0);
-        opacity: 0.5;
-    }
-    20% {
-        transform: scale(25, 25);
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 0;
-        transform: scale(40, 40);
-    }
-}
-
-.btn-primary {
+.btn-primary-modern {
     background: var(--primary);
     color: var(--on-primary);
 }
 
-.btn-primary:hover {
-    background: #5A4494;
+.btn-primary-modern:hover {
+    background: #5A4A8C;
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
 }
 
-.btn-secondary {
-    background: var(--secondary-container);
+.btn-secondary-modern {
+    background: var(--surface-variant);
     color: var(--secondary);
-    border: 1px solid var(--outline-variant);
+    border: 2px solid var(--outline-variant);
 }
 
-.btn-secondary:hover {
-    background: #D5D3E0;
-    transform: translateY(-1px);
+.btn-secondary-modern:hover {
+    background: var(--outline-variant);
+    border-color: var(--outline);
 }
 
-.btn-success {
-    background: var(--success);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #0B7A43;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-outline-primary {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-}
-
-.btn-outline-primary:hover {
-    background: rgba(103, 80, 164, 0.1);
-    transform: translateY(-1px);
-}
-
-.btn-sm {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-sm);
-}
-
-/* Alerts - Material Design Snackbars */
-.alert {
-    padding: var(--space-4);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-4);
+/* Progress indicator */
+.progress-indicator {
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    animation: slideDown 0.3s ease;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.progress-step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
 }
 
-.alert-dismissible {
-    padding-right: var(--space-10);
+.progress-step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--outline-variant);
+    color: var(--outline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: var(--text-sm);
 }
 
-.alert-close {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    background: transparent;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    padding: var(--space-1);
-    opacity: 0.7;
-    transition: opacity var(--transition-fast);
+.progress-step.active .progress-step-number {
+    background: var(--primary);
+    color: var(--on-primary);
 }
 
-.alert-close:hover {
-    opacity: 1;
+.progress-step.completed .progress-step-number {
+    background: var(--success);
+    color: var(--on-primary);
 }
 
-.alert-primary {
-    background: var(--primary-container);
+.progress-line {
+    width: 60px;
+    height: 2px;
+    background: var(--outline-variant);
+}
+
+.progress-step.completed .progress-line {
+    background: var(--success);
+}
+
+/* Multi-member cards */
+.member-card {
+    background: var(--surface);
+    border: 2px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    transition: all 0.3s ease;
+}
+
+.member-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.1);
+}
+
+.member-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.member-card-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
     color: var(--primary);
-    border-left: 4px solid var(--primary);
 }
 
-.alert-success {
-    background: var(--success-container);
-    color: var(--success);
-    border-left: 4px solid var(--success);
-}
-
-.alert-warning {
-    background: var(--warning-container);
-    color: #B45309;
-    border-left: 4px solid var(--warning);
-}
-
-.alert-info {
-    background: var(--info-container);
-    color: var(--info);
-    border-left: 4px solid var(--info);
-}
-
-.alert-danger {
-    background: var(--error-container);
-    color: var(--error);
-    border-left: 4px solid var(--error);
-}
-
-/* Utilities */
-.mb-0 { margin-bottom: 0 !important; }
-.mb-2 { margin-bottom: var(--space-2) !important; }
-.mb-3 { margin-bottom: var(--space-3) !important; }
-.mb-4 { margin-bottom: var(--space-4) !important; }
-.mb-6 { margin-bottom: var(--space-6) !important; }
-
-.mt-2 { margin-top: var(--space-2) !important; }
-.mt-3 { margin-top: var(--space-3) !important; }
-.mt-4 { margin-top: var(--space-4) !important; }
-.mt-6 { margin-top: var(--space-6) !important; }
-
-.ms-2 { margin-left: var(--space-2) !important; }
-
-.me-1 { margin-right: var(--space-1) !important; }
-.me-2 { margin-right: var(--space-2) !important; }
-
-.text-muted { color: var(--secondary) !important; }
-.text-center { text-align: center !important; }
-
-.small {
-    font-size: var(--font-size-sm) !important;
-}
-
-.d-flex {
-    display: flex !important;
-}
-
-.justify-content-between {
-    justify-content: space-between !important;
-}
-
-.align-items-center {
-    align-items: center !important;
-}
-
-/* Responsive Utilities */
-@media (max-width: 768px) {
-    .page-header {
-        padding: var(--space-4) 0;
-    }
-    
-    .page-header-title {
-        font-size: var(--font-size-xl);
-    }
-    
-    .card-header h5 {
-        font-size: var(--font-size-lg);
-    }
-    
-    .row {
-        margin: 0 calc(-1 * var(--space-1));
-    }
-    
-    .col {
-        padding: 0 var(--space-1);
-    }
-    
-    /* Stack columns on mobile */
-    .col-sm-12,
-    .col-md-5,
-    .col-md-6,
-    .col-md-7,
-    .col-md-8,
-    .col-lg-4,
-    .col-lg-8,
-    .col-xl-4,
-    .col-xl-8 {
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
-        margin-bottom: var(--space-4);
-    }
-    
-    .card {
-        margin-bottom: var(--space-3);
-    }
-    
-    .btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .d-flex {
-        flex-direction: column;
-        gap: var(--space-3);
-    }
-    
-    .border-top {
-        border-top: 1px solid var(--outline-variant);
-    }
-    
-    .pt-4 {
-        padding-top: var(--space-4) !important;
-    }
-}
-
-@media (max-width: 640px) {
-    :root {
-        --font-size-sm: 0.8125rem;  /* 13px */
-        --font-size-base: 0.875rem; /* 14px */
-        --font-size-lg: 1rem;       /* 16px */
-        --font-size-xl: 1.125rem;   /* 18px */
-    }
-    
-    .container-fluid {
-        padding: 0 var(--space-3);
-    }
-    
-    .card-header,
-    .card-body {
-        padding: var(--space-3);
-    }
-    
-    .form-control,
-    .form-select {
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--font-size-sm);
-    }
-    
-    .btn {
-        padding: var(--space-2) var(--space-4);
-        font-size: var(--font-size-sm);
-    }
-}
-
-/* Loading States */
-.loading {
-    position: relative;
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-.loading::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.member-remove-btn {
+    background: var(--error);
+    color: var(--on-primary);
+    border: none;
+    border-radius: var(--radius-full);
     width: 24px;
     height: 24px;
-    border: 3px solid var(--outline-variant);
-    border-top-color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.member-remove-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Floating action button */
+.fab-add-member {
+    position: fixed;
+    bottom: var(--space-xl);
+    right: var(--space-xl);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.fab-add-member:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(103, 80, 164, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .modern-form-container {
+        margin: var(--space-md);
+        border-radius: var(--radius-md);
+    }
+    
+    .form-header {
+        padding: var(--space-lg);
+    }
+    
+    .form-body {
+        padding: var(--space-lg);
+    }
+    
+    .mode-toggle {
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+    
+    .checkbox-group-modern {
+        flex-direction: column;
+    }
+    
+    .fab-add-member {
+        bottom: var(--space-lg);
+        right: var(--space-lg);
+    }
+}
+
+/* Loading states */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--outline-variant);
+    border-top: 4px solid var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    to { transform: translate(-50%, -50%) rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Focus States for Accessibility */
-:focus-visible {
+/* Success animation */
+.success-animation {
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Searchable Select Components */
+.searchable-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-input {
+    cursor: pointer;
+    padding-right: var(--space-xl) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2379747E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-md) center;
+    background-size: 16px;
+}
+
+.searchable-input:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236750A4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 2px solid var(--outline-variant);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-dropdown.active {
+    display: block;
+}
+
+.search-results {
+    padding: var(--space-xs);
+}
+
+.search-result-item {
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    border-radius: var(--radius-xs);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    color: var(--secondary);
+    font-size: var(--text-sm);
+}
+
+.search-result-item:hover {
+    background: var(--primary-container);
+    color: var(--primary);
+}
+
+.search-result-item.selected {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.search-no-results {
+    padding: var(--space-md);
+    text-align: center;
+    color: var(--outline);
+    font-size: var(--text-sm);
+    font-style: italic;
+}
+
+.search-highlight {
+    background: var(--warning-container);
+    color: var(--warning);
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+/* Loading state */
+.search-loading {
+    padding: var(--space-md);
+    text-align: center;
+    color: var(--outline);
+    font-size: var(--text-sm);
+}
+
+.search-loading::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--outline-variant);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: var(--space-sm);
+}
+
+/* Keyboard navigation */
+.search-result-item.keyboard-focused {
+    background: var(--primary-container);
+    color: var(--primary);
     outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* Print Styles */
-@media print {
-    .card {
-        box-shadow: none;
-        border: 1px solid #ddd;
-    }
-    
-    .btn,
-    .alert {
-        display: none !important;
-    }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-    :root {
-        --primary: #0000FF;
-        --secondary: #000000;
-        --outline: #000000;
-    }
-    
-    .card {
-        border: 2px solid var(--outline);
-    }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+    outline-offset: -2px;
 }
 </style>
 {% endblock internal_style %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="modern-form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="fas {% if mode == 'single' %}fa-user-plus{% else %}fa-users{% endif %} me-2"></i>
+                {% if mode == 'single' %}Add New Member{% else %}Add Multiple Members{% endif %}
+            </h1>
+            <p class="form-subtitle">
+                {% if mode == 'single' %}Register a new church member{% else %}Register multiple church members at once{% endif %}
+            </p>
+            
+            <!-- Mode Toggle -->
+            <div class="mode-toggle">
+                <button class="{% if mode == 'single' %}active{% endif %}" onclick="location.href='{% url 'add_member' %}'">
+                    <i class="fas fa-user me-2"></i>Single
+                </button>
+                <button class="{% if mode != 'single' %}active{% endif %}" onclick="location.href='{% url 'create_member' %}'">
+                    <i class="fas fa-users me-2"></i>Multiple
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <form method="post" enctype="multipart/form-data" novalidate id="memberForm">
+                {% csrf_token %}
+                
+                {% if mode == 'single' %}
+                    <!-- Single Member Form -->
+                    <!-- Progress Indicator -->
+                    <div class="progress-indicator">
+                        <div class="progress-step active">
+                            <div class="progress-step-number">1</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <div class="progress-step-number">2</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <div class="progress-step-number">3</div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Basic Information
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label-modern required">
+                                        Full Name
+                                    </label>
+                                    <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" 
+       class="form-input-modern {% if form.name.errors %}error{% endif %}" 
+       value="{{ form.name.value|default:'' }}" 
+       placeholder="Enter full name">
+                                    {% if form.name.errors %}
+                                        <div class="form-error-text">{{ form.name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.code.id_for_label }}" class="form-label-modern">
+                                        Member Code
+                                    </label>
+                                    <input type="text" name="{{ form.code.name }}" id="{{ form.code.id_for_label }}" 
+       class="form-input-modern {% if form.code.errors %}error{% endif %}" 
+       value="{{ form.code.value|default:'' }}" 
+       placeholder="e.g., 001PT">
+                                    <div class="form-help-text">e.g., 001PT</div>
+                                    {% if form.code.errors %}
+                                        <div class="form-error-text">{{ form.code.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.telephone.id_for_label }}" class="form-label-modern">
+                                        Phone Number
+                                    </label>
+                                    <input type="tel" name="{{ form.telephone.name }}" id="{{ form.telephone.id_for_label }}" 
+       class="form-input-modern {% if form.telephone.errors %}error{% endif %}" 
+       value="{{ form.telephone.value|default:'' }}" 
+       placeholder="+255 XXX XXX XXX">
+                                    <div class="form-help-text">Format: +255 XXX XXX XXX</div>
+                                    {% if form.telephone.errors %}
+                                        <div class="form-error-text">{{ form.telephone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.gender.id_for_label }}" class="form-label-modern">
+                                        Gender
+                                    </label>
+                                    <select name="{{ form.gender.name }}" id="{{ form.gender.id_for_label }}" 
+        class="form-select-modern {% if form.gender.errors %}error{% endif %}">
+        <option value="">Select Gender</option>
+        <option value="male" {% if form.gender.value == 'male' %}selected{% endif %}>Male</option>
+        <option value="female" {% if form.gender.value == 'female' %}selected{% endif %}>Female</option>
+    </select>
+                                    {% if form.gender.errors %}
+                                        <div class="form-error-text">{{ form.gender.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="{{ form.location.id_for_label }}" class="form-label-modern">
+                                Location
+                            </label>
+                            <input type="text" name="{{ form.location.name }}" id="{{ form.location.id_for_label }}" 
+       class="form-input-modern {% if form.location.errors %}error{% endif %}" 
+       value="{{ form.location.value|default:'' }}" 
+       placeholder="Enter location">
+                            {% if form.location.errors %}
+                                <div class="form-error-text">{{ form.location.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Community & Ministry Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-church"></i>
+                            Community & Ministry
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.shepherd.id_for_label }}" class="form-label-modern">
+                                        Community
+                                    </label>
+                                    <select name="{{ form.shepherd.name }}" id="{{ form.shepherd.id_for_label }}" 
+                                            class="form-select-modern {% if form.shepherd.errors %}error{% endif %}">
+                                        <option value="">Select Community</option>
+                                        {% for community in shepherds %}
+                                        <option value="{{ community.id }}" {% if form.shepherd.value == community.id %}selected{% endif %}>
+                                            {{ community.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.shepherd.errors %}
+                                        <div class="form-error-text">{{ form.shepherd.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.ministry.id_for_label }}" class="form-label-modern">
+                                        Ministry
+                                    </label>
+                                    <select name="{{ form.ministry.name }}" id="{{ form.ministry.id_for_label }}" 
+                                            class="form-select-modern {% if form.ministry.errors %}error{% endif %}">
+                                        <option value="">Select Ministry</option>
+                                        {% for ministry in ministries %}
+                                        <option value="{{ ministry.id }}" {% if form.ministry.value == ministry.id %}selected{% endif %}>
+                                            {{ ministry.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.ministry.errors %}
+                                        <div class="form-error-text">{{ form.ministry.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Family Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-home"></i>
+                            Family Information
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.fathers_name.id_for_label }}" class="form-label-modern">
+                                        Father's Name
+                                    </label>
+                                    <input type="text" name="{{ form.fathers_name.name }}" id="{{ form.fathers_name.id_for_label }}" 
+       class="form-input-modern {% if form.fathers_name.errors %}error{% endif %}" 
+       value="{{ form.fathers_name.value|default:'' }}" 
+       placeholder="Enter father's name">
+                                    {% if form.fathers_name.errors %}
+                                        <div class="form-error-text">{{ form.fathers_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.mothers_name.id_for_label }}" class="form-label-modern">
+                                        Mother's Name
+                                    </label>
+                                    <input type="text" name="{{ form.mothers_name.name }}" id="{{ form.mothers_name.id_for_label }}" 
+       class="form-input-modern {% if form.mothers_name.errors %}error{% endif %}" 
+       value="{{ form.mothers_name.value|default:'' }}" 
+       placeholder="Enter mother's name">
+                                    {% if form.mothers_name.errors %}
+                                        <div class="form-error-text">{{ form.mothers_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.guardians_name.id_for_label }}" class="form-label-modern">
+                                        Guardian's Name
+                                    </label>
+                                    <input type="text" name="{{ form.guardians_name.name }}" id="{{ form.guardians_name.id_for_label }}" 
+       class="form-input-modern {% if form.guardians_name.errors %}error{% endif %}" 
+       value="{{ form.guardians_name.value|default:'' }}" 
+       placeholder="Enter guardian's name">
+                                    {% if form.guardians_name.errors %}
+                                        <div class="form-error-text">{{ form.guardians_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status & Activities Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-toggle-on"></i>
+                            Status & Activities
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label for="{{ form.membership_category.id_for_label }}" class="form-label-modern">
+                                        Membership Category
+                                    </label>
+                                    <select name="{{ form.membership_category.name }}" id="{{ form.membership_category.id_for_label }}" 
+                                            class="form-select-modern {% if form.membership_category.errors %}error{% endif %}">
+                                        <option value="">Select Category</option>
+                                        <option value="elder" {% if form.membership_category.value == 'elder' %}selected{% endif %}>Elder</option>
+                                        <option value="youth" {% if form.membership_category.value == 'youth' %}selected{% endif %}>Youth</option>
+                                        <option value="child" {% if form.membership_category.value == 'child' %}selected{% endif %}>Child</option>
+                                    </select>
+                                    <div class="form-help-text">Distinguishes between Elders, Youth, and Children</div>
+                                    {% if form.membership_category.errors %}
+                                        <div class="form-error-text">{{ form.membership_category.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Member Status</label>
+                                    <div class="checkbox-group-modern">
+                                        <div class="checkbox-item-modern">
+                                            {{ form.active }}
+                                            <label for="{{ form.active.id_for_label }}">Active Member</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Activities</label>
+                                    <div class="checkbox-group-modern">
+                                        <div class="checkbox-item-modern">
+                                            {{ form.pays_tithe }}
+                                            <label for="{{ form.pays_tithe.id_for_label }}">Pays Tithe</label>
+                                        </div>
+                                        <div class="checkbox-item-modern">
+                                            {{ form.working }}
+                                            <label for="{{ form.working.id_for_label }}">Working</label>
+                                        </div>
+                                        <div class="checkbox-item-modern">
+                                            {{ form.schooling }}
+                                            <label for="{{ form.schooling.id_for_label }}">Schooling</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-camera"></i>
+                            Profile Picture
+                        </h3>
+                        
+                        <div class="form-group-modern">
+                            <div class="file-upload-modern">
+                                <input type="file" id="{{ form.picture.id_for_label }}" name="{{ form.picture.name }}" accept="image/*">
+                                <label for="{{ form.picture.id_for_label }}" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                                    <span>Click to upload photo</span>
+                                </label>
+                            </div>
+                            {% if form.picture.errors %}
+                                <div class="form-error-text">{{ form.picture.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-section">
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn-modern btn-primary-modern">
+                                <i class="fas fa-save me-2"></i>
+                                Save Member
+                            </button>
+                            <a href="{% url 'table_members' %}" class="btn-modern btn-secondary-modern">
+                                <i class="fas fa-times me-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- Multiple Members Form -->
+                    <div id="multiMemberForm">
+                        <!-- Progress Indicator -->
+                        <div class="progress-indicator">
+                            <div class="progress-step active">
+                                <div class="progress-step-number">1</div>
+                            </div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step">
+                                <div class="progress-step-number">2</div>
+                            </div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step">
+                                <div class="progress-step-number">3</div>
+                            </div>
+                        </div>
+
+                        <!-- Member Cards Container -->
+                        <div id="memberCards">
+                            {% for form_num in '123' %}
+                                <div class="member-card" data-member="{{ form_num }}">
+                                    <div class="member-card-header">
+                                        <h4 class="member-card-title">Member {{ form_num }}</h4>
+                                        {% if form_num != '1' %}
+                                        <button type="button" class="member-remove-btn" onclick="removeMember({{ form_num }})">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Include form fields for each member -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="name_{{ form_num }}" class="form-label-modern required">
+                                                    Full Name
+                                                </label>
+                                                <input type="text" name="name_{{ form_num }}" id="name_{{ form_num }}" 
+                                                       class="form-input-modern" placeholder="Enter full name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="code_{{ form_num }}" class="form-label-modern">
+                                                    Member Code
+                                                </label>
+                                                <input type="text" name="code_{{ form_num }}" id="code_{{ form_num }}" 
+                                                       class="form-input-modern" placeholder="e.g., 001PT">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="telephone_{{ form_num }}" class="form-label-modern">
+                                                    Phone Number
+                                                </label>
+                                                <input type="tel" name="telephone_{{ form_num }}" id="telephone_{{ form_num }}" 
+                                                       class="form-input-modern" placeholder="+255 XXX XXX XXX">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="gender_{{ form_num }}" class="form-label-modern">
+                                                    Gender
+                                                </label>
+                                                <select name="gender_{{ form_num }}" id="gender_{{ form_num }}" class="form-select-modern">
+                                                    <option value="">Select Gender</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group-modern">
+                                        <label for="location_{{ form_num }}" class="form-label-modern">
+                                            Location
+                                        </label>
+                                        <input type="text" name="location_{{ form_num }}" id="location_{{ form_num }}" 
+                                               class="form-input-modern" placeholder="Enter location">
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="shepherd_{{ form_num }}" class="form-label-modern">
+                                                    Community
+                                                </label>
+                                                <select name="shepherd_{{ form_num }}" id="shepherd_{{ form_num }}" class="form-select-modern">
+                                                    <option value="">Select Community</option>
+                                                    {% for community in shepherds %}
+                                                    <option value="{{ community.id }}">{{ community.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="ministry_{{ form_num }}" class="form-label-modern">
+                                                    Ministry
+                                                </label>
+                                                <select name="ministry_{{ form_num }}" id="ministry_{{ form_num }}" class="form-select-modern">
+                                                    <option value="">Select Ministry</option>
+                                                    {% for ministry in ministries %}
+                                                    <option value="{{ ministry.id }}">{{ ministry.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Add Member Button -->
+                        <div class="text-center mb-4">
+                            <button type="button" class="btn-modern btn-secondary-modern" onclick="addMember()">
+                                <i class="fas fa-plus me-2"></i>
+                                Add Another Member
+                            </button>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-section">
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn-modern btn-primary-modern">
+                                    <i class="fas fa-save me-2"></i>
+                                    Save All Members
+                                </button>
+                                <a href="{% url 'table_members' %}" class="btn-modern btn-secondary-modern">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button for Multi-Member Mode -->
+{% if mode != 'single' %}
+<button class="fab-add-member" onclick="addMember()">
+    <i class="fas fa-plus"></i>
+</button>
+{% endif %}
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
+
+<script>
+// Form validation and submission
+document.getElementById('memberForm').addEventListener('submit', function(e) {
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+    loadingOverlay.style.display = 'flex';
+    
+    // Simulate form submission (remove this in production)
+    setTimeout(() => {
+        loadingOverlay.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Member';
+        
+        // Add success animation
+        document.querySelector('.modern-form-container').classList.add('success-animation');
+    }, 2000);
+});
+
+// Multi-member form functions
+let memberCount = 3;
+
+function addMember() {
+    memberCount++;
+    const memberCards = document.getElementById('memberCards');
+    
+    const newCard = document.createElement('div');
+    newCard.className = 'member-card';
+    newCard.setAttribute('data-member', memberCount);
+    
+    newCard.innerHTML = `
+        <div class="member-card-header">
+            <h4 class="member-card-title">Member ${memberCount}</h4>
+            <button type="button" class="member-remove-btn" onclick="removeMember(${memberCount})">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label for="name_${memberCount}" class="form-label-modern required">
+                        Full Name
+                    </label>
+                    <input type="text" name="name_${memberCount}" id="name_${memberCount}" 
+                           class="form-input-modern" placeholder="Enter full name">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label for="code_${memberCount}" class="form-label-modern">
+                        Member Code
+                    </label>
+                    <input type="text" name="code_${memberCount}" id="code_${memberCount}" 
+                           class="form-input-modern" placeholder="e.g., 001PT">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label for="telephone_${memberCount}" class="form-label-modern">
+                        Phone Number
+                    </label>
+                    <input type="tel" name="telephone_${memberCount}" id="telephone_${memberCount}" 
+                           class="form-input-modern" placeholder="+255 XXX XXX XXX">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label for="gender_${memberCount}" class="form-label-modern">
+                        Gender
+                    </label>
+                    <select name="gender_${memberCount}" id="gender_${memberCount}" class="form-select-modern">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group-modern">
+            <label for="location_${memberCount}" class="form-label-modern">
+                Location
+            </label>
+            <input type="text" name="location_${memberCount}" id="location_${memberCount}" 
+                   class="form-input-modern" placeholder="Enter location">
+        </div>
+    `;
+    
+    memberCards.appendChild(newCard);
+    
+    // Smooth scroll to new card
+    newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function removeMember(memberId) {
+    const card = document.querySelector(`[data-member="${memberId}"]`);
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-100%)';
+        setTimeout(() => card.remove(), 300);
+    }
+}
+
+// File upload preview
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'file-preview';
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                
+                const label = input.nextElementSibling;
+                label.style.display = 'none';
+                label.parentNode.insertBefore(preview, label.nextSibling);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+// Auto-save draft functionality disabled - preventing previous data from appearing
+// let autoSaveTimer;
+// document.querySelectorAll('.form-input-modern, .form-select-modern').forEach(input => {
+//     input.addEventListener('input', function() {
+//         clearTimeout(autoSaveTimer);
+//         autoSaveTimer = setTimeout(() => {
+//             // Save to localStorage
+//             const formData = new FormData(document.getElementById('memberForm'));
+//             const data = {};
+//             for (let [key, value] of formData.entries()) {
+//                 data[key] = value;
+//             }
+//             localStorage.setItem('memberFormDraft', JSON.stringify(data));
+//         }, 2000);
+//     });
+// });
+
+// Searchable Select Component
+class SearchableSelect {
+    constructor(inputElement, dropdownElement, resultsElement) {
+        this.input = inputElement;
+        this.dropdown = dropdownElement;
+        this.results = resultsElement;
+        this.hiddenInput = document.getElementById(inputElement.id + '_id');
+        this.allItems = Array.from(resultsElement.querySelectorAll('.search-result-item'));
+        this.filteredItems = [...this.allItems];
+        this.selectedIndex = -1;
+        this.isOpen = false;
+        
+        this.init();
+    }
+    
+    init() {
+        // Set initial value if exists
+        if (this.hiddenInput && this.hiddenInput.value) {
+            const selectedItem = this.allItems.find(item => item.dataset.value === this.hiddenInput.value);
+            if (selectedItem) {
+                this.input.value = selectedItem.dataset.text;
+                this.input.dataset.selectedValue = selectedItem.dataset.value;
+            }
+        }
+        
+        // Event listeners
+        this.input.addEventListener('focus', () => this.open());
+        this.input.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.open();
+        });
+        this.input.addEventListener('blur', () => {
+            setTimeout(() => this.close(), 200);
+        });
+        this.input.addEventListener('input', (e) => this.handleInput(e));
+        this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+        
+        // Click events for results
+        this.results.addEventListener('click', (e) => {
+            if (e.target.classList.contains('search-result-item')) {
+                this.selectItem(e.target);
+            }
+        });
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!this.input.contains(e.target) && !this.dropdown.contains(e.target)) {
+                this.close();
+            }
+        });
+    }
+    
+    open() {
+        if (!this.isOpen) {
+            this.dropdown.classList.add('active');
+            this.isOpen = true;
+            this.showResults();
+        }
+    }
+    
+    close() {
+        if (this.isOpen) {
+            this.dropdown.classList.remove('active');
+            this.isOpen = false;
+            this.selectedIndex = -1;
+        }
+    }
+    
+    handleInput(e) {
+        const query = e.target.value.toLowerCase().trim();
+        
+        if (query === '') {
+            this.filteredItems = [...this.allItems];
+        } else {
+            this.filteredItems = this.allItems.filter(item => 
+                item.dataset.text.toLowerCase().includes(query)
+            );
+        }
+        
+        this.showResults();
+        this.open();
+    }
+    
+    handleKeydown(e) {
+        if (!this.isOpen) return;
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.navigateDown();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                this.navigateUp();
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (this.selectedIndex >= 0) {
+                    this.selectItem(this.filteredItems[this.selectedIndex]);
+                }
+                break;
+            case 'Escape':
+                this.close();
+                break;
+        }
+    }
+    
+    navigateDown() {
+        this.selectedIndex = Math.min(this.selectedIndex + 1, this.filteredItems.length - 1);
+        this.updateSelection();
+    }
+    
+    navigateUp() {
+        this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+        this.updateSelection();
+    }
+    
+    updateSelection() {
+        // Remove previous selection
+        this.filteredItems.forEach(item => {
+            item.classList.remove('keyboard-focused');
+        });
+        
+        // Add selection to current item
+        if (this.selectedIndex >= 0 && this.filteredItems[this.selectedIndex]) {
+            this.filteredItems[this.selectedIndex].classList.add('keyboard-focused');
+            this.filteredItems[this.selectedIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+    
+    showResults() {
+        this.results.innerHTML = '';
+        
+        if (this.filteredItems.length === 0) {
+            this.results.innerHTML = '<div class="search-no-results">No results found</div>';
+            return;
+        }
+        
+        this.filteredItems.forEach(item => {
+            const clonedItem = item.cloneNode(true);
+            this.results.appendChild(clonedItem);
+        });
+    }
+    
+    selectItem(item) {
+        this.input.value = item.dataset.text;
+        if (this.hiddenInput) {
+            this.hiddenInput.value = item.dataset.value;
+        }
+        this.input.dataset.selectedValue = item.dataset.value;
+        this.close();
+        
+        // Trigger change event
+        this.input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+// Initialize searchable selects (disabled - using standard select dropdowns)
+document.addEventListener('DOMContentLoaded', function() {
+    // Standard HTML select dropdowns are now being used instead of custom searchable selects
+    // This provides better reliability and compatibility
+    
+    // Clear any existing draft data from localStorage
+    localStorage.removeItem('memberFormDraft');
+});
+
+// Restore draft on page load disabled - preventing previous data from appearing
+// window.addEventListener('load', function() {
+//     const draft = localStorage.getItem('memberFormDraft');
+//     if (draft) {
+//         const data = JSON.parse(draft);
+//         Object.keys(data).forEach(key => {
+//             const input = document.querySelector(`[name="${key}"]`);
+//             if (input) {
+//                 input.value = data[key];
+//             }
+//         });
+//     }
+// });
+</script>
+{% endblock %}

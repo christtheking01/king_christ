@@ -3,139 +3,631 @@
 
 {% block title %}Events Calendar - Christ King Church{% endblock %}
 
+{% block internal_style %}
+<style>
+    /* Modern Glassmorphism Calendar Styles */
+    .calendar-wrapper {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header Section */
+    .calendar-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .calendar-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .calendar-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-bar form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .filter-group label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        font-size: 0.9rem;
+        background: white;
+        color: var(--text-primary);
+        min-width: 140px;
+        transition: all 0.2s ease;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary-modern {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline-modern {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-secondary-modern {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    .btn-secondary-modern:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Dual Calendar Layout */
+    .dual-calendar-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+        .dual-calendar-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Calendar Card */
+    .calendar-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .calendar-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .calendar-card-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .calendar-card-header h2 {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .calendar-nav a {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .calendar-nav a:hover {
+        background: rgba(255,255,255,0.35);
+        transform: scale(1.1);
+    }
+
+    /* Calendar Table */
+    .calendar-table-wrapper {
+        padding: 1rem;
+    }
+
+    .calendar-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 4px;
+    }
+
+    .calendar-table th {
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .calendar-table td {
+        height: 100px;
+        vertical-align: top;
+        padding: 0.5rem;
+        border-radius: var(--border-radius-sm);
+        background: var(--bg-primary);
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .calendar-table td:hover {
+        background: var(--bg-secondary);
+        transform: scale(1.02);
+        z-index: 1;
+        box-shadow: var(--shadow-md);
+    }
+
+    .calendar-table td.other-month {
+        background: var(--bg-secondary);
+        opacity: 0.6;
+    }
+
+    .calendar-table td.today {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border: 2px solid var(--primary);
+    }
+
+    .calendar-table td.today .day-number {
+        background: var(--gradient-primary);
+        color: white;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 600;
+    }
+
+    .day-number {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .day-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        max-height: 70px;
+        overflow-y: auto;
+    }
+
+    .day-content::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .day-content::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+
+    /* Event Pills */
+    .event-pill {
+        display: block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: white;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .event-pill:hover {
+        transform: translateX(2px);
+        filter: brightness(1.1);
+    }
+
+    /* Liturgical Badge */
+    .liturgical-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .liturgical-title {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        font-style: italic;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Legend Card */
+    .legend-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .legend-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .legend-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .calendar-header {
+            padding: 1rem;
+        }
+
+        .calendar-header h1 {
+            font-size: 1.25rem;
+        }
+
+        .filter-bar form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+        }
+
+        .calendar-table td {
+            height: 70px;
+            padding: 0.25rem;
+        }
+
+        .day-number {
+            font-size: 0.8rem;
+        }
+
+        .event-pill {
+            font-size: 0.6rem;
+            padding: 1px 3px;
+        }
+
+        .calendar-card-header h2 {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .calendar-card {
+        animation: fadeIn 0.4s ease forwards;
+    }
+
+    .calendar-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
+<div class="calendar-wrapper">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1"><i class="fas fa-calendar-alt text-primary me-2"></i>Events Calendar</h1>
-            <p class="text-muted mb-0">View and manage church events</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'event_list' %}" class="btn btn-outline-primary">
-                <i class="fas fa-list me-1"></i>List View
-            </a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'event_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Create Event
-            </a>
-            {% endif %}
+    <div class="calendar-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h1><i class="fas fa-calendar-alt"></i> Events Calendar</h1>
+            <div class="quick-actions">
+                <a href="{% url 'event_list' %}" class="btn-modern btn-outline-modern">
+                    <i class="fas fa-list"></i> List View
+                </a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'event_create' %}" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-plus"></i> Create Event
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Month</label>
-                    <select name="month" class="form-select" onchange="this.form.submit()">
-                        {% for m in "123456789101112"|make_list %}
-                        <option value="{{ m }}" {% if m == month|stringformat:"i" %}selected{% endif %}>
-                            {% if m == "1" %}January{% endif %}
-                            {% if m == "2" %}February{% endif %}
-                            {% if m == "3" %}March{% endif %}
-                            {% if m == "4" %}April{% endif %}
-                            {% if m == "5" %}May{% endif %}
-                            {% if m == "6" %}June{% endif %}
-                            {% if m == "7" %}July{% endif %}
-                            {% if m == "8" %}August{% endif %}
-                            {% if m == "9" %}September{% endif %}
-                            {% if m == "10" %}October{% endif %}
-                            {% if m == "11" %}November{% endif %}
-                            {% if m == "12" %}December{% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Year</label>
-                    <select name="year" class="form-select" onchange="this.form.submit()">
-                        {% for y in "20232024202520262027"|make_list|slice:":4" %}
-                        <option value="{{ y }}{{ y|add:1|slice:":2" }}" {% if y|add:"0" == year|divisibleby:1 %}selected{% endif %}>{{ y }}{{ y|add:1|slice:":2" }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Category</label>
-                    <select name="category" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Categories</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Event Type</label>
-                    <select name="event_type" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Types</option>
-                        {% for type_code, type_name in event_types %}
-                        <option value="{{ type_code }}" {% if selected_type == type_code %}selected{% endif %}>{{ type_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <a href="{% url 'calendar' %}" class="btn btn-outline-secondary w-100">
-                        <i class="fas fa-undo"></i>
+    <div class="filter-bar">
+        <form method="get">
+            <div class="filter-group">
+                <label>Month</label>
+                <select name="month" onchange="this.form.submit()">
+                    {% for m in "123456789101112"|make_list %}
+                    <option value="{{ m }}" {% if m == month|stringformat:"i" %}selected{% endif %}>
+                        {% if m == "1" %}January{% endif %}
+                        {% if m == "2" %}February{% endif %}
+                        {% if m == "3" %}March{% endif %}
+                        {% if m == "4" %}April{% endif %}
+                        {% if m == "5" %}May{% endif %}
+                        {% if m == "6" %}June{% endif %}
+                        {% if m == "7" %}July{% endif %}
+                        {% if m == "8" %}August{% endif %}
+                        {% if m == "9" %}September{% endif %}
+                        {% if m == "10" %}October{% endif %}
+                        {% if m == "11" %}November{% endif %}
+                        {% if m == "12" %}December{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Year</label>
+                <select name="year" onchange="this.form.submit()">
+                    {% for y in "20242025202620272028"|make_list|slice:":5" %}
+                    <option value="{{ y }}{{ y|add:1|slice:":2" }}" {% if y|add:"0" == year|divisibleby:1 %}selected{% endif %}>{{ y }}{{ y|add:1|slice:":2" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Category</label>
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Event Type</label>
+                <select name="event_type" onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    {% for type_code, type_name in event_types %}
+                    <option value="{{ type_code }}" {% if selected_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <a href="{% url 'calendar' %}" class="btn-modern btn-secondary-modern" style="height: fit-content;">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Dual Calendar Grid -->
+    <div class="dual-calendar-container">
+        <!-- Current Month -->
+        <div class="calendar-card">
+            <div class="calendar-card-header">
+                <h2>{{ month_name }} {{ year }}</h2>
+                <div class="calendar-nav">
+                    <a href="{% url 'calendar' %}?month={{ prev_month }}&year={{ prev_year }}{% if selected_category and selected_category != 'None' %}&category={{ selected_category }}{% endif %}{% if selected_type %}&event_type={{ selected_type }}{% endif %}" title="Previous Month">
+                        <i class="fas fa-chevron-left"></i>
                     </a>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Calendar Navigation -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href="{% url 'calendar' %}?month={{ prev_month }}&year={{ prev_year }}&category={{ selected_category }}&event_type={{ selected_type }}" class="btn btn-outline-primary">
-            <i class="fas fa-chevron-left me-1"></i>Previous
-        </a>
-        <h2 class="h4 mb-0">{{ month_name }} {{ year }}</h2>
-        <a href="{% url 'calendar' %}?month={{ next_month }}&year={{ next_year }}&category={{ selected_category }}&event_type={{ selected_type }}" class="btn btn-outline-primary">
-            Next<i class="fas fa-chevron-right ms-1"></i>
-        </a>
-    </div>
-
-    <!-- Calendar Grid -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered mb-0 calendar-table">
-                    <thead class="table-light">
+            </div>
+            <div class="calendar-table-wrapper">
+                <table class="calendar-table">
+                    <thead>
                         <tr>
-                            <th class="text-center">Sun</th>
-                            <th class="text-center">Mon</th>
-                            <th class="text-center">Tue</th>
-                            <th class="text-center">Wed</th>
-                            <th class="text-center">Thu</th>
-                            <th class="text-center">Fri</th>
-                            <th class="text-center">Sat</th>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for week in calendar_weeks %}
-                        <tr style="height: 120px;">
+                        {% for week in current_month_weeks %}
+                        <tr>
                             {% for day in week %}
-                            <td class="{% if not day.is_current_month %}bg-light text-muted{% endif %} {% if day.is_today %}table-primary{% endif %}" style="vertical-align: top; padding: 8px;">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <span class="fw-bold {% if day.is_today %}text-primary{% endif %}">{{ day.date.day }}</span>
+                            <td class="{% if not day.is_current_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="day-number{% if day.is_today %}{% endif %}">{{ day.date.day }}</span>
                                     {% if day.liturgical %}
-                                    <span class="badge" style="background-color: {{ day.liturgical.color }}; font-size: 0.6rem;" title="{{ day.liturgical.title }}">
+                                    <span class="liturgical-badge" style="background-color: {{ day.liturgical.color }};" title="{{ day.liturgical.title }}">
                                         <i class="fas fa-church"></i>
                                     </span>
                                     {% endif %}
                                 </div>
-                                <div class="small">
+                                <div class="day-content">
                                     {% for event in day.events %}
                                     <a href="{% url 'event_detail' event.id %}" 
-                                       class="d-block mb-1 p-1 rounded text-decoration-none text-white text-truncate"
-                                       style="background-color: {% if event.category %}{{ event.category.color }}{% else %}#007bff{% endif %}; font-size: 0.75rem;"
-                                       title="{{ event.title }}">
-                                        {% if event.all_day %}<i class="fas fa-sun me-1"></i>{% endif %}
-                                        {% if event.start_time %}{{ event.start_time|time:"H:i" }}{% endif %}
-                                        {{ event.title }}
+                                       class="event-pill"
+                                       style="background-color: {% if event.category %}{{ event.category.color }}{% else %}#667eea{% endif %};"
+                                       title="{{ event.title }} - {% if event.start_time %}{{ event.start_time|time:"g:i A" }}{% else %}All Day{% endif %}">
+                                        {% if event.all_day %}<i class="fas fa-sun" style="font-size: 0.5rem;"></i>{% endif %}
+                                        {{ event.title|truncatechars:15 }}
                                     </a>
                                     {% empty %}
                                     {% if day.liturgical %}
-                                    <small class="text-muted d-block">{{ day.liturgical.title }}</small>
+                                    <span class="liturgical-title">{{ day.liturgical.title|truncatechars:12 }}</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Next Month -->
+        <div class="calendar-card">
+            <div class="calendar-card-header" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+                <h2>{{ next_month_name }} {{ next_year }}</h2>
+                <div class="calendar-nav">
+                    <a href="{% url 'calendar' %}?month={{ next_month_nav }}&year={{ next_year_nav }}{% if selected_category and selected_category != 'None' %}&category={{ selected_category }}{% endif %}{% if selected_type %}&event_type={{ selected_type }}{% endif %}" title="Next Month">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="calendar-table-wrapper">
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in next_month_weeks %}
+                        <tr>
+                            {% for day in week %}
+                            <td class="{% if not day.is_current_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="day-number{% if day.is_today %}{% endif %}">{{ day.date.day }}</span>
+                                    {% if day.liturgical %}
+                                    <span class="liturgical-badge" style="background-color: {{ day.liturgical.color }};" title="{{ day.liturgical.title }}">
+                                        <i class="fas fa-church"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="day-content">
+                                    {% for event in day.events %}
+                                    <a href="{% url 'event_detail' event.id %}" 
+                                       class="event-pill"
+                                       style="background-color: {% if event.category %}{{ event.category.color }}{% else %}#667eea{% endif %};"
+                                       title="{{ event.title }} - {% if event.start_time %}{{ event.start_time|time:"g:i A" }}{% else %}All Day{% endif %}">
+                                        {% if event.all_day %}<i class="fas fa-sun" style="font-size: 0.5rem;"></i>{% endif %}
+                                        {{ event.title|truncatechars:15 }}
+                                    </a>
+                                    {% empty %}
+                                    {% if day.liturgical %}
+                                    <span class="liturgical-title">{{ day.liturgical.title|truncatechars:12 }}</span>
                                     {% endif %}
                                     {% endfor %}
                                 </div>
@@ -150,36 +642,23 @@
     </div>
 
     <!-- Legend -->
-    <div class="card mt-3">
-        <div class="card-body">
-            <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Legend</h6>
-            <div class="d-flex flex-wrap gap-3">
-                {% for cat in categories %}
-                <div class="d-flex align-items-center">
-                    <span class="badge me-2" style="background-color: {{ cat.color }}">&nbsp;&nbsp;</span>
-                    <small>{{ cat.name }}</small>
-                </div>
-                {% endfor %}
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-secondary me-2">&nbsp;&nbsp;</span>
-                    <small>Other Events</small>
-                </div>
+    <div class="legend-card">
+        <div class="legend-title">
+            <i class="fas fa-info-circle text-primary"></i>
+            Category Legend
+        </div>
+        <div class="legend-items">
+            {% for cat in categories %}
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: {{ cat.color }}"></span>
+                <span>{{ cat.name }}</span>
+            </div>
+            {% endfor %}
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #667eea"></span>
+                <span>Other Events</span>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.calendar-table td {
-    width: 14.28%;
-    min-width: 100px;
-}
-.calendar-table .event-item {
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-.calendar-table .event-item:hover {
-    opacity: 0.8;
-}
-</style>
 {% endblock %}

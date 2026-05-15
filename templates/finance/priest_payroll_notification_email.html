@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payroll Verification Required</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #f31260 0%, #ff6b9d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .details-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .details-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .details-table td:first-child {
+            font-weight: 600;
+            color: #f31260;
+            width: 40%;
+        }
+        .salary-row {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .btn {
+            display: inline-block;
+            background: #f31260;
+            color: white;
+            text-decoration: none;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+        .btn:hover {
+            background: #d91a50;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Payroll Verification Required</h1>
+        <p>A payroll is awaiting your approval</p>
+    </div>
+    
+    <div class="content">
+        <p>Dear Father,</p>
+        
+        <div class="alert-box">
+            <strong>⚠️ Action Required:</strong> A payroll has been submitted by {{ submitted_by.get_full_name|default:submitted_by.username }} and is awaiting your verification before processing.
+        </div>
+        
+        <table class="details-table">
+            <tr>
+                <td>Status</td>
+                <td><span class="status-badge">PENDING VERIFICATION</span></td>
+            </tr>
+            <tr>
+                <td>Employee</td>
+                <td>{{ employee.name }}</td>
+            </tr>
+            <tr>
+                <td>Position</td>
+                <td>{{ employee.position }}</td>
+            </tr>
+            <tr>
+                <td>Department</td>
+                <td>{{ employee.department|default:"N/A" }}</td>
+            </tr>
+            <tr>
+                <td>Pay Period</td>
+                <td>{{ payroll.pay_period_start|date:"F d, Y" }} - {{ payroll.pay_period_end|date:"F d, Y" }}</td>
+            </tr>
+            <tr>
+                <td>Basic Salary</td>
+                <td>TZS {{ payroll.basic_salary|floatformat:2|intcomma }}</td>
+            </tr>
+            <tr>
+                <td>Gross Salary</td>
+                <td>TZS {{ payroll.gross_salary|floatformat:2|intcomma }}</td>
+            </tr>
+            {% if payroll.tax_deduction > 0 %}
+            <tr>
+                <td>Tax Deduction</td>
+                <td>TZS {{ payroll.tax_deduction|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endif %}
+            {% if payroll.other_deductions > 0 %}
+            <tr>
+                <td>Other Deductions</td>
+                <td>TZS {{ payroll.other_deductions|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endif %}
+            <tr class="salary-row">
+                <td>Net Salary</td>
+                <td>TZS {{ payroll.net_salary|floatformat:2|intcomma }}</td>
+            </tr>
+            <tr>
+                <td>Payment Method</td>
+                <td>{{ payroll.get_payment_method_display|default:"Bank Transfer" }}</td>
+            </tr>
+            <tr>
+                <td>Submitted By</td>
+                <td>{{ submitted_by.get_full_name|default:submitted_by.username }}</td>
+            </tr>
+            <tr>
+                <td>Submitted At</td>
+                <td>{{ payroll.submitted_for_verification_at|date:"F d, Y at h:i A" }}</td>
+            </tr>
+        </table>
+        
+        <p style="text-align: center;">
+            <a href="{{ site_url }}/finance/payrolls/?status=PENDING_VERIFICATION" class="btn">Review & Verify Payroll</a>
+        </p>
+        
+        <p>Please review the payroll details and either <strong>verify</strong> it for processing or <strong>reject</strong> it with feedback.</p>
+        
+        <div class="footer">
+            <p>God bless,<br>
+            <strong>Christ The King Parish</strong><br>
+            Financial Management System</p>
+        </div>
+    </div>
+</body>
+</html>

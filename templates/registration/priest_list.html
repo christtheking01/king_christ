@@ -1,155 +1,634 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Priest List{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.9);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .priest-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass {
+        position: relative;
+        overflow: hidden;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-glass:hover::before {
+        left: 100%;
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out 0.1s both;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255,255,255,0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255,255,255,0.9);
+    }
+
+    .btn-glass-primary {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-glass-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Table Card */
+    .table-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out 0.2s both;
+    }
+
+    .table-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-header h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .count-badge {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Table Styles */
+    .priests-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .priests-table th {
+        background: rgba(102, 126, 234, 0.05);
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .priests-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.05);
+        color: var(--text-primary);
+    }
+
+    .priests-table tr:hover {
+        background: rgba(102, 126, 234, 0.02);
+    }
+
+    .priests-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Priest Info */
+    .priest-info-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .priest-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .priest-avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .priest-avatar-placeholder i {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+    }
+
+    .priest-details h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .priest-details small {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .contact-info {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Role Badges */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .role-badge.parish {
+        background: rgba(102, 126, 234, 0.1);
+        color: var(--primary);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .role-badge.assistant {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .role-badge.normal {
+        background: rgba(100, 116, 139, 0.1);
+        color: var(--text-secondary);
+        border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    .role-badge.unassigned {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid;
+        background: transparent;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-action.edit {
+        border-color: rgba(102, 126, 234, 0.3);
+        color: var(--primary);
+    }
+
+    .btn-action.edit:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-action.delete {
+        border-color: rgba(239, 68, 68, 0.3);
+        color: var(--danger);
+    }
+
+    .btn-action.delete:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h5 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border-radius: 8px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        background: white;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .page-link:hover {
+        background: rgba(102, 126, 234, 0.05);
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-color: transparent;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .priest-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .filter-form { flex-direction: column; }
+        .form-group { width: 100%; }
+        .priests-table { display: block; overflow-x: auto; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-users text-primary me-2"></i>All Priests
-                    </h2>
-                    <p class="text-muted mb-0">View and manage all priests in the system</p>
-                </div>
-                <div>
-                    <a href="{% url 'priest_role_management' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Role Management
-                    </a>
-                </div>
-            </div>
-        </div>
+<div class="priest-page">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-users"></i>
+            All Priests
+        </h1>
+        <a href="{% url 'priest_role_management' %}" class="btn-glass">
+            <i class="fas fa-arrow-left"></i>
+            Back to Role Management
+        </a>
     </div>
 
     <!-- Filter Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <form method="get" class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label for="role" class="form-label">Filter by Role</label>
-                            <select name="role" id="role" class="form-select" onchange="this.form.submit()">
-                                <option value="all" {% if role_filter == 'all' %}selected{% endif %}>All Priests</option>
-                                <option value="parish_priest" {% if role_filter == 'parish_priest' %}selected{% endif %}>Parish Priest</option>
-                                <option value="assistant_priest" {% if role_filter == 'assistant_priest' %}selected{% endif %}>Assistant Priest</option>
-                                <option value="normal_priest" {% if role_filter == 'normal_priest' %}selected{% endif %}>Normal Priest</option>
-                                <option value="unassigned" {% if role_filter == 'unassigned' %}selected{% endif %}>Not Assigned</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-filter me-1"></i>Apply Filter
-                            </button>
-                            <a href="{% url 'priest_list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-undo me-1"></i>Clear
-                            </a>
-                        </div>
-                    </form>
-                </div>
+    <div class="filter-card">
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label for="role">Filter by Role</label>
+                <select name="role" id="role" class="form-control" onchange="this.form.submit()">
+                    <option value="all" {% if role_filter == 'all' %}selected{% endif %}>All Priests</option>
+                    <option value="parish_priest" {% if role_filter == 'parish_priest' %}selected{% endif %}>Parish Priest</option>
+                    <option value="assistant_priest" {% if role_filter == 'assistant_priest' %}selected{% endif %}>Assistant Priest</option>
+                    <option value="normal_priest" {% if role_filter == 'normal_priest' %}selected{% endif %}>Normal Priest</option>
+                    <option value="unassigned" {% if role_filter == 'unassigned' %}selected{% endif %}>Not Assigned</option>
+                </select>
             </div>
-        </div>
+            <button type="submit" class="btn-glass-primary">
+                <i class="fas fa-filter"></i>
+                Apply Filter
+            </button>
+            <a href="{% url 'priest_list' %}" class="btn-glass">
+                <i class="fas fa-undo"></i>
+                Clear
+            </a>
+        </form>
     </div>
 
     <!-- Priests List -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Priests
-                        <span class="badge bg-primary ms-2">{{ priests|length }}</span>
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if priests %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Priest</th>
-                                    <th>Contact</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for priest in priests %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            {% if priest.profile and priest.profile.picture %}
-                                            <img src="{{ priest.profile.picture.url }}" alt="{{ priest.user.username }}" 
-                                                 class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                                            {% else %}
-                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                 style="width: 50px; height: 50px;">
-                                                <i class="fas fa-user text-muted fa-lg"></i>
-                                            </div>
-                                            {% endif %}
-                                            <div>
-                                                <h6 class="mb-0">{{ priest.user.full_name|default:priest.user.username }}</h6>
-                                                <small class="text-muted">@{{ priest.user.username }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <small class="text-muted d-block">{{ priest.user.email|default:"No email" }}</small>
-                                            <small class="text-muted">{{ priest.user.phone|default:"No phone" }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {% if priest.priest_type == 'parish_priest' %}
-                                        <span class="badge bg-primary">{{ priest.role_display }}</span>
-                                        {% elif priest.priest_type == 'assistant_priest' %}
-                                        <span class="badge bg-info">{{ priest.role_display }}</span>
-                                        {% elif priest.priest_type == 'normal_priest' %}
-                                        <span class="badge bg-secondary">{{ priest.role_display }}</span>
-                                        {% else %}
-                                        <span class="badge bg-warning text-dark">{{ priest.role_display }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if priest.user.is_active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{% url 'assign_priest_role' priest.user.id %}" class="btn btn-sm btn-outline-primary" title="Edit Role">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        {% if priest.priest_type %}
-                                        <a href="{% url 'remove_priest_role' priest.user.id %}" class="btn btn-sm btn-outline-danger" title="Remove Role">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
-                        <h5 class="text-muted">No priests found</h5>
-                        <p class="text-muted mb-0">
-                            {% if role_filter != 'all' %}
-                            No priests match the selected filter. 
-                            <a href="{% url 'priest_list' %}">View all priests</a>
-                            {% else %}
-                            No priests have been added to the system yet.
-                            {% endif %}
-                        </p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="table-card">
+        <div class="table-header">
+            <h5><i class="fas fa-list"></i>Priests</h5>
+            <span class="count-badge">{{ priests|length }}</span>
         </div>
+
+        {% if priests %}
+        <table class="priests-table">
+            <thead>
+                <tr>
+                    <th>Priest</th>
+                    <th>Contact</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for priest in priests %}
+                <tr>
+                    <td>
+                        <div class="priest-info-cell">
+                            {% if priest.profile and priest.profile.picture %}
+                            <img src="{{ priest.profile.picture.url }}" alt="{{ priest.user.username }}" class="priest-avatar">
+                            {% else %}
+                            <div class="priest-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div class="priest-details">
+                                <h6>{{ priest.user.full_name|default:priest.user.username }}</h6>
+                                <small>@{{ priest.user.username }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-info">
+                            <div>{{ priest.user.email|default:"No email" }}</div>
+                            <div>{{ priest.user.phone|default:"No phone" }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if priest.priest_type == 'parish_priest' %}
+                        <span class="role-badge parish">{{ priest.role_display }}</span>
+                        {% elif priest.priest_type == 'assistant_priest' %}
+                        <span class="role-badge assistant">{{ priest.role_display }}</span>
+                        {% elif priest.priest_type == 'normal_priest' %}
+                        <span class="role-badge normal">{{ priest.role_display }}</span>
+                        {% else %}
+                        <span class="role-badge unassigned">{{ priest.role_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if priest.user.is_active %}
+                        <span class="status-badge active">Active</span>
+                        {% else %}
+                        <span class="status-badge inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="{% url 'assign_priest_role' priest.user.id %}" class="btn-action edit" title="Edit Role">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% if priest.priest_type %}
+                            <a href="{% url 'remove_priest_role' priest.user.id %}" class="btn-action delete" title="Remove Role">
+                                <i class="fas fa-times"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users-slash"></i>
+            <h5>No priests found</h5>
+            <p>
+                {% if role_filter != 'all' %}
+                No priests match the selected filter.
+                <a href="{% url 'priest_list' %}">View all priests</a>
+                {% else %}
+                No priests have been added to the system yet.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&role={{ role_filter }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&role={{ role_filter }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&role={{ role_filter }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

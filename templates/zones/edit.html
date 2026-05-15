@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+    .dashboard-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+        animation: slideUp 0.4s ease;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .form-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--divider);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        animation: slideUp 0.4s ease;
+    }
+
+    .form-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-body {
+        padding: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .form-label .required {
+        color: var(--danger);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--divider);
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+        font-family: inherit;
+        background: var(--background);
+        color: var(--text-primary);
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Leaders Section */
+    .leaders-section {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid var(--divider);
+    }
+
+    .leader-card {
+        background: var(--background);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--divider);
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+    }
+
+    .leader-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--divider);
+    }
+
+    .leader-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .leader-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .leader-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .btn-add-leader {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        background: var(--success);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-add-leader:hover {
+        background: var(--secondary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-remove-leader {
+        background: none;
+        border: none;
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 4px;
+    }
+
+    .btn-remove-leader:hover {
+        opacity: 0.7;
+    }
+
+    /* Select Dropdown */
+    .select-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 14px;
+        padding-right: 35px;
+    }
+
+    /* Phone Input */
+    .phone-input {
+        position: relative;
+    }
+
+    .phone-prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        pointer-events: none;
+    }
+
+    .phone-input .form-control {
+        padding-left: 50px;
+    }
+
+    /* Communities Selection */
+    .communities-section {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid var(--divider);
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .communities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        background: var(--background);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--divider);
+    }
+
+    .community-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .community-checkbox:hover {
+        background: rgba(26, 115, 232, 0.05);
+    }
+
+    .community-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .community-checkbox label {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        margin: 0;
+        flex: 1;
+    }
+
+    .community-checkbox.assigned {
+        background: rgba(26, 115, 232, 0.1);
+        border: 1px solid rgba(26, 115, 232, 0.2);
+    }
+
+    .no-communities {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--divider);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: var(--background);
+        color: var(--text-primary);
+        border: 1px solid var(--divider);
+    }
+
+    .btn-secondary:hover {
+        background: var(--surface);
+        border-color: var(--text-secondary);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 20px;
+    }
+
+    .alert-message {
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-danger {
+        background: rgba(234, 67, 53, 0.1);
+        border: 1px solid rgba(234, 67, 53, 0.2);
+        color: var(--danger);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 15px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .communities-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Animation */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message alert-{{ message.tags }}">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-edit"></i>
+            Edit Zone
+        </h1>
+        <p class="page-subtitle">Update zone information and community assignments</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="form-header">
+            <h2>
+                <i class="fas fa-map-marked-alt"></i>
+                {{ zone.name }}
+            </h2>
+        </div>
+        <div class="form-body">
+            <form method="post" action="{% url 'edit_zone' zone.pk %}">
+                {% csrf_token %}
+
+                <!-- Zone Name -->
+                <div class="form-group">
+                    <label class="form-label" for="zone_name">
+                        Zone Name <span class="required">*</span>
+                    </label>
+                    <input type="text" id="zone_name" name="zone_name" class="form-control"
+                           value="{{ zone.name }}" placeholder="Enter zone name" required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control"
+                              placeholder="Enter zone description (optional)">{{ zone.description|default:'' }}</textarea>
+                </div>
+
+                <!-- Zone Leaders Section -->
+                <div class="leaders-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-tie"></i>
+                        Zone Leaders
+                    </h3>
+                    
+                    <div id="leadersContainer">
+                        {% for leader in zone_leaders %}
+                        <div class="leader-card" data-index="{{ forloop.counter0 }}">
+                            <input type="hidden" name="leader_ids[]" value="{{ leader.id }}">
+                            <div class="leader-header">
+                                <div class="leader-title">
+                                    <i class="fas fa-user"></i>
+                                    Leader #{{ forloop.counter }}
+                                </div>
+                            </div>
+                            <div class="leader-grid">
+                                <div class="form-group full-width">
+                                    <label class="form-label">Full Name <span class="required">*</span></label>
+                                    <input type="text" name="leader_names[]" class="form-control" 
+                                           value="{{ leader.name }}" placeholder="Enter leader's full name" required
+                                           list="zoneMembersList">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Position <span class="required">*</span></label>
+                                    <select name="leader_positions[]" class="form-control select-control" required>
+                                        <option value="">Select Position</option>
+                                        <option value="CHAIRPERSON" {% if leader.position == "CHAIRPERSON" %}selected{% endif %}>Chairperson</option>
+                                        <option value="VICE CHAIR" {% if leader.position == "VICE CHAIR" %}selected{% endif %}>Vice Chair</option>
+                                        <option value="SECRETARY" {% if leader.position == "SECRETARY" %}selected{% endif %}>Secretary</option>
+                                        <option value="VICE SECRETARY" {% if leader.position == "VICE SECRETARY" %}selected{% endif %}>Vice Secretary</option>
+                                        <option value="ACCOUNTANT" {% if leader.position == "ACCOUNTANT" %}selected{% endif %}>Accountant</option>
+                                        <option value="COORDINATOR" {% if leader.position == "COORDINATOR" %}selected{% endif %}>Coordinator</option>
+                                        <option value="MEMBER" {% if leader.position == "MEMBER" %}selected{% endif %}>Member</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Phone</label>
+                                    <div class="phone-input">
+                                        <span class="phone-prefix">+255</span>
+                                        <input type="tel" name="leader_phones[]" class="form-control" 
+                                               value="{{ leader.phone|default:'' }}" placeholder="XXXXXXXXX" pattern="[0-9]{9}">
+                                    </div>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="leader_emails[]" class="form-control" 
+                                           value="{{ leader.email|default:'' }}" placeholder="leader@example.com">
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="no-communities">No leaders assigned yet. Click "Add Leader" to add zone leaders.</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <datalist id="zoneMembersList">
+                        {% for member in zone_members %}
+                        <option value="{{ member.name }}">{{ member.name }} - {{ member.code|default:"No Code" }} - {{ member.telephone|default:"No Phone" }}</option>
+                        {% endfor %}
+                    </datalist>
+                    
+                    <button type="button" class="btn-add-leader" id="addLeaderBtn">
+                        <i class="fas fa-plus"></i> Add Leader
+                    </button>
+                </div>
+
+                <!-- Communities Selection -->
+                <div class="communities-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-church"></i>
+                        Assigned Communities
+                    </h3>
+
+                    {% if communities %}
+                    <div class="communities-grid">
+                        {% for community in communities %}
+                        <div class="community-checkbox {% if community.id in assigned_community_ids %}assigned{% endif %}">
+                            <input type="checkbox" id="community_{{ community.id }}" name="communities[]"
+                                   value="{{ community.id }}" {% if community.id in assigned_community_ids %}checked{% endif %}>
+                            <label for="community_{{ community.id }}">{{ community.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-communities">
+                        <i class="fas fa-info-circle"></i>
+                        No communities available.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                    <a href="{% url 'list_zones' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const leadersContainer = document.getElementById('leadersContainer');
+    const addLeaderBtn = document.getElementById('addLeaderBtn');
+    let leaderCount = {{ zone_leaders|length }};
+
+    // Function to create a new leader form
+    function createLeaderForm(index) {
+        return `
+            <div class="leader-card" data-index="${index}">
+                <input type="hidden" name="leader_ids[]" value="new">
+                <div class="leader-header">
+                    <div class="leader-title">
+                        <i class="fas fa-user"></i>
+                        New Leader
+                    </div>
+                </div>
+                <div class="leader-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Full Name <span class="required">*</span></label>
+                        <input type="text" name="leader_names[]" class="form-control" 
+                               placeholder="Enter leader's full name" required
+                               list="zoneMembersList">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Position <span class="required">*</span></label>
+                        <select name="leader_positions[]" class="form-control select-control" required>
+                            <option value="">Select Position</option>
+                            <option value="CHAIRPERSON">Chairperson</option>
+                            <option value="VICE CHAIR">Vice Chair</option>
+                            <option value="SECRETARY">Secretary</option>
+                            <option value="VICE SECRETARY">Vice Secretary</option>
+                            <option value="ACCOUNTANT">Accountant</option>
+                            <option value="COORDINATOR">Coordinator</option>
+                            <option value="MEMBER">Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <div class="phone-input">
+                            <span class="phone-prefix">+255</span>
+                            <input type="tel" name="leader_phones[]" class="form-control" 
+                                   placeholder="XXXXXXXXX" pattern="[0-9]{9}">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="leader_emails[]" class="form-control" 
+                               placeholder="leader@example.com">
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Add leader button click
+    addLeaderBtn.addEventListener('click', function() {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = createLeaderForm(leaderCount);
+        leadersContainer.appendChild(tempDiv.firstElementChild);
+        leaderCount++;
+    });
+
+    // Phone number formatting
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'leader_phones[]' && e.target.type === 'tel') {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 9) value = value.substring(0, 9);
+            e.target.value = value;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -251,6 +251,13 @@ class EventRegistration(models.Model):
     # Registration status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     
+    # SMS tracking
+    sms_sent = models.BooleanField(default=False)
+    sms_sent_at = models.DateTimeField(null=True, blank=True)
+    sms_message_id = models.CharField(max_length=100, blank=True, null=True)
+    sms_failure_count = models.PositiveIntegerField(default=0)
+    last_sms_error = models.TextField(blank=True, null=True)
+    
     # Metadata
     registered_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

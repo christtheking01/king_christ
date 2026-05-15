@@ -1,0 +1,570 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$...",
+      "last_login": "2024-01-15T10:00:00Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "System",
+      "last_name": "Administrator",
+      "email": "admin@christkingchurch.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2024-01-01T00:00:00Z",
+      "roles": "admin",
+      "phone_number": "+255712345000",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "member.member",
+    "pk": 1,
+    "fields": {
+      "name": "John Mwangi",
+      "member_id": "CKC001",
+      "gender": "Male",
+      "marital_status": "Married",
+      "baptised": true,
+      "confirmed": true,
+      "telephone": "+255712345001",
+      "baptism_date": "2010-05-15",
+      "confirmation_date": "2015-08-20",
+      "join_date": "2010-01-01",
+      "status": "active",
+      "address": "123 Church Street"
+    }
+  },
+  {
+    "model": "member.member",
+    "pk": 2,
+    "fields": {
+      "name": "Mary Wanjiku",
+      "member_id": "CKC002",
+      "gender": "Female",
+      "marital_status": "Married",
+      "baptised": true,
+      "confirmed": true,
+      "telephone": "+255712345002",
+      "baptism_date": "2012-04-10",
+      "confirmation_date": "2017-07-25",
+      "join_date": "2012-01-01",
+      "status": "active",
+      "address": "456 Faith Avenue"
+    }
+  },
+  {
+    "model": "member.member",
+    "pk": 3,
+    "fields": {
+      "name": "Peter Ochieng",
+      "member_id": "CKC003",
+      "gender": "Male",
+      "marital_status": "Single",
+      "baptised": true,
+      "confirmed": false,
+      "telephone": "+255712345003",
+      "baptism_date": "2018-06-20",
+      "join_date": "2018-01-01",
+      "status": "active",
+      "address": "789 Hope Road"
+    }
+  },
+  {
+    "model": "member.member",
+    "pk": 4,
+    "fields": {
+      "name": "Grace Achieng",
+      "member_id": "CKC004",
+      "gender": "Female",
+      "marital_status": "Single",
+      "baptised": true,
+      "confirmed": true,
+      "telephone": "+255712345004",
+      "baptism_date": "2015-03-12",
+      "confirmation_date": "2020-09-15",
+      "join_date": "2015-01-01",
+      "status": "active",
+      "address": "321 Grace Lane"
+    }
+  },
+  {
+    "model": "member.member",
+    "pk": 5,
+    "fields": {
+      "name": "James Kamau",
+      "member_id": "CKC005",
+      "gender": "Male",
+      "marital_status": "Married",
+      "baptised": true,
+      "confirmed": true,
+      "telephone": "+255712345005",
+      "baptism_date": "2011-08-08",
+      "confirmation_date": "2016-11-30",
+      "join_date": "2011-01-01",
+      "status": "active",
+      "address": "654 Blessing Way"
+    }
+  },
+  {
+    "model": "finance.category",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "Sunday Collection",
+      "type": "OFFERING",
+      "description": "Weekly Sunday offerings"
+    }
+  },
+  {
+    "model": "finance.category",
+    "pk": 2,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "Tithe Payments",
+      "type": "TITHE",
+      "description": "Monthly tithe collections"
+    }
+  },
+  {
+    "model": "finance.category",
+    "pk": 3,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "Priest Salary",
+      "type": "SALARY",
+      "description": "Monthly priest salary"
+    }
+  },
+  {
+    "model": "finance.category",
+    "pk": 4,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "Electricity Bill",
+      "type": "UTILITIES",
+      "description": "Monthly electricity"
+    }
+  },
+  {
+    "model": "finance.category",
+    "pk": 5,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "Building Maintenance",
+      "type": "MAINTENANCE",
+      "description": "Repairs and upkeep"
+    }
+  },
+  {
+    "model": "finance.transaction",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-15T10:00:00Z",
+      "updated_at": "2024-01-15T10:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "category": 1,
+      "amount": "150000.00",
+      "description": "Sunday collection - First Service",
+      "date": "2024-01-14",
+      "type": "Income",
+      "status": "COMPLETED",
+      "reference_number": "SC-20240114-001"
+    }
+  },
+  {
+    "model": "finance.transaction",
+    "pk": 2,
+    "fields": {
+      "created_at": "2024-01-15T10:00:00Z",
+      "updated_at": "2024-01-15T10:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "category": 1,
+      "amount": "125000.00",
+      "description": "Sunday collection - Second Service",
+      "date": "2024-01-14",
+      "type": "Income",
+      "status": "COMPLETED",
+      "reference_number": "SC-20240114-002"
+    }
+  },
+  {
+    "model": "finance.transaction",
+    "pk": 3,
+    "fields": {
+      "created_at": "2024-01-10T09:00:00Z",
+      "updated_at": "2024-01-10T09:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "category": 2,
+      "amount": "350000.00",
+      "description": "January tithe collections",
+      "date": "2024-01-10",
+      "type": "Income",
+      "status": "COMPLETED",
+      "reference_number": "TITHE-202401-001"
+    }
+  },
+  {
+    "model": "finance.transaction",
+    "pk": 4,
+    "fields": {
+      "created_at": "2024-01-31T14:00:00Z",
+      "updated_at": "2024-01-31T14:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "category": 3,
+      "amount": "800000.00",
+      "description": "January priest salary",
+      "date": "2024-01-31",
+      "type": "Expense",
+      "status": "COMPLETED",
+      "reference_number": "SAL-202401-001"
+    }
+  },
+  {
+    "model": "finance.transaction",
+    "pk": 5,
+    "fields": {
+      "created_at": "2024-01-28T11:00:00Z",
+      "updated_at": "2024-01-28T11:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "category": 4,
+      "amount": "185000.00",
+      "description": "January electricity bill",
+      "date": "2024-01-28",
+      "type": "Expense",
+      "status": "COMPLETED",
+      "reference_number": "ELEC-202401-001"
+    }
+  },
+  {
+    "model": "finance.tithereceipt",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-10T09:30:00Z",
+      "updated_at": "2024-01-10T09:30:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "member": 1,
+      "amount": "50000.00",
+      "payment_method": "cash",
+      "date": "2024-01-10T09:30:00Z",
+      "receipt_number": "RCT-202401-0001",
+      "notes": "Monthly tithe from John Mwangi"
+    }
+  },
+  {
+    "model": "finance.tithereceipt",
+    "pk": 2,
+    "fields": {
+      "created_at": "2024-01-12T10:15:00Z",
+      "updated_at": "2024-01-12T10:15:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "member": 2,
+      "amount": "75000.00",
+      "payment_method": "bank",
+      "date": "2024-01-12T10:15:00Z",
+      "receipt_number": "RCT-202401-0002",
+      "notes": "Monthly tithe from Mary Wanjiku"
+    }
+  },
+  {
+    "model": "finance.tithereceipt",
+    "pk": 3,
+    "fields": {
+      "created_at": "2024-01-08T14:00:00Z",
+      "updated_at": "2024-01-08T14:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "member": 3,
+      "amount": "60000.00",
+      "payment_method": "mobile",
+      "date": "2024-01-08T14:00:00Z",
+      "receipt_number": "RCT-202401-0003",
+      "notes": "Monthly tithe from Peter Ochieng"
+    }
+  },
+  {
+    "model": "finance.offering",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-14T11:00:00Z",
+      "updated_at": "2024-01-14T11:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "offering_type": "SUNDAY",
+      "date": "2024-01-14",
+      "amount": "25000.00",
+      "payment_method": "CASH",
+      "donor_name": null,
+      "donor_phone": null,
+      "is_anonymous": true,
+      "member": null,
+      "notes": "Anonymous offering",
+      "receipt_number": "OFF-202401-0001"
+    }
+  },
+  {
+    "model": "finance.offering",
+    "pk": 2,
+    "fields": {
+      "created_at": "2024-01-14T11:00:00Z",
+      "updated_at": "2024-01-14T11:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "offering_type": "SUNDAY",
+      "date": "2024-01-14",
+      "amount": "50000.00",
+      "payment_method": "CASH",
+      "donor_name": "James Kamau",
+      "donor_phone": "+255712345005",
+      "is_anonymous": false,
+      "member": 5,
+      "notes": "Sunday offering",
+      "receipt_number": "OFF-202401-0002"
+    }
+  },
+  {
+    "model": "finance.offering",
+    "pk": 3,
+    "fields": {
+      "created_at": "2024-01-07T11:00:00Z",
+      "updated_at": "2024-01-07T11:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "offering_type": "THANKSGIVING",
+      "date": "2024-01-07",
+      "amount": "100000.00",
+      "payment_method": "MOBILE",
+      "donor_name": "Grace Achieng",
+      "donor_phone": "+255712345004",
+      "is_anonymous": false,
+      "member": 4,
+      "notes": "Thanksgiving offering",
+      "receipt_number": "OFF-202401-0003"
+    }
+  },
+  {
+    "model": "finance.employee",
+    "pk": 1,
+    "fields": {
+      "created_at": "2020-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "member": 1,
+      "employee_id": "EMP001",
+      "position": "Parish Priest",
+      "department": "Church Administration",
+      "base_salary": "800000.00",
+      "housing_allowance": "200000.00",
+      "transport_allowance": "100000.00",
+      "other_allowances": "0.00",
+      "payment_type": "MONTHLY",
+      "bank_account": "1234567890",
+      "bank_name": "CRDB Bank",
+      "tax_id": "TAX001",
+      "status": "ACTIVE",
+      "hire_date": "2020-01-01"
+    }
+  },
+  {
+    "model": "finance.employee",
+    "pk": 2,
+    "fields": {
+      "created_at": "2021-06-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "member": 2,
+      "employee_id": "EMP002",
+      "position": "Secretary",
+      "department": "Church Administration",
+      "base_salary": "450000.00",
+      "housing_allowance": "100000.00",
+      "transport_allowance": "50000.00",
+      "other_allowances": "0.00",
+      "payment_type": "MONTHLY",
+      "bank_account": "0987654321",
+      "bank_name": "NBC Bank",
+      "tax_id": "TAX002",
+      "status": "ACTIVE",
+      "hire_date": "2021-06-01"
+    }
+  },
+  {
+    "model": "finance.budget",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "name": "2024 Annual Budget",
+      "description": "Full year church budget for 2024",
+      "total_amount": "15000000.00",
+      "start_date": "2024-01-01",
+      "end_date": "2024-12-31",
+      "status": "ACTIVE",
+      "approved_by": 1,
+      "approved_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "finance.budgetallocation",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "budget": 1,
+      "category": 3,
+      "allocated_amount": "9600000.00",
+      "spent_amount": "800000.00"
+    }
+  },
+  {
+    "model": "finance.expensereport",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-20T10:00:00Z",
+      "updated_at": "2024-01-25T14:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "user": 1,
+      "employee": 1,
+      "title": "Pastoral Visit Expenses",
+      "description": "Travel and accommodation for pastoral visits",
+      "total_amount": "75000.00",
+      "date_submitted": "2024-01-20",
+      "date_approved": "2024-01-25",
+      "approved_by": 1,
+      "status": "REIMBURSED",
+      "notes": "Approved and reimbursed"
+    }
+  },
+  {
+    "model": "finance.expenseitem",
+    "pk": 1,
+    "fields": {
+      "created_at": "2024-01-20T10:00:00Z",
+      "updated_at": "2024-01-20T10:00:00Z",
+      "created_by": 1,
+      "updated_by": null,
+      "is_deleted": false,
+      "deleted_at": null,
+      "deleted_by": null,
+      "expense_report": 1,
+      "category": 5,
+      "description": "Transport and accommodation",
+      "amount": "75000.00",
+      "date_incurred": "2024-01-15",
+      "receipt_number": "RCP-1234"
+    }
+  }
+]
