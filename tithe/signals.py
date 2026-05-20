@@ -163,7 +163,7 @@ def _send_update_notification(instance, old_instance, changes):
         month_name = get_swahili_month(instance.date)
         
         message = (
-            f"Tumsifu Yesu {member_name}, zaka yako ya mwezi wa {month_name} "
+            f"Tumsifu Yesu Kristu,{member_name}, zaka yako ya mwezi wa {month_name} "
             f"imebadilishwa kuwa Tsh {instance.amount:,.0f}. Malipo yamesasishwa. Ubarikiwe!"
         )
         

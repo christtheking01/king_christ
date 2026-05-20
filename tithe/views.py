@@ -462,7 +462,7 @@ def search_members(request):
     search_term = request.GET.get('q', request.GET.get('search', '')).strip()
     
     if len(search_term) < 2:
-        return JsonResponse([])
+        return JsonResponse({'members': []})
     
     try:
         members = Member.objects.filter(
@@ -480,10 +480,10 @@ def search_members(request):
                 'code': member.code or '',
             })
         
-        return JsonResponse({'members': members_data}, safe=False)
+        return JsonResponse({'members': members_data})
         
     except Exception as e:
-        return JsonResponse([], safe=False)
+        return JsonResponse({'members': [], 'error': str(e)})
 
 @login_required
 def get_member_details(request, member_id):
@@ -635,7 +635,6 @@ class YearlyReportView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         # Get selected year from query params, default to current year
-        from django.utils import timezone
         selected_year = int(self.request.GET.get('year', timezone.now().year))
         context['current_year'] = selected_year
         
@@ -1287,11 +1286,35 @@ def pos_tithe_submission(request):
                 'print_data': receipt.get_print_data()
             }
             
-            # Auto-mark as printed if configured
+            # Auto-print if configured
             auto_print = data.get('auto_print', getattr(settings, 'TITHE_AUTO_PRINT_RECEIPT', True))
             if auto_print and created:
-                receipt.mark_printed()
-                receipt_data['printed'] = True
+                # Try backend printing for H10 POS systems without print dialog
+                if getattr(settings, 'POS_BACKEND_PRINTING_ENABLED', False):
+                    try:
+                        pos_data = {
+                            "church_name": settings.CHURCH_NAME,
+                            "church_address": settings.CHURCH_ADDRESS,
+                            "church_phone": settings.CHURCH_PHONE,
+                            "receipt_number": receipt.receipt_number,
+                            "date": tithe_payment.date.strftime('%Y-%m-%d'),
+                            "time": tithe_payment.date.strftime('%H:%M'),
+                            "member_name": member.name,
+                            "member_code": member.code if member.code else '',
+                            "amount": float(tithe_payment.amount),
+                            "payment_method": tithe_payment.status,
+                            "contact_number": tithe_payment.contact_number,
+                            "generated_by": 'POS System',
+                        }
+                        print_receipt_backend(pos_data)
+                        receipt.mark_printed()
+                        receipt_data['printed'] = True
+                    except Exception as e:
+                        print(f"Backend printing failed: {e}")
+                        receipt_data['printed'] = False
+                else:
+                    receipt.mark_printed()
+                    receipt_data['printed'] = True
         
         # Prepare response
         response_data = {
@@ -1341,46 +1364,39 @@ def pos_print_receipt(request, receipt_id):
     """
     POS-optimized print receipt view.
     Returns receipt data in a format optimized for POS thermal printers.
+    Also triggers backend printing if configured.
     """
     receipt = get_object_or_404(TitheReceipt, id=receipt_id)
+    payment = receipt.tithe_payment
     
-    if request.method == "POST":
-        try:
-            receipt.mark_printed()
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Receipt marked as printed',
-                'receipt_number': receipt.receipt_number
-            })
-        except Exception as e:
-            receipt.last_print_error = str(e)
-            receipt.save()
-            return JsonResponse({
-                'success': False,
-                'message': f'Error: {str(e)}'
-            })
+    # Get member info
+    member = payment.name
+    member_name = member.name if member else 'Unknown'
+    member_code = member.code if member else ''
     
-    # Return POS-optimized print data
-    print_data = receipt.get_print_data()
-    
-    # Add POS-specific formatting
+    # Format receipt data for thermal printer
     pos_data = {
-        **print_data,
-        'pos_formatted': {
-            'header': f"{print_data['church_name']}\n{print_data['church_address']}\n{print_data['church_phone']}",
-            'title': 'TITHE RECEIPT',
-            'body': f"""
-Receipt No: {print_data['receipt_number']}
-Date: {print_data['payment_date']}
-Member: {print_data['member_name']}
-Phone: {print_data['phone_number']}
-Amount: TZS {print_data['amount']}
-Method: {print_data['payment_method']}
-            """.strip(),
-            'footer': 'Thank you for your tithe!'
-        }
+        "church_name": settings.CHURCH_NAME,
+        "church_address": settings.CHURCH_ADDRESS,
+        "church_phone": settings.CHURCH_PHONE,
+        "receipt_number": receipt.receipt_number,
+        "date": payment.date.strftime('%Y-%m-%d'),
+        "time": payment.date.strftime('%H:%M'),
+        "member_name": member_name,
+        "member_code": member_code,
+        "amount": float(payment.amount),
+        "payment_method": payment.status,
+        "contact_number": payment.contact_number,
+        "generated_by": receipt.generated_by,
     }
+    
+    # Try backend printing if configured
+    if getattr(settings, 'POS_BACKEND_PRINTING_ENABLED', False):
+        try:
+            print_receipt_backend(pos_data)
+            receipt.mark_printed()
+        except Exception as e:
+            print(f"Backend printing failed: {e}")
     
     context = {
         "receipt": receipt,
@@ -1389,6 +1405,121 @@ Method: {print_data['payment_method']}
         "is_pos": True
     }
     return render(request, "tithepayment/pos_print_receipt.html", context)
+
+
+def print_receipt_backend(receipt_data):
+    """
+    Print receipt directly from backend using system printer.
+    Works with USB, serial, or network printers configured on the server.
+    """
+    import subprocess
+    import os
+    
+    # Generate ESC/POS commands for thermal printer
+    escpos_commands = generate_escpos_receipt(receipt_data)
+    
+    # Method 1: Print via CUPS (Linux)
+    if os.path.exists('/usr/bin/lp'):
+        printer_name = getattr(settings, 'POS_PRINTER_NAME', 'default')
+        try:
+            # Write to temporary file and print
+            temp_file = '/tmp/receipt_temp.txt'
+            with open(temp_file, 'wb') as f:
+                f.write(escpos_commands)
+            
+            subprocess.run(['lp', '-d', printer_name, temp_file], check=True)
+            os.remove(temp_file)
+            return True
+        except Exception as e:
+            print(f"CUPS printing failed: {e}")
+    
+    # Method 2: Print via USB/Serial (if printer device path configured)
+    printer_device = getattr(settings, 'POS_PRINTER_DEVICE', None)
+    if printer_device and os.path.exists(printer_device):
+        try:
+            with open(printer_device, 'wb') as printer:
+                printer.write(escpos_commands)
+            return True
+        except Exception as e:
+            print(f"Direct device printing failed: {e}")
+    
+    # Method 3: Windows printing (if on Windows)
+    if os.name == 'nt':
+        try:
+            import win32print
+            printer_name = getattr(settings, 'POS_PRINTER_NAME', win32print.GetDefaultPrinter())
+            hPrinter = win32print.OpenPrinter(printer_name)
+            try:
+                win32print.StartDocPrinter(hPrinter, 1, ("Receipt", None, "RAW"))
+                win32print.WritePrinter(hPrinter, escpos_commands)
+                win32print.EndDocPrinter(hPrinter)
+            finally:
+                win32print.ClosePrinter(hPrinter)
+            return True
+        except Exception as e:
+            print(f"Windows printing failed: {e}")
+    
+    return False
+
+
+def generate_escpos_receipt(data):
+    """
+    Generate ESC/POS commands for thermal printer.
+    Returns bytes that can be sent directly to the printer.
+    """
+    ESC = b'\x1B'
+    GS = b'\x1D'
+    
+    commands = b''
+    
+    # Initialize printer
+    commands += ESC + b'@'
+    
+    # Center align
+    commands += ESC + b'\x61' + b'\x01'
+    
+    # Church name
+    commands += b'\n\n' + data['church_name'].encode('latin-1') + b'\n'
+    commands += data['church_address'].encode('latin-1') + b'\n'
+    commands += b'--------------------------------\n'
+    
+    # Left align
+    commands += ESC + b'\x61' + b'\x00'
+    
+    # Receipt header
+    commands += b'\nRECEIPT\n'
+    commands += f"Type: Tithe\n".encode('latin-1')
+    commands += f"Date: {data['date']}\n".encode('latin-1')
+    commands += f"Time: {data['time']}\n".encode('latin-1')
+    commands += f"Receipt #: {data['receipt_number']}\n".encode('latin-1')
+    commands += b'--------------------------------\n'
+    
+    # Member info
+    if data.get('member_name'):
+        commands += f"Member: {data['member_name']}\n".encode('latin-1')
+    if data.get('member_code'):
+        commands += f"Code: {data['member_code']}\n".encode('latin-1')
+    commands += b'--------------------------------\n'
+    
+    # Payment details
+    amount_str = f"{data['amount']:,.2f}"
+    commands += f"Amount: Tsh {amount_str}\n".encode('latin-1')
+    commands += f"Method: {data['payment_method']}\n".encode('latin-1')
+    if data.get('contact_number'):
+        commands += f"Phone: {data['contact_number']}\n".encode('latin-1')
+    commands += b'--------------------------------\n'
+    
+    # Footer
+    commands += b'\n'
+    commands += ESC + b'\x61' + b'\x01'  # Center align
+    commands += b'Thank you for your contribution!\n'
+    commands += b'God bless you!\n'
+    commands += b'\n\n\n'
+    
+    # Cut paper (if supported)
+    commands += GS + b'V' + b'\x00'
+    
+    return commands
 
 
 @login_required
@@ -1495,7 +1626,7 @@ def bulk_payment_create(request):
                             # Auto-generate receipt if enabled
                             if getattr(settings, 'TITHE_AUTO_GENERATE_RECEIPT', True):
                                 generated_by = request.user.get_full_name() or request.user.username
-                                TitheReceipt.objects.get_or_create(
+                                receipt, created = TitheReceipt.objects.get_or_create(
                                     tithe_payment=tithe_payment,
                                     defaults={
                                         'generated_by': generated_by,
@@ -1504,6 +1635,9 @@ def bulk_payment_create(request):
                                         'church_phone': settings.CHURCH_PHONE,
                                     }
                                 )
+                                # Auto-print if enabled
+                                if created and getattr(settings, 'TITHE_AUTO_PRINT_RECEIPT', False):
+                                    receipt.mark_printed()
                             
                             created_count += 1
                             total_amount += float(amount)
@@ -1778,6 +1912,7 @@ def pos_tithe(request):
     
     view_mode = request.GET.get('view', 'menu')
     
+    
     # Handle POST for individual payment
     if request.method == 'POST' and view_mode == 'individual':
         member_id = request.POST.get('name')
@@ -1843,7 +1978,6 @@ def pos_tithe(request):
     
     if view_mode == 'today':
         # Get today's payments
-        from django.utils import timezone
         today = timezone.now().date()
         today_payments = TithePayment.objects.filter(
             date__date=today
@@ -2074,12 +2208,13 @@ def pos_pin_login(request):
 def pos_logout(request):
     """
     Logout from POS session (clears PIN verification).
+    Redirects to POS PIN login to maintain POS workflow separation.
     """
     request.session['pos_pin_verified'] = False
     request.session['pos_pin_verified_time'] = None
     
     messages.info(request, 'POS session ended.')
-    return redirect('tithepayment:tithepayment_list')
+    return redirect('tithepayment:pos_pin_login')
 
 
 @login_required

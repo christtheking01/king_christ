@@ -165,21 +165,34 @@ class TitheReceipt(AuditableModelWithManager):
     
     def save(self, *args, **kwargs):
         if not self.receipt_number:
-            # Generate unique receipt number
-            last_receipt = TitheReceipt.objects.filter(
-                date__year=timezone.now().year,
-                date__month=timezone.now().month
-            ).order_by('receipt_number').last()
+            from django.db import transaction, IntegrityError
+            import random
+            import string
             
-            if last_receipt:
-                last_number = int(last_receipt.receipt_number.split('-')[-1])
-                new_number = last_number + 1
-            else:
-                new_number = 1
+            # Generate unique receipt number using timestamp + random for guaranteed uniqueness
+            max_retries = 100
+            prefix = f"RCT-{timezone.now().strftime('%Y%m')}-"
             
-            self.receipt_number = f"RCT-{timezone.now().strftime('%Y%m')}-{new_number:04d}"
-        
-        super().save(*args, **kwargs)
+            for attempt in range(max_retries):
+                try:
+                    with transaction.atomic():
+                        # Use timestamp + random component for guaranteed uniqueness
+                        timestamp = int(timezone.now().timestamp() * 1000)
+                        random_suffix = ''.join(random.choices(string.digits, k=4))
+                        self.receipt_number = f"{prefix}{timestamp}{random_suffix}"
+                        
+                        # Double-check it doesn't exist
+                        if TitheReceipt.objects.filter(receipt_number=self.receipt_number).exists():
+                            continue
+                        
+                        super().save(*args, **kwargs)
+                        break
+                except IntegrityError:
+                    if attempt < max_retries - 1:
+                        continue
+                    raise
+        else:
+            super().save(*args, **kwargs)
 
 
 class Offering(AuditableModelWithManager):
@@ -242,24 +255,35 @@ class Offering(AuditableModelWithManager):
     
     def save(self, *args, **kwargs):
         if not self.receipt_number:
-            # Generate unique receipt number
-            last_offering = Offering.all_objects.filter(
-                date__year=timezone.now().year,
-                date__month=timezone.now().month
-            ).order_by('receipt_number').last()
+            from django.db import transaction, IntegrityError
+            import random
+            import string
             
-            if last_offering and last_offering.receipt_number:
+            # Generate unique receipt number using timestamp + random for guaranteed uniqueness
+            max_retries = 100
+            prefix = f"OFF-{timezone.now().strftime('%Y%m')}-"
+            
+            for attempt in range(max_retries):
                 try:
-                    last_number = int(last_offering.receipt_number.split('-')[-1])
-                    new_number = last_number + 1
-                except (ValueError, IndexError):
-                    new_number = 1
-            else:
-                new_number = 1
-            
-            self.receipt_number = f"OFF-{timezone.now().strftime('%Y%m')}-{new_number:04d}"
-        
-        super().save(*args, **kwargs)
+                    with transaction.atomic():
+                        # Use timestamp + random component for guaranteed uniqueness
+                        # This avoids race conditions with sequential numbering
+                        timestamp = int(timezone.now().timestamp() * 1000)
+                        random_suffix = ''.join(random.choices(string.digits, k=4))
+                        self.receipt_number = f"{prefix}{timestamp}{random_suffix}"
+                        
+                        # Double-check it doesn't exist (extremely unlikely but possible)
+                        if Offering.objects.filter(receipt_number=self.receipt_number).exists():
+                            continue  # Retry with new random suffix
+                        
+                        super().save(*args, **kwargs)
+                        break
+                except IntegrityError:
+                    if attempt < max_retries - 1:
+                        continue
+                    raise
+        else:
+            super().save(*args, **kwargs)
 
 
 class Employee(AuditableModelWithManager):
@@ -1123,7 +1147,7 @@ class EventPledge(AuditableModelWithManager):
         phone = self.pledger_phone
         
         if remaining > 0 and phone:
-            message = f"Dear {self.pledger_name}, this is a reminder that you pledged {self.promised_amount} for {self.event.title}. Remaining balance: {remaining}. Due: {self.due_date or 'ASAP'}. Thank you! - Christ King Church"
+            message = f"Ndugu {self.pledger_name}, hii ni kikumbusho kuwa umeahidi {self.promised_amount} kwa ajili ya {self.event.title}. Salio lililobaki: {remaining}. Tarehe ya malipo: {self.due_date or 'MAPEMA'}. Asante!"
             try:
                 phone_str = phone.as_e164 if hasattr(phone, 'as_e164') else str(phone)
                 result = sms_service.send_sms(phone_str, message)
@@ -1149,7 +1173,7 @@ class EventPledge(AuditableModelWithManager):
         if phone:
             total_paid = self.paid_amount
             remaining = self.remaining_amount
-            message = f"Dear {self.pledger_name}, thank you for your contribution of {payment_amount} for {self.event.title}. Total paid: {total_paid}. Remaining: {remaining}. God bless you! - Christ King Church"
+            message = f"Ndugu {self.pledger_name}, asante kwa mchango wako wa {payment_amount} kwa ajili ya {self.event.title}. Jumla iliyolipwa: {total_paid}. Salio lililobaki: {remaining}. Mungu akubariki!"
             try:
                 phone_str = phone.as_e164 if hasattr(phone, 'as_e164') else str(phone)
                 result = sms_service.send_sms(phone_str, message)
@@ -1211,3 +1235,92 @@ class PledgePayment(AuditableModelWithManager):
                 if success:
                     self.sms_notification_sent = True
                     super().save(update_fields=['sms_notification_sent'])
+
+
+class PledgeReceipt(AuditableModelWithManager):
+    """Receipt for pledge payments"""
+    pledge_payment = models.OneToOneField(
+        PledgePayment,
+        on_delete=models.CASCADE,
+        related_name='receipt'
+    )
+    
+    receipt_number = models.CharField(max_length=50, unique=True, editable=False)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    generated_by = models.CharField(max_length=255, blank=True, null=True)
+    
+    is_printed = models.BooleanField(default=False)
+    printed_at = models.DateTimeField(blank=True, null=True)
+    print_attempts = models.IntegerField(default=0)
+    last_print_error = models.TextField(blank=True, null=True)
+    
+    church_name = models.CharField(max_length=255, default="Parokia ya Kristo Mfalme")
+    church_address = models.TextField(default="S.L.P 1310")
+    church_phone = models.CharField(max_length=20, blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-generated_at']
+        verbose_name = "Pledge Receipt"
+        verbose_name_plural = "Pledge Receipts"
+    
+    def __str__(self):
+        return f"Receipt {self.receipt_number} - {self.pledge_payment.pledge.pledger_name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.receipt_number:
+            from django.db import transaction, IntegrityError
+            import random
+            import string
+            
+            # Generate unique receipt number using timestamp + random for guaranteed uniqueness
+            max_retries = 100
+            today = timezone.now().date()
+            prefix = f"PLDG-{today.strftime('%Y%m%d')}-"
+            
+            for attempt in range(max_retries):
+                try:
+                    with transaction.atomic():
+                        # Use timestamp + random component for guaranteed uniqueness
+                        timestamp = int(timezone.now().timestamp() * 1000)
+                        random_suffix = ''.join(random.choices(string.digits, k=4))
+                        self.receipt_number = f"{prefix}{timestamp}{random_suffix}"
+                        
+                        # Double-check it doesn't exist
+                        if PledgeReceipt.objects.filter(receipt_number=self.receipt_number).exists():
+                            continue
+                        
+                        super().save(*args, **kwargs)
+                        break
+                except IntegrityError:
+                    if attempt < max_retries - 1:
+                        continue
+                    raise
+        else:
+            super().save(*args, **kwargs)
+    
+    def get_print_data(self):
+        payment = self.pledge_payment
+        pledge = payment.pledge
+        
+        return {
+            'receipt_number': self.receipt_number,
+            'pledger_name': pledge.pledger_name,
+            'event_title': pledge.event.title if pledge.event else 'General Pledge',
+            'phone_number': pledge.pledger_phone or '',
+            'amount': f"{payment.amount:,.2f}",
+            'payment_method': payment.get_payment_method_display(),
+            'payment_date': payment.payment_date.strftime('%Y-%m-%d'),
+            'receipt_date': self.generated_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'promised_amount': f"{pledge.promised_amount:,.2f}",
+            'paid_amount': f"{pledge.paid_amount:,.2f}",
+            'remaining_amount': f"{pledge.remaining_amount:,.2f}",
+            'church_name': self.church_name,
+            'church_address': self.church_address or '',
+            'church_phone': self.church_phone or '',
+        }
+    
+    def mark_printed(self):
+        self.is_printed = True
+        self.printed_at = timezone.now()
+        self.print_attempts += 1
+        self.save()

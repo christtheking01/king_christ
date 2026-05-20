@@ -20,6 +20,171 @@ from .permissions import (
 import csv
 
 
+# Leadership Approval Views
+@login_required
+def leadership_payroll_approvals(request):
+    """Leadership view for payroll approvals - simplified for priests/admins"""
+    # Check if user has leadership role
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    pending_payrolls = Payroll.objects.filter(status='PENDING_VERIFICATION').order_by('-submitted_for_verification_at')
+    
+    context = {
+        'pending_payrolls': pending_payrolls,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_payroll_approvals.html', context)
+
+
+@login_required
+def leadership_payroll_detail(request, pk):
+    """Leadership view for payroll detail with approval/reject and comments"""
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    payroll = get_object_or_404(Payroll, pk=pk)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        comment = request.POST.get('comment', '')
+        
+        if action == 'approve':
+            payroll.status = 'VERIFIED'
+            payroll.verified_by = request.user
+            payroll.verified_at = timezone.now()
+            payroll.approver_comment = comment
+            payroll.save()
+            messages.success(request, f"Payroll for {payroll.employee.name} approved successfully")
+        elif action == 'reject':
+            payroll.status = 'REJECTED'
+            payroll.verified_by = request.user
+            payroll.verified_at = timezone.now()
+            payroll.approver_comment = comment
+            payroll.save()
+            messages.success(request, f"Payroll for {payroll.employee.name} rejected")
+        
+        return redirect('finance:leadership_payroll_approvals')
+    
+    context = {
+        'payroll': payroll,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_payroll_detail.html', context)
+
+
+@login_required
+def leadership_budget_approvals(request):
+    """Leadership view for budget approvals - simplified for priests/admins"""
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    pending_budgets = Budget.objects.filter(status='PENDING_APPROVAL').order_by('-created_at')
+    
+    context = {
+        'pending_budgets': pending_budgets,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_budget_approvals.html', context)
+
+
+@login_required
+def leadership_budget_detail(request, pk):
+    """Leadership view for budget detail with approval/reject and comments"""
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    budget = get_object_or_404(Budget, pk=pk)
+    allocations = budget.allocations.all()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        comment = request.POST.get('comment', '')
+        
+        if action == 'approve':
+            budget.status = 'APPROVED'
+            budget.approved_by = request.user
+            budget.approved_at = timezone.now()
+            budget.approver_comment = comment
+            budget.save()
+            messages.success(request, f"Budget '{budget.name}' approved successfully")
+        elif action == 'reject':
+            budget.status = 'REJECTED'
+            budget.approved_by = request.user
+            budget.approved_at = timezone.now()
+            budget.approver_comment = comment
+            budget.save()
+            messages.success(request, f"Budget '{budget.name}' rejected")
+        
+        return redirect('finance:leadership_budget_approvals')
+    
+    context = {
+        'budget': budget,
+        'allocations': allocations,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_budget_detail.html', context)
+
+
+@login_required
+def leadership_expense_approvals(request):
+    """Leadership view for expense report approvals - simplified for priests/admins"""
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    pending_expenses = ExpenseReport.objects.filter(status='PENDING').order_by('-date_submitted')
+    
+    context = {
+        'pending_expenses': pending_expenses,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_expense_approvals.html', context)
+
+
+@login_required
+def leadership_expense_detail(request, pk):
+    """Leadership view for expense report detail with approval/reject and comments"""
+    if not (request.user.is_superuser or request.user.roles in ['priest', 'admin', 'chair_person', 'secretary']):
+        messages.error(request, "You don't have permission to view this page")
+        return redirect('home')
+    
+    expense = get_object_or_404(ExpenseReport, pk=pk)
+    items = expense.items.all()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        comment = request.POST.get('comment', '')
+        
+        if action == 'approve':
+            expense.status = 'APPROVED'
+            expense.approved_by = request.user
+            expense.date_approved = timezone.now()
+            expense.notes = comment
+            expense.save()
+            messages.success(request, f"Expense report approved successfully")
+        elif action == 'reject':
+            expense.status = 'REJECTED'
+            expense.approved_by = request.user
+            expense.date_approved = timezone.now()
+            expense.notes = comment
+            expense.save()
+            messages.success(request, f"Expense report rejected")
+        
+        return redirect('finance:leadership_expense_approvals')
+    
+    context = {
+        'expense': expense,
+        'items': items,
+        'leadership_active': True,
+    }
+    return render(request, 'finance/leadership_expense_detail.html', context)
+
+
 @login_required
 def dashboard(request):
     # Enhanced dashboard with comprehensive financial overview
@@ -2077,9 +2242,9 @@ def pledge_create(request):
                 error_messages.append(f'Entry #{i+1}: {str(e)}')
         
         if created_count > 0:
-            messages.success(request, f'{created_count} pledge(s) created successfully!')
+            messages.success(request, f'Ahadi {created_count} zimeundwa kwa mafanikio!')
         if skipped_count > 0:
-            messages.warning(request, f'{skipped_count} pledge(s) skipped (already exist)')
+            messages.warning(request, f'Ahadi {skipped_count} zimepitiwa (zipo tayari)')
         if error_messages:
             for msg in error_messages[:5]:  # Show first 5 errors
                 messages.error(request, msg)
@@ -2147,7 +2312,7 @@ def pledge_edit(request, pk):
         pledge.modified_by = request.user
         pledge.save()
         
-        messages.success(request, 'Pledge updated successfully!')
+        messages.success(request, 'Ahadi imesasishwa kwa mafanikio!')
         return redirect('pledge_detail', pk=pledge.pk)
     
     events = Event.objects.filter(status__in=['PUBLISHED', 'COMPLETED'])
@@ -2170,7 +2335,7 @@ def pledge_delete(request, pk):
     
     if request.method == 'POST':
         pledge.soft_delete(request.user)
-        messages.success(request, 'Pledge deleted successfully!')
+        messages.success(request, 'Ahadi imefutwa kwa mafanikio!')
         return redirect('pledge_list')
     
     context = {'pledge': pledge}
@@ -2201,7 +2366,7 @@ def pledge_payment_add(request, pledge_pk):
             notes=notes
         )
         
-        messages.success(request, f'Payment of {amount} recorded successfully! SMS notification sent.')
+        messages.success(request, f'Malipo ya {amount} yamerekodiwa kwa mafanikio! Ujumbe wa SMS umetumwa.')
         return redirect('pledge_detail', pk=pledge.pk)
     
     context = {
@@ -2226,7 +2391,7 @@ def pledge_payment_delete(request, pk):
         pledge.paid_amount = pledge.payments.aggregate(total=Sum('amount'))['total'] or 0
         pledge.update_status()
         
-        messages.success(request, 'Payment deleted successfully!')
+        messages.success(request, 'Malipo yamefutwa kwa mafanikio!')
         return redirect('pledge_detail', pk=pledge_pk)
     
     context = {'payment': payment}
@@ -2240,15 +2405,15 @@ def pledge_send_reminder(request, pk):
     pledge = get_object_or_404(EventPledge, pk=pk)
     
     if pledge.remaining_amount <= 0:
-        messages.warning(request, 'This pledge is already fully paid!')
+        messages.warning(request, 'Ahadi hii imeshalipwa kamili!')
         return redirect('pledge_detail', pk=pk)
     
     success = pledge.send_reminder_sms()
     
     if success:
-        messages.success(request, f'Reminder SMS sent to {pledge.member.name}!')
+        messages.success(request, f'Ujumbe wa kikumbusho umetumwa kwa {pledge.pledger_name}!')
     else:
-        messages.error(request, 'Failed to send SMS. Check if member has a valid phone number.')
+        messages.error(request, 'Imeshindwa kutuma ujumbe wa SMS. Angalia kama mtoa ahadi ana namba ya simu sahihi.')
     
     return redirect('pledge_detail', pk=pk)
 
@@ -2276,7 +2441,7 @@ def pledge_bulk_reminder(request):
             else:
                 failed_count += 1
         
-        messages.success(request, f'Reminders sent: {sent_count} successful, {failed_count} failed.')
+        messages.success(request, f'Vikumbusho vimetumwa: {sent_count} vimefanikiwa, {failed_count} vimeshindwa.')
         return redirect('pledge_list')
     
     return redirect('pledge_list')

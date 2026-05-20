@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if instructor %}Edit Instructor{% else %}Add Instructor{% endif %}
+{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .leadership-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-glass {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .form-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        animation: slideUp 0.6s ease-out 0.1s both;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .form-header p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group select,
+    .form-group input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        box-sizing: border-box;
+        color: var(--text-primary);
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .help-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .error-text {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    @media (max-width: 768px) {
+        .instructor-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .form-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="instructor-page">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-chalkboard-teacher"></i>
+            {% if instructor %}Edit Instructor{% else %}Add Instructor{% endif %}
+        </h1>
+        <a href="{% url 'instructor_list' %}" class="btn-glass">
+            <i class="fas fa-arrow-left"></i>
+            Back to Instructors
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="form-header">
+            <h3>
+                <i class="fas fa-user-plus"></i>
+                {% if instructor %}Edit Instructor Details{% else %}Add New Instructor{% endif %}
+            </h3>
+            <p>{% if instructor %}Update instructor information{% else %}Fill in the details to add a new instructor{% endif %}</p>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.3);">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.entry_type.id_for_label }}">
+                    Entry Type <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.entry_type }}
+                <span class="help-text">Select whether to choose a system user or enter details manually</span>
+                {% if form.entry_type.errors %}
+                    <div class="error-text">
+                        {% for error in form.entry_type.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group" id="user_field_group">
+                <label for="{{ form.user.id_for_label }}">
+                    Select User <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.user }}
+                <span class="help-text">Only users with catechist role are displayed</span>
+                {% if form.user.errors %}
+                    <div class="error-text">
+                        {% for error in form.user.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="manual_fields_group" style="display: none;">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">
+                        First Name <span style="color: var(--danger);">*</span>
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="error-text">
+                            {% for error in form.first_name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">
+                        Last Name <span style="color: var(--danger);">*</span>
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="error-text">
+                            {% for error in form.last_name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">
+                        Email
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="error-text">
+                            {% for error in form.email.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">
+                        Phone
+                    </label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="error-text">
+                            {% for error in form.phone.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.gender.id_for_label }}">
+                    Gender <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.gender }}
+                {% if form.gender.errors %}
+                    <div class="error-text">
+                        {% for error in form.gender.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.qualification.id_for_label }}">Qualification</label>
+                {{ form.qualification }}
+                {% if form.qualification.errors %}
+                    <div class="error-text">
+                        {% for error in form.qualification.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <span class="help-text">e.g., Bachelor's in Theology, Catechist Certification</span>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.specilization.id_for_label }}">Specialization</label>
+                {{ form.specilization }}
+                {% if form.specilization.errors %}
+                    <div class="error-text">
+                        {% for error in form.specilization.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <span class="help-text">e.g., Bible, Catechism, Liturgy</span>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">
+                    Status <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="error-text">
+                        {% for error in form.status.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'instructor_list' %}" class="btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if instructor %}Update Instructor{% else %}Add Instructor{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const entryTypeSelect = document.getElementById('{{ form.entry_type.id_for_label }}');
+    const userFieldGroup = document.getElementById('user_field_group');
+    const manualFieldsGroup = document.getElementById('manual_fields_group');
+    
+    function toggleEntryFields() {
+        if (entryTypeSelect.value === 'user') {
+            userFieldGroup.style.display = 'block';
+            manualFieldsGroup.style.display = 'none';
+        } else if (entryTypeSelect.value === 'manual') {
+            userFieldGroup.style.display = 'none';
+            manualFieldsGroup.style.display = 'block';
+        }
+    }
+    
+    // Initial toggle based on current value
+    toggleEntryFields();
+    
+    // Toggle on change
+    entryTypeSelect.addEventListener('change', toggleEntryFields);
+});
+</script>
+{% endblock %}

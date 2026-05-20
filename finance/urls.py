@@ -89,5 +89,13 @@ urlpatterns = [
     
     # Pledge Payments
     path('pledges/<int:pledge_pk>/payment/add/', views.pledge_payment_add, name='pledge_payment_add'),
-    path('pledge-payments/<int:pk>/delete/', views.pledge_payment_delete, name='pledge_payment_delete'),
+    path('pledges-payments/<int:pk>/delete/', views.pledge_payment_delete, name='pledge_payment_delete'),
+    
+    # Leadership Approval Views
+    path('leadership/payroll-approvals/', views.leadership_payroll_approvals, name='leadership_payroll_approvals'),
+    path('leadership/payroll/<int:pk>/', views.leadership_payroll_detail, name='leadership_payroll_detail'),
+    path('leadership/budget-approvals/', views.leadership_budget_approvals, name='leadership_budget_approvals'),
+    path('leadership/budget/<int:pk>/', views.leadership_budget_detail, name='leadership_budget_detail'),
+    path('leadership/expense-approvals/', views.leadership_expense_approvals, name='leadership_expense_approvals'),
+    path('leadership/expense/<int:pk>/', views.leadership_expense_detail, name='leadership_expense_detail'),
 ]

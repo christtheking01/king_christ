@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ instructor.full_name }} - Instructor Details{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .instructor-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-glass {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .detail-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out 0.1s both;
+    }
+
+    .instructor-profile {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .instructor-avatar-large {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .instructor-profile-info h2 {
+        margin: 0 0 0.5rem;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .instructor-profile-info p {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--primary);
+    }
+
+    .classes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .class-card {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transition: var(--transition);
+    }
+
+    .class-card:hover {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateY(-2px);
+    }
+
+    .class-card h4 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .class-card p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .btn-danger {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--danger);
+    }
+
+    .empty-classes {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .instructor-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .instructor-profile { flex-direction: column; text-align: center; }
+        .info-grid { grid-template-columns: 1fr; }
+        .action-buttons { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="instructor-page">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-chalkboard-teacher"></i>
+            Instructor Details
+        </h1>
+        <a href="{% url 'catechesis:instructor_list' %}" class="btn-glass">
+            <i class="fas fa-arrow-left"></i>
+            Back to Instructors
+        </a>
+    </div>
+
+    <!-- Detail Card -->
+    <div class="detail-card">
+        <!-- Profile Section -->
+        <div class="instructor-profile">
+            <div class="instructor-avatar-large">
+                {{ instructor.first_name|first }}{{ instructor.last_name|first }}
+            </div>
+            <div class="instructor-profile-info">
+                <h2>{{ instructor.full_name }}</h2>
+                <p>{{ instructor.email }}</p>
+                <span class="status-badge {{ instructor.status }}">{{ instructor.get_status_display }}</span>
+            </div>
+        </div>
+
+        <!-- Information Grid -->
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Gender</span>
+                <span class="info-value">{{ instructor.get_gender_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Qualification</span>
+                <span class="info-value">{{ instructor.qualification|default:'Not specified' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Specialization</span>
+                <span class="info-value">{{ instructor.specilization|default:'Not specified' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Joined Date</span>
+                <span class="info-value">{{ instructor.joined_date|date:"F d, Y" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">{{ instructor.phone|default:'Not specified' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Created</span>
+                <span class="info-value">{{ instructor.created_at|date:"F d, Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Coordinated Classes -->
+        {% if coordinated_classes %}
+        <div style="margin-top: 2rem;">
+            <h3 class="section-title">
+                <i class="fas fa-crown"></i>
+                Coordinated Classes
+            </h3>
+            <div class="classes-grid">
+                {% for class in coordinated_classes %}
+                <div class="class-card">
+                    <h4>{{ class.name }}</h4>
+                    <p>{{ class.get_sacrament_type_display }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Teaching Classes -->
+        {% if teaching_classes %}
+        <div style="margin-top: 2rem;">
+            <h3 class="section-title">
+                <i class="fas fa-book"></i>
+                Teaching Classes
+            </h3>
+            <div class="classes-grid">
+                {% for class in teaching_classes %}
+                <div class="class-card">
+                    <h4>{{ class.name }}</h4>
+                    <p>{{ class.get_sacrament_type_display }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not coordinated_classes and not teaching_classes %}
+        <div class="empty-classes">
+            This instructor is not assigned to any classes yet.
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'catechesis:instructor_update' instructor.pk %}" class="btn-primary">
+                <i class="fas fa-edit"></i>
+                Edit Instructor
+            </a>
+            <a href="{% url 'catechesis:instructor_list' %}" class="btn-outline">
+                <i class="fas fa-list"></i>
+                View All Instructors
+            </a>
+            <a href="{% url 'catechesis:instructor_delete' instructor.pk %}" class="btn-danger">
+                <i class="fas fa-trash"></i>
+                Delete Instructor
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

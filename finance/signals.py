@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from django.conf import settings
-from .models import EventPledge, PledgePayment, Payroll
+from .models import EventPledge, PledgePayment, Payroll, Budget
 from notifications.models import Notification, UserNotification
 from notifications.services import NotificationService
 from users.models import User
@@ -27,22 +27,22 @@ def notify_priests_payroll_submitted(payroll):
     employee = payroll.employee
     submitted_by = payroll.submitted_by
     
-    subject = f"Payroll Verification Required: {employee.name} - {payroll.pay_period_start.strftime('%B %Y')}"
+    subject = f"Uhakiki wa Mshahara Unahitajika: {employee.name} - {payroll.pay_period_start.strftime('%B %Y')}"
     
     message = (
-        f"Dear Father,\n\n"
-        f"A payroll has been submitted for your verification:\n\n"
-        f"Employee: {employee.name}\n"
-        f"Position: {employee.position}\n"
-        f"Pay Period: {payroll.pay_period_start.strftime('%B %d, %Y')} - {payroll.pay_period_end.strftime('%B %d, %Y')}\n"
-        f"Basic Salary: TZS {payroll.basic_salary:,.2f}\n"
-        f"Gross Salary: TZS {payroll.gross_salary:,.2f}\n"
-        f"Net Salary: TZS {payroll.net_salary:,.2f}\n"
-        f"Submitted By: {submitted_by.get_full_name() or submitted_by.username}\n"
-        f"Submitted At: {payroll.submitted_for_verification_at.strftime('%B %d, %Y at %I:%M %p')}\n\n"
-        f"Please review and verify this payroll at your earliest convenience.\n\n"
-        f"View payroll: {getattr(settings, 'SITE_URL', '')}/finance/payrolls/?status=PENDING_VERIFICATION\n\n"
-        f"God bless,\nChrist The King Parish System"
+        f"Baba Mkuu,\n\n"
+        f"Mshahara umewasilishwa kwa uhakiki wako:\n\n"
+        f"Mmfanyakazi: {employee.name}\n"
+        f"Nafasi: {employee.position}\n"
+        f"Kipindi cha Malipo: {payroll.pay_period_start.strftime('%B %d, %Y')} - {payroll.pay_period_end.strftime('%B %d, %Y')}\n"
+        f"Mshahara wa Msingi: TZS {payroll.basic_salary:,.2f}\n"
+        f"Mshahara Jumla: TZS {payroll.gross_salary:,.2f}\n"
+        f"Mshahara Halisi: TZS {payroll.net_salary:,.2f}\n"
+        f"Uliwasilishwa Na: {submitted_by.get_full_name() or submitted_by.username}\n"
+        f"Uliwasilishwa Saa: {payroll.submitted_for_verification_at.strftime('%B %d, %Y at %I:%M %p')}\n\n"
+        f"Tafadhali hakiki mshahara huu mapema iwezekanavyo.\n\n"
+        f"Angalia mshahara: {getattr(settings, 'SITE_URL', '')}/finance/payrolls/?status=PENDING_VERIFICATION\n\n"
+        f"Mungu akubariki,\nMfumo wa Parokia ya Kristo Mfalme"
     )
     
     try:
@@ -171,25 +171,25 @@ def send_pledge_assignment_notification(sender, instance, created, **kwargs):
             from django.conf import settings
             
             if user and user.email:
-                email_subject = f"New Pledge Assignment - {event_title}"
+                email_subject = f"Upangaji wa Ahadi Mpya - {event_title}"
                 email_body = f"""
-Dear {pledge.pledger_name},
+Ndugu {pledge.pledger_name},
 
-You have been assigned a new pledge for {event_title}.
+Umepangiwa ahadi mpya kwa ajili ya {event_title}.
 
-Pledge Details:
-- Amount: {promised_amount:,.2f} TZS
-- Event: {event_title}
-- Due Date: {due_date}
-- Status: {pledge.get_status_display()}
+Maelezo ya Ahadi:
+- Kiasi: {promised_amount:,.2f} TZS
+- Tukio: {event_title}
+- Tarehe ya Malipo: {due_date}
+- Hali: {pledge.get_status_display()}
 
-Please log in to your portal to view and manage your pledge:
+Tafadhali ingia kwenye portal yako kuona na kusimamia ahadi yako:
 https://christtheking.space/portal/pledges/
 
-Thank you for your generous support!
+Asante kwa mchango wako wa kujitolea!
 
-Blessings,
-Kristo Mfalme Parish Team
+Baraka,
+Timu ya Parokia ya Kristo Mfalme
 """
                 
                 send_mail(
@@ -253,7 +253,7 @@ def send_payment_confirmation_notification(sender, instance, created, **kwargs):
         # 2. Live notification
         if user and remaining > 0:
             try:
-                title = "Pledge Payment Received"
+                title = "Malipo ya Ahadi Yamepokelewa"
                 message = (
                     f"Asante kwa malipo yako ya TZS {payment_amount:,.2f}. " \
                     f"Umelipa jumla ya TZS {total_paid:,.2f} kati ya TZS {pledge.promised_amount:,.2f}. " \
@@ -290,24 +290,24 @@ def send_payment_confirmation_notification(sender, instance, created, **kwargs):
             from django.conf import settings
             
             if user and user.email:
-                email_subject = "Pledge Payment Confirmation"
+                email_subject = "Thibitisho la Malipo ya Ahadi"
                 email_body = f"""
-Dear {pledge.pledger_name},
+Ndugu {pledge.pledger_name},
 
-Thank you for your contribution!
+Asante kwa mchango wako!
 
-Payment Details:
-- Amount Paid: {payment_amount:,.2f} TZS
-- Event: {event_title}
-- Total Paid: {total_paid:,.2f} TZS
-- Total Pledged: {pledge.promised_amount:,.2f} TZS
-- Remaining Balance: {remaining:,.2f} TZS
+Maelezo ya Malipo:
+- Kiasi Kilicholipwa: {payment_amount:,.2f} TZS
+- Tukio: {event_title}
+- Jumla Iliyolipwa: {total_paid:,.2f} TZS
+- Jumla Iliyoahidiwa: {pledge.promised_amount:,.2f} TZS
+- Salio Lililobaki: {remaining:,.2f} TZS
 
-{"Your pledge is now COMPLETE! Thank you for your generosity." if remaining <= 0 else f"Please complete your remaining balance of {remaining:,.2f} TZS by the due date."}
+{"Ahadi yako sasa imekamilika! Asante kwa ukarimu wako." if remaining <= 0 else f"Tafadhali kamilisha salio lako la {remaining:,.2f} TZS kabla ya tarehe ya mwisho."}
 
-God bless you!
+Mungu akubariki!
 
-Kristo Mfalme Parish Team
+Timu ya Parokia ya Kristo Mfalme
 """
                 
                 send_mail(
@@ -322,3 +322,55 @@ Kristo Mfalme Parish Team
             
     except Exception as e:
         logger.error(f"Error in payment notification: {e}")
+
+
+def notify_priests_budget_submitted(budget):
+    """Send email notification to priests when budget is submitted for approval"""
+    priest_emails = get_priest_emails()
+    if not priest_emails:
+        logger.warning("No priest emails found for budget notification")
+        return
+    
+    submitted_by = budget.created_by
+    
+    subject = f"Idhini ya Bajeti Inahitajika: {budget.name} - {budget.fiscal_year}"
+    
+    message = (
+        f"Baba Mkuu,\n\n"
+        f"Bajeti imewasilishwa kwa idhini yako:\n\n"
+        f"Jina la Bajeti: {budget.name}\n"
+        f"Mwaka wa Fedha: {budget.fiscal_year}\n"
+        f"Jumla ya Bajeti: TZS {budget.total_budget:,.2f}\n"
+        f"Idara: {budget.department or 'Haipo'}\n"
+        f"Uliwasilishwa Na: {submitted_by.get_full_name() or submitted_by.username if submitted_by else 'Haipo'}\n"
+        f"Uliwasilishwa Saa: {budget.created_at.strftime('%B %d, %Y at %I:%M %p')}\n\n"
+        f"Tafadhali hakiki na idhini/kataa bajeti hii mapema iwezekanavyo.\n\n"
+        f"Angalia bajeti: {getattr(settings, 'SITE_URL', '')}/finance/budgets/{budget.id}/\n\n"
+        f"Mungu akubariki,\nMfumo wa Parokia ya Kristo Mfalme"
+    )
+    
+    try:
+        notification_service = NotificationService()
+        for email in priest_emails:
+            notification_service.send_email(
+                to=email,
+                subject=subject,
+                message=message,
+                template='finance/priest_budget_notification_email.html',
+                context={
+                    'budget': budget,
+                    'submitted_by': submitted_by,
+                    'site_url': getattr(settings, 'SITE_URL', ''),
+                }
+            )
+        logger.info(f"Priest notification sent for budget {budget.id}")
+    except Exception as e:
+        logger.error(f"Failed to send priest budget notification: {str(e)}")
+
+
+@receiver(post_save, sender=Budget)
+def notify_budget_submitted_for_approval(sender, instance, created, **kwargs):
+    """Send notification to priests when budget is submitted for approval"""
+    # Only notify when status changes to PENDING_APPROVAL
+    if instance.status == 'PENDING_APPROVAL':
+        notify_priests_budget_submitted(instance)

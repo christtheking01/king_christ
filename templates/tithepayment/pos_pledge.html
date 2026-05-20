@@ -264,13 +264,21 @@
     }
 </style>
 
-<div class="search-box">
+<div class="search-box" style="display: flex; gap: 12px; align-items: center;">
     <input 
         type="text" 
         class="search-input" 
         placeholder="Search pledges by name or event..."
         id="pledgeSearch"
+        style="flex: 1;"
     >
+    <button 
+        class="submit-btn" 
+        onclick="openCreatePledgeModal()"
+        style="white-space: nowrap; padding: 16px 24px;"
+    >
+        <i class="fas fa-plus"></i> New Pledge
+    </button>
 </div>
 
 <div class="pledge-list" id="pledgeList">
@@ -301,6 +309,105 @@
             <p>No active pledges found</p>
         </div>
     {% endif %}
+</div>
+
+<!-- Create Pledge Modal -->
+<div class="modal" id="createPledgeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Pledge</h3>
+            <button class="close-btn" onclick="closeCreatePledgeModal()">&times;</button>
+        </div>
+        
+        <form id="createPledgeForm" method="post" action="{% url 'tithepayment:pos_pledge' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_pledge">
+            
+            <div class="form-group">
+                <label>Event</label>
+                <select name="event_id" id="eventId" required>
+                    <option value="">Select an event...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Pledger Type</label>
+                <select name="pledger_type" id="pledgerType" onchange="togglePledgerFields()" required>
+                    <option value="member">Member</option>
+                    <option value="external">External (Non-Member)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="memberField">
+                <label>Member</label>
+                <input 
+                    type="text" 
+                    name="member_search" 
+                    placeholder="Search member by name or code..."
+                    id="memberSearch"
+                    oninput="searchMembers(this.value)"
+                >
+                <input type="hidden" name="member_id" id="memberId">
+                <div id="memberResults" class="search-results" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group" id="externalFields" style="display: none;">
+                <label>External Name</label>
+                <input 
+                    type="text" 
+                    name="external_name" 
+                    placeholder="Full name"
+                    id="externalName"
+                >
+            </div>
+            
+            <div class="form-group" id="externalPhoneField" style="display: none;">
+                <label>External Phone</label>
+                <input 
+                    type="tel" 
+                    name="external_phone" 
+                    placeholder="Phone number"
+                    id="externalPhone"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>Promised Amount (Tsh)</label>
+                <input 
+                    type="number" 
+                    name="promised_amount" 
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0"
+                    required
+                    id="promisedAmount"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>Due Date (Optional)</label>
+                <input 
+                    type="date" 
+                    name="due_date" 
+                    id="dueDate"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>Notes (Optional)</label>
+                <textarea 
+                    name="notes" 
+                    placeholder="Any additional notes..."
+                    rows="2"
+                    style="width: 100%; padding: 12px; border: 2px solid rgba(76, 201, 240, 0.3); border-radius: 8px; box-sizing: border-box; background: rgba(30, 42, 74, 0.5); color: #e0e0e0;"
+                ></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-plus"></i> Create Pledge
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- Payment Modal -->
@@ -388,6 +495,7 @@
 
 <script>
     let currentPledgeData = null;
+    let memberSearchTimeout = null;
 
     function openPaymentModal(element) {
         const pledgeId = element.dataset.pledgeId;
@@ -421,6 +529,99 @@
         document.getElementById('paymentModal').classList.remove('show');
         currentPledgeData = null;
     }
+
+    function openCreatePledgeModal() {
+        document.getElementById('createPledgeModal').classList.add('show');
+        loadEvents();
+    }
+    
+    function closeCreatePledgeModal() {
+        document.getElementById('createPledgeModal').classList.remove('show');
+        document.getElementById('createPledgeForm').reset();
+    }
+
+    function togglePledgerFields() {
+        const pledgerType = document.getElementById('pledgerType').value;
+        const memberField = document.getElementById('memberField');
+        const externalFields = document.getElementById('externalFields');
+        const externalPhoneField = document.getElementById('externalPhoneField');
+        
+        if (pledgerType === 'member') {
+            memberField.style.display = 'block';
+            externalFields.style.display = 'none';
+            externalPhoneField.style.display = 'none';
+            document.getElementById('memberSearch').required = true;
+            document.getElementById('externalName').required = false;
+        } else {
+            memberField.style.display = 'none';
+            externalFields.style.display = 'block';
+            externalPhoneField.style.display = 'block';
+            document.getElementById('memberSearch').required = false;
+            document.getElementById('externalName').required = true;
+        }
+    }
+
+    async function loadEvents() {
+        try {
+            const response = await fetch('/tithepayment/api/v1/pledges/events/');
+            const data = await response.json();
+            
+            if (data.success) {
+                const eventSelect = document.getElementById('eventId');
+                eventSelect.innerHTML = '<option value="">Select an event...</option>';
+                
+                data.results.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id;
+                    option.textContent = `${event.title} - ${event.date}`;
+                    eventSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading events:', error);
+        }
+    }
+
+    async function searchMembers(query) {
+        if (query.length < 2) {
+            document.getElementById('memberResults').style.display = 'none';
+            return;
+        }
+        
+        clearTimeout(memberSearchTimeout);
+        memberSearchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/tithepayment/api/v1/members/lookup/?search=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.success && data.results.length > 0) {
+                    const resultsDiv = document.getElementById('memberResults');
+                    resultsDiv.innerHTML = '';
+                    resultsDiv.style.display = 'block';
+                    
+                    data.results.forEach(member => {
+                        const div = document.createElement('div');
+                        div.style.padding = '8px';
+                        div.style.cursor = 'pointer';
+                        div.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                        div.textContent = `${member.name} (${member.code || 'No code'})`;
+                        div.onclick = () => selectMember(member);
+                        resultsDiv.appendChild(div);
+                    });
+                } else {
+                    document.getElementById('memberResults').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error searching members:', error);
+            }
+        }, 300);
+    }
+
+    function selectMember(member) {
+        document.getElementById('memberSearch').value = member.name;
+        document.getElementById('memberId').value = member.id;
+        document.getElementById('memberResults').style.display = 'none';
+    }
     
     // Search functionality
     document.getElementById('pledgeSearch').addEventListener('input', function() {
@@ -433,14 +634,20 @@
         });
     });
     
-    // Close modal on outside click
+    // Close modals on outside click
     document.getElementById('paymentModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closePaymentModal();
         }
     });
 
-    // Handle form submission and print receipt
+    document.getElementById('createPledgeModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCreatePledgeModal();
+        }
+    });
+
+    // Handle pledge payment form submission
     const pledgePaymentForm = document.getElementById('pledgePaymentForm');
     if (pledgePaymentForm) {
         pledgePaymentForm.addEventListener('submit', async function(e) {
@@ -487,6 +694,56 @@
                 // Fallback to normal form submission
                 pledgePaymentForm.submit();
             });
+        });
+    }
+
+    // Handle create pledge form submission
+    const createPledgeForm = document.getElementById('createPledgeForm');
+    if (createPledgeForm) {
+        createPledgeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(createPledgeForm);
+            const pledgerType = formData.get('pledger_type');
+            
+            // Build API request data
+            const requestData = {
+                event_id: formData.get('event_id'),
+                promised_amount: parseFloat(formData.get('promised_amount')),
+                due_date: formData.get('due_date'),
+                notes: formData.get('notes')
+            };
+            
+            if (pledgerType === 'member') {
+                requestData.member_id = formData.get('member_id');
+            } else {
+                requestData.external_name = formData.get('external_name');
+                requestData.external_phone = formData.get('external_phone');
+            }
+            
+            try {
+                const response = await fetch('/tithepayment/api/v1/pledges/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCreatePledgeModal();
+                    alert(`Pledge created successfully! Pledge ID: ${data.pledge_number}`);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to create pledge'));
+                }
+            } catch (error) {
+                console.error('Error creating pledge:', error);
+                alert('Error: Failed to create pledge. Please try again.');
+            }
         });
     }
 </script>

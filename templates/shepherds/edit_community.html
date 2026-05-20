@@ -289,7 +289,7 @@
 <div class="edit-wrapper">
     <div class="edit-header">
         <h1><i class="fas fa-edit"></i> Edit Community</h1>
-        <a href="{% url 'community_list' %}" class="btn-modern btn-secondary-modern">
+        <a href="{% url 'list_community' %}" class="btn-modern btn-secondary-modern">
             <i class="fas fa-arrow-left"></i> Back to Communities
         </a>
     </div>
@@ -397,7 +397,7 @@
             <button type="submit" class="btn-modern btn-primary-modern">
                 <i class="fas fa-save"></i> Save Changes
             </button>
-            <a href="{% url 'community_list' %}" class="btn-modern btn-secondary-modern">
+            <a href="{% url 'list_community' %}" class="btn-modern btn-secondary-modern">
                 <i class="fas fa-times"></i> Cancel
             </a>
             <button type="button" class="btn-modern btn-danger-modern" onclick="confirmDelete()">
@@ -411,7 +411,7 @@
 <template id="leader-template">
     <div class="leader-card" data-leader-id="NEW_ID">
         <div class="leader-header">
-            <select class="leader-role" name="leader_role_NEW_ID" required>
+            <select class="form-control-modern leader-role-select" name="leader_role_NEW_ID" required>
                 <option value="">Select Role</option>
                 <option value="CHAIR PERSON">Chair Person</option>
                 <option value="VICE CHAIR">Vice Chair</option>

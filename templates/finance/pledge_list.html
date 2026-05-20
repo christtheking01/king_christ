@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load finance_filters %}
 
-{% block title %}Event Pledges{% endblock %}
+{% block title %}Ahadi za Matukio{% endblock %}
 
 {% block internal_style %}
 <style>
@@ -282,17 +282,17 @@
     <!-- Hero Header -->
     <div class="pledge-hero">
         <div>
-            <h1><i class="fas fa-hand-holding-heart"></i>Event Pledges</h1>
+            <h1><i class="fas fa-hand-holding-heart"></i>Ahadi za Matukio</h1>
         </div>
         <div class="d-flex gap-2">
             <form method="post" action="{% url 'pledge_bulk_reminder' %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn-secondary-hero" onclick="return confirm('Send reminders to all members with pending/overdue pledges?');">
-                    <i class="fas fa-paper-plane"></i>Send Bulk Reminders
+                <button type="submit" class="btn-secondary-hero" onclick="return confirm('Tuma vikumbusho kwa wanachama wote wenye ahadi zinazosubiri/zimechelewa?');">
+                    <i class="fas fa-paper-plane"></i>Tuma Vikumbusho Vikuu
                 </button>
             </form>
             <a href="{% url 'pledge_create' %}" class="btn-create">
-                <i class="fas fa-plus"></i>Create Pledge
+                <i class="fas fa-plus"></i>Unda Ahadi
             </a>
         </div>
     </div>
@@ -302,19 +302,19 @@
         <div class="col-md-3">
             <div class="stat-card primary">
                 <div class="stat-value">{{ total_promised|currency }}</div>
-                <div class="stat-label"><i class="fas fa-handshake me-1"></i>Total Promised</div>
+                <div class="stat-label"><i class="fas fa-handshake me-1"></i>Jumla Iliyoahidiwa</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card success">
                 <div class="stat-value">{{ total_paid|currency }}</div>
-                <div class="stat-label"><i class="fas fa-check-circle me-1"></i>Total Paid</div>
+                <div class="stat-label"><i class="fas fa-check-circle me-1"></i>Jumla Iliyolipwa</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card warning">
                 <div class="stat-value">{{ total_remaining|currency }}</div>
-                <div class="stat-label"><i class="fas fa-clock me-1"></i>Remaining</div>
+                <div class="stat-label"><i class="fas fa-clock me-1"></i>Salio</div>
             </div>
         </div>
         <div class="col-md-3">
@@ -324,7 +324,7 @@
                         {{ total_paid|div:total_promised|mul:100|floatformat:1 }}%
                     {% else %}0%{% endif %}
                 </div>
-                <div class="stat-label"><i class="fas fa-chart-pie me-1"></i>Completion Rate</div>
+                <div class="stat-label"><i class="fas fa-chart-pie me-1"></i>Kiwango cha Ukombozi</div>
             </div>
         </div>
     </div>
@@ -335,27 +335,27 @@
             <ul class="nav nav-pills card-header-pills">
                 <li class="nav-item">
                     <a class="nav-link {% if not selected_status %}active{% endif %}" href="{% url 'pledge_list' %}">
-                        All <span class="badge bg-secondary ms-1">{{ status_counts.PENDING|add:status_counts.PARTIAL|add:status_counts.COMPLETED|add:status_counts.OVERDUE }}</span>
+                        Zote <span class="badge bg-secondary ms-1">{{ status_counts.PENDING|add:status_counts.PARTIAL|add:status_counts.COMPLETED|add:status_counts.OVERDUE }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if selected_status == 'PENDING' %}active{% endif %}" href="{% url 'pledge_list' %}?status=PENDING">
-                        Pending <span class="badge bg-warning ms-1">{{ status_counts.PENDING }}</span>
+                        Zinasubiri <span class="badge bg-warning ms-1">{{ status_counts.PENDING }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if selected_status == 'PARTIAL' %}active{% endif %}" href="{% url 'pledge_list' %}?status=PARTIAL">
-                        Partial <span class="badge bg-info ms-1">{{ status_counts.PARTIAL }}</span>
+                        Nusu <span class="badge bg-info ms-1">{{ status_counts.PARTIAL }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if selected_status == 'COMPLETED' %}active{% endif %}" href="{% url 'pledge_list' %}?status=COMPLETED">
-                        Completed <span class="badge bg-success ms-1">{{ status_counts.COMPLETED }}</span>
+                        Zimekamilika <span class="badge bg-success ms-1">{{ status_counts.COMPLETED }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if selected_status == 'OVERDUE' or overdue_only %}active{% endif %}" href="{% url 'pledge_list' %}?overdue=1">
-                        Overdue <span class="badge bg-danger ms-1">{{ status_counts.OVERDUE }}</span>
+                        Zimechelewa <span class="badge bg-danger ms-1">{{ status_counts.OVERDUE }}</span>
                     </a>
                 </li>
             </ul>
@@ -365,7 +365,7 @@
             <form method="get" class="row g-3 mb-3">
                 <div class="col-md-4">
                     <select name="event" class="form-select">
-                        <option value="">All Events</option>
+                        <option value="">Matukio Yote</option>
                         {% for event in events %}
                         <option value="{{ event.id }}" {% if selected_event == event.id|stringformat:'s' %}selected{% endif %}>
                             {{ event.title }}
@@ -375,7 +375,7 @@
                 </div>
                 <div class="col-md-4">
                     <select name="member" class="form-select">
-                        <option value="">All Members</option>
+                        <option value="">Wanachama Wote</option>
                         {% for member in members %}
                         <option value="{{ member.id }}" {% if selected_member == member.id|stringformat:'s' %}selected{% endif %}>
                             {{ member.name }}
@@ -385,10 +385,10 @@
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-outline-primary">
-                        <i class="fas fa-filter me-1"></i>Filter
+                        <i class="fas fa-filter me-1"></i>Chuja
                     </button>
                     <a href="{% url 'pledge_list' %}" class="btn btn-outline-secondary ms-1">
-                        <i class="fas fa-times me-1"></i>Clear
+                        <i class="fas fa-times me-1"></i>Futa
                     </a>
                 </div>
             </form>
@@ -399,15 +399,15 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Member</th>
-                            <th>Event</th>
-                            <th>Promised</th>
-                            <th>Paid</th>
-                            <th>Remaining</th>
-                            <th>Progress</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
-                            <th>Actions</th>
+                            <th>Mwanachama</th>
+                            <th>Tukio</th>
+                            <th>Iliyoahidiwa</th>
+                            <th>Imelipwa</th>
+                            <th>Salio</th>
+                            <th>Maendeleo</th>
+                            <th>Hali</th>
+                            <th>Tarehe ya Malipo</th>
+                            <th>Vitendo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -428,7 +428,7 @@
                                         <small class="d-block text-muted">{{ pledge.pledger_phone }}</small>
                                         {% endif %}
                                         {% if not pledge.member %}
-                                        <small class="d-block text-muted"><span class="badge bg-secondary">External</span></small>
+                                        <small class="d-block text-muted"><span class="badge bg-secondary">Nje</span></small>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -472,19 +472,19 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'pledge_detail' pledge.pk %}" class="btn btn-outline-primary" title="View Details">
+                                    <a href="{% url 'pledge_detail' pledge.pk %}" class="btn btn-outline-primary" title="Angalia Maelezo">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     {% if pledge.remaining_amount > 0 %}
-                                    <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-outline-success" title="Record Payment">
+                                    <a href="{% url 'pledge_payment_add' pledge.pk %}" class="btn btn-outline-success" title="Rekodi Malipo">
                                         <i class="fas fa-plus"></i>
                                     </a>
-                                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" class="btn btn-outline-warning send-reminder" title="Send Reminder SMS"
+                                    <a href="{% url 'pledge_send_reminder' pledge.pk %}" class="btn btn-outline-warning send-reminder" title="Tuma Ujumbe wa Kikumbusho"
                                        data-member-name="{{ pledge.pledger_name }}">
                                         <i class="fas fa-paper-plane"></i>
                                     </a>
                                     {% endif %}
-                                    <a href="{% url 'pledge_edit' pledge.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                    <a href="{% url 'pledge_edit' pledge.pk %}" class="btn btn-outline-secondary" title="Hariri">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
@@ -499,10 +499,10 @@
                 <div class="mb-3">
                     <i class="fas fa-hand-holding-heart text-muted fa-3x"></i>
                 </div>
-                <h5 class="text-muted">No pledges found</h5>
-                <p class="text-muted">Create a new pledge to track member contributions for events.</p>
+                <h5 class="text-muted">Hakuna ahadi zimepatikana</h5>
+                <p class="text-muted">Unda ahadi mpya kufuatia mchango wa wanachama kwa matukio.</p>
                 <a href="{% url 'pledge_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Create First Pledge
+                    <i class="fas fa-plus me-1"></i>Unda Ahadi ya Kwanza
                 </a>
             </div>
             {% endif %}
@@ -555,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.send-reminder').forEach(function(link) {
         link.addEventListener('click', function(e) {
             var memberName = this.getAttribute('data-member-name');
-            if (!confirm('Send reminder SMS to ' + memberName + '?')) {
+            if (!confirm('Tuma ujumbe wa kikumbusho wa SMS kwa ' + memberName + '?')) {
                 e.preventDefault();
             }
         });

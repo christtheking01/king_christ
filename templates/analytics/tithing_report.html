@@ -70,7 +70,7 @@
           <div class="card bg-success text-white">
             <div class="card-body">
               <h3>Total Tithes</h3>
-              <h2>${{ summary.total|default:"0.00" }}</h2>
+              <h2>Tsh {{ summary.total|default:"0.00" }}</h2>
             </div>
           </div>
         </div>
@@ -78,7 +78,7 @@
           <div class="card bg-info text-white">
             <div class="card-body">
               <h3>Total Payments</h3>
-              <h2>{{ summary.count|default:"0" }}</h2>
+              <h2>Tsh {{ summary.count|default:"0" }}</h2>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@
           <div class="card bg-primary text-white">
             <div class="card-body">
               <h3>Average Tithe</h3>
-              <h2>${{ summary.avg|default:"0.00" }}</h2>
+              <h2>Tsh {{ summary.avg|default:"0.00" }}</h2>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@
                   {% for month in monthly_data %}
                   <tr>
                     <td>{{ month.month|date:"F Y" }}</td>
-                    <td>${{ month.total }}</td>
+                    <td>Tsh {{ month.total }}</td>
                     <td>{{ month.count }}</td>
                   </tr>
                   {% empty %}
@@ -153,7 +153,7 @@
                   {% for method in by_method %}
                   <tr>
                     <td>{{ method.status|title }}</td>
-                    <td>${{ method.total }}</td>
+                    <td>Tsh{{ method.total }}</td>
                     <td>{{ method.count }}</td>
                   </tr>
                   {% empty %}
@@ -190,7 +190,7 @@
                     <th>Date</th>
                     <th>Member</th>
                     <th>Phone</th>
-                    <th>Amount</th>
+                    <th>Amount (TSH)</th>
                     <th>Method</th>
                   </tr>
                 </thead>
@@ -200,7 +200,7 @@
                     <td>{{ tithe.date|date:"Y-m-d" }}</td>
                     <td>{{ tithe.name.name }}</td>
                     <td>{{ tithe.contact_number }}</td>
-                    <td>${{ tithe.amount }}</td>
+                    <td>{{ tithe.amount }}</td>
                     <td>
                       <span class="badge badge-info">{{ tithe.get_status_display }}</span>
                     </td>

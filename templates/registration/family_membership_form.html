@@ -1,104 +1,545 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
     {% if object %}Edit Family Membership{% else %}Add Family Membership{% endif %}
 {% endblock %}
 
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .family-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header p {
+        color: rgba(255,255,255,0.9);
+        margin: 0.25rem 0 0;
+    }
+
+    .btn-glass {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .form-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        animation: slideUp 0.6s ease-out 0.1s both;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .form-header p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-group select,
+    .form-group input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        box-sizing: border-box;
+        color: var(--text-primary);
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .help-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .error-text {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-glass-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-glass-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-glass-outline {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-glass-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    /* Member Search */
+    .member-search-container {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .member-search-container input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.5rem;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        box-sizing: border-box;
+    }
+
+    .member-search-container input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .member-search-container i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    /* Member Selection Grid */
+    .member-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: var(--radius-md);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .member-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .member-option:hover {
+        border-color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .member-option.selected {
+        border-color: var(--primary);
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .member-option input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+
+    .member-info {
+        flex: 1;
+    }
+
+    .member-info strong {
+        display: block;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .member-info small {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .selected-count {
+        text-align: center;
+        padding: 0.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .family-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .form-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+        .member-selection-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-wrapper">
-    <div class="content-card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="card-title">
-                        {% if object %}Edit Family Membership{% else %}Add Family Membership{% endif %}
-                    </h3>
-                    <p class="text-muted">
-                        {% if object %}Update family member assignment{% else %}Assign a user to a family{% endif %}
-                    </p>
-                </div>
-                <a href="{% url 'family_membership_list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Memberships
-                </a>
-            </div>
+<div class="family-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-user-plus"></i>
+                {% if object %}Edit Family Membership{% else %}Add Family Membership{% endif %}
+            </h1>
+            <p>{% if object %}Update family member assignment{% else %}Assign members to a family{% endif %}</p>
+        </div>
+        <a href="{% url 'family_membership_list' %}" class="btn-glass">
+            <i class="fas fa-arrow-left"></i>
+            Back to Memberships
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="form-header">
+            <h3>
+                <i class="fas fa-users"></i>
+                {% if object %}Edit Membership{% else %}Add Members to Family{% endif %}
+            </h3>
+            <p>{% if object %}Update the membership details{% else %}Select one or more members to add to a family{% endif %}</p>
         </div>
 
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %}
+        <form method="post" novalidate id="membershipForm">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.3);">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Family Selection -->
+            <div class="form-group">
+                <label for="{{ form.family.id_for_label }}">
+                    Family <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.family }}
+                {% if form.family.errors %}
+                    <div class="error-text">
+                        {% for error in form.family.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <span class="help-text">Select the family to add members to</span>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label for="{{ form.role.id_for_label }}">
+                    Role <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                    <div class="error-text">
+                        {% for error in form.role.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <span class="help-text">Select the role for these members in the family</span>
+            </div>
+
+            <!-- Member Selection with Search -->
+            <div class="form-group">
+                <label>
+                    Members <span style="color: var(--danger);">*</span>
+                </label>
                 
-                {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
+                <!-- Search Bar -->
+                <div class="member-search-container">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="memberSearch" 
+                        placeholder="Search members by name or code..."
+                    >
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input type="hidden" name="members" id="selectedMembers" value="">
+
+                <!-- Member Selection Grid -->
+                <div class="member-selection-grid" id="memberGrid">
+                    {% for member in form.members.field.queryset %}
+                    <div class="member-option" data-member-name="{{ member.name|lower }}" data-member-code="{{ member.code|default:''|lower }}" data-member-id="{{ member.id }}">
+                        <input type="checkbox" class="member-checkbox" value="{{ member.id }}" id="member_{{ member.id }}">
+                        <div class="member-info">
+                            <strong>{{ member.name }}</strong>
+                            <small>{{ member.code|default:'No code' }}</small>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
+
+                <!-- Selected Count -->
+                <div class="selected-count" id="selectedCount">
+                    0 members selected
+                </div>
+
+                {% if form.members.errors %}
+                    <div class="error-text">
+                        {% for error in form.members.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 {% endif %}
+                <span class="help-text">Select one or more members to add to this family</span>
+            </div>
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="{{ form.user.id_for_label }}" class="form-label">
-                                User <span class="text-danger">*</span>
-                            </label>
-                            {{ form.user }}
-                            {% if form.user.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in form.user.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">Select the user to add to family</div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="{{ form.family.id_for_label }}" class="form-label">
-                                Family <span class="text-danger">*</span>
-                            </label>
-                            {{ form.family }}
-                            {% if form.family.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in form.family.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">Select the family</div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="{{ form.role.id_for_label }}" class="form-label">
-                                Role <span class="text-danger">*</span>
-                            </label>
-                            {{ form.role }}
-                            {% if form.role.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in form.role.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">Select the role in the family</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'family_membership_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> 
-                        {% if object %}Update Membership{% else %}Add Membership{% endif %}
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'family_membership_list' %}" class="btn-glass-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-glass-primary">
+                    <i class="fas fa-save"></i>
+                    {% if object %}Update Membership{% else %}Add Members to Family{% endif %}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+<script>
+    // Member search functionality
+    document.getElementById('memberSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const options = document.querySelectorAll('.member-option');
+        
+        options.forEach(option => {
+            const memberName = option.dataset.memberName;
+            const memberCode = option.dataset.memberCode;
+            
+            if (memberName.includes(query) || memberCode.includes(query)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+
+    // Member selection handling
+    const memberGrid = document.getElementById('memberGrid');
+    const selectedMembersInput = document.getElementById('selectedMembers');
+    const selectedCount = document.getElementById('selectedCount');
+
+    function updateSelectedCount() {
+        const selected = document.querySelectorAll('.member-checkbox:checked');
+        selectedCount.textContent = `${selected.length} member${selected.length !== 1 ? 's' : ''} selected`;
+        
+        // Update hidden input
+        const selectedIds = Array.from(selected).map(cb => cb.value);
+        selectedMembersInput.value = selectedIds.join(',');
+    }
+
+    // Add click handlers to member options
+    document.querySelectorAll('.member-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('.member-checkbox');
+                checkbox.checked = !checkbox.checked;
+            }
+            
+            this.classList.toggle('selected', this.querySelector('.member-checkbox').checked);
+            updateSelectedCount();
+        });
+    });
+
+    // Handle checkbox changes
+    document.querySelectorAll('.member-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            this.closest('.member-option').classList.toggle('selected', this.checked);
+            updateSelectedCount();
+        });
+    });
+
+    // Form validation
+    document.getElementById('membershipForm').addEventListener('submit', function(e) {
+        const selected = document.querySelectorAll('.member-checkbox:checked');
+        if (selected.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one member to add to the family.');
+            return false;
+        }
+    });
+</script>
 {% endblock %}

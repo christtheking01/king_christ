@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budget Approvals - Leadership{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .leadership-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .approval-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        animation: slideUp 0.6s ease-out both;
+    }
+
+    .approval-card:nth-child(1) { animation-delay: 0.1s; }
+    .approval-card:nth-child(2) { animation-delay: 0.2s; }
+    .approval-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .approval-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .approval-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: white;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+        .leadership-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .action-buttons { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="leadership-page">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-chart-pie"></i>
+            Budget Approvals
+        </h1>
+    </div>
+
+    {% if pending_budgets %}
+        {% for budget in pending_budgets %}
+        <div class="approval-card">
+            <div class="approval-header">
+                <h3>
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    {{ budget.name }}
+                </h3>
+                <span class="status-badge pending">Pending Approval</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Fiscal Year</span>
+                    <span class="info-value">{{ budget.fiscal_year }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Department</span>
+                    <span class="info-value">{{ budget.department|default:'General' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Budget</span>
+                    <span class="info-value">TZS {{ budget.total_budget|floatformat:0 }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Allocated</span>
+                    <span class="info-value">TZS {{ budget.total_allocated|floatformat:0 }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Submitted By</span>
+                    <span class="info-value">{{ budget.created_by.get_full_name|default:budget.created_by.username }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Submitted At</span>
+                    <span class="info-value">{{ budget.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'leadership_budget_detail' budget.pk %}" class="btn-primary">
+                    <i class="fas fa-eye"></i>
+                    Review Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>No Pending Budget Approvals</h3>
+            <p>All budgets have been reviewed</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

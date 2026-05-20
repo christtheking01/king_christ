@@ -15,13 +15,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import json
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView
+from django.views.generic import CreateView, FormView, ListView, UpdateView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum
 from chartjs.views.lines import BaseLineChartView
-from .forms import AdminUserCreationForm, AdminUserEditForm, FirstTimePasswordChangeForm, UserForm, SignupForm, FamilyForm, FamilyMembershipForm, UserProfileForm
+from .forms import AdminUserCreationForm, AdminUserEditForm, FirstTimePasswordChangeForm, UserForm, SignupForm, FamilyForm, FamilyMembershipForm, FamilyBulkAddForm, UserProfileForm
 from .models import UserProfile,User, family, FamilyMembership
 
 from member.models import CommunityLeader
@@ -594,7 +594,7 @@ class FamilyDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['family_detail_active'] = True
-        context['memberships'] = self.object.memberships.all().select_related('user')
+        context['memberships'] = self.object.memberships.all().select_related('member')
         return context
 
 
@@ -653,8 +653,31 @@ class FamilyMembershipCreateView(LoginRequiredMixin, UserPassesTestMixin, Create
         return self.request.user.is_superuser or self.request.user.is_staff or self.request.user.roles == 'admin'
 
     def form_valid(self, form):
-        messages.success(self.request, f'Membership for "{form.instance.user.username}" created successfully!')
-        return super().form_valid(form)
+        members = form.cleaned_data.get('members')
+        family = form.cleaned_data.get('family')
+        role = form.cleaned_data.get('role')
+        
+        created_count = 0
+        skipped_count = 0
+        
+        for member in members:
+            # Check if member already has a family membership
+            if not FamilyMembership.objects.filter(member=member).exists():
+                FamilyMembership.objects.create(
+                    member=member,
+                    family=family,
+                    role=role
+                )
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        if created_count > 0:
+            messages.success(self.request, f'Successfully added {created_count} members to {family.name}!')
+        if skipped_count > 0:
+            messages.warning(self.request, f'{skipped_count} members were skipped as they already belong to a family.')
+        
+        return redirect(self.success_url)
 
 
 class FamilyMembershipUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -668,8 +691,18 @@ class FamilyMembershipUpdateView(LoginRequiredMixin, UserPassesTestMixin, Update
         return self.request.user.is_superuser or self.request.user.is_staff or self.request.user.roles == 'admin'
 
     def form_valid(self, form):
-        messages.success(self.request, f'Membership for "{form.instance.user.username}" updated successfully!')
-        return super().form_valid(form)
+        members = form.cleaned_data.get('members')
+        family = form.cleaned_data.get('family')
+        role = form.cleaned_data.get('role')
+        
+        # For update, we only update the existing membership's family and role
+        # The member field is read-only in update mode
+        self.object.family = family
+        self.object.role = role
+        self.object.save()
+        
+        messages.success(self.request, f'Membership for "{self.object.member.name}" updated successfully!')
+        return redirect(self.success_url)
 
 
 class FamilyMembershipDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -683,8 +716,72 @@ class FamilyMembershipDeleteView(LoginRequiredMixin, UserPassesTestMixin, Delete
 
     def delete(self, request, *args, **kwargs):
         membership = self.get_object()
-        messages.success(request, f'Membership for "{membership.user.username}" deleted successfully!')
+        messages.success(request, f'Membership for "{membership.member.name}" deleted successfully!')
         return super().delete(request, *args, **kwargs)
+
+
+@login_required
+def set_family_head(request, membership_id):
+    """Set a member as the family head via AJAX"""
+    if not (request.user.is_superuser or request.user.is_staff or request.user.roles == 'admin'):
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    
+    try:
+        membership = FamilyMembership.objects.get(id=membership_id)
+        family = membership.family
+        
+        # Remove head status from current head
+        FamilyMembership.objects.filter(
+            family=family,
+            role='head'
+        ).update(role='member')
+        
+        # Set new head
+        membership.role = 'head'
+        membership.save()
+        
+        return JsonResponse({'success': True, 'message': 'Family head updated successfully'})
+    except FamilyMembership.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Membership not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class FamilyBulkAddView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    """Add multiple members to a family at once"""
+    form_class = FamilyBulkAddForm
+    template_name = 'registration/family_bulk_add.html'
+    success_url = reverse_lazy('family_membership_list')
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff or self.request.user.roles == 'admin'
+
+    def form_valid(self, form):
+        family_obj = form.cleaned_data['family']
+        members = form.cleaned_data['members']
+        role = form.cleaned_data['role']
+        
+        created_count = 0
+        skipped_count = 0
+        
+        for member in members:
+            # Check if member already has a family membership
+            if not FamilyMembership.objects.filter(member=member).exists():
+                FamilyMembership.objects.create(
+                    member=member,
+                    family=family_obj,
+                    role=role
+                )
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        if created_count > 0:
+            messages.success(self.request, f'Successfully added {created_count} members to {family_obj.name}!')
+        if skipped_count > 0:
+            messages.warning(self.request, f'{skipped_count} members were skipped as they already belong to a family.')
+        
+        return super().form_valid(form)
 
 
 # =============================================================================

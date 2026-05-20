@@ -450,24 +450,59 @@
             }
 
             async connect() {
+                console.log('Starting printer connection...');
+                console.log('Checking Bluetooth support...');
+                console.log('navigator.bluetooth:', navigator.bluetooth);
+                console.log('User agent:', navigator.userAgent);
+                
+                if (!navigator.bluetooth) {
+                    console.error('Bluetooth not supported in this browser');
+                    alert('Bluetooth Web API not available in this Chrome version. Your H10 POS may have a customized Chrome without Web Bluetooth support. Using fallback printing instead.');
+                    return false;
+                }
+                
                 try {
+                    console.log('Requesting Bluetooth device with service:', this.serviceUUID);
                     // Request Bluetooth device
                     this.device = await navigator.bluetooth.requestDevice({
                         filters: [{ services: [this.serviceUUID] }],
                         optionalServices: [this.serviceUUID]
                     });
+                    console.log('Device selected:', this.device.name);
 
                     // Connect to device
+                    console.log('Connecting to GATT server...');
                     this.server = await this.device.gatt.connect();
+                    console.log('GATT server connected');
+                    
+                    console.log('Getting primary service:', this.serviceUUID);
                     const service = await this.server.getPrimaryService(this.serviceUUID);
+                    console.log('Service found');
+                    
+                    console.log('Getting characteristic:', this.characteristicUUID);
                     this.characteristic = await service.getCharacteristic(this.characteristicUUID);
+                    console.log('Characteristic found');
 
                     this.isConnected = true;
                     console.log('Printer connected successfully');
                     return true;
                 } catch (error) {
                     console.error('Printer connection error:', error);
+                    console.error('Error name:', error.name);
+                    console.error('Error message:', error.message);
                     this.isConnected = false;
+                    
+                    // Provide user-friendly error messages
+                    if (error.name === 'NotFoundError') {
+                        alert('No Bluetooth device found. Make sure your printer is on and paired.');
+                    } else if (error.name === 'NetworkError') {
+                        alert('Connection failed. Try turning Bluetooth off and on again.');
+                    } else if (error.name === 'SecurityError') {
+                        alert('Security error. Make sure you\'re using HTTPS or localhost.');
+                    } else {
+                        alert('Connection error: ' + error.message);
+                    }
+                    
                     return false;
                 }
             }
@@ -563,25 +598,45 @@
 
         // Connect printer function
         async function connectPrinter() {
+            console.log('connectPrinter called');
             const printerStatus = document.getElementById('printerStatus');
             const printerIcon = document.getElementById('printerIcon');
             
+            if (!printerStatus || !printerIcon) {
+                console.error('Printer UI elements not found');
+                alert('Printer button elements not found. Please refresh the page.');
+                return;
+            }
+            
             if (window.thermalPrinter.isConnected) {
                 // Disconnect
+                console.log('Disconnecting printer...');
                 window.thermalPrinter.disconnect();
                 printerStatus.textContent = 'Connect Printer';
                 printerIcon.className = 'fas fa-print';
             } else {
                 // Connect
+                console.log('Attempting to connect printer...');
                 printerStatus.textContent = 'Connecting...';
-                const connected = await window.thermalPrinter.connect();
                 
-                if (connected) {
-                    printerStatus.textContent = 'Printer Connected';
-                    printerIcon.className = 'fas fa-check-circle';
-                } else {
+                try {
+                    const connected = await window.thermalPrinter.connect();
+                    console.log('Connection result:', connected);
+                    
+                    if (connected) {
+                        printerStatus.textContent = 'Printer Connected';
+                        printerIcon.className = 'fas fa-check-circle';
+                        alert('Printer connected successfully!');
+                    } else {
+                        printerStatus.textContent = 'Connect Printer';
+                        printerIcon.className = 'fas fa-print';
+                        alert('Failed to connect printer. Make sure Bluetooth is enabled and printer is paired.');
+                    }
+                } catch (error) {
+                    console.error('Connection error:', error);
                     printerStatus.textContent = 'Connect Printer';
                     printerIcon.className = 'fas fa-print';
+                    alert('Connection error: ' + error.message);
                 }
             }
         }
@@ -595,8 +650,18 @@
 
         // Print receipt helper
         async function printReceipt(type, memberName, memberCode, amount, paymentMethod, contactNumber) {
+            console.log('printReceipt called with:', {type, memberName, memberCode, amount, paymentMethod, contactNumber});
+            
+            // Fallback: Use browser print dialog if Bluetooth not available
+            if (!window.thermalPrinter || !navigator.bluetooth) {
+                console.log('Bluetooth not available, using browser print dialog');
+                printReceiptToBrowser(type, memberName, memberCode, amount, paymentMethod, contactNumber);
+                return;
+            }
+            
             if (!window.thermalPrinter.isConnected) {
-                console.log('Printer not connected, skipping print');
+                console.log('Printer not connected, using browser print dialog');
+                printReceiptToBrowser(type, memberName, memberCode, amount, paymentMethod, contactNumber);
                 return;
             }
 
@@ -615,7 +680,78 @@
                 contactNumber: contactNumber
             };
 
-            await window.thermalPrinter.printReceipt(receiptData);
+            console.log('Sending to printer:', receiptData);
+            try {
+                const result = await window.thermalPrinter.printReceipt(receiptData);
+                console.log('Print result:', result);
+                if (result) {
+                    alert('Receipt printed successfully!');
+                } else {
+                    alert('Print failed. Using browser print dialog instead.');
+                    printReceiptToBrowser(type, memberName, memberCode, amount, paymentMethod, contactNumber);
+                }
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Print error: ' + error.message + '. Using browser print dialog instead.');
+                printReceiptToBrowser(type, memberName, memberCode, amount, paymentMethod, contactNumber);
+            }
+        }
+
+        // Fallback: Print using browser's print dialog
+        function printReceiptToBrowser(type, memberName, memberCode, amount, paymentMethod, contactNumber) {
+            const now = new Date();
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Receipt</title>
+                    <style>
+                        body { font-family: monospace; width: 80mm; margin: 0; padding: 10px; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .header h1 { font-size: 16px; margin: 5px 0; }
+                        .header p { font-size: 12px; margin: 2px 0; }
+                        .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                        .row { display: flex; justify-content: space-between; font-size: 12px; margin: 5px 0; }
+                        .label { font-weight: bold; }
+                        .value { text-align: right; }
+                        .total { font-size: 14px; font-weight: bold; margin-top: 15px; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 11px; }
+                        @media print { body { width: 80mm; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Christ The King Parish</h1>
+                        <p>Dar es Salaam, Tanzania</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="row"><span class="label">Type:</span><span class="value">${type}</span></div>
+                    <div class="row"><span class="label">Date:</span><span class="value">${now.toLocaleDateString('en-GB')}</span></div>
+                    <div class="row"><span class="label">Time:</span><span class="value">${now.toLocaleTimeString('en-GB')}</span></div>
+                    <div class="row"><span class="label">Receipt #:</span><span class="value">${generateReceiptNumber()}</span></div>
+                    <div class="divider"></div>
+                    <div class="row"><span class="label">Member:</span><span class="value">${memberName}</span></div>
+                    ${memberCode ? `<div class="row"><span class="label">Code:</span><span class="value">${memberCode}</span></div>` : ''}
+                    <div class="divider"></div>
+                    <div class="row total"><span class="label">Amount:</span><span class="value">Tsh ${amount.toLocaleString('en-TZ')}</span></div>
+                    <div class="row"><span class="label">Method:</span><span class="value">${paymentMethod}</span></div>
+                    ${contactNumber ? `<div class="row"><span class="label">Phone:</span><span class="value">${contactNumber}</span></div>` : ''}
+                    <div class="divider"></div>
+                    <div class="footer">
+                        <p>Thank you for your contribution!</p>
+                        <p>God bless you!</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            printWindow.onload = function() {
+                printWindow.print();
+                printWindow.close();
+            };
         }
     </script>
     

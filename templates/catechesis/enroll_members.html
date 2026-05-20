@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enroll Members{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #2c3e50;
+        --primary-light: #34495e;
+        --accent: #e67e22;
+        --accent-light: #f39c12;
+        --success: #27ae60;
+        --danger: #c0392b;
+        --warning: #f39c12;
+        --background: #f5f6fa;
+        --surface: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --border: #dfe6e9;
+        --shadow: 0 2px 10px rgba(0,0,0,0.08);
+        --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
+        --radius: 8px;
+        --transition: all 0.3s ease;
+    }
+
+    .enroll-page {
+        min-height: 100vh;
+        background: var(--background);
+        padding: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid var(--primary);
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        color: var(--accent);
+    }
+
+    .btn-back {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-back:hover {
+        background: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .form-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        transition: var(--transition);
+        background: var(--surface);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+    }
+
+    .class-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(230, 126, 34, 0.05) 100%);
+        border-radius: var(--radius);
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--accent);
+    }
+
+    .class-info-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--primary);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .class-info-content h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .class-info-content p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .search-container {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .search-container input {
+        padding-left: 3rem;
+    }
+
+    .search-container i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .members-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .section-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-header h4 i {
+        color: var(--accent);
+    }
+
+    .select-all-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .select-all-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .members-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .member-checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .member-checkbox-item:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .member-checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 1rem;
+        cursor: pointer;
+    }
+
+    .member-info {
+        flex: 1;
+    }
+
+    .member-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .member-details {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+
+    .badge-success {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success);
+    }
+
+    .badge-warning {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .btn-secondary {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .enroll-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; gap: 1rem; }
+        .form-card { padding: 1.75rem; }
+        .form-actions { flex-direction: column; }
+        .class-info { flex-direction: column; text-align: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="enroll-page">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-user-plus"></i>
+            Enroll Members
+        </h1>
+        <a href="{% url 'class_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to Classes
+        </a>
+    </div>
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Class Selection -->
+            <div class="form-group">
+                <label for="{{ form.sacrament_class.id_for_label }}">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Select Class
+                </label>
+                {{ form.sacrament_class }}
+                {% if form.sacrament_class.errors %}
+                    <div class="error-message">
+                        {% for error in form.sacrament_class.errors %}
+                            <small style="color: var(--danger);">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if sacrament_class %}
+            <!-- Class Info Display -->
+            <div class="class-info">
+                <div class="class-info-icon">
+                    <i class="fas fa-church"></i>
+                </div>
+                <div class="class-info-content">
+                    <h3>{{ sacrament_class.name }}</h3>
+                    <p>{{ sacrament_class.get_sacrament_type_display }} | Enrolled: {{ sacrament_class.enrollments.count }}/{{ sacrament_class.max_capacity }}</p>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="member-search" class="form-control" placeholder="Search members by name...">
+            </div>
+
+            <!-- Available Members -->
+            {% if form.members %}
+            <div class="members-section">
+                <div class="section-header">
+                    <h4>
+                        <i class="fas fa-user-check"></i>
+                        Available Members
+                    </h4>
+                    <label class="select-all-label">
+                        <input type="checkbox" id="select-all">
+                        <span>Select All</span>
+                    </label>
+                </div>
+                <div class="members-grid">
+                    {% for member in form.members %}
+                    <label class="member-checkbox-item" data-name="{{ member.first_name }} {{ member.last_name }}">
+                        <input type="checkbox" name="members" value="{{ member.id }}" id="member_{{ member.id }}">
+                        <div class="member-info">
+                            <div class="member-name">{{ member.first_name }} {{ member.last_name }}</div>
+                            <div class="member-details">{{ member.member_category }} | {{ member.gender }}</div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Already Enrolled -->
+            {% if enrolled_members %}
+            <div class="members-section">
+                <div class="section-header">
+                    <h4>
+                        <i class="fas fa-check-circle"></i>
+                        Already Enrolled in This Class
+                    </h4>
+                </div>
+                <div class="members-grid">
+                    {% for enrollment in enrolled_members %}
+                    <div class="member-checkbox-item">
+                        <div class="member-info">
+                            <div class="member-name">{{ enrollment.catechesis_member.first_name }} {{ enrollment.catechesis_member.last_name }}</div>
+                            <div class="member-details">{{ enrollment.catechesis_member.member_category }} | Enrolled: {{ enrollment.enrolled_date }}</div>
+                        </div>
+                        <span class="badge badge-success">Enrolled</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Other Class Enrollments -->
+            {% if other_class_enrollments %}
+            <div class="members-section">
+                <div class="section-header">
+                    <h4>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Enrolled in Other {{ sacrament_class.get_sacrament_type_display }} Classes
+                    </h4>
+                </div>
+                <div class="members-grid">
+                    {% for enrollment in other_class_enrollments %}
+                    <div class="member-checkbox-item">
+                        <div class="member-info">
+                            <div class="member-name">{{ enrollment.catechesis_member.first_name }} {{ enrollment.catechesis_member.last_name }}</div>
+                            <div class="member-details">{{ enrollment.catechesis_member.member_category }} | Class: {{ enrollment.sacrament_class.name }}</div>
+                        </div>
+                        <span class="badge badge-warning">Other Class</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Empty State -->
+            {% if not form.members and not enrolled_members and not other_class_enrollments %}
+            <div class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <h3>No Available Members</h3>
+                <p>No members with approved {{ sacrament_class.get_sacrament_type_display }} requests available for enrollment.</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Members need approved sacrament requests to be enrolled in this class.</p>
+                <a href="{% url 'member_register' %}" class="btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-user-plus"></i>
+                    Register New Member
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-check"></i>
+                    Enroll Selected Members
+                </button>
+                <a href="{% url 'class_list' %}" class="btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h3>Select a Class</h3>
+                <p>Please select a class above to view available members for enrollment.</p>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('member-search');
+    const memberItems = document.querySelectorAll('.member-checkbox-item[data-name]');
+    const classSelect = document.getElementById('{{ form.sacrament_class.id_for_label }}');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            memberItems.forEach(item => {
+                const memberName = item.getAttribute('data-name').toLowerCase();
+                if (memberName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Class selection change handler
+    if (classSelect) {
+        classSelect.addEventListener('change', function() {
+            if (this.value) {
+                window.location.href = '/en/catechesis/enroll/' + this.value + '/';
+            }
+        });
+    }
+
+    // Select all functionality
+    const selectAllBtn = document.getElementById('select-all');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="members"]');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    }
+});
+</script>
+{% endblock %}

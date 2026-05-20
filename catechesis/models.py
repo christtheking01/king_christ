@@ -232,6 +232,17 @@ class CatechesisInstructor(models.Model):
         ('inactive', 'Inactive'),
     ]
     
+    ENTRY_TYPE_CHOICES = [
+        ('user', 'System User'),
+        ('manual', 'Manual Entry'),
+    ]
+    
+    entry_type = models.CharField(max_length=10, choices=ENTRY_TYPE_CHOICES, default='user')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    first_name = models.CharField(max_length=100, blank=True, null=True)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(max_length=254, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     qualification = models.CharField(max_length=100,blank=True)
     specilization = models.CharField(max_length=100,blank=True, help_text="eg: Bible, Catechism, etc.")
@@ -246,23 +257,23 @@ class CatechesisInstructor(models.Model):
         verbose_name_plural = 'Catechesis Instructors'
 
     @property
-    def first_name(self):
-        return self.user.first_name
+    def display_first_name(self):
+        return self.user.first_name if self.user else self.first_name
 
     @property
-    def last_name(self):
-        return self.user.last_name
+    def display_last_name(self):
+        return self.user.last_name if self.user else self.last_name
         
     @property
-    def email(self):
-        return self.user.email
+    def display_email(self):
+        return self.user.email if self.user else self.email
         
     @property
-    def phone(self):
-        return self.user.phone  
+    def display_phone(self):
+        return self.user.phone if self.user else self.phone  
 
     def full_name(self):
-        return f"{self.first_name} {self.last_name}".strip() or "Unknown"
+        return f"{self.display_first_name} {self.display_last_name}".strip() or "Unknown"
     
     def __str__(self):
         return self.full_name()

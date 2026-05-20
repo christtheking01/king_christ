@@ -195,10 +195,10 @@ class Command(BaseCommand):
 
             # Create notification
             notification = Notification.objects.create(
-                title=f"Tithe Payment Reminder - {month_name}",
+                title=f"Kikumbusho cha Malipo ya Zaka - {month_name}",
                 message=(
-                    f"Dear {member.name}, this is a friendly reminder to submit "
-                    f"your tithe for {month_name}. Thank you for your faithfulness!"
+                    f"Ndugu {member.name}, hii ni kikumbusho cha kirafiki kuchangia "
+                    f"zaka yako kwa mwezi wa {month_name}. Asante kwa uaminifu wako!"
                 ),
                 recipient_type='MEMBER',
                 member=member,

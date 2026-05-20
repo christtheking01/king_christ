@@ -493,7 +493,7 @@ function searchMembers(input) {
     }
 
     searchTimeout = setTimeout(() => {
-        const url = `/finance/api/member-search/?q=${encodeURIComponent(query)}`;
+        const url = `/financial/api/member-search/?q=${encodeURIComponent(query)}`;
         console.log('Fetching:', url);
 
         fetch(url)

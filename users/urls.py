@@ -4,7 +4,7 @@ from .views import ( _login, login_user, _logout, signup, signup_user, user_prof
                     # Family Views
                     FamilyListView, FamilyCreateView, FamilyDetailView, FamilyUpdateView, FamilyDeleteView,
                     # Family Membership Views
-                    FamilyMembershipListView, FamilyMembershipCreateView, FamilyMembershipUpdateView, FamilyMembershipDeleteView,
+                    FamilyMembershipListView, FamilyMembershipCreateView, FamilyMembershipUpdateView, FamilyMembershipDeleteView, FamilyBulkAddView, set_family_head,
                     # Priest Role Management Views
                     priest_role_management, assign_priest_role, remove_priest_role, priest_list,
                     # Sacrament Management Views
@@ -54,9 +54,11 @@ urlpatterns = [
 
     # Family Membership URLs
     path('family-memberships/', FamilyMembershipListView.as_view(), name='family_membership_list'),
+    path('family-memberships/bulk-add/', FamilyBulkAddView.as_view(), name='family_bulk_add'),
     path('family-memberships/create/', FamilyMembershipCreateView.as_view(), name='family_membership_create'),
     path('family-memberships/<int:pk>/edit/', FamilyMembershipUpdateView.as_view(), name='family_membership_update'),
     path('family-memberships/<int:pk>/delete/', FamilyMembershipDeleteView.as_view(), name='family_membership_delete'),
+    path('family-memberships/<int:pk>/set-head/', set_family_head, name='set_family_head'),
 
     # Priest Role Management URLs
     path('priest-roles/', priest_role_management, name='priest_role_management'),

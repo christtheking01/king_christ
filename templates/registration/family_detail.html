@@ -390,7 +390,10 @@
                         <span class="info-label">Head of Family</span>
                         <span class="info-value">
                             {% if family.head_family %}
-                                {{ family.head_family.get_full_name|default:family.head_family.username }}
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-crown" style="color: var(--warning);"></i>
+                                    <strong>{{ family.head_family.name }}</strong>
+                                </div>
                             {% else %}
                                 <span class="text-muted">Not assigned</span>
                             {% endif %}
@@ -416,8 +419,21 @@
                     Family Members
                 </div>
 
+                <!-- Search Bar -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="position: relative;">
+                        <input 
+                            type="text" 
+                            id="memberSearch" 
+                            placeholder="Search members by name or code..."
+                            style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.5rem; font-size: 0.95rem; background: rgba(255, 255, 255, 0.6); border: 2px solid rgba(102, 126, 234, 0.1); border-radius: var(--radius-md); color: var(--text-primary); box-sizing: border-box;"
+                        >
+                        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                    </div>
+                </div>
+
                 {% if memberships %}
-                <table class="members-table">
+                <table class="members-table" id="membersTable">
                     <thead>
                         <tr>
                             <th>Member</th>
@@ -428,21 +444,33 @@
                     </thead>
                     <tbody>
                         {% for membership in memberships %}
-                        <tr>
+                        <tr class="member-row" data-member-name="{{ membership.member.name|lower }}" data-member-code="{{ membership.member.code|lower }}">
                             <td>
                                 <div class="member-cell">
-                                    <img src="{% static 'assets/images/avatar01.png' %}" alt="{{ membership.user.username }}" class="member-avatar">
+                                    <img src="{% static 'assets/images/avatar01.png' %}" alt="{{ membership.member.name }}" class="member-avatar">
                                     <div class="member-info">
-                                        <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
-                                        <small>{{ membership.user.email }}</small>
+                                        <strong>{{ membership.member.name }}</strong>
+                                        <small>{{ membership.member.code|default:"No code" }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 {% if membership.role == 'head' %}
-                                    <span class="role-badge head">Head</span>
+                                    <span class="role-badge head">
+                                        <i class="fas fa-crown" style="margin-right: 0.25rem;"></i>Head
+                                    </span>
                                 {% else %}
                                     <span class="role-badge member">Member</span>
+                                    {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
+                                    <button 
+                                        class="set-head-btn"
+                                        data-membership-id="{{ membership.pk }}"
+                                        style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; cursor: pointer; transition: var(--transition);"
+                                        title="Set as Family Head"
+                                    >
+                                        <i class="fas fa-crown"></i>
+                                    </button>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                             <td>{{ membership.date_joined|date:"M d, Y" }}</td>
@@ -468,7 +496,7 @@
                     <h5>No members in this family yet</h5>
                     <p>Add members to this family to get started.</p>
                     {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
-                    <a href="{% url 'family_membership_create' %}" class="btn-glass btn-glass-success">
+                    <a href="{% url 'family_membership_create' %}?family_id={{ family.pk }}" class="btn-glass btn-glass-success">
                         <i class="fas fa-user-plus"></i>Add First Member
                     </a>
                     {% endif %}
@@ -478,4 +506,55 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Member search functionality
+    document.getElementById('memberSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.member-row');
+        
+        rows.forEach(row => {
+            const memberName = row.dataset.memberName;
+            const memberCode = row.dataset.memberCode;
+            
+            if (memberName.includes(query) || memberCode.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Set member as family head
+    document.querySelectorAll('.set-head-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const membershipId = this.dataset.membershipId;
+            
+            if (!confirm('Are you sure you want to set this member as the family head? This will remove the head status from the current head.')) {
+                return;
+            }
+
+            fetch(`/users/family-memberships/${membershipId}/set-head/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Family head updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to update family head'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: Failed to update family head');
+            });
+        });
+    });
+</script>
 {% endblock %}

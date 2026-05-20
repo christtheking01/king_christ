@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Report Review - Leadership{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .leadership-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-glass {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .detail-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out both;
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .detail-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-badge {
+        padding: 0.75rem 1.5rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        padding: 1.25rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .items-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .items-section h3 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .expense-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--radius-md);
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .comment-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .comment-section h3 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        box-sizing: border-box;
+        color: var(--text-primary);
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-danger {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-outline {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    @media (max-width: 768px) {
+        .leadership-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .detail-card { padding: 1.75rem; }
+        .action-buttons { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="leadership-page">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-receipt"></i>
+            Expense Report Review
+        </h1>
+        <a href="{% url 'leadership_expense_approvals' %}" class="btn-glass">
+            <i class="fas fa-arrow-left"></i>
+            Back to Approvals
+        </a>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>
+                <i class="fas fa-file-invoice"></i>
+                {{ expense.title }}
+            </h2>
+            <span class="status-badge pending">Pending Approval</span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Submitted By</span>
+                <span class="info-value">{{ expense.user.get_full_name|default:expense.user.username }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Amount</span>
+                <span class="info-value">TZS {{ expense.total_amount|floatformat:0 }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Date Submitted</span>
+                <span class="info-value">{{ expense.date_submitted|date:"M d, Y" }}</span>
+            </div>
+            {% if expense.date_approved %}
+            <div class="info-item">
+                <span class="info-label">Date Approved</span>
+                <span class="info-value">{{ expense.date_approved|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if expense.description %}
+        <div style="margin-bottom: 2rem;">
+            <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">Description</h3>
+            <p style="color: var(--text-secondary);">{{ expense.description }}</p>
+        </div>
+        {% endif %}
+
+        {% if items %}
+        <div class="items-section">
+            <h3><i class="fas fa-list"></i> Expense Items</h3>
+            {% for item in items %}
+            <div class="expense-item">
+                <span>{{ item.description }}</span>
+                <span>TZS {{ item.amount|floatformat:0 }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="comment-section">
+            <h3><i class="fas fa-comment"></i> Add Comment (Optional)</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="comment" placeholder="Add any comments or notes regarding this expense report approval..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" name="action" value="approve" class="btn-primary">
+                        <i class="fas fa-check"></i>
+                        Approve Expense
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn-danger">
+                        <i class="fas fa-times"></i>
+                        Reject Expense
+                    </button>
+                    <a href="{% url 'leadership_expense_approvals' %}" class="btn-outline">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

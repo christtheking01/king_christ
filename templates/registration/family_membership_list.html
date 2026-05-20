@@ -12,6 +12,9 @@
                     <p class="text-muted">Manage family member assignments</p>
                 </div>
                 {% if user.is_superuser or user.is_staff or user.roles == 'Admin' %}
+                <a href="{% url 'family_bulk_add' %}" class="btn btn-success">
+                    <i class="fas fa-users"></i> Bulk Add Members
+                </a>
                 <a href="{% url 'family_membership_create' %}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Membership
                 </a>
@@ -25,7 +28,7 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>User</th>
+                            <th>Member</th>
                             <th>Family</th>
                             <th>Role</th>
                             <th>Date Joined</th>
@@ -38,11 +41,11 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="user-avatar-sm me-2">
-                                        <img src="{% static 'assets/images/avatar01.png' %}" alt="{{ membership.user.username }}" />
+                                        <img src="{% static 'assets/images/avatar01.png' %}" alt="{{ membership.member.name }}" />
                                     </div>
                                     <div>
-                                        <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong><br>
-                                        <small class="text-muted">{{ membership.user.email }}</small>
+                                        <strong>{{ membership.member.name }}</strong><br>
+                                        <small class="text-muted">{{ membership.member.code|default:"No code" }}</small>
                                     </div>
                                 </div>
                             </td>

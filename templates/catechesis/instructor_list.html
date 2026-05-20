@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catechesis Instructors{% endblock %}
+
+{% block internal_style %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .instructor-page {
+        min-height: 100vh;
+        background: var(--background);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .filters-bar {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out 0.1s both;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        box-sizing: border-box;
+        color: var(--text-primary);
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .instructor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        animation: slideUp 0.6s ease-out 0.2s both;
+    }
+
+    .instructor-card {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        transition: var(--transition);
+        animation: slideUp 0.6s ease-out both;
+    }
+
+    .instructor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+
+    .instructor-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .instructor-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .instructor-info h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .instructor-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .instructor-details {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        color: var(--text-secondary);
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-view {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-view:hover {
+        background: rgba(59, 130, 246, 0.2);
+        border-color: var(--info);
+    }
+
+    .btn-edit {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-edit:hover {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: var(--warning);
+    }
+
+    .btn-delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--danger);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.6s ease-out both;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .empty-state p {
+        margin: 0 0 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .instructor-page { padding: 1rem; }
+        .page-header { flex-direction: column; text-align: center; }
+        .filters-bar { flex-direction: column; }
+        .instructor-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="instructor-page">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-chalkboard-teacher"></i>
+            Catechesis Instructors
+        </h1>
+        <a href="{% url 'instructor_create' %}" class="btn-glass">
+            <i class="fas fa-plus"></i>
+            Add Instructor
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" name="q" placeholder="Search by name, email, or qualification..." value="{{ search_query }}">
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="">All Status</option>
+                {% for status, label in status_choices %}
+                    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group" style="display: flex; align-items: flex-end;">
+            <button type="submit" class="btn-glass" style="width: 100%;">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+        </div>
+    </div>
+
+    <!-- Instructor Grid -->
+    {% if instructors %}
+    <div class="instructor-grid">
+        {% for instructor in instructors %}
+        <div class="instructor-card">
+            <div class="instructor-header">
+                <div class="instructor-avatar">
+                    {{ instructor.first_name|first }}{{ instructor.last_name|first }}
+                </div>
+                <div class="instructor-info">
+                    <h3>{{ instructor.full_name }}</h3>
+                    <p>{{ instructor.email }}</p>
+                </div>
+            </div>
+
+            <div class="instructor-details">
+                <div class="detail-item">
+                    <span class="detail-label">Gender:</span>
+                    <span class="detail-value">{{ instructor.get_gender_display }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Qualification:</span>
+                    <span class="detail-value">{{ instructor.qualification|default:'Not specified' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Specialization:</span>
+                    <span class="detail-value">{{ instructor.specilization|default:'Not specified' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Joined:</span>
+                    <span class="detail-value">{{ instructor.joined_date|date:"M d, Y" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span>
+                    <span class="status-badge {{ instructor.status }}">{{ instructor.get_status_display }}</span>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <a href="{% url 'instructor_detail' instructor.pk %}" class="btn-action btn-view">
+                    <i class="fas fa-eye"></i> View
+                </a>
+                <a href="{% url 'instructor_update' instructor.pk %}" class="btn-action btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'instructor_delete' instructor.pk %}" class="btn-action btn-delete">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <h3>No Instructors Found</h3>
+        <p>Get started by adding your first catechesis instructor</p>
+        <a href="{% url 'instructor_create' %}" class="btn-glass">
+            <i class="fas fa-plus"></i>
+            Add First Instructor
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

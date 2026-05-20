@@ -1,5 +1,6 @@
 import re
 import logging
+import asyncio
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.timezone import now
 from django.shortcuts import redirect
@@ -174,7 +175,18 @@ class LoginHistoryMiddleware:
             else None
         )
 
-        response = self.get_response(request)
+        try:
+            response = self.get_response(request)
+        except asyncio.CancelledError:
+            # Client disconnected or request cancelled - this is normal, log at debug level
+            logger.debug(f"Request cancelled by client: {request.path}")
+            # Return an empty response to avoid breaking the middleware chain
+            from django.http import HttpResponse
+            return HttpResponse(status=204)  # No Content
+        except Exception as e:
+            # Log unexpected errors but allow them to propagate
+            logger.error(f"LoginHistoryMiddleware error in get_response: {e}")
+            raise
 
         self._track_login_logout(request, response, user_before)
         return response

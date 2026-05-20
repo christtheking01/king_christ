@@ -40,7 +40,8 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         'https://www.christtheking.space',
         'https://*.onrender.com',
-        'http://christtheking.space',
+        'https://christtheking.space',
+        'http://192.168.1.111:8000', # local pos testing
     ]
 
 
@@ -57,7 +58,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 # ALLOWED_HOSTS - read from env or use defaults
 # Render generates random subdomain like 'kristo-mfalme-8kid.onrender.com'
-_default_hosts = 'localhost,127.0.0.1,.onrender.com,christtheking.space, www.christtheking.space'
+_default_hosts = 'localhost,127.0.0.1,.onrender.com,christtheking.space,www.christtheking.space,192.168.1.111'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', _default_hosts).split(',')
 # Remove empty strings
 ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
@@ -556,3 +557,14 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# =============================================================================
+# PWA CONFIGURATION (Progressive Web App)
+# =============================================================================
+PWA_ENABLED = True
+PWA_APP_NAME = 'Kristo Mfalme POS'
+PWA_APP_DESCRIPTION = 'Church Management System - Point of Sale'
+PWA_APP_THEME_COLOR = '#2c3e50'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+
+POS_BACKEND_PRINTING_ENABLED = True  # Enable backend receipt generation for POS machines

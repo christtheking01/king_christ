@@ -135,8 +135,14 @@ def notification_preview(request, pk):
     recipients = notification.get_recipients()
     phone_numbers = notification.get_phone_numbers()
     
+    # Handle both QuerySet and list returns
+    if hasattr(recipients, 'count') and hasattr(recipients, 'model'):
+        total_recipients = recipients.count()
+    else:
+        total_recipients = len(recipients) if recipients else 0
+    
     data = {
-        'total_recipients': recipients.count(),
+        'total_recipients': total_recipients,
         'valid_phones': len(phone_numbers),
         'recipients': [
             {

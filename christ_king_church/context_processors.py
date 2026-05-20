@@ -22,6 +22,29 @@ def language_context(request):
     }
 
 
+def notification_counts_context(request):
+    """
+    Add notification counts for leadership approval items
+    """
+    if not request.user.is_authenticated:
+        return {}
+    
+    pending_payroll_count = 0
+    pending_budget_count = 0
+    
+    try:
+        from finance.models import Payroll, Budget
+        pending_payroll_count = Payroll.objects.filter(status='PENDING_VERIFICATION').count()
+        pending_budget_count = Budget.objects.filter(status='PENDING_APPROVAL').count()
+    except Exception:
+        pass
+    
+    return {
+        'pending_payroll_count': pending_payroll_count,
+        'pending_budget_count': pending_budget_count,
+    }
+
+
 def menu_active_context(request):
     """
     Add active menu states based on current URL path
@@ -39,4 +62,7 @@ def menu_active_context(request):
         'pending_sacraments_active': '/catechesis/sacraments/pending/' in path,
         'payroll_verification_active': '/finance/payrolls/' in path and 'PENDING_VERIFICATION' in path,
         'priest_reports_active': '/analytics/' in path,
+        # Leadership states
+        'payroll_active': '/finance/payrolls/' in path,
+        'budget_active': '/finance/budgets/' in path,
     }

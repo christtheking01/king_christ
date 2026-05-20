@@ -10,7 +10,7 @@ from django.db import transaction
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 
-from .models import Community, Member, Ministry, CommunityLeader, Zone, CommunityZone, MinistryLeader
+from .models import Community, Member, Ministry, CommunityLeader, Zone, CommunityZone, MinistryLeader,ZoneLeader
 from finance.models import TitheReceipt, Offering, EventPledge
 from users.models import UserProfile
 from .forms import MemberForm, MinistryForm, MinistryLeaderFormSet, ShepherdForm,Committee
@@ -598,41 +598,43 @@ def list_committees(request):
 @login_required
 def create_committee(request):
     if request.method == 'POST':
-        comm_name = request.POST.get('Commitee_name')
-        desc = request.POST.get('description')
-        
-        # Get dynamic lists
+        comm_name = request.POST.get('Commitee_name', '').strip()
+        desc = request.POST.get('description', '').strip()
+
+        if not comm_name:
+            messages.error(request, "Committee name is required.")
+            return redirect('create_committee')
+
         member_names = request.POST.getlist('members[]')
         positions = request.POST.getlist('positions[]')
         phones = request.POST.getlist('phones[]')
 
         for m_name, pos, ph in zip(member_names, positions, phones):
             if m_name and pos:
-                try:
-                    # Look up member by name (since Datalist sends text)
-                    member_obj = Member.objects.get(name=m_name)
-                    
-                    # Unique Position Check
-                    if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
-                        messages.error(request, _("The position %(position)s is already taken.") % {'position': pos})
-                        continue
+                # Use filter().first() instead of get() to avoid MultipleObjectsReturned
+                member_obj = Member.objects.filter(name=m_name, active=True).first()
+                
+                if not member_obj:
+                    messages.error(request, f"Member '{m_name}' not found.")
+                    continue
 
-                    Committee.objects.create(
-                        Commitee_name=comm_name,
-                        description=desc,
-                        member=member_obj,
-                        position=pos,
-                        phone=ph
-                    )
-                except Member.DoesNotExist:
-                    messages.error(request, _("Member '%(name)s' not found.") % {'name': m_name})
+                if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
+                    messages.error(request, f"Position '{pos}' is already taken in this committee.")
+                    continue
 
-        messages.success(request, _("Committee created successfully!"))
+                Committee.objects.create(
+                    Commitee_name=comm_name,
+                    description=desc,
+                    member=member_obj,
+                    position=pos,
+                    phone=ph or None
+                )
+
+        messages.success(request, "Committee created successfully!")
         return redirect('list_committees')
 
-    # Pass data to template
     context = {
-        'members': Member.objects.all(),
+        'members': Member.objects.filter(active=True).order_by('name'),
         'positions': Committee.Position,
         'committee_active_add': True
     }
@@ -640,17 +642,55 @@ def create_committee(request):
 
 @login_required
 def edit_committee(request, name):
-    # Get all records sharing the same committee name
     committee_members = Committee.objects.filter(Commitee_name=name)
+    
     if request.method == 'POST':
-        committee_members.delete() # Simple update strategy: replace records
-        # Re-use the creation logic here...
-        return redirect('list_committees')
+        comm_name = request.POST.get('Commitee_name', '').strip()
+        desc = request.POST.get('description', '').strip()
+        member_names = request.POST.getlist('members[]')
+        positions = request.POST.getlist('positions[]')
+        phones = request.POST.getlist('phones[]')
+
+        if not comm_name:
+            messages.error(request, "Committee name is required.")
+            return redirect('edit_committee', name=name)
+
+        # Validate at least one valid member+position pair exists before deleting
+        valid_rows = [(m, p, ph) for m, p, ph in zip(member_names, positions, phones) if m.strip() and p.strip()]
         
+        if not valid_rows:
+            messages.error(request, "At least one committee member with a position is required.")
+            return redirect('edit_committee', name=name)
+
+        # Safe to delete and re-create now
+        committee_members.delete()
+
+        for m_name, pos, ph in valid_rows:
+            member_obj = Member.objects.filter(name=m_name, active=True).first()
+            
+            if not member_obj:
+                messages.error(request, f"Member '{m_name}' not found.")
+                continue
+
+            if Committee.objects.filter(Commitee_name=comm_name, position=pos).exists():
+                messages.error(request, f"Position '{pos}' is already taken.")
+                continue
+
+            Committee.objects.create(
+                Commitee_name=comm_name,
+                description=desc,
+                member=member_obj,
+                position=pos,
+                phone=ph or None
+            )
+
+        messages.success(request, "Committee updated successfully!")
+        return redirect('list_committees')
+
     context = {
         'name': name,
         'committee_members': committee_members,
-        'members': Member.objects.all(),
+        'members': Member.objects.filter(active=True).order_by('name'),
         'positions': Committee.Position,
         'desc': committee_members.first().description if committee_members.exists() else ""
     }
@@ -1012,11 +1052,11 @@ def create_shepherd(request):
             messages.error(request, error)
         
         if success_count == 0 and error_messages:
-            return redirect('add_shepherd')
+            return redirect('add_community')
         else:
-            return redirect('list_shepherds')
+            return redirect('list_community')
     
-    return redirect('add_shepherd')
+    return redirect('add_community')
 
 
 @login_required
@@ -1100,10 +1140,27 @@ def edit_community(request, community_id):
     # Get community members for leader selection dropdown
     community_members_list = Member.objects.filter(shepherd=community, active=True).order_by('name')
     
+    # Get zones for dropdown
+    from .models import Zone
+    zones = Zone.objects.all().order_by('name')
+    
+    # Meeting days choices
+    meeting_days = [
+        ('MONDAY', 'Monday'),
+        ('TUESDAY', 'Tuesday'),
+        ('WEDNESDAY', 'Wednesday'),
+        ('THURSDAY', 'Thursday'),
+        ('FRIDAY', 'Friday'),
+        ('SATURDAY', 'Saturday'),
+        ('SUNDAY', 'Sunday'),
+    ]
+    
     context = {
         "community": community,
         "leaders": leaders,
         "community_members": community_members_list,
+        "zones": zones,
+        "meeting_days": meeting_days,
         "shepherds_active_list": "active", 
         "profile": profile
     }
@@ -1249,7 +1306,6 @@ def edit_zone(request, pk):
     communities = Community.objects.all().order_by('name')
     assigned_community_ids = list(CommunityZone.objects.filter(zone=zone).values_list('community_id', flat=True))
     
-    # Get zone leaders and zone members for dropdown
     zone_leaders = zone.leaders.filter(is_active=True).order_by('position')
     zone_communities = zone.get_communities()
     zone_members = Member.objects.filter(shepherd__in=zone_communities, active=True).order_by('name')
@@ -1265,20 +1321,31 @@ def edit_zone(request, pk):
         # Remove unselected communities
         CommunityZone.objects.filter(zone=zone).exclude(community_id__in=new_community_ids).delete()
 
-        # Add new communities
+        # Add new communities  ← THIS WAS MISSING
         for community_id in new_community_ids:
             if community_id:
                 CommunityZone.objects.get_or_create(zone=zone, community_id=community_id)
-        
-        # Update zone leaders
+
+        # Get leader data  ← THESE WERE MISSING
         leader_ids = request.POST.getlist('leader_ids[]')
         leader_names = request.POST.getlist('leader_names[]')
         leader_positions = request.POST.getlist('leader_positions[]')
         leader_phones = request.POST.getlist('leader_phones[]')
         leader_emails = request.POST.getlist('leader_emails[]')
-        
-        # Update existing leaders
+
+        # Update / create leaders
         for i, leader_id in enumerate(leader_ids):
+            if leader_id == 'new':
+                if i < len(leader_names) and leader_names[i]:
+                    ZoneLeader.objects.create(
+                        zone=zone,
+                        name=leader_names[i],
+                        position=leader_positions[i] if i < len(leader_positions) else '',
+                        phone=leader_phones[i] if i < len(leader_phones) else None,
+                        email=leader_emails[i] if i < len(leader_emails) else None
+                    )
+                continue
+
             try:
                 leader = ZoneLeader.objects.get(id=leader_id, zone=zone)
                 if i < len(leader_names):

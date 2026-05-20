@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User, UserProfile, family, FamilyMembership, ChurchMember, ChurchMemberProfile
-from member.models import MemberSacrament
+from member.models import MemberSacrament,Member
 
 
 class UserForm(forms.Form):
@@ -262,28 +262,63 @@ class FamilyForm(forms.ModelForm):
         }
 
 class FamilyMembershipForm(forms.ModelForm):
+    members = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'size': '5'}),
+        label='Members',
+        required=True
+    )
+
     class Meta:
         model = FamilyMembership
-        fields = ['user', 'family', 'role']
+        fields = ['family', 'role']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-control'}),
             'family': forms.Select(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control'})
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter users to show only those without family membership
+        from member.models import Member
+        
+        # Filter members to show only active members without family membership
         if self.instance.pk:
-            # For existing membership, exclude current user from other memberships
-            self.fields['user'].queryset = User.objects.filter(
-                family_membership=None
-            ) | User.objects.filter(id=self.instance.user.id)
+            # For existing membership, exclude current member from other memberships
+            self.fields['members'].queryset = Member.objects.filter(
+                active=True
+            ).exclude(
+                family_memberships__family=self.instance.family
+            ) | Member.objects.filter(id=self.instance.member.id)
+            # Pre-select the current member
+            self.fields['members'].initial = [self.instance.member.id]
         else:
-            # For new membership, show only users without family
-            self.fields['user'].queryset = User.objects.filter(
-                family_membership=None
+            # For new membership, show only active members without family
+            self.fields['members'].queryset = Member.objects.filter(
+                active=True
+            ).exclude(
+                family_memberships__isnull=False
             )
+
+
+class FamilyBulkAddForm(forms.Form):
+    """Form for adding multiple members to a family at once"""
+    family = forms.ModelChoiceField(
+        queryset=family.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Family'
+    )
+    members = forms.ModelMultipleChoiceField(
+        queryset=Member.objects.filter(active=True),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'size': '10'}),
+        label='Members',
+        help_text='Select multiple members to add to this family'
+    )
+    role = forms.ChoiceField(
+        choices=FamilyMembership.ROLE_CHOICES,
+        initial='member',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Role'
+    )
 
 
 class UserProfileForm(forms.ModelForm):

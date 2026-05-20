@@ -8,6 +8,8 @@ from django.conf import settings
 
 from .models import TithePayment, TitheReceipt
 from member.models import Member
+from finance.models import EventPledge, PledgePayment, PledgeReceipt
+from events.models import Event
 from .serializers import (
     MemberListSerializer,
     TithePaymentSerializer,
@@ -640,6 +642,419 @@ def api_sync_offline_operations(request):
             'results': results,
         })
         
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_pledge_events(request):
+    """
+    Get list of events available for pledge creation.
+    GET /tithe/api/v1/pledges/events/
+    Returns PUBLISHED events with start_date >= today, plus any event with existing pledges.
+    """
+    try:
+        today = timezone.now().date()
+
+        # Upcoming published events
+        upcoming = list(Event.objects.filter(
+            status='PUBLISHED',
+            start_date__gte=today
+        ).order_by('start_date')[:20])
+
+        # Events that already have pledges (so POS can accept payments)
+        pledged_event_ids = list(
+            EventPledge.objects.values_list('event_id', flat=True).distinct()
+        )
+        existing_ids = {e.id for e in upcoming}
+        with_pledges = list(Event.objects.filter(
+            id__in=pledged_event_ids
+        ).exclude(id__in=existing_ids)[:10])
+
+        combined = upcoming + with_pledges
+
+        events_data = []
+        for event in combined:
+            events_data.append({
+                'id':          event.id,
+                'title':       event.title,
+                'date':        event.start_date.strftime('%Y-%m-%d'),
+                'description': event.description or '',
+                'status':      event.status,
+            })
+
+        return Response({
+            'success': True,
+            'count': len(events_data),
+            'results': events_data
+        })
+
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_create_pledge(request):
+    """
+    Create a new pledge from POS.
+    
+    POST /tithe/api/v1/pledges/create/
+    Body: {
+        "member_id": 123,
+        "event_id": 456,
+        "promised_amount": 50000.00,
+        "due_date": "2024-12-31",
+        "external_name": "John Doe",
+        "external_phone": "+255123456789"
+    }
+    """
+    try:
+        data = request.data
+        member_id = data.get('member_id')
+        event_id = data.get('event_id')
+        promised_amount = data.get('promised_amount')
+        due_date = data.get('due_date')
+        
+        if not event_id or not promised_amount:
+            return Response(
+                {'error': 'event_id and promised_amount are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get event
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get member if provided
+        member = None
+        if member_id:
+            try:
+                member = Member.objects.get(id=member_id)
+            except Member.DoesNotExist:
+                return Response(
+                    {'error': 'Member not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        # Parse due date if provided
+        due_date_parsed = None
+        if due_date:
+            try:
+                from datetime import datetime
+                due_date_parsed = datetime.strptime(due_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid due_date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Create pledge
+        pledge = EventPledge.objects.create(
+            user=request.user,
+            event=event,
+            member=member,
+            external_name=data.get('external_name'),
+            external_phone=data.get('external_phone'),
+            promised_amount=promised_amount,
+            due_date=due_date_parsed,
+            notes=data.get('notes', ''),
+            status='PENDING'
+        )
+        
+        return Response({
+            'success': True,
+            'message': 'Pledge created successfully',
+            'pledge_id': pledge.id,
+            'pledge_number': f"PLDG-{timezone.now().strftime('%Y%m%d')}-{pledge.id:04d}",
+            'pledger_name': pledge.pledger_name,
+            'promised_amount': float(pledge.promised_amount),
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_submit_pledge_payment(request):
+    """
+    Submit a pledge payment from POS.
+    Creates payment and auto-generates receipt.
+    
+    POST /tithe/api/v1/pledges/payments/submit/
+    Body: {
+        "pledge_id": 123,
+        "amount": 50000.00,
+        "payment_method": "CASH",
+        "phone": "+255123456789",
+        "auto_print": true
+    }
+    """
+    try:
+        data = request.data
+        pledge_id = data.get('pledge_id')
+        amount = data.get('amount')
+        payment_method = data.get('payment_method', 'CASH')
+        
+        if not pledge_id or not amount:
+            return Response(
+                {'error': 'pledge_id and amount are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get pledge
+        try:
+            pledge = EventPledge.objects.get(id=pledge_id)
+        except EventPledge.DoesNotExist:
+            return Response(
+                {'error': 'Pledge not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create payment
+        payment = PledgePayment.objects.create(
+            pledge=pledge,
+            amount=amount,
+            payment_method=payment_method,
+            received_by=request.user,
+            notes=data.get('notes', '')
+        )
+        
+        # Auto-generate receipt if enabled
+        receipt = None
+        if getattr(settings, 'TITHE_AUTO_GENERATE_RECEIPT', True):
+            generated_by = request.user.get_full_name() if request.user else 'POS System'
+            
+            receipt = PledgeReceipt.objects.create(
+                pledge_payment=payment,
+                generated_by=generated_by,
+                church_name=getattr(settings, 'CHURCH_NAME', 'Parokia ya Kristo Mfalme'),
+                church_address=getattr(settings, 'CHURCH_ADDRESS', 'S.L.P 1310'),
+                church_phone=getattr(settings, 'CHURCH_PHONE', ''),
+            )
+            
+            # Auto-mark as printed if requested
+            if data.get('auto_print') and getattr(settings, 'TITHE_AUTO_PRINT_RECEIPT', False):
+                receipt.mark_printed()
+        
+        return Response({
+            'success': True,
+            'message': 'Pledge payment submitted successfully',
+            'payment_id': payment.id,
+            'receipt': {
+                'receipt_number': receipt.receipt_number if receipt else None,
+                'generated': receipt is not None,
+                'print_data': receipt.get_print_data() if receipt else None
+            },
+            'pledge': {
+                'pledger_name': pledge.pledger_name,
+                'promised_amount': float(pledge.promised_amount),
+                'paid_amount': float(pledge.paid_amount),
+                'remaining_amount': float(pledge.remaining_amount),
+                'status': pledge.status
+            }
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_pledge_list(request):
+    """
+    Get list of active pledges for POS.
+    
+    GET /tithe/api/v1/pledges/
+    Query params:
+    - status: Filter by status (PENDING, PARTIAL, COMPLETED, OVERDUE)
+    - event_id: Filter by event
+    """
+    try:
+        status_filter = request.query_params.get('status')
+        event_id = request.query_params.get('event_id')
+        
+        pledges = EventPledge.objects.select_related('member', 'event').filter(
+            status__in=['PENDING', 'PARTIAL']
+        )
+        
+        if status_filter:
+            pledges = pledges.filter(status=status_filter)
+        
+        if event_id:
+            pledges = pledges.filter(event_id=event_id)
+        
+        pledges = pledges.order_by('-created_at')[:50]
+        
+        pledges_data = []
+        for pledge in pledges:
+            pledges_data.append({
+                'id': pledge.id,
+                'pledger_name': pledge.pledger_name,
+                'event_title': pledge.event.title if pledge.event else '',
+                'promised_amount': float(pledge.promised_amount),
+                'paid_amount': float(pledge.paid_amount),
+                'remaining_amount': float(pledge.remaining_amount),
+                'status': pledge.status,
+                'due_date': pledge.due_date.strftime('%Y-%m-%d') if pledge.due_date else None,
+                'progress_percentage': pledge.progress_percentage,
+            })
+        
+        return Response({
+            'success': True,
+            'count': len(pledges_data),
+            'results': pledges_data
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_print_pledge_receipt(request, receipt_id):
+    """
+    Get pledge receipt data for printing.
+    
+    GET /tithe/api/v1/pledges/receipts/<int:receipt_id>/print/
+    """
+    try:
+        receipt = PledgeReceipt.objects.get(id=receipt_id)
+        
+        # Mark as printed
+        receipt.mark_printed()
+        
+        return Response({
+            'success': True,
+            'receipt': receipt.get_print_data()
+        })
+        
+    except PledgeReceipt.DoesNotExist:
+        return Response(
+            {'error': 'Receipt not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def api_update_payment(request, payment_id):
+    """
+    Update an existing tithe payment.
+    PUT /tithe/api/v1/payments/<id>/update/
+    """
+    try:
+        payment = TithePayment.objects.get(id=payment_id)
+        data = request.data
+
+        if 'member_id' in data:
+            payment.name = Member.objects.get(id=data['member_id'])
+        if 'amount' in data:
+            payment.amount = data['amount']
+        if 'payment_method' in data:
+            payment.status = data['payment_method']
+        if 'date' in data:
+            from datetime import datetime
+            payment.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+        if 'contact_number' in data:
+            payment.contact_number = data['contact_number']
+
+        payment.save()
+        return Response({
+            'success': True,
+            'message': 'Payment updated successfully',
+            'payment': TithePaymentSerializer(payment).data
+        })
+    except TithePayment.DoesNotExist:
+        return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_list_payments(request):
+    """
+    List all tithe payments with optional filters.
+    GET /tithe/api/v1/payments/list/
+    """
+    try:
+        payments = TithePayment.objects.select_related('name').order_by('-date')
+        
+        # Basic filtering
+        member_id = request.query_params.get('member_id')
+        if member_id:
+            payments = payments.filter(name_id=member_id)
+            
+        serializer = TithePaymentSerializer(payments, many=True)
+        return Response({
+            'success': True,
+            'count': payments.count(),
+            'results': serializer.data
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_pledge_receipt(request, payment_id):
+    """
+    Get or generate pledge receipt for a payment.
+    
+    GET /tithe/api/v1/pledges/payments/<int:payment_id>/receipt/
+    """
+    try:
+        payment = PledgePayment.objects.get(id=payment_id)
+        
+        # Get or create receipt
+        receipt, created = PledgeReceipt.objects.get_or_create(
+            pledge_payment=payment,
+            defaults={
+                'generated_by': request.user.get_full_name() if request.user else 'POS System',
+                'church_name': getattr(settings, 'CHURCH_NAME', 'Parokia ya Kristo Mfalme'),
+                'church_address': getattr(settings, 'CHURCH_ADDRESS', 'S.L.P 1310'),
+                'church_phone': getattr(settings, 'CHURCH_PHONE', ''),
+            }
+        )
+        
+        return Response({
+            'success': True,
+            'receipt': receipt.get_print_data(),
+            'created': created
+        })
+        
+    except PledgePayment.DoesNotExist:
+        return Response(
+            {'error': 'Payment not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     except Exception as e:
         return Response(
             {'error': str(e)},

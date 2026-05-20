@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Take Attendance - {{ class.name }} - Christ King Church{% endblock %}
+{% block title %}Take Attendance - {{ sacrament_class.name }} - Christ King Church{% endblock %}
 
 {% block internal_style %}
 <style>
@@ -344,17 +344,18 @@
     <div class="attendance-header">
         <h1><i class="fas fa-clipboard-check"></i> Take Attendance</h1>
         <div class="class-info">
-            <i class="fas fa-chalkboard-teacher"></i> {{ class.name }} ({{ class.get_sacrament_type_display }})
+            <i class="fas fa-chalkboard-teacher"></i> {{ sacrament_class.name }} ({{ sacrament_class.get_sacrament_type_display }})
         </div>
     </div>
 
-    <form method="post" action="{% url 'take_attendance' class.pk %}">
+    <form method="post" action="">
         {% csrf_token %}
+        <input type="hidden" name="class_pk" value="{{ sacrament_class.pk }}">
 
         <div class="date-card">
             <label for="class_date"><i class="fas fa-calendar-alt me-2"></i>Class Date</label>
-            <input type="date" name="class_date" id="class_date" class="date-input" 
-                   value="{{ selected_date|date:'Y-m-d'|default:today }}" required>
+            <input type="date" name="class_date" id="class_date" class="date-input"
+                   value="{{ class_date|date:'Y-m-d' }}" required>
         </div>
 
         <div class="attendance-card">
@@ -374,40 +375,40 @@
             </div>
 
             <div class="member-list">
-                {% if members %}
-                {% for member in members %}
-                <div class="member-item" data-member-id="{{ member.id }}">
+                {% if enrollments %}
+                {% for enrollment in enrollments %}
+                <div class="member-item" data-member-id="{{ enrollment.id }}">
                     <div class="member-info">
                         <div class="member-avatar">
-                            {{ member.first_name|first }}{{ member.last_name|first }}
+                            {{ enrollment.catechesis_member.first_name|first }}{{ enrollment.catechesis_member.last_name|first }}
                         </div>
                         <div class="member-details">
-                            <h4>{{ member.first_name }} {{ member.last_name }}</h4>
+                            <h4>{{ enrollment.catechesis_member.first_name }} {{ enrollment.catechesis_member.last_name }}</h4>
                             <p>
-                                <i class="fas fa-birthday-cake"></i> Age {{ member.age|default:"N/A" }}
-                                {% if member.parent_name %}
-                                <i class="fas fa-user-friends ms-2"></i> Parent: {{ member.parent_name }}
+                                <i class="fas fa-birthday-cake"></i> Age {{ enrollment.catechesis_member.age|default:"N/A" }}
+                                {% if enrollment.catechesis_member.parent_guardian_name %}
+                                <i class="fas fa-user-friends ms-2"></i> Parent: {{ enrollment.catechesis_member.parent_guardian_name }}
                                 {% endif %}
                             </p>
                         </div>
                     </div>
                     <div>
                         <div class="status-buttons">
-                            <button type="button" class="status-btn present" 
-                                    onclick="setStatus('{{ member.id }}', 'PRESENT')">
+                            <button type="button" class="status-btn present"
+                                    onclick="setStatus('{{ enrollment.id }}', 'PRESENT')">
                                 <i class="fas fa-check"></i> Present
                             </button>
-                            <button type="button" class="status-btn absent" 
-                                    onclick="setStatus('{{ member.id }}', 'ABSENT')">
+                            <button type="button" class="status-btn absent"
+                                    onclick="setStatus('{{ enrollment.id }}', 'ABSENT')">
                                 <i class="fas fa-times"></i> Absent
                             </button>
-                            <button type="button" class="status-btn late" 
-                                    onclick="setStatus('{{ member.id }}', 'LATE')">
+                            <button type="button" class="status-btn late"
+                                    onclick="setStatus('{{ enrollment.id }}', 'LATE')">
                                 <i class="fas fa-clock"></i> Late
                             </button>
                         </div>
-                        <input type="hidden" name="status_{{ member.id }}" id="status_{{ member.id }}" value="">
-                        <input type="text" name="notes_{{ member.id }}" class="notes-input" 
+                        <input type="hidden" name="status_{{ enrollment.id }}" id="status_{{ enrollment.id }}" value="">
+                        <input type="text" name="notes_{{ enrollment.id }}" class="notes-input"
                                placeholder="Add notes (optional)...">
                     </div>
                 </div>
@@ -425,7 +426,7 @@
             </div>
         </div>
 
-        {% if members %}
+        {% if enrollments %}
         <div class="form-actions">
             <button type="submit" class="btn-modern btn-primary-modern">
                 <i class="fas fa-save"></i> Save Attendance

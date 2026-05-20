@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 import json
 from datetime import timedelta
+from member.models import Member
 
 from member.models import upload_image_path
 
@@ -164,11 +165,11 @@ class family(models.Model):
         return self.name
     
     def head_family(self):
-        membership = self.membership_set_filter(role = "head").select_related("user").first()
-        return membership.user if membership else None
+        membership = self.memberships.filter(role="head").select_related("member").first()
+        return membership.member if membership else None
 
     def member_count(self):
-        return self.membership_set.count()
+        return self.memberships.count()
     
     class Meta:
         verbose_name = "Family"
@@ -179,10 +180,12 @@ class FamilyMembership(models.Model):
         ('head', 'Head'),
         ('member', 'Member'),
     ]
-    user = models.OneToOneField(  # one user can only belong to one family
-        User,
+    member = models.ForeignKey(
+        'member.Member',
         on_delete=models.CASCADE,
-        related_name='family_membership'
+        related_name='family_memberships',
+        null=True,
+        blank=True
     )
     family = models.ForeignKey(
         family,
@@ -193,13 +196,14 @@ class FamilyMembership(models.Model):
     date_joined = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.family.name} ({self.role})"
+        return f"{self.member.name} - {self.family.name} ({self.role})"
 
     def is_head(self):
         return self.role == 'head'
 
     class Meta:
         verbose_name_plural = "Family Memberships"
+        # unique_together = ['member', 'family']  # One member can only belong to one family once
 
 
 class ChurchMember(models.Model):

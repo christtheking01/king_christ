@@ -366,7 +366,10 @@
                     </td>
                     <td>
                         {% if family.head_family %}
-                            {{ family.head_family.get_full_name|default:family.head_family.username }}
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-crown" style="color: var(--warning); font-size: 0.85rem;"></i>
+                                <strong>{{ family.head_family.name }}</strong>
+                            </div>
                         {% else %}
                             <span class="text-muted">Not assigned</span>
                         {% endif %}

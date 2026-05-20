@@ -15,9 +15,12 @@
     <!-- PWA Meta Tags for Add to Home Screen -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CTK Parish">
+    <meta name="apple-mobile-web-app-title" content="Kristo Mfalme POS">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="CTK Parish">
+    <meta name="application-name" content="Kristo Mfalme POS">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
     <title>
       {% block title %}{% trans "Christ The King Parish" %}{% endblock %}
     </title>
@@ -1846,6 +1849,12 @@
                       </div>
                       <span>{% trans "Classes" %}</span>
                     </a>
+                    <a href="{% url 'instructor_list' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                      </div>
+                      <span>{% trans "Instructors" %}</span>
+                    </a>
                     <a href="{% url 'catechesis_analytics' %}" class="submenu-link">
                       <div class="nav-icon-small">
                         <i class="fas fa-chart-line"></i>
@@ -2034,7 +2043,7 @@
             </div>
 
             <!-- Section 5: Finance (Restricted) -->
-            {% if user.is_superuser or user.is_staff or user.roles == 'accountant' %}
+            {% if user.is_superuser or user.roles == 'priest' or user.roles == 'treasurer' or user.roles == 'accountant' %}
             <div class="nav-section-card" data-section="finance">
               <div class="nav-section-header" onclick="toggleSection(this)">
                 <div class="nav-section-title">
@@ -2225,7 +2234,7 @@
             {% endif %}
 
             <!-- Section 6: Communications (Restricted) -->
-            {% if user.is_superuser or user.is_staff or user.roles == 'admin' %}
+            {% if user.is_superuser or user.roles == 'chair_person' or user.roles == 'secretary' or user.roles == 'accountant' or user.roles == 'admin' %}
             <div class="nav-section-card" data-section="communication">
               <div class="nav-section-header" onclick="toggleSection(this)">
                 <div class="nav-section-title">
@@ -2307,7 +2316,7 @@
             {% endif %}
 
             <!-- Section 7: Leadership (Priest/Admin only) -->
-            {% if user.is_superuser or user.is_staff or user.roles == 'priest' or user.roles == 'admin' %}
+            {% if user.is_superuser or user.roles == 'chair_person' or user.roles == 'secretary' or user.roles == 'accountant' or user.roles == 'admin'%}
             <div class="nav-section-card" data-section="leadership">
               <div class="nav-section-header" onclick="toggleSection(this)">
                 <div class="nav-section-title">
@@ -2355,6 +2364,47 @@
                         <i class="fas fa-stamp"></i>
                       </div>
                       <span>{% trans "Verify Sacraments" %}</span>
+                    </a>
+                  </div>
+                  <div
+                    class="nav-link-enhanced nav-toggle {% if payroll_active or budget_active %}active{% endif %}"
+                    data-target="finance-approval-submenu"
+                  >
+                    <div class="nav-icon-small">
+                      <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <span>{% trans "Finance Approvals" %}</span>
+                    {% if pending_payroll_count and pending_payroll_count > 0 %}
+                    <span class="nav-item-count">{{ pending_payroll_count }}</span>
+                    {% endif %}
+                    <div class="nav-chevron">
+                      <i class="fas fa-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div id="finance-approval-submenu" class="submenu">
+                    <a href="{% url 'leadership_payroll_approvals' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-users-cog"></i>
+                      </div>
+                      <span>{% trans "Payroll Verification" %}</span>
+                      {% if pending_payroll_count and pending_payroll_count > 0 %}
+                      <span class="nav-item-count">{{ pending_payroll_count }}</span>
+                      {% endif %}
+                    </a>
+                    <a href="{% url 'leadership_budget_approvals' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-chart-pie"></i>
+                      </div>
+                      <span>{% trans "Budget Approval" %}</span>
+                      {% if pending_budget_count and pending_budget_count > 0 %}
+                      <span class="nav-item-count">{{ pending_budget_count }}</span>
+                      {% endif %}
+                    </a>
+                    <a href="{% url 'leadership_expense_approvals' %}" class="submenu-link">
+                      <div class="nav-icon-small">
+                        <i class="fas fa-receipt"></i>
+                      </div>
+                      <span>{% trans "Expense Reports" %}</span>
                     </a>
                   </div>
                   <div
@@ -2601,6 +2651,7 @@
                 <span class="favorites-title">{% trans "Quick Access" %}</span>
               </div>
               <div class="favorites-grid">
+                {% if user.is_superuser or user.roles == 'chair_person' or user.roles == 'secretary' or user.roles == 'accountant' or user.roles == 'admin'%}
                 <a
                   href="{% url 'tithepayment:tithepayment_create' %}"
                   class="favorite-item"
@@ -2613,20 +2664,21 @@
                   <span>{% trans "Tithe" %}</span>
                 </a>
                 <a
-                  href="{% url 'add_member' %}"
-                  class="favorite-item"
-                  title="{% trans 'Add Member' %}"
-                >
-                  <i class="fas fa-user-plus" style="color: #4facfe"></i>
-                  <span>{% trans "Member" %}</span>
-                </a>
-                <a
                   href="{% url 'tithepayment:receipt_list' %}"
                   class="favorite-item"
                   title="{% trans 'Receipts' %}"
                 >
                   <i class="fas fa-receipt" style="color: #f093fb"></i>
                   <span>{% trans "Receipts" %}</span>
+                </a>
+                {% endif %}
+                <a
+                  href="{% url 'add_member' %}"
+                  class="favorite-item"
+                  title="{% trans 'Add Member' %}"
+                >
+                  <i class="fas fa-user-plus" style="color: #4facfe"></i>
+                  <span>{% trans "Member" %}</span>
                 </a>
                 <a
                   href="{% url 'calendar' %}"
@@ -3536,6 +3588,43 @@
     {% block script %}
     <!-- Additional scripts will be inserted here -->
     <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button if you have one
+            const installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) {
+                installBtn.style.display = 'block';
+                installBtn.addEventListener('click', function() {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function(choiceResult) {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            }
+        });
+
         // Handle message dismissal
         document.addEventListener('DOMContentLoaded', function() {
             // Add click handlers to message close buttons

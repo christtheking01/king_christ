@@ -608,7 +608,12 @@
                 .then(data => {
                     if (data.success) {
                         // Print receipt if printer is connected
+                        console.log('Print check - selectedMember:', selectedMember);
+                        console.log('Print check - thermalPrinter:', window.thermalPrinter);
+                        console.log('Print check - isConnected:', window.thermalPrinter ? window.thermalPrinter.isConnected : 'N/A');
+                        
                         if (selectedMember && window.thermalPrinter && window.thermalPrinter.isConnected) {
+                            console.log('Attempting to print receipt...');
                             printReceipt(
                                 'Tithe',
                                 selectedMember.name,
@@ -617,6 +622,13 @@
                                 paymentMethod,
                                 contactNumber
                             );
+                        } else {
+                            console.log('Printer not connected or missing data, skipping print');
+                            if (!window.thermalPrinter) {
+                                console.error('thermalPrinter object not found');
+                            } else if (!window.thermalPrinter.isConnected) {
+                                console.error('Printer not connected - click "Connect Printer" button first');
+                            }
                         }
                         
                         // Redirect or show success

@@ -8,8 +8,8 @@ from django.db.models import Q, Count, Avg
 from django.utils import timezone
 from datetime import timedelta, date
 from calendar import monthrange
-from .models import (CatechesisMember, Sacrament, SacramentClass, SacramentRequest, Enrollment, ClassAttendance)
-from .forms import MemberRegistrationForm, SacramentRequestForm, ReviewForm
+from .models import (CatechesisMember, Sacrament, SacramentClass, SacramentRequest, Enrollment, ClassAttendance, CatechesisInstructor)
+from .forms import MemberRegistrationForm, SacramentRequestForm, ReviewForm, SacramentClassForm, CatechesisInstructorForm, EnrollmentForm
 
 def is_approver(user):
     return user.is_authenticated and hasattr(user, 'is_approver') and user.is_approver()
@@ -106,7 +106,7 @@ def sacrament_request_create(request, member_pk):
     
     # Get sacraments the member hasn't requested yet
     requested_sacraments = member.sacrament_requests.values_list('sacrament', flat=True)
-    from .models import SacramentRequest
+    from .models import SacramentRequest, Enrollment
     all_sacraments = [choice[0] for choice in SacramentRequest.SACRAMENT_CHOICES]
     available_sacraments = [s for s in all_sacraments if s not in requested_sacraments]
     
@@ -343,12 +343,23 @@ def analytics_dashboard(request):
         'member_category'
     ).annotate(count=Count('id')).order_by('-count')
 
-    # Sacrament stats
-    sacrament_stats = Sacrament.objects.annotate(
-        total_requests=Count('sacramentrequest'),
-        completed=Count('sacramentrequest', filter=Q(sacramentrequest__status='completed')),
-        pending=Count('sacramentrequest', filter=Q(sacramentrequest__status='pending'))
-    )
+    # Sacrament stats - since sacrament is a CharField, we need to query differently
+    sacrament_stats = []
+    for sacrament_choice in SacramentRequest.SACRAMENT_CHOICES:
+        sacrament_name = sacrament_choice[0]
+        sacrament_display = sacrament_choice[1]
+        
+        total = base_requests.filter(sacrament=sacrament_name).count()
+        completed = base_requests.filter(sacrament=sacrament_name, status='completed').count()
+        pending = base_requests.filter(sacrament=sacrament_name, status='pending').count()
+        
+        sacrament_stats.append({
+            'name': sacrament_display,
+            'sacrament_type': sacrament_name,
+            'total_requests': total,
+            'completed': completed,
+            'pending': pending
+        })
 
     # Monthly completions — single query
     monthly_qs = base_requests.filter(
@@ -412,8 +423,8 @@ def member_analytics(request, pk):
     return render(request, 'catechesis/member_analytics.html', context)
 
 def sacrament_class_list(request):
-    status = request.GET.get('type','')
-    sacrament_type = request.GET.get('status','ACTIVE')
+    status = request.GET.get('status','')
+    sacrament_type = request.GET.get('type','')
 
     classes = SacramentClass.objects.all()
 
@@ -425,7 +436,7 @@ def sacrament_class_list(request):
 
     context = {
         'classes':classes,
-        'status_filter':sacrament_type,
+        'status_filter':status,
         'type_filter':sacrament_type,
         'sacrament_types': SacramentClass.SACRAMENT_TYPE_CHOICES,
         'status_choices':SacramentClass.STATUS_CHOICES,
@@ -434,9 +445,285 @@ def sacrament_class_list(request):
 
     return render(request,'catechesis/class_list.html',context)
 
+
 @login_required
-def take_attendance(request, pk):
+def create_sacrament_class(request):
+    """Create a new sacrament class"""
+    if request.method == 'POST':
+        form = SacramentClassForm(request.POST)
+        if form.is_valid():
+            sacrament_class = form.save(commit=False)
+            sacrament_class.created_by = request.user
+            sacrament_class.save()
+            form.save_m2m()  # Save many-to-many relationships
+            
+            # Auto-enroll members with approved sacrament requests
+            # Map SacramentRequest sacrament values (lowercase) to SacramentClass sacrament_type values (uppercase)
+            sacrament_type_map = {
+                'baptism': 'BAPTISM',
+                'eucharist': 'FIRST_COMMUNION',
+                'confirmation': 'CONFIRMATION',
+                'reconciliation': 'RECONCILIATION',
+                'marriage': 'CONFIRMATION',
+                'holy_orders': 'CONFIRMATION',
+                'anointing_sick': 'FIRST_COMMUNION',
+            }
+            
+            # Get the sacrament type to filter by (convert from class type to request type)
+            request_sacrament_type = None
+            for request_type, class_type in sacrament_type_map.items():
+                if class_type == sacrament_class.sacrament_type:
+                    request_sacrament_type = request_type
+                    break
+            
+            if not request_sacrament_type:
+                request_sacrament_type = sacrament_class.sacrament_type.lower()
+            
+            # Get members with approved sacrament requests for this type
+            approved_requests = SacramentRequest.objects.filter(
+                sacrament=request_sacrament_type,
+                status='approved'
+            )
+            
+            auto_enrolled_count = 0
+            for request_obj in approved_requests:
+                # Check if class has capacity
+                if not sacrament_class.has_capacity():
+                    break
+                
+                # Check if member is already enrolled in another class of same type
+                existing_enrollment = Enrollment.objects.filter(
+                    catechesis_member=request_obj.member,
+                    sacrament_class__sacrament_type=sacrament_class.sacrament_type,
+                    status='ENROLLED'
+                ).exists()
+                
+                if not existing_enrollment:
+                    enrollment, created = Enrollment.objects.get_or_create(
+                        catechesis_member=request_obj.member,
+                        sacrament_class=sacrament_class,
+                        defaults={
+                            'status': 'ENROLLED',
+                            'request_source': f'Auto-enrolled from approved request: {request_obj.sacrament}'
+                        }
+                    )
+                    if created:
+                        auto_enrolled_count += 1
+            
+            if auto_enrolled_count > 0:
+                messages.info(request, f'Auto-enrolled {auto_enrolled_count} member(s) with approved sacrament requests.')
+            
+            messages.success(request, f'Sacrament class "{sacrament_class.name}" created successfully!')
+            return redirect('class_list')
+    else:
+        form = SacramentClassForm()
+    
+    context = {
+        'form': form,
+        'catechesis_active': True,
+        'catechesis_class_list': True,
+    }
+    return render(request, 'catechesis/class_form.html', context)
+
+
+# CatechesisInstructor Views
+@login_required
+def instructor_list(request):
+    """List all catechesis instructors"""
+    status_filter = request.GET.get('status', '')
+    search_query = request.GET.get('q', '')
+    
+    instructors = CatechesisInstructor.objects.all()
+    
+    if status_filter:
+        instructors = instructors.filter(status=status_filter)
+    
+    if search_query:
+        instructors = instructors.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(qualification__icontains=search_query)
+        )
+    
+    context = {
+        'instructors': instructors,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'status_choices': CatechesisInstructor.STATUS_CHOICES,
+        'catechesis_active': True,
+        'instructor_list_active': True,
+    }
+    return render(request, 'catechesis/instructor_list.html', context)
+
+
+@login_required
+def instructor_detail(request, pk):
+    """View instructor details"""
+    instructor = get_object_or_404(CatechesisInstructor, pk=pk)
+    
+    # Get classes coordinated by this instructor
+    coordinated_classes = instructor.coordinated_classes.all()
+    
+    # Get classes taught by this instructor
+    teaching_classes = instructor.teaching_classes.all()
+    
+    context = {
+        'instructor': instructor,
+        'coordinated_classes': coordinated_classes,
+        'teaching_classes': teaching_classes,
+        'catechesis_active': True,
+        'instructor_list_active': True,
+    }
+    return render(request, 'catechesis/instructor_detail.html', context)
+
+
+@login_required
+def instructor_create(request):
+    """Create a new catechesis instructor"""
+    if request.method == 'POST':
+        form = CatechesisInstructorForm(request.POST)
+        if form.is_valid():
+            instructor = form.save()
+            messages.success(request, f'Instructor "{instructor.full_name()}" created successfully!')
+            return redirect('instructor_list')
+    else:
+        form = CatechesisInstructorForm()
+    
+    context = {
+        'form': form,
+        'catechesis_active': True,
+        'instructor_list_active': True,
+    }
+    return render(request, 'catechesis/instructor_form.html', context)
+
+
+@login_required
+def instructor_update(request, pk):
+    """Update an existing catechesis instructor"""
+    instructor = get_object_or_404(CatechesisInstructor, pk=pk)
+    
+    if request.method == 'POST':
+        form = CatechesisInstructorForm(request.POST, instance=instructor)
+        if form.is_valid():
+            instructor = form.save()
+            messages.success(request, f'Instructor "{instructor.full_name()}" updated successfully!')
+            return redirect('instructor_detail', pk=instructor.pk)
+    else:
+        form = CatechesisInstructorForm(instance=instructor)
+    
+    context = {
+        'form': form,
+        'instructor': instructor,
+        'catechesis_active': True,
+        'instructor_list_active': True,
+    }
+    return render(request, 'catechesis/instructor_form.html', context)
+
+
+@login_required
+def instructor_delete(request, pk):
+    """Delete a catechesis instructor"""
+    instructor = get_object_or_404(CatechesisInstructor, pk=pk)
+    
+    if request.method == 'POST':
+        instructor_name = instructor.full_name()
+        instructor.delete()
+        messages.success(request, f'Instructor "{instructor_name}" deleted successfully!')
+        return redirect('instructor_list')
+    
+    context = {
+        'instructor': instructor,
+        'catechesis_active': True,
+        'instructor_list_active': True,
+    }
+    return render(request, 'catechesis/instructor_confirm_delete.html', context)
+
+@login_required
+def enroll_members(request, pk=None):
+    """Enroll members in a class - with class selection option"""
+    sacrament_class = None
+    
+    # If pk is provided, it's the old URL pattern (specific class)
+    if pk:
+        sacrament_class = get_object_or_404(SacramentClass, pk=pk)
+    
+    if request.method == 'POST':
+        form = EnrollmentForm(request.POST, sacrament_class=sacrament_class)
+        if form.is_valid():
+            # Get the class from the form (for new flow) or use the provided class (for old flow)
+            target_class = form.cleaned_data.get('sacrament_class') or sacrament_class
+            
+            if not target_class:
+                messages.error(request, 'Please select a class to enroll members into.')
+                return render(request, 'catechesis/enroll_members.html', {'form': form})
+            
+            members = form.cleaned_data['members']
+            enrolled_count = 0
+            
+            for member in members:
+                # Check if class has capacity
+                if not target_class.has_capacity():
+                    messages.warning(request, f'Class has reached maximum capacity. Could not enroll all members.')
+                    break
+                
+                # Create enrollment
+                enrollment, created = Enrollment.objects.get_or_create(
+                    catechesis_member=member,
+                    sacrament_class=target_class,
+                    defaults={
+                        'status': 'ENROLLED',
+                        'request_source': 'Manual Enrollment'
+                    }
+                )
+                if created:
+                    enrolled_count += 1
+            
+            if enrolled_count > 0:
+                messages.success(request, f'Successfully enrolled {enrolled_count} member(s) in {target_class.name}.')
+            else:
+                messages.info(request, 'No new members were enrolled (they may already be enrolled).')
+            
+            return redirect('class_list')
+    else:
+        form = EnrollmentForm(sacrament_class=sacrament_class)
+    
+    # Get context data
+    context = {
+        'form': form,
+        'sacrament_class': sacrament_class,
+        'catechesis_active': True,
+        'catechesis_class_list': True,
+    }
+    
+    # If a specific class is selected, get enrollment info
+    if sacrament_class:
+        enrolled_members = sacrament_class.enrollments.filter(
+            status='ENROLLED'
+        ).select_related('catechesis_member')
+        
+        other_class_enrollments = Enrollment.objects.filter(
+            sacrament_class__sacrament_type=sacrament_class.sacrament_type,
+            status='ENROLLED'
+        ).exclude(
+            sacrament_class=sacrament_class
+        ).select_related('catechesis_member', 'sacrament_class')
+        
+        context.update({
+            'enrolled_members': enrolled_members,
+            'other_class_enrollments': other_class_enrollments,
+        })
+    
+    return render(request, 'catechesis/enroll_members.html', context)
+
+
+@login_required
+def take_attendance(request, pk=None):
     """Take attendance for a class on a specific date"""
+    # Get pk from URL parameter or POST data
+    if request.method == 'POST' and not pk:
+        pk = request.POST.get('class_pk')
+    
     sacrament_class = get_object_or_404(SacramentClass, pk=pk)
     
     # Get date from query param or default to today
@@ -472,7 +759,7 @@ def take_attendance(request, pk):
             )
         
         messages.success(request, f'Attendance recorded for {class_date}')
-        return redirect('catechesis:class_attendance', pk=pk, date=class_date.isoformat())
+        return redirect('view_attendance', pk=pk)
     
     # Get existing attendance for this date
     existing_attendance = {

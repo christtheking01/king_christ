@@ -89,10 +89,10 @@ def send_event_registration_sms(sender, instance, created, **kwargs):
         if instance.user:
             try:
                 notification = Notification.objects.create(
-                    title=f"Event Registration Confirmed: {event.title}",
+                    title=f"Usajili wa Matukio Umethibitishwa: {event.title}",
                     message=(
-                        f"You have successfully registered for '{event.title}' on "
-                        f"{event_date} at {location}."
+                        f"Umeshajiliwa kwa mafanikio kwa matukio '{event.title}' tarehe "
+                        f"{event_date} eneo la {location}."
                     ),
                     recipient_type='MEMBER',
                     target_audience='PORTAL_ONLY',
@@ -172,8 +172,8 @@ def send_event_cancellation_notifications(event):
         for registration in registrations.filter(user__isnull=False):
             try:
                 notification = Notification.objects.create(
-                    title=f"Event Cancelled: {event.title}",
-                    message=f"The event '{event.title}' has been cancelled. We apologize for any inconvenience.",
+                    title=f"Matukio Yameghairiwa: {event.title}",
+                    message=f"Matukio '{event.title}' yameghairiwa. Tunatoa msamaha kwa usumbufu wowote.",
                     recipient_type='MEMBER',
                     target_audience='PORTAL_ONLY',
                     priority='high',
