@@ -1,0 +1,10 @@
+*.pyc
+__pycache__/
+db.sqlite3
+.env
+*.log
+venv/
+env/
+.vscode/
+.env.example/
+*.pyo
