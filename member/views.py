@@ -1135,7 +1135,7 @@ def edit_community(request, community_id):
         else:
             messages.success(request, f"Community '{community_name}' updated successfully")
         
-        return redirect('list_shepherds')
+        return redirect('list_community')
     
     # Get community members for leader selection dropdown
     community_members_list = Member.objects.filter(shepherd=community, active=True).order_by('name')
@@ -1178,7 +1178,7 @@ def delete_community(request, community_id):
         except Community.DoesNotExist:
             messages.error(request, "Community not found")
     
-    return redirect('list_shepherds')
+    return redirect('list_community')
 
 
 # ================================================================================= #
