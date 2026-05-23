@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 import logging
 from django.conf import settings
 import africastalking
