@@ -70,7 +70,7 @@ def send_tithe_sms_notification(sender, instance, created, **kwargs):
         month_name = get_swahili_month(instance.date)
         
         message = (
-            f"Parokia ya Kristo Mfalme: Tumsifu Yesu Kristu; mpendwa {member_name} "
+            f"Tumsifu Yesu Kristu; mpendwa {member_name} "
             f"zaka ya {month_name} Tsh {formatted_amount} imepokelewa kwa maendeleo ya parokia. Malaki 3:10. Ubarikiwe!"
         )
 

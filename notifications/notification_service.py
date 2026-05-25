@@ -102,7 +102,7 @@ class NotificationService:
             recipients = notification.get_recipients()
 
             # Handle both QuerySet and list returns
-            if hasattr(recipients, 'count'):
+            if hasattr(recipients, 'count') and hasattr(recipients, 'model'):
                 notification.total_recipients = recipients.count()
                 has_recipients = recipients.exists()
             else:
