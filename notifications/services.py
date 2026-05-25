@@ -128,6 +128,13 @@ class NotificationService:
             else:
                 notification.total_recipients = len(recipients) if recipients else 0
                 has_recipients = bool(recipients)
+            
+            # For custom phone numbers, check phone numbers instead of recipients list
+            if notification.recipient_type == 'CUSTOM_PHONES':
+                phone_numbers = notification.get_phone_numbers()
+                notification.total_recipients = len(phone_numbers)
+                has_recipients = len(phone_numbers) > 0
+            
             notification.save()
 
             if not has_recipients:
