@@ -141,71 +141,130 @@ class NotificationService:
                 sent_count = 0
                 failed_count = 0
 
-                for member in recipients:
-                    if not member.telephone:
-                        NotificationLog.objects.create(
-                            notification=notification,
-                            member=member,
-                            phone_number='N/A',
-                            status='FAILED',
-                            error_message='No phone number'
+                # Handle custom phone numbers separately
+                if notification.recipient_type == 'CUSTOM_PHONES':
+                    phone_numbers = notification.get_phone_numbers()
+                    for phone_number in phone_numbers:
+                        # Normalize to international format
+                        normalized_phone = self._normalize_phone(phone_number)
+
+                        result = self.sms_service.send_sms(
+                            phone_number=normalized_phone,
+                            message=notification.message
                         )
-                        failed_count += 1
-                        continue
 
-                    # Normalize to international format
-                    phone_number = self._normalize_phone(str(member.telephone))
+                        if result['success']:
+                            message_id = result.get('message_id', '')
+                            response_data = result.get('data', {})
+                            sms_recipients = response_data.get('SMSMessageData', {}).get('Recipients', [])
 
-                    result = self.sms_service.send_sms(
-                        phone_number=phone_number,
-                        message=notification.message
-                    )
+                            if sms_recipients:
+                                recipient_info = sms_recipients[0]
+                                status = recipient_info.get('status', 'Unknown')
+                                cost = recipient_info.get('cost', '')
+                                is_sent = status.lower() in ('success', 'sent')
 
-                    if result['success']:
-                        message_id = result.get('message_id', '')
-                        response_data = result.get('data', {})
-                        sms_recipients = response_data.get('SMSMessageData', {}).get('Recipients', [])
+                                NotificationLog.objects.create(
+                                    notification=notification,
+                                    member=None,
+                                    phone_number=normalized_phone,
+                                    status='SENT' if is_sent else 'FAILED',
+                                    at_message_id=message_id,
+                                    cost=cost,
+                                    error_message=None if is_sent else status
+                                )
 
-                        if sms_recipients:
-                            recipient_info = sms_recipients[0]
-                            status = recipient_info.get('status', 'Unknown')
-                            cost = recipient_info.get('cost', '')
-                            is_sent = status.lower() in ('success', 'sent')
-
+                                if is_sent:
+                                    sent_count += 1
+                                else:
+                                    failed_count += 1
+                            else:
+                                NotificationLog.objects.create(
+                                    notification=notification,
+                                    member=None,
+                                    phone_number=normalized_phone,
+                                    status='SENT',
+                                    at_message_id=message_id,
+                                    cost='',
+                                    error_message=None
+                                )
+                                sent_count += 1
+                        else:
+                            NotificationLog.objects.create(
+                                notification=notification,
+                                member=None,
+                                phone_number=normalized_phone,
+                                status='FAILED',
+                                error_message=result.get('error', 'Unknown error')
+                            )
+                            failed_count += 1
+                else:
+                    # Handle member-based recipients
+                    for member in recipients:
+                        if not member.telephone:
                             NotificationLog.objects.create(
                                 notification=notification,
                                 member=member,
-                                phone_number=phone_number,
-                                status='SENT' if is_sent else 'FAILED',
-                                at_message_id=message_id,
-                                cost=cost,
-                                error_message=None if is_sent else status
+                                phone_number='N/A',
+                                status='FAILED',
+                                error_message='No phone number'
                             )
+                            failed_count += 1
+                            continue
 
-                            if is_sent:
-                                sent_count += 1
+                        # Normalize to international format
+                        phone_number = self._normalize_phone(str(member.telephone))
+
+                        result = self.sms_service.send_sms(
+                            phone_number=phone_number,
+                            message=notification.message
+                        )
+
+                        if result['success']:
+                            message_id = result.get('message_id', '')
+                            response_data = result.get('data', {})
+                            sms_recipients = response_data.get('SMSMessageData', {}).get('Recipients', [])
+
+                            if sms_recipients:
+                                recipient_info = sms_recipients[0]
+                                status = recipient_info.get('status', 'Unknown')
+                                cost = recipient_info.get('cost', '')
+                                is_sent = status.lower() in ('success', 'sent')
+
+                                NotificationLog.objects.create(
+                                    notification=notification,
+                                    member=member,
+                                    phone_number=phone_number,
+                                    status='SENT' if is_sent else 'FAILED',
+                                    at_message_id=message_id,
+                                    cost=cost,
+                                    error_message=None if is_sent else status
+                                )
+
+                                if is_sent:
+                                    sent_count += 1
+                                else:
+                                    failed_count += 1
                             else:
-                                failed_count += 1
+                                NotificationLog.objects.create(
+                                    notification=notification,
+                                    member=member,
+                                    phone_number=phone_number,
+                                    status='SENT',
+                                    at_message_id=message_id,
+                                    cost='',
+                                    error_message=None
+                                )
+                                sent_count += 1
                         else:
                             NotificationLog.objects.create(
                                 notification=notification,
                                 member=member,
                                 phone_number=phone_number,
-                                status='SENT',
-                                at_message_id=message_id,
-                                cost='',
-                                error_message=None
+                                status='FAILED',
+                                error_message=result.get('error', 'Unknown error')
                             )
-                            sent_count += 1
-                    else:
-                        NotificationLog.objects.create(
-                            notification=notification,
-                            member=member,
-                            phone_number=phone_number,
-                            status='FAILED',
-                            error_message=result.get('error', 'Unknown error')
-                        )
-                        failed_count += 1
+                            failed_count += 1
 
                 # Update notification counts and status
                 notification.sms_sent_count = sent_count
