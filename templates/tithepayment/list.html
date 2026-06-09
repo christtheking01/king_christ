@@ -766,34 +766,6 @@
             </form>
         </div>
 
-        <!-- Pagination for History -->
-        {% if members_page.has_other_pages %}
-        <div class="pagination" style="margin-top: 24px;">
-            {% if members_page.has_previous %}
-            <a href="?history_page={{ members_page.previous_page_number }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">Previous</a>
-            {% endif %}
-            {% for num in members_page.paginator.page_range %}
-                {% if members_page.number == num %}
-                <span class="page-link active">{{ num }}</span>
-                {% elif num > members_page.number|add:'-2' and num < members_page.number|add:'2' %}
-                <a href="?history_page={{ num }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-            {% if members_page.has_next %}
-            <a href="?history_page={{ members_page.next_page_number }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">Next</a>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-    {% else %}
-    <div class="table-card" style="margin-top: 32px;">
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <h3>No payment history found</h3>
-            <p>No payment history available for the current year.</p>
-        </div>
-    </div>
-    {% endif %}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
