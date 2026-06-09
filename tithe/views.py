@@ -2519,12 +2519,63 @@ def pos_new_member(request):
     
     return render(request, 'tithepayment/pos_new_member.html', context)
 
-class CommunityPaymentListView(LoginRequiredMixin, ListView):
+
+class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
     """List payments by community with monthly breakdown (Jan-Dec)"""
-    model = TithePayment
     template_name = 'tithepayment/community_payment_list.html'
-    context_object_name = 'payments'
-    paginate_by = 25
+
+    def get(self, request, *args, **kwargs):
+        # Check if download format is requested
+        format_type = request.GET.get('format')
+        if format_type == 'csv':
+            return self.download_csv(request)
+        return super().get(request, *args, **kwargs)
+
+    def download_csv(self, request):
+        """Generate CSV download"""
+        import csv
+        from django.http import HttpResponse
+        
+        context = self.get_context_data()
+        communities_data = context['communities_data']
+        selected_year = context['selected_year']
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="community_payments_{selected_year}.csv"'
+        
+        writer = csv.writer(response)
+        
+        # Write header
+        header = ['Community', 'Member', 'Code', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total']
+        writer.writerow(header)
+        
+        # Write data
+        for community_data in communities_data:
+            for member_data in community_data['members']:
+                row = [
+                    community_data['community'].name,
+                    member_data['member'].name,
+                    member_data['member'].code or '',
+                ]
+                for month_num in range(1, 13):
+                    row.append(member_data['monthly_totals'].get(str(month_num), 0))
+                row.append(member_data['total'])
+                writer.writerow(row)
+            
+            # Write community total row
+            total_row = [
+                f"{community_data['community'].name} - TOTAL",
+                '',
+                '',
+            ]
+            for month_num in range(1, 13):
+                total_row.append(community_data['monthly_totals'].get(str(month_num), 0))
+            total_row.append(community_data['total'])
+            writer.writerow(total_row)
+            writer.writerow([])  # Empty row between communities
+        
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2557,36 +2608,12 @@ class CommunityPaymentListView(LoginRequiredMixin, ListView):
             'search': self.request.GET.get('search', ''),
         }
         
-        # Calculate total amount and payment count for stats
-        queryset = self.get_queryset()
-        context['total_amount'] = queryset.aggregate(total=Sum('amount'))['total'] or 0
-        context['payment_count'] = queryset.count()
+        # Get base queryset
+        queryset = TithePayment.objects.filter(date__year=selected_year)
         
-        # Active state for sidebar
-        context['finance_active'] = True
-        context['community_payment_list_active'] = True
-        
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        
-        # Get selected year
-        selected_year = self.request.GET.get('year', timezone.now().year)
-        try:
-            selected_year = int(selected_year)
-        except (ValueError, TypeError):
-            selected_year = timezone.now().year
-        
-        # Filter by selected year
-        queryset = queryset.filter(date__year=selected_year)
-        
-        # Filter by community
-        selected_community_id = self.request.GET.get('community')
+        # Filter by community if selected
         if selected_community_id:
-            from member.models import Community
             selected_community = Community.objects.get(id=selected_community_id)
-            # Get members in this community
             community_members = selected_community.get_members()
             queryset = queryset.filter(name__in=community_members)
         
@@ -2598,7 +2625,68 @@ class CommunityPaymentListView(LoginRequiredMixin, ListView):
                 Q(contact_number__icontains=search_query)
             )
         
-        # Order by member name and date
-        queryset = queryset.select_related('name').order_by('name__name', 'date')
+        # Calculate total amount and payment count for stats
+        context['total_amount'] = queryset.aggregate(total=Sum('amount'))['total'] or 0
+        context['payment_count'] = queryset.count()
         
-        return queryset
+        # Group payments by community
+        communities_data = []
+        
+        # Get communities to display (either selected or all)
+        if selected_community_id:
+            communities_to_display = [Community.objects.get(id=selected_community_id)]
+        else:
+            communities_to_display = Community.objects.all()
+        
+        for community in communities_to_display:
+            # Get members in this community
+            community_members = community.get_members()
+            
+            # Get payments for this community's members
+            community_payments = queryset.filter(name__in=community_members).select_related('name').order_by('name__name', 'date')
+            
+            if community_payments.exists():
+                # Group by member
+                from collections import defaultdict
+                member_payments_dict = defaultdict(list)
+                for payment in community_payments:
+                    member_payments_dict[payment.name].append(payment)
+                
+                # Build member data with monthly breakdown
+                members_data = []
+                for member, payments in member_payments_dict.items():
+                    monthly_totals = {str(i): 0 for i in range(1, 13)}
+                    total = 0
+                    for payment in payments:
+                        month = str(payment.date.month)
+                        monthly_totals[month] += payment.amount
+                        total += payment.amount
+                    
+                    members_data.append({
+                        'member': member,
+                        'monthly_totals': monthly_totals,
+                        'total': total
+                    })
+                
+                # Calculate community monthly totals
+                community_monthly_totals = {str(i): 0 for i in range(1, 13)}
+                community_total = 0
+                for member_data in members_data:
+                    for month, amount in member_data['monthly_totals'].items():
+                        community_monthly_totals[month] += amount
+                    community_total += member_data['total']
+                
+                communities_data.append({
+                    'community': community,
+                    'members': members_data,
+                    'monthly_totals': community_monthly_totals,
+                    'total': community_total
+                })
+        
+        context['communities_data'] = communities_data
+        
+        # Active state for sidebar
+        context['finance_active'] = True
+        context['community_payment_list_active'] = True
+        
+        return context

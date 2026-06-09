@@ -419,7 +419,10 @@
             Community Payments
         </h1>
         <div class="page-header-actions">
-            <a href="{% url 'tithepayment:tithepayment_create' %}" class="btn btn-primary">
+            <a href="?format=csv&community={{ current_filters.community }}&year={{ current_filters.year }}&search={{ current_filters.search }}" class="btn btn-success">
+                <i class="fas fa-file-csv"></i> Download CSV
+            </a>
+            <a href="{% url 'tithepayment:tithepayment_create' %}" class="btn btn-secondary">
                 <i class="fas fa-plus"></i> New Payment
             </a>
         </div>
@@ -493,81 +496,92 @@
             <div class="table-header">
                 <h3>
                     <i class="fas fa-calendar-alt"></i>
-                    Payments by Member ({{ selected_year }})
+                    Payments by Community ({{ selected_year }})
                     {% if selected_community %}
                     - {{ selected_community.name }}
                     {% endif %}
                 </h3>
             </div>
-            {% if payments %}
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>Code</th>
-                            <th>Jan</th>
-                            <th>Feb</th>
-                            <th>Mar</th>
-                            <th>Apr</th>
-                            <th>May</th>
-                            <th>Jun</th>
-                            <th>Jul</th>
-                            <th>Aug</th>
-                            <th>Sep</th>
-                            <th>Oct</th>
-                            <th>Nov</th>
-                            <th>Dec</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% regroup payments by name as member_payments %}
-                        {% for member in member_payments %}
-                        <tr>
-                            <td>
-                                <div class="member-info">
-                                    <span class="member-name">{{ member.grouper.name }}</span>
-                                </div>
-                            </td>
-                            <td>{{ member.grouper.code|default:"—" }}</td>
-                            {% for month_num in "123456789101112" %}
-                            <td class="monthly-cell">
-                                {% with month_total=member.list|month_filter:month_num %}
-                                    {% if month_total > 0 %}
-                                        <span class="has-payment">Tsh {{ month_total|floatformat:0 }}</span>
-                                    {% else %}
-                                        <span class="no-payment">—</span>
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
+            {% if communities_data %}
+            {% for community_data in communities_data %}
+            <div style="margin-bottom: 32px;">
+                <div class="community-header">
+                    <h4>
+                        <i class="fas fa-users"></i> {{ community_data.community.name }}
+                    </h4>
+                    <div style="font-weight: 600;">
+                        Total: Tsh {{ community_data.total|floatformat:0 }}
+                    </div>
+                </div>
+                <div class="table-wrapper" style="border-radius: 0 0 var(--border-radius) var(--border-radius); border-top: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Code</th>
+                                <th>Jan</th>
+                                <th>Feb</th>
+                                <th>Mar</th>
+                                <th>Apr</th>
+                                <th>May</th>
+                                <th>Jun</th>
+                                <th>Jul</th>
+                                <th>Aug</th>
+                                <th>Sep</th>
+                                <th>Oct</th>
+                                <th>Nov</th>
+                                <th>Dec</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member_data in community_data.members %}
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <span class="member-name">{{ member_data.member.name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ member_data.member.code|default:"—" }}</td>
+                                {% for month_num in "123456789101112" %}
+                                <td class="monthly-cell">
+                                    {% with month_total=member_data.monthly_totals|get_item:month_num %}
+                                        {% if month_total > 0 %}
+                                            <span class="has-payment">Tsh {{ month_total|floatformat:0 }}</span>
+                                        {% else %}
+                                            <span class="no-payment">—</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                {% endfor %}
+                                <td class="monthly-cell">
+                                    <strong>Tsh {{ member_data.total|floatformat:0 }}</strong>
+                                </td>
+                            </tr>
                             {% endfor %}
-                            <td class="monthly-cell">
-                                <strong>Tsh {{ member.list|total_amount|default:0|floatformat:0 }}</strong>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            <!-- Community Monthly Totals Row -->
+                            <tr style="background: rgba(102, 126, 234, 0.1); font-weight: 600;">
+                                <td colspan="2" style="text-align: right;"><strong>Community Total:</strong></td>
+                                {% for month_num in "123456789101112" %}
+                                <td class="monthly-cell">
+                                    {% with month_total=community_data.monthly_totals|get_item:month_num %}
+                                        {% if month_total > 0 %}
+                                            <span style="color: var(--primary);">Tsh {{ month_total|floatformat:0 }}</span>
+                                        {% else %}
+                                            <span style="color: var(--text-disabled);">—</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                {% endfor %}
+                                <td class="monthly-cell">
+                                    <strong style="color: var(--primary);">Tsh {{ community_data.total|floatformat:0 }}</strong>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
-            {% if is_paginated %}
-            <div class="pagination">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}&community={{ current_filters.community }}&year={{ current_filters.year }}&search={{ current_filters.search }}" class="page-link">Previous</a>
-                {% endif %}
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <span class="page-link active">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
-                    <a href="?page={{ num }}&community={{ current_filters.community }}&year={{ current_filters.year }}&search={{ current_filters.search }}" class="page-link">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&community={{ current_filters.community }}&year={{ current_filters.year }}&search={{ current_filters.search }}" class="page-link">Next</a>
-                {% endif %}
-            </div>
-            {% endif %}
+            {% endfor %}
 
             {% else %}
             <div class="empty-state">
