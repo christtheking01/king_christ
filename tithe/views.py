@@ -2518,3 +2518,87 @@ def pos_new_member(request):
     }
     
     return render(request, 'tithepayment/pos_new_member.html', context)
+
+class CommunityPaymentListView(LoginRequiredMixin, ListView):
+    """List payments by community with monthly breakdown (Jan-Dec)"""
+    model = TithePayment
+    template_name = 'tithepayment/community_payment_list.html'
+    context_object_name = 'payments'
+    paginate_by = 25
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get all communities for filter dropdown
+        from member.models import Community
+        context['communities'] = Community.objects.all()
+        
+        # Get selected year (default to current year)
+        selected_year = self.request.GET.get('year', timezone.now().year)
+        try:
+            selected_year = int(selected_year)
+        except (ValueError, TypeError):
+            selected_year = timezone.now().year
+        context['selected_year'] = selected_year
+        
+        # Get available years from payments
+        available_years = TithePayment.objects.dates('date', 'year', order='DESC')
+        context['available_years'] = [year.year for year in available_years]
+        
+        # Get selected community
+        selected_community_id = self.request.GET.get('community')
+        if selected_community_id:
+            context['selected_community'] = Community.objects.get(id=selected_community_id)
+        
+        # Preserve filter parameters
+        context['current_filters'] = {
+            'community': self.request.GET.get('community', ''),
+            'year': selected_year,
+            'search': self.request.GET.get('search', ''),
+        }
+        
+        # Calculate total amount and payment count for stats
+        queryset = self.get_queryset()
+        context['total_amount'] = queryset.aggregate(total=Sum('amount'))['total'] or 0
+        context['payment_count'] = queryset.count()
+        
+        # Active state for sidebar
+        context['finance_active'] = True
+        context['community_payment_list_active'] = True
+        
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Get selected year
+        selected_year = self.request.GET.get('year', timezone.now().year)
+        try:
+            selected_year = int(selected_year)
+        except (ValueError, TypeError):
+            selected_year = timezone.now().year
+        
+        # Filter by selected year
+        queryset = queryset.filter(date__year=selected_year)
+        
+        # Filter by community
+        selected_community_id = self.request.GET.get('community')
+        if selected_community_id:
+            from member.models import Community
+            selected_community = Community.objects.get(id=selected_community_id)
+            # Get members in this community
+            community_members = selected_community.get_members()
+            queryset = queryset.filter(name__in=community_members)
+        
+        # Search functionality
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__name__icontains=search_query) |
+                Q(contact_number__icontains=search_query)
+            )
+        
+        # Order by member name and date
+        queryset = queryset.select_related('name').order_by('name__name', 'date')
+        
+        return queryset

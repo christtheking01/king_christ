@@ -2085,6 +2085,7 @@
                       href="{% url 'tithepayment:tithepayment_list' %}"
                       class="submenu-link"
                     >
+                    
                       <div class="nav-icon-small">
                         <i class="fas fa-list"></i>
                       </div>
@@ -2134,6 +2135,15 @@
                         <i class="fas fa-calendar"></i>
                       </div>
                       <span>{% trans "Yearly Reports" %}</span>
+                    </a>
+                    <a
+                      href="{% url 'tithepayment:community_payment_list' %}"
+                      class="submenu-link {% if community_payment_list_active %}active{% endif %}"
+                    >
+                      <div class="nav-icon-small">
+                        <i class="fas fa-users"></i>
+                      </div>
+                      <span>{% trans "Community Payments" %}</span>
                     </a>
                     <a
                       href="{% url 'tithepayment:receipt_list' %}"
