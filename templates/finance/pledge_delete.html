@@ -195,11 +195,11 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label"><i class="fas fa-hand-holding-usd me-2"></i>Promised:</span>
-                    <span class="info-value">{{ pledge.promised_amount }}</span>
+                    <span class="info-value">{{ pledge.promised_amount|currency }}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label"><i class="fas fa-check-circle me-2"></i>Paid:</span>
-                    <span class="info-value">{{ pledge.paid_amount }}</span>
+                    <span class="info-value">{{ pledge.paid_amount|currency }}</span>
                 </div>
             </div>
 

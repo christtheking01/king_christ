@@ -47,6 +47,7 @@ urlpatterns = [
     path('reports/member/<int:member_id>/', views.MemberTitheReportView.as_view(), name='member_report'),
     path('analytics/dashboard/', views.TitheAnalyticsView.as_view(), name='analytics_dashboard'),
     path('reports/community-payments/', views.CommunityPaymentListView.as_view(), name='community_payment_list'),
+    path('reports/community-payments/<int:community_id>/', views.CommunityPaymentDetailView.as_view(), name='community_payment_detail'),
 
     # receipt
     path('receipt/generate/<int:payment_id>/', views.generate_receipt, name='generate_receipt'),

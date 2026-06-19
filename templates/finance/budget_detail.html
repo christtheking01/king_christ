@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 {% block title %}{{ budget.name }} -Budget Details{% endblock %} 
 {% block internal_style %}
 <style>
@@ -401,7 +402,7 @@
       <div class="finance-stat-content">
         <div class="finance-stat-label">Total Budget</div>
         <div class="finance-stat-value">
-          TSH{{ budget.total_amount|floatformat:2 }}
+          {{ budget.total_amount|currency }}
         </div>
       </div>
     </div>
@@ -410,7 +411,7 @@
       <div class="finance-stat-content">
         <div class="finance-stat-label">Amount Spent</div>
         <div class="finance-stat-value">
-          TSH{{ budget.spent_amount|floatformat:2 }}
+          {{ budget.spent_amount|currency }}
         </div>
       </div>
     </div>
@@ -419,7 +420,7 @@
       <div class="finance-stat-content">
         <div class="finance-stat-label">Remaining</div>
         <div class="finance-stat-value">
-          TSH{{ budget.remaining_amount|floatformat:2 }}
+          {{ budget.remaining_amount|currency }}
         </div>
       </div>
     </div>
@@ -533,13 +534,13 @@
               </div>
             </td>
             <td style="font-weight: 600">
-              TSH {{ allocation.allocated_amount|floatformat:2 }}
+              {{ allocation.allocated_amount|currency }}
             </td>
             <td style="color: #ffc107; font-weight: 600">
-              TSH {{ allocation.spent_amount|floatformat:2 }}
+              {{ allocation.spent_amount|currency }}
             </td>
             <td style="color: #28a745; font-weight: 600">
-              TSH {{ allocation.remaining_amount|floatformat:2 }}
+              {{ allocation.remaining_amount|currency }}
             </td>
             <td>
               <div class="finance-progress">
@@ -580,9 +581,9 @@
         <tfoot>
           <tr style="font-weight: 700; background: #f8f9fa">
             <td>Total</td>
-            <td>TSH {{ total_allocated|floatformat:2 }}</td>
-            <td>TSH {{ total_spent|floatformat:2 }}</td>
-            <td>TSH {{ total_remaining|floatformat:2 }}</td>
+            <td>{{ total_allocated|currency }}</td>
+            <td>{{ total_spent|currency }}</td>
+            <td>{{ total_remaining|currency }}</td>
             <td>-</td>
             <td>-</td>
           </tr>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Financial Report{% endblock %}
 
@@ -65,7 +66,7 @@
           <div class="card bg-info text-white">
             <div class="card-body">
               <h3>Total Income</h3>
-              <h2>${{ total_income|default:"0.00" }}</h2>
+              <h2>{{ total_income|default:0|currency }}</h2>
             </div>
           </div>
         </div>
@@ -73,7 +74,7 @@
           <div class="card bg-warning text-dark">
             <div class="card-body">
               <h3>Total Expenses</h3>
-              <h2>${{ total_expense|default:"0.00" }}</h2>
+              <h2>{{ total_expense|default:0|currency }}</h2>
             </div>
           </div>
         </div>
@@ -81,7 +82,7 @@
           <div class="card {% if net >= 0 %}bg-success{% else %}bg-danger{% endif %} text-white">
             <div class="card-body">
               <h3>Net Balance</h3>
-              <h2>${{ net|default:"0.00" }}</h2>
+              <h2>{{ net|default:0|currency }}</h2>
             </div>
           </div>
         </div>
@@ -125,7 +126,7 @@
                         {{ transaction.type }}
                       </span>
                     </td>
-                    <td>${{ transaction.amount }}</td>
+                    <td>{{ transaction.amount|currency }}</td>
                     <td>
                       <span class="badge {% if transaction.status == 'COMPLETED' %}badge-success{% elif transaction.status == 'PENDING' %}badge-warning{% else %}badge-danger{% endif %}">
                         {{ transaction.status }}

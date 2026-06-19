@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load tithe_filters %}
+{% load finance_filters %}
 {% block footer %}{% endblock footer %}
 
 {% block internal_style %}
@@ -119,15 +120,9 @@
     }
 
     .content-grid {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 24px;
-    }
-
-    @media (min-width: 1024px) {
-        .content-grid {
-            grid-template-columns: 300px 1fr;
-        }
     }
 
     .filters-card {
@@ -138,22 +133,41 @@
         border-radius: var(--border-radius-lg);
         padding: 24px;
         box-shadow: var(--glass-shadow);
-        height: fit-content;
     }
 
-    .filters-card h3 {
+    .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .filters-header h3 {
         font-family: var(--font-display);
         font-size: 1.25rem;
         font-weight: 600;
         color: var(--text-primary);
-        margin: 0 0 20px 0;
+        margin: 0;
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .filters-card h3 i {
+    .filters-header h3 i {
         color: var(--primary);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .filters-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
     }
 
     .form-group {
@@ -287,7 +301,7 @@
 
     .data-table th {
         background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-        padding: 16px 20px;
+        padding: 14px 16px;
         text-align: left;
         font-weight: 600;
         font-size: 0.8125rem;
@@ -299,7 +313,7 @@
     }
 
     .data-table td {
-        padding: 18px 22px;
+        padding: 16px 18px;
         border-bottom: 1px solid rgba(102, 126, 234, 0.08);
         vertical-align: middle;
         transition: all var(--transition-fast);
@@ -310,8 +324,8 @@
     }
 
     .data-table tbody tr:hover {
-        background: rgba(102, 126, 234, 0.03);
-        transform: scale(1.002);
+        background: rgba(102, 126, 234, 0.04);
+        transform: scale(1.001);
     }
 
     .data-table tbody tr:last-child td {
@@ -495,6 +509,10 @@
             font-size: 1.25rem;
         }
         
+        .filters-grid {
+            flex-direction: column;
+        }
+        
         .filters-actions {
             flex-direction: column;
         }
@@ -582,7 +600,7 @@
                 </div>
             </div>
             <div class="stat-label">Total Collected</div>
-            <div class="stat-value">Tsh {{ total_amount|floatformat:2 }}</div>
+            <div class="stat-value">{{ total_amount|currency }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-card-header">
@@ -615,35 +633,41 @@
 
     <div class="content-grid">
         <div class="filters-card">
-            <h3><i class="fas fa-filter"></i> Filters</h3>
+            <div class="filters-header">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+            </div>
             <form method="get">
-                <div class="form-group">
-                    <label>Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search members..." value="{{ request.GET.search }}">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Search</label>
+                        <input type="text" name="search" class="form-control" placeholder="Search members..." value="{{ request.GET.search }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select name="status" class="form-control">
+                            <option value="">All Methods</option>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select name="status" class="form-control">
-                        <option value="">All Methods</option>
-                        {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if request.GET.status == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="filters-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
                 </div>
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
-                </div>
-                <div class="form-group">
-                    <label>End Date</label>
-                    <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-search"></i> Apply Filters
-                </button>
-                <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-secondary btn-block">
-                    <i class="fas fa-times"></i> Clear
-                </a>
             </form>
         </div>
 
@@ -658,7 +682,6 @@
                         <tr>
                             <th>Date</th>
                             <th>Member</th>
-                            <th>Code</th>
                             <th>Contact</th>
                             <th>Amount</th>
                             <th>Method</th>
@@ -668,11 +691,23 @@
                     <tbody>
                         {% for payment in payments %}
                         <tr>
-                            <td>{{ payment.date|date:"M d, Y" }}<br><small>{{ payment.date|time:"H:i" }}</small></td>
-                            <td>{{ payment.name.name }}</td>
-                            <td>{{ payment.name.code|default:"—" }}</td>
+                            <td>
+                                <div class="date-cell">
+                                    {{ payment.date|date:"M d, Y" }}<br>
+                                    <small>{{ payment.date|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="member-cell">
+                                    
+                                    <div class="member-info">
+                                        <span class="member-name">{{ payment.name.name }}</span>
+                                        <span class="member-id">{{ payment.name.code|default:"—" }}</span>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{ payment.contact_number|default:"—" }}</td>
-                            <td><strong>Tsh {{ payment.amount|floatformat:2 }}</strong></td>
+                            <td><strong>{{ payment.amount|currency }}</strong></td>
                             <td>
                                 <span class="badge badge-{% if payment.status == 'cash' %}success{% else %}primary{% endif %}">
                                     {{ payment.get_status_display }}
@@ -728,72 +763,6 @@
         </div>
     </div>
 
-    <!-- Member Payment History Section -->
-    {% if communities_data %}
-    <div class="table-card" style="margin-top: 32px;">
-        <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-            <h3><i class="fas fa-calendar-alt"></i> Member Payment History (April - December {{ selected_year }})</h3>
-            
-            <!-- History Filters -->
-            <form method="get" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
-                <div>
-                    <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; display: block;">Year</label>
-                    <select name="history_year" class="form-control" style="padding: 8px 12px; font-size: 0.875rem; min-width: 100px;">
-                        {% for year in available_years %}
-                        <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; display: block;">Search Member</label>
-                    <input type="text" name="history_search" class="form-control" placeholder="Search by name..." value="{{ history_search }}" style="padding: 8px 12px; font-size: 0.875rem;">
-                </div>
-                <div>
-                    <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; display: block;">Community</label>
-                    <select name="history_community" class="form-control" style="padding: 8px 12px; font-size: 0.875rem;">
-                        <option value="">All Communities</option>
-                        {% for community in communities %}
-                        <option value="{{ community.id }}" {% if history_community == community.id|stringformat:"s" %}selected{% endif %}>{{ community.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary" style="padding: 8px 16px;">
-                    <i class="fas fa-search"></i> Filter
-                </button>
-                <a href="{% url 'tithepayment:tithepayment_list' %}" class="btn btn-secondary" style="padding: 8px 16px;">
-                    <i class="fas fa-times"></i> Clear
-                </a>
-            </form>
-        </div>
-
-        <!-- Pagination for History -->
-        {% if members_page.has_other_pages %}
-        <div class="pagination" style="margin-top: 24px;">
-            {% if members_page.has_previous %}
-            <a href="?history_page={{ members_page.previous_page_number }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">Previous</a>
-            {% endif %}
-            {% for num in members_page.paginator.page_range %}
-                {% if members_page.number == num %}
-                <span class="page-link active">{{ num }}</span>
-                {% elif num > members_page.number|add:'-2' and num < members_page.number|add:'2' %}
-                <a href="?history_page={{ num }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-            {% if members_page.has_next %}
-            <a href="?history_page={{ members_page.next_page_number }}&history_year={{ selected_year }}&history_search={{ history_search }}&history_community={{ history_community }}" class="page-link">Next</a>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-    {% else %}
-    <div class="table-card" style="margin-top: 32px;">
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <h3>No payment history found</h3>
-            <p>No payment history available for the current year.</p>
-        </div>
-    </div>
-    {% endif %}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

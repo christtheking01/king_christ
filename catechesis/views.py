@@ -833,6 +833,74 @@ def export_students(request):
         )
     
     if category_filter:
-        students = students.filter(category=category_filter)
+        students = students.filter(member_category=category_filter)
     
     return export_students_to_csv(students)
+
+
+@user_passes_test(is_approver)
+def export_member_analytics(request):
+    """Export individual member course progress to CSV"""
+    from .exports import export_member_analytics_to_csv
+    
+    # Get all members with their progress
+    members_data = []
+    members = CatechesisMember.objects.filter(is_deleted=False)
+    
+    for member in members:
+        requests = member.sacrament_requests.filter(is_deleted=False)
+        total = requests.count()
+        completed = requests.filter(status='completed').count()
+        in_progress = requests.filter(status__in=['approved', 'scheduled']).count()
+        pending = requests.filter(status='pending').count()
+        progress = (completed / 7 * 100) if total > 0 else 0  # 7 sacraments total
+        
+        members_data.append({
+            'member_id': member.id,
+            'name': f"{member.first_name} {member.last_name}",
+            'category': member.get_member_category_display(),
+            'total_requests': total,
+            'completed': completed,
+            'in_progress': in_progress,
+            'pending': pending,
+            'progress_percentage': progress
+        })
+    
+    return export_member_analytics_to_csv(members_data)
+
+
+@user_passes_test(is_approver)
+def export_enrollment_records(request):
+    """Export class enrollment records to CSV"""
+    from .exports import export_enrollment_records_to_csv
+    
+    class_id = request.GET.get('class_id')
+    enrollments = Enrollment.objects.all()
+    
+    if class_id:
+        enrollments = enrollments.filter(sacrament_class_id=class_id)
+    
+    return export_enrollment_records_to_csv(enrollments)
+
+
+@user_passes_test(is_approver)
+def export_attendance_records(request):
+    """Export attendance records to CSV"""
+    from .exports import export_attendance_records_to_csv
+    
+    class_id = request.GET.get('class_id')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    attendance_records = ClassAttendance.objects.all()
+    
+    if class_id:
+        attendance_records = attendance_records.filter(sacrament_class_id=class_id)
+    
+    if start_date:
+        attendance_records = attendance_records.filter(class_date__gte=start_date)
+    
+    if end_date:
+        attendance_records = attendance_records.filter(class_date__lte=end_date)
+    
+    return export_attendance_records_to_csv(attendance_records)

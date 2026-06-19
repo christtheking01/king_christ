@@ -1,5 +1,6 @@
 {% extends "tithepayment/pos_base.html" %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}POS - Tithe{% endblock %}
 
@@ -350,7 +351,7 @@
                     <h4>{{ payment.name.name }}</h4>
                     <p>{{ payment.date|date:"H:i" }} • {{ payment.get_status_display }}</p>
                 </div>
-                <div class="payment-amount">Tsh {{ payment.amount|floatformat:0 }}</div>
+                <div class="payment-amount">{{ payment.amount|currency }}</div>
             </div>
             {% endfor %}
         {% else %}

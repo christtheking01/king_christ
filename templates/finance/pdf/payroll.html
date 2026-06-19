@@ -1,4 +1,5 @@
-{% extends 'finance/pdf/base_pdf.html' %}
+{% extends 'finance/pdf/base_pdf.html %}
+{% load finance_filters %}
 
 {% block title %}Payroll{% endblock %}
 {% block report_title %}Payroll Report{% endblock %}
@@ -23,9 +24,9 @@
             <td>#{{ payroll.id }}</td>
             <td>{{ payroll.employee.name }}</td>
             <td>{{ payroll.pay_period_start|date:"Y-m-d" }} to {{ payroll.pay_period_end|date:"Y-m-d" }}</td>
-            <td class="amount">{{ payroll.basic_salary|floatformat:2 }}</td>
-            <td class="amount">{{ payroll.gross_salary|floatformat:2 }}</td>
-            <td class="amount">{{ payroll.net_salary|floatformat:2 }}</td>
+            <td class="amount">{{ payroll.basic_salary|currency }}</td>
+            <td class="amount">{{ payroll.gross_salary|currency }}</td>
+            <td class="amount">{{ payroll.net_salary|currency }}</td>
             <td>
                 <span class="badge badge-{{ payroll.status|lower }}">{{ payroll.status }}</span>
             </td>
@@ -42,7 +43,7 @@
 <div class="summary">
     <div class="summary-row">
         <span><strong>Total Records:</strong> {{ payrolls|length }}</span>
-        <span><strong>Total Net Salary:</strong> TSH {{ total_net_salary|default:0|floatformat:2 }}</span>
+        <span><strong>Total Net Salary:</strong> {{ total_net_salary|default:0|currency }}</span>
     </div>
 </div>
 {% endblock %}

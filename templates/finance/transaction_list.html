@@ -316,7 +316,7 @@
                         {% for t in transactions %}
                             {% if t.type == 'Income' %}{% with income_total=income_total|add:t.amount %}{% endwith %}{% endif %}
                         {% endfor %}
-                        TSH {{ income_total|floatformat:0 }}
+                        {{ income_total|currency }}
                     {% endwith %}
                 </div>
                 <div class="stat-label">Total Income</div>
@@ -329,7 +329,7 @@
                         {% for t in transactions %}
                             {% if t.type == 'Expense' %}{% with expense_total=expense_total|add:t.amount %}{% endwith %}{% endif %}
                         {% endfor %}
-                        TSH {{ expense_total|floatformat:0 }}
+                        {{ expense_total|currency }}
                     {% endwith %}
                 </div>
                 <div class="stat-label">Total Expenses</div>
@@ -424,7 +424,7 @@
                                 {% endif %}
                             </td>
                             <td class="{% if transaction.type == 'Income' %}text-success{% else %}text-danger{% endif %}" style="font-weight: 700;">
-                                {% if transaction.type == 'Income' %}+{% else %}-{% endif %}TSH {{ transaction.amount|floatformat:2 }}
+                                {% if transaction.type == 'Income' %}+{% else %}-{% endif %}{{ transaction.amount|currency }}
                             </td>
                             <td>
                                 {% if transaction.status == 'COMPLETED' %}

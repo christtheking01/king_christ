@@ -719,9 +719,9 @@
             <!-- Amount Section -->
             <div class="amount-section">
                 <div class="amount-label">Total Amount Paid</div>
-                <div class="amount-value">TZS {{ receipt.amount|floatformat:2 }}</div>
+                <div class="amount-value">{{ receipt.amount|currency }}</div>
                 <div class="amount-currency">Tanzanian Shillings</div>
-                <div class="amount-words">{{ receipt.amount }} TZS Only</div>
+                <div class="amount-words">{{ receipt.amount|currency }} Only</div>
             </div>
 
             <!-- Verification Section -->

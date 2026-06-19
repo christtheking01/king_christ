@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Monthly Tithe Report{% endblock %}
 
@@ -155,7 +156,7 @@
                         <small class="text-muted">{{ item.payment_count }} payments</small>
                       </td>
                       <td class="text-end py-3">
-                        <strong>TSH {{ item.total_amount|floatformat:2 }}</strong>
+                        <strong>{{ item.total_amount|currency }}</strong>
                       </td>
                     </tr>
                   {% endfor %}
@@ -192,7 +193,7 @@
             {% for item in monthly_data %}
             <tr>
               <td>{{ item.month|date:"M Y" }}</td>
-              <td class="text-end">TSH {{ item.total_amount|floatformat:2 }}</td>
+              <td class="text-end">{{ item.total_amount|currency }}</td>
               <td class="text-end">{{ item.payment_count }}</td>
               <td class="text-end avg-value" data-total="{{ item.total_amount|default:0 }}" data-count="{{ item.payment_count|default:0 }}">—</td>
             </tr>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Yearly Tithe Report{% endblock %}
 
@@ -48,7 +49,7 @@
             <div class="card shadow h-100">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">Total Collected</h6>
-                    <h3 class="text-primary mb-0">TSH {{ total_collected|floatformat:2 }}</h3>
+                    <h3 class="text-primary mb-0">{{ total_collected|currency }}</h3>
                 </div>
             </div>
         </div>
@@ -64,7 +65,7 @@
             <div class="card shadow h-100">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">Average per Payment</h6>
-                    <h3 class="text-info mb-0">TSH {{ average_payment|floatformat:2 }}</h3>
+                    <h3 class="text-info mb-0">{{ average_payment|currency }}</h3>
                 </div>
             </div>
         </div>
@@ -93,9 +94,9 @@
                         {% for month_data in monthly_data %}
                         <tr>
                             <td>{{ month_data.month_name }}</td>
-                            <td>TSH {{ month_data.amount|floatformat:2 }}</td>
+                            <td>{{ month_data.amount|currency }}</td>
                             <td>{{ month_data.count }}</td>
-                            <td>TSH {{ month_data.average|floatformat:2 }}</td>
+                            <td>{{ month_data.average|currency }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -106,9 +107,9 @@
                     <tfoot class="table-light">
                         <tr>
                             <th>Total</th>
-                            <th>TSH {{ total_collected|floatformat:2 }}</th>
+                            <th>{{ total_collected|currency }}</th>
                             <th>{{ total_payments }}</th>
-                            <th>TSH {{ average_payment|floatformat:2 }}</th>
+                            <th>{{ average_payment|currency }}</th>
                         </tr>
                     </tfoot>
                 </table>

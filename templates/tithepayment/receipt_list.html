@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -630,7 +631,7 @@
             <div class="stat-icon">
                 <i class="fas fa-money-bill-wave"></i>
             </div>
-            <div class="stat-value">TZS {{ total_amount|floatformat:0|default:"0" }}</div>
+            <div class="stat-value">{{ total_amount|default:0|currency }}</div>
             <div class="stat-label">Total Amount</div>
         </div>
     </div>
@@ -719,7 +720,7 @@
                             </div>
                         </td>
                         <td>
-                            <span class="amount">TZS {{ payment.amount|floatformat:2 }}</span>
+                            <span class="amount">{{ payment.amount|currency }}</span>
                         </td>
                         <td>{{ payment.date|date:"M d, Y" }}<br><small style="color: var(--text-muted);">{{ payment.date|date:"H:i" }}</small></td>
                         <td>{{ payment.get_status_display }}</td>

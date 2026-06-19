@@ -96,6 +96,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     password_changed_at = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(default=timezone.now)
     pos_pin = models.CharField(max_length=4, blank=True, null=True, help_text="4-digit PIN for POS access")
+    
+    # Soft delete fields
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
+                                   related_name='deleted_users')
 
     objects = ManagerUser()
 
@@ -138,6 +144,22 @@ class User(AbstractBaseUser, PermissionsMixin):
             return False
         
         return True
+    
+    def soft_delete(self, user=None):
+        """Soft delete the user - marks as inactive and deleted"""
+        self.is_active = False
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.deleted_by = user
+        self.save(update_fields=['is_active', 'is_deleted', 'deleted_at', 'deleted_by'])
+    
+    def restore(self, user=None):
+        """Restore a soft-deleted user"""
+        self.is_active = True
+        self.is_deleted = False
+        self.deleted_at = None
+        self.deleted_by = None
+        self.save(update_fields=['is_active', 'is_deleted', 'deleted_at', 'deleted_by'])
 
 
 

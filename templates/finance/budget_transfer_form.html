@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Budget Transfer Request{% endblock %}
 
@@ -35,7 +36,7 @@
                             <select name="source_budget" id="source_budget" class="form-select" required>
                                 <option value="">Select source budget</option>
                                 {% for budget in budgets %}
-                                <option value="{{ budget.id }}">{{ budget.name }} (TSH {{ budget.remaining_amount|floatformat:2 }})</option>
+                                <option value="{{ budget.id }}">{{ budget.name }} ({{ budget.remaining_amount|currency }})</option>
                                 {% endfor %}
                             </select>
                         </div>

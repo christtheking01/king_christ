@@ -33,7 +33,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Total Income</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ total_income|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_income|currency }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
@@ -50,7 +50,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Total Expenses</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ total_expenses|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_expenses|currency }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
@@ -67,7 +67,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Balance</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">TSH {{ balance|floatformat:2 }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ balance|currency }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>

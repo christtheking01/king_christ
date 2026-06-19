@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Budget Review - Leadership{% endblock %}
 
@@ -330,11 +331,11 @@
                 <span class="info-value">{{ budget.department|default:'General' }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Total Budget</span>
+                <span class="info-label">l Budget</span>curency
                 <span class="info-value">TZS {{ budget.total_budget|floatformat:0 }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Total Allocated</span>
+                <span class="info-label">l Allocated</span>curency
                 <span class="info-value">TZS {{ budget.total_allocated|floatformat:0 }}</span>
             </div>
             <div class="info-item">
@@ -367,7 +368,7 @@
             <h3><i class="fas fa-list"></i> Budget Allocations</h3>
             {% for allocation in allocations %}
             <div class="allocation-item">
-                <span>{{ allocation.category.name }}</span>
+                <span>llocation.category.nacursency
                 <span>TZS {{ allocation.amount|floatformat:0 }}</span>
             </div>
             {% endfor %}

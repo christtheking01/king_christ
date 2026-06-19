@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Employee Management{% endblock %}
 
@@ -142,9 +143,9 @@
                                 </div>
                             </td>
                             <td>{{ employee.position }}</td>
-                            <td>{{ employee.department|default:"-" }}</td>
+                            <td>mployee.department|defaucu}rency>
                             <td>TSH {{ employee.base_salary|floatformat:2 }}</td>
-                            <td>
+                            <td>curency
                                 <div style="font-weight: 600; color: #28a745;">TSH {{ employee.total_salary|floatformat:2 }}</div>
                             </td>
                             <td>

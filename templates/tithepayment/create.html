@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -905,7 +906,7 @@
                             Created on {{ form.instance.date|date:"M d, Y" }}
                         </div>
                         <div class="history-amount">
-                            Amount: {{ form.instance.amount|floatformat:2 }}
+                            Amount: {{ form.instance.amount|currency }}
                         </div>
                     </div>
                     

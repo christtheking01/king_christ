@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -751,7 +752,7 @@
             <!-- Amount Section -->
             <div class="amount-section">
                 <div class="amount-label">Total Amount Paid</div>
-                <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
+                <div class="amount-value">{{ payment.amount|currency }}</div>
                 <div class="amount-currency">Tanzanian Shillings</div>
                 <div class="amount-words">{{ payment.amount }} TZS Only</div>
             </div>

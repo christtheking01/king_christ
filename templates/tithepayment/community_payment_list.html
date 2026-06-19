@@ -1,423 +1,48 @@
 {% extends 'base.html' %}
 {% load tithe_filters %}
+{% load finance_filters %}
 {% block footer %}{% endblock footer %}
 
 {% block internal_style %}
 <style>
-    .main-wrapper {
-        padding: 32px;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    .page-header {
-        margin-bottom: 32px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .page-header h1 {
-        font-family: var(--font-display);
-        font-size: 2rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .page-header-actions {
-        display: flex;
-        gap: 12px;
-    }
-
-    .page-header h1 i {
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        margin-bottom: 32px;
-    }
-
-    .stat-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--border-radius-lg);
-        padding: 24px;
-        box-shadow: var(--glass-shadow);
-        transition: all var(--transition-base);
-    }
-
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stat-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-    }
-
-    .stat-icon.primary {
-        background: var(--gradient-primary);
-        color: white;
-    }
-
-    .stat-icon.success {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-    }
-
-    .stat-icon.warning {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        font-weight: 500;
-        margin-bottom: 8px;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-
-    .content-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
-
-    @media (min-width: 1024px) {
-        .content-grid {
-            grid-template-columns: 300px 1fr;
-        }
-    }
-
-    .filters-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--border-radius-lg);
-        padding: 24px;
-        box-shadow: var(--glass-shadow);
-        height: fit-content;
-    }
-
-    .filters-card h3 {
-        font-family: var(--font-display);
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0 0 20px 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .filters-card h3 i {
-        color: var(--primary);
-    }
-
-    .form-group {
-        margin-bottom: 16px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--text-secondary);
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-sm);
-        font-family: var(--font-primary);
-        font-size: 0.9375rem;
-        color: var(--text-primary);
-        background: rgba(255, 255, 255, 0.9);
-        transition: all var(--transition-base);
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 24px;
-        border-radius: var(--border-radius);
-        font-family: var(--font-primary);
-        font-size: 0.9375rem;
-        font-weight: 600;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all var(--transition-base);
-        white-space: nowrap;
-    }
-
-    .btn-primary {
-        background: var(--gradient-primary);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-
-    .btn-secondary:hover {
-        background: white;
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .btn-block {
-        width: 100%;
-        margin-bottom: 12px;
-    }
-
-    .btn-block:last-child {
-        margin-bottom: 0;
-    }
-
-    .table-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--border-radius-lg);
-        overflow: hidden;
-        box-shadow: var(--glass-shadow);
-    }
-
-    .table-header {
-        padding: 24px 28px;
-        border-bottom: 1px solid var(--border-color);
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    }
-
-    .table-header h3 {
-        font-family: var(--font-display);
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .table-header h3 i {
-        color: var(--primary);
-    }
-
-    .table-wrapper {
-        overflow-x: auto;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .data-table th {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-        padding: 16px 12px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 0.8125rem;
-        color: var(--primary-dark);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid rgba(102, 126, 234, 0.15);
-        white-space: nowrap;
-    }
-
-    .data-table td {
-        padding: 18px 12px;
-        border-bottom: 1px solid rgba(102, 126, 234, 0.08);
-        vertical-align: middle;
-        transition: all var(--transition-fast);
-    }
-
-    .data-table tbody tr {
-        transition: all var(--transition-fast);
-    }
-
-    .data-table tbody tr:hover {
-        background: rgba(102, 126, 234, 0.03);
-        transform: scale(1.002);
-    }
-
-    .data-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .data-table .member-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .member-name {
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-
-    .monthly-cell {
-        text-align: center;
-        min-width: 70px;
-    }
-
-    .monthly-cell.has-payment {
-        color: var(--success);
-        font-weight: 500;
-    }
-
-    .monthly-cell.no-payment {
-        color: var(--text-disabled);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-icon {
-        font-size: 3rem;
-        color: var(--text-disabled);
-        margin-bottom: 20px;
-        opacity: 0.5;
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 4px;
-        list-style: none;
-        padding: 20px;
-        margin: 0;
-        border-top: 1px solid var(--divider);
-        background: var(--background);
-    }
-
-    .page-item {
-        display: flex;
-    }
-
-    .page-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 40px;
-        height: 40px;
-        padding: 0 12px;
-        border-radius: var(--radius-md);
-        color: var(--text-primary);
-        text-decoration: none;
-        font-weight: 500;
-        border: 1px solid var(--divider);
-        background: var(--surface);
-        transition: all 0.2s;
-    }
-
-    .page-link:hover {
-        background: var(--background);
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .page-item.active .page-link {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-    }
-
-    .page-item.disabled .page-link {
-        opacity: 0.5;
-        cursor: not-allowed;
-        background: var(--background);
-    }
-
-    @media (max-width: 768px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .stat-card {
-        animation: fadeIn 0.4s ease forwards;
-        opacity: 0;
-    }
-
-    .stat-card:nth-child(1) { animation-delay: 0.1s; }
-    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .main-wrapper { padding: 32px; max-width: 1400px; margin: 0 auto; }
+    .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+    .page-header h1 { font-size: 2rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 12px; }
+    .page-header-actions { display: flex; gap: 12px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); padding: 24px; }
+    .stat-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+    .content-grid { display: flex; flex-direction: column; gap: 24px; }
+    .filters-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); padding: 24px; }
+    .filters-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+    .filters-actions { display: flex; gap: 12px; justify-content: flex-end; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 0.875rem; color: var(--text-secondary); }
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: var(--border-radius); text-decoration: none; border: none; cursor: pointer; }
+    .btn-primary { background: var(--gradient-primary); color: white; }
+    .btn-secondary { background: rgba(255,255,255,0.9); color: var(--text-primary); border: 1px solid var(--border-color); }
+    .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+    .table-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); overflow: hidden; }
+    .table-header { padding: 24px 28px; border-bottom: 1px solid var(--border-color); }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%); padding: 14px 16px; text-align: left; font-weight: 600; border-bottom: 2px solid rgba(102,126,234,0.15); }
+    .data-table td { padding: 16px 18px; border-bottom: 1px solid rgba(102,126,234,0.08); }
+    .community-cell { display: flex; align-items: center; gap: 12px; }
+    .community-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+    .community-name { font-weight: 600; color: var(--text-primary); }
+    .amount { font-weight: 700; color: var(--primary); }
+    .pagination { display: flex; justify-content: center; gap: 4px; padding: 20px; border-top: 1px solid var(--divider); }
+    .page-link { display: flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 12px; border-radius: var(--radius-md); text-decoration: none; border: 1px solid var(--divider); }
+    .page-link.active { background: var(--primary); color: white; border-color: var(--primary); }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="main-wrapper">
     <div class="page-header">
-        <h1>
-            <i class="fas fa-users"></i>
-            Community Payments
-        </h1>
+        <h1><i class="fas fa-users"></i> Community Payments</h1>
         <div class="page-header-actions">
             <a href="?format=csv&community={{ current_filters.community }}&year={{ current_filters.year }}&search={{ current_filters.search }}" class="btn btn-success">
                 <i class="fas fa-file-csv"></i> Download CSV
@@ -430,31 +55,16 @@
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-card-header">
-                <div class="stat-icon primary">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-            </div>
             <div class="stat-label">Total Collected ({{ selected_year }})</div>
-            <div class="stat-value">Tsh {{ total_amount|default:0|floatformat:2 }}</div>
+            <div class="stat-value">{{ total_amount|default:0|currency }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-header">
-                <div class="stat-icon success">
-                    <i class="fas fa-receipt"></i>
-                </div>
-            </div>
             <div class="stat-label">Total Payments</div>
             <div class="stat-value">{{ payment_count|default:0 }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-header">
-                <div class="stat-icon warning">
-                    <i class="fas fa-users"></i>
-                </div>
-            </div>
-            <div class="stat-label">Selected Community</div>
-            <div class="stat-value">{{ selected_community.name|default:"All" }}</div>
+            <div class="stat-label">Total Communities</div>
+            <div class="stat-value">{{ community_count|default:0 }}</div>
         </div>
     </div>
 
@@ -462,132 +72,100 @@
         <div class="filters-card">
             <h3><i class="fas fa-filter"></i> Filters</h3>
             <form method="get">
-                <div class="form-group">
-                    <label>Community</label>
-                    <select name="community" class="form-control">
-                        <option value="">All Communities</option>
-                        {% for community in communities %}
-                        <option value="{{ community.id }}" {% if current_filters.community == community.id|stringformat:"s" %}selected{% endif %}>{{ community.name }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Community</label>
+                        <select name="community" class="form-control">
+                            <option value="">All Communities</option>
+                            {% for community in communities %}
+                            <option value="{{ community.id }}" {% if current_filters.community == community.id|stringformat:"s" %}selected{% endif %}>{{ community.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <select name="year" class="form-control">
+                            {% for year in available_years %}
+                            <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Search Community</label>
+                        <input type="text" name="search" class="form-control" placeholder="Search communities..." value="{{ current_filters.search }}">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Year</label>
-                    <select name="year" class="form-control">
-                        {% for year in available_years %}
-                        <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="filters-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'tithepayment:community_payment_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
                 </div>
-                <div class="form-group">
-                    <label>Search Member</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search members..." value="{{ current_filters.search }}">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-search"></i> Apply Filters
-                </button>
-                <a href="{% url 'tithepayment:community_payment_list' %}" class="btn btn-secondary btn-block">
-                    <i class="fas fa-times"></i> Clear
-                </a>
             </form>
         </div>
 
         <div class="table-card">
             <div class="table-header">
-                <h3>
-                    <i class="fas fa-calendar-alt"></i>
-                    Payments by Community ({{ selected_year }})
-                    {% if selected_community %}
-                    - {{ selected_community.name }}
-                    {% endif %}
-                </h3>
+                <h3><i class="fas fa-calendar-alt"></i> Communities ({{ selected_year }})</h3>
             </div>
             {% if communities_data %}
-            {% for community_data in communities_data %}
-            <div style="margin-bottom: 32px;">
-                <div class="community-header">
-                    <h4>
-                        <i class="fas fa-users"></i> {{ community_data.community.name }}
-                    </h4>
-                    <div style="font-weight: 600;">
-                        Total: Tsh {{ community_data.total|floatformat:0 }}
-                    </div>
-                </div>
-                <div class="table-wrapper" style="border-radius: 0 0 var(--border-radius) var(--border-radius); border-top: none;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Member</th>
-                                <th>Code</th>
-                                <th>Jan</th>
-                                <th>Feb</th>
-                                <th>Mar</th>
-                                <th>Apr</th>
-                                <th>May</th>
-                                <th>Jun</th>
-                                <th>Jul</th>
-                                <th>Aug</th>
-                                <th>Sep</th>
-                                <th>Oct</th>
-                                <th>Nov</th>
-                                <th>Dec</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for member_data in community_data.members %}
-                            <tr>
-                                <td>
-                                    <div class="member-info">
-                                        <span class="member-name">{{ member_data.member.name }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ member_data.member.code|default:"—" }}</td>
-                                {% for month_num in "123456789101112" %}
-                                <td class="monthly-cell">
-                                    {% with month_total=member_data.monthly_totals|get_item:month_num %}
-                                        {% if month_total > 0 %}
-                                            <span class="has-payment">Tsh {{ month_total|floatformat:0 }}</span>
-                                        {% else %}
-                                            <span class="no-payment">—</span>
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-                                {% endfor %}
-                                <td class="monthly-cell">
-                                    <strong>Tsh {{ member_data.total|floatformat:0 }}</strong>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            <!-- Community Monthly Totals Row -->
-                            <tr style="background: rgba(102, 126, 234, 0.1); font-weight: 600;">
-                                <td colspan="2" style="text-align: right;"><strong>Community Total:</strong></td>
-                                {% for month_num in "123456789101112" %}
-                                <td class="monthly-cell">
-                                    {% with month_total=community_data.monthly_totals|get_item:month_num %}
-                                        {% if month_total > 0 %}
-                                            <span style="color: var(--primary);">Tsh {{ month_total|floatformat:0 }}</span>
-                                        {% else %}
-                                            <span style="color: var(--text-disabled);">—</span>
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-                                {% endfor %}
-                                <td class="monthly-cell">
-                                    <strong style="color: var(--primary);">Tsh {{ community_data.total|floatformat:0 }}</strong>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Community</th>
+                            <th>Payment Count</th>
+                            <th>Total Amount</th>
+                            <th>Average</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for community_data in communities_data %}
+                        <tr>
+                            <td>
+                                <div class="community-cell">
+                                    <div class="community-avatar">{{ community_data.community.name|first|upper }}</div>
+                                    <span class="community-name">{{ community_data.community.name }}</span>
+                                </div>
+                            </td>
+                            <td>{{ community_data.payment_count }}</td>
+                            <td><strong class="amount">{{ community_data.total|currency }}</strong></td>
+                            <td>{{ community_data.average|currency }}</td>
+                            <td>
+                                <a href="{% url 'tithepayment:community_payment_detail' community_data.community.id %}?year={{ selected_year }}" class="btn btn-primary">View Payments</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% endfor %}
+
+            {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&community={{ current_filters.community }}&year={{ selected_year }}&search={{ current_filters.search }}" class="page-link">Previous</a>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                    <a href="?page={{ num }}&community={{ current_filters.community }}&year={{ selected_year }}&search={{ current_filters.search }}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&community={{ current_filters.community }}&year={{ selected_year }}&search={{ current_filters.search }}" class="page-link">Next</a>
+                {% endif %}
+            </div>
+            {% endif %}
 
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h3>No payments found</h3>
-                <p>{% if current_filters.community or current_filters.search %}No results match your filters.{% else %}No payments recorded yet.{% endif %}</p>
+            <div style="text-align: center; padding: 60px 20px;">
+                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-disabled); margin-bottom: 20px;"></i>
+                <h3>No communities found</h3>
+                <p>{% if current_filters.community or current_filters.search %}No results match your filters.{% else %}No communities with payments yet.{% endif %}</p>
             </div>
             {% endif %}
         </div>

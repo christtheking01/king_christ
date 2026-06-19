@@ -1,5 +1,6 @@
 {% extends "tithepayment/pos_base.html" %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}POS Dashboard{% endblock %}
 
@@ -258,7 +259,7 @@
             </div>
             <div class="stat-card-title">Today's Tithe</div>
         </div>
-        <div class="stat-card-value">Tsh {{ today_tithe_total|floatformat:0 }}</div>
+        <div class="stat-card-value">{{ today_tithe_total|currency }}</div>
         <div class="stat-card-subtitle">{{ today_tithe_count }} payments</div>
     </div>
     
@@ -269,7 +270,7 @@
             </div>
             <div class="stat-card-title">Today's Offering</div>
         </div>
-        <div class="stat-card-value">Tsh {{ today_offering_total|floatformat:0 }}</div>
+        <div class="stat-card-value">{{ today_offering_total|currency }}</div>
         <div class="stat-card-subtitle">{{ today_offering_count }} payments</div>
     </div>
     
@@ -280,7 +281,7 @@
             </div>
             <div class="stat-card-title">This Week</div>
         </div>
-        <div class="stat-card-value">Tsh {{ week_tithe_total|floatformat:0 }}</div>
+        <div class="stat-card-value">{{ week_tithe_total|currency }}</div>
         <div class="stat-card-subtitle">{{ week_tithe_count }} tithe payments</div>
     </div>
     
@@ -291,7 +292,7 @@
             </div>
             <div class="stat-card-title">This Month</div>
         </div>
-        <div class="stat-card-value">Tsh {{ month_tithe_total|floatformat:0 }}</div>
+        <div class="stat-card-value">{{ month_tithe_total|currency }}</div>
         <div class="stat-card-subtitle">{{ month_tithe_count }} tithe payments</div>
     </div>
     
@@ -334,7 +335,7 @@
                     <div class="payment-meta">{{ payment.date|date:"M d, Y - H:i" }} • {{ payment.get_status_display }}</div>
                 </div>
                 <div style="text-align: right;">
-                    <div class="payment-amount">Tsh {{ payment.amount|floatformat:0 }}</div>
+                    <div class="payment-amount">{{ payment.amount|currency }}</div>
                     <div class="payment-method-badge">{{ payment.get_status_display }}</div>
                 </div>
             </div>
@@ -362,7 +363,7 @@
         <div class="method-bar-container">
             <div class="method-bar-fill" style="width: {% if today_tithe_total > 0 %}{% widthratio method.total today_tithe_total 100 %}{% else %}0{% endif %}%"></div>
         </div>
-        <div class="method-value">{{ method.total|floatformat:0 }}</div>
+        <div class="method-value">{{ method.total|currency }}</div>
     </div>
     {% endfor %}
 </div>

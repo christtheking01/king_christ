@@ -7,11 +7,11 @@ register = template.Library()
 def currency(value):
     """Format a number as currency"""
     if value is None:
-        return "TSH 0.00"
+        return "TSH 0"
     try:
-        return f"TSH {float(value):,.2f}"
+        return f"TSH {float(value):,.0f}"
     except (ValueError, TypeError):
-        return "TSH 0.00"
+        return "TSH 0"
 
 
 @register.filter

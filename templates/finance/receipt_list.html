@@ -86,7 +86,7 @@
             <div class="finance-stat-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Total Amount</div>
-                <div class="finance-stat-value">TSH {{ total_amount|floatformat:2 }}</div>
+                <div class="finance-stat-value">{{ total_amount|currency }}</div>
             </div>
         </div>
         <div class="finance-stat-card info">
@@ -94,7 +94,7 @@
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Average</div>
                 <div class="finance-stat-value">
-                    TSH {{ average_amount|floatformat:2 }}
+                    {{ average_amount|currency }}
                 </div>
             </div>
         </div>
@@ -184,7 +184,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="color: #28a745; font-weight: 600;">TSH {{ receipt.amount|floatformat:2 }}</td>
+                            <td style="color: #28a745; font-weight: 600;">{{ receipt.amount|currency }}</td>
                             <td>
                                 {% if receipt.payment_method == 'cash' %}<span class="finance-badge finance-badge-success">Cash</span>
                                 {% elif receipt.payment_method == 'bank' %}<span class="finance-badge finance-badge-info">Bank Transfer</span>

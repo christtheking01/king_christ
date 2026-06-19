@@ -427,7 +427,7 @@
         </div>
         <div class="col-md-3">
             <div class="stat-card success">
-                <div class="stat-value">TSH {{ total_net_salary|floatformat:0 }}</div>
+                <div class="stat-value">{{ total_net_salary|currency }}</div>
                 <div class="stat-label">Total Amount</div>
             </div>
         </div>
@@ -522,9 +522,9 @@
                                 <div>{{ payroll.pay_period_start|date:"M d, Y" }}</div>
                                 <div class="text-muted small">to {{ payroll.pay_period_end|date:"M d, Y" }}</div>
                             </td>
-                            <td class="text-primary" style="font-weight: 600;">TSH {{ payroll.basic_salary|floatformat:2 }}</td>
-                            <td class="text-info" style="font-weight: 600;">TSH {{ payroll.gross_salary|floatformat:2 }}</td>
-                            <td class="text-success" style="font-weight: 700;">TSH {{ payroll.net_salary|floatformat:2 }}</td>
+                            <td class="text-primary" style="font-weight: 600;">{{ payroll.basic_salary|currency }}</td>
+                            <td class="text-info" style="font-weight: 600;">{{ payroll.gross_salary|currency }}</td>
+                            <td class="text-success" style="font-weight: 700;">{{ payroll.net_salary|currency }}</td>
                             <td><span class="badge badge-method">{{ payroll.get_payment_method_display }}</span></td>
                             <td>
                                 {% if payroll.status == 'PENDING' %}<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>

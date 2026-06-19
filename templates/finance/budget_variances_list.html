@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Budget Variances{% endblock %}
 
@@ -105,10 +106,10 @@
                                 <span class="badge bg-info">{{ variance.get_severity_display }}</span>
                                 {% endif %}
                             </td>
-                            <td>TSH {{ variance.budget_amount|floatformat:2 }}</td>
-                            <td>TSH {{ variance.actual_amount|floatformat:2 }}</td>
+                            <td>{{ variance.budget_amount|currency }}</td>
+                            <td>{{ variance.actual_amount|currency }}</td>
                             <td class="{% if variance.variance_amount > 0 %}text-danger{% else %}text-success{% endif %}">
-                                TSH {{ variance.variance_amount|floatformat:2 }}
+                                {{ variance.variance_amount|currency }}
                             </td>
                             <td>{{ variance.variance_percentage|floatformat:1 }}%</td>
                             <td>

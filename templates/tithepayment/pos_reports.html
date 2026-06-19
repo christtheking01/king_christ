@@ -1,5 +1,6 @@
 {% extends "tithepayment/pos_base.html" %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}POS Reports{% endblock %}
 
@@ -207,15 +208,15 @@
 <div class="summary-cards">
     <div class="summary-card">
         <div class="summary-card-label">Total Tithe</div>
-        <div class="summary-card-value">Tsh {{ tithe_total|floatformat:0 }}</div>
+        <div class="summary-card-value">{{ tithe_total|currency }}</div>
     </div>
     <div class="summary-card">
         <div class="summary-card-label">Total Offering</div>
-        <div class="summary-card-value">Tsh {{ offering_total|floatformat:0 }}</div>
+        <div class="summary-card-value">{{ offering_total|currency }}</div>
     </div>
     <div class="summary-card">
         <div class="summary-card-label">Grand Total</div>
-        <div class="summary-card-value">Tsh {{ grand_total|floatformat:0 }}</div>
+        <div class="summary-card-value">{{ grand_total|currency }}</div>
     </div>
     <div class="summary-card">
         <div class="summary-card-label">Total Transactions</div>
@@ -250,7 +251,7 @@
                 <div class="daily-offering-fill" style="width: {% widthratio day.offering_total grand_total 100 %}%"></div>
             {% endif %}
         </div>
-        <div class="daily-value">Tsh {{ day.total|floatformat:0 }}</div>
+        <div class="daily-value">{{ day.total|currency }}</div>
     </div>
     {% endfor %}
 </div>
@@ -281,7 +282,7 @@
             <tr>
                 <td>{{ payment.date|date:"M d, Y - H:i" }}</td>
                 <td>{{ payment.name.name|default:"Anonymous" }}</td>
-                <td class="amount">Tsh {{ payment.amount|floatformat:0 }}</td>
+                <td class="amount">{{ payment.amount|currency }}</td>
                 <td>{{ payment.get_status_display }}</td>
             </tr>
             {% empty %}
@@ -316,7 +317,7 @@
                 <td>{{ offering.created_at|date:"M d, Y - H:i" }}</td>
                 <td>{{ offering.get_offering_type_display }}</td>
                 <td>{{ offering.donor_name|default:offering.member.name|default:"Anonymous" }}</td>
-                <td class="amount">Tsh {{ offering.amount|floatformat:0 }}</td>
+                <td class="amount">{{ offering.amount|currency }}</td>
                 <td>{{ offering.get_payment_method_display }}</td>
             </tr>
             {% empty %}

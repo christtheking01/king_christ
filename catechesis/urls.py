@@ -46,4 +46,7 @@ urlpatterns = [
     
     # Export
     path('export/', views.export_students, name='export_students'),
+    path('export/member-analytics/', views.export_member_analytics, name='export_member_analytics'),
+    path('export/enrollments/', views.export_enrollment_records, name='export_enrollment_records'),
+    path('export/attendance/', views.export_attendance_records, name='export_attendance_records'),
 ]

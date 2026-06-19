@@ -842,19 +842,19 @@ body {
             <!-- Payment Statistics -->
             <div class="payment-stats">
                 <div class="stat-box">
-                    <div class="stat-value">{{ payment_stats.total_tithe|default:0|floatformat:0 }}</div>
+                    <div class="stat-value">{{ payment_stats.total_tithe|default:0|currency }}</div>
                     <div class="stat-label">Total Tithe (TZS)</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">{{ payment_stats.total_offerings|default:0|floatformat:0 }}</div>
+                    <div class="stat-value">{{ payment_stats.total_offerings|default:0|currency }}</div>
                     <div class="stat-label">Total Offerings (TZS)</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">{{ payment_stats.total_paid_pledges|default:0|floatformat:0 }}</div>
+                    <div class="stat-value">{{ payment_stats.total_paid_pledges|default:0|currency }}</div>
                     <div class="stat-label">Paid Pledges (TZS)</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">{{ payment_stats.pledge_balance|default:0|floatformat:0 }}</div>
+                    <div class="stat-value">{{ payment_stats.pledge_balance|default:0|currency }}</div>
                     <div class="stat-label">Pledge Balance (TZS)</div>
                 </div>
             </div>
@@ -870,7 +870,7 @@ body {
                             <div class="payment-description">Receipt #{{ receipt.receipt_number }}</div>
                             <div class="payment-date">{{ receipt.date|date:"M d, Y" }}</div>
                         </div>
-                        <div class="payment-amount">TZS {{ receipt.amount|floatformat:2 }}</div>
+                        <div class="payment-amount">{{ receipt.amount|currency }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -891,7 +891,7 @@ body {
                             <div class="payment-description">{{ offering.get_offering_type_display }}</div>
                             <div class="payment-date">{{ offering.date|date:"M d, Y" }}</div>
                         </div>
-                        <div class="payment-amount">TZS {{ offering.amount|floatformat:2 }}</div>
+                        <div class="payment-amount">{{ offering.amount|currency }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -913,7 +913,7 @@ body {
                             <div class="payment-date">{{ pledge.get_status_display }}</div>
                         </div>
                         <div class="payment-amount pledge">
-                            {{ pledge.paid_amount|floatformat:0 }} / {{ pledge.promised_amount|floatformat:0 }} TZS
+                            {{ pledge.paid_amount|currency }} / {{ pledge.promised_amount|currency }}
                         </div>
                     </div>
                     {% endfor %}

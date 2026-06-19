@@ -134,21 +134,21 @@ class Command(BaseCommand):
             if phone:
                 if is_overdue:
                     sms_message = (
-                        f"Mpendwa, tunakukumbusha kuhusu ahadi yako "
+                        f"Parokia ya Kristo Mfalme: Mpendwa, tunakukumbusha kuhusu ahadi yako "
                         f"ya TZS {remaining:,.0f} kwa ajili ya {event_title} ambayo imepitiliza muda. "
                         f"Tafadhali kamilisha wakati unapoweza. Tunakushukuru kwa moyo wako wa kutoa. Mungu akubariki."
 
                     )
                 elif is_urgent:
                     sms_message = (
-                        f" Mpendwa, ahadi yako ya TZS {remaining:,.0f} "
+                        f"Parokia ya Kristo Mfalme: Mpendwa, ahadi yako ya TZS {remaining:,.0f} "
                         f"kwa ajili ya {event_title} inatakiwa kukamilika baada ya siku {days_until_due}. "
                         f"Tunathamini mchango wako. Mungu akubariki."
 
                     )
                 else:
                     sms_message = (
-                        f"Mpendwa, tunakukaribisha kukamilisha ahadi yako "
+                        f"Parokia ya Kristo Mfalme: Mpendwa, tunakukaribisha kukamilisha ahadi yako "
                         f"ya TZS {remaining:,.0f} kwa ajili ya {event_title} kufikia {pledge.due_date.strftime('%d %b %Y')}. "
                         f"Ushirika wako ni muhimu sana. Tunakushukuru. Mungu akubariki."
 
@@ -170,7 +170,7 @@ class Command(BaseCommand):
                 if is_overdue:
                     title = "Kikumbusho cha Ahadi - Mpendwa wa Kristo"
                     message = (
-                        f" tunakukumbusha kuhusu ahadi yako ya TZS {remaining:,.2f} "
+                        f"Mpendwa wa Kristo, tunakukumbusha kuhusu ahadi yako ya TZS {remaining:,.2f} "
                         f"kwa ajili ya {event_title} ambayo imepitiliza muda. Tafadhali kamilisha wakati unapoweza. "
                         f"Tunathamini moyo wako wa kutoa. Mungu akubariki."
 
@@ -179,7 +179,7 @@ class Command(BaseCommand):
                 elif is_urgent:
                     title = "Kikumbusho cha Ahadi - Mpendwa wa Kristo"
                     message = (
-                        f"Ahadi yako ya TZS {remaining:,.2f} kwa ajili ya {event_title} "
+                        f"Mpendwa wa Kristo, ahadi yako ya TZS {remaining:,.2f} kwa ajili ya {event_title} "
                         f"inatakiwa kukamilika baada ya siku {days_until_due}. Tunathamini mchango wako. Mungu akubariki."
 
                     )
@@ -187,7 +187,7 @@ class Command(BaseCommand):
                 else:
                     title = "Kikumbusho cha Ahadi - Mpendwa wa Kristo"
                     message = (
-                        f"Mpendwa, tunakukaribisha kukamilisha ahadi yako ya TZS {remaining:,.2f} "
+                        f"Mpendwa wa Kristo, tunakukaribisha kukamilisha ahadi yako ya TZS {remaining:,.2f} "
                         f"kwa ajili ya {event_title} kufikia {pledge.due_date.strftime('%d %B %Y')}. "
                         f"Ushirika wako ni muhimu sana kwa maendeleo ya parokia. Tunakushukuru. Mungu akubariki."
 

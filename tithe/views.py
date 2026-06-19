@@ -64,6 +64,11 @@ class TithePaymentListView(LoginRequiredMixin, ListView):
         if member_id:
             queryset = queryset.filter(name_id=member_id)
         
+        # Filter by community (through member.shepherd)
+        community_id = self.request.GET.get('community')
+        if community_id:
+            queryset = queryset.filter(name__shepherd_id=community_id)
+        
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -92,6 +97,7 @@ class TithePaymentListView(LoginRequiredMixin, ListView):
             'start_date': self.request.GET.get('start_date', ''),
             'end_date': self.request.GET.get('end_date', ''),
             'member': self.request.GET.get('member', ''),
+            'community': self.request.GET.get('community', ''),
         }
         
         # Get member payment history (April to December of selected year)
@@ -605,7 +611,16 @@ class MonthlyReportView(LoginRequiredMixin, ListView):
         # Get payments grouped by month
         from django.db.models.functions import TruncMonth
         
-        monthly_data = TithePayment.objects.annotate(
+        # Get selected year from query params, default to current year
+        selected_year = self.request.GET.get('year', timezone.now().year)
+        try:
+            selected_year = int(selected_year)
+        except (ValueError, TypeError):
+            selected_year = timezone.now().year
+        
+        monthly_data = TithePayment.objects.filter(
+            date__year=selected_year
+        ).annotate(
             month=TruncMonth('date')
         ).values('month').annotate(
             total_amount=Sum('amount'),
@@ -619,11 +634,25 @@ class MonthlyReportView(LoginRequiredMixin, ListView):
         
         # Add year filter
         current_year = self.request.GET.get('year', timezone.now().year)
+        try:
+            current_year = int(current_year)
+        except (ValueError, TypeError):
+            current_year = timezone.now().year
         context['selected_year'] = current_year
+        
+        # Get available years
+        available_years = TithePayment.objects.dates('date', 'year', order='DESC')
+        context['available_years'] = [year.year for year in available_years]
+        
+        # Convert queryset to list for template rendering
+        if 'monthly_data' in context:
+            context['monthly_data'] = list(context['monthly_data'])
         
         # Active state for sidebar
         context['finance_active'] = True
         context['tithepayment_active_monthly'] = True
+        
+        return context
         
 
 # Additional Views for Extended URLs
@@ -2688,5 +2717,81 @@ class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
         # Active state for sidebar
         context['finance_active'] = True
         context['community_payment_list_active'] = True
+        
+        return context
+
+
+class CommunityPaymentDetailView(LoginRequiredMixin, TemplateView):
+    """Show monthly payment breakdown for a specific community"""
+    template_name = 'tithepayment/community_payment_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        from member.models import Community
+        
+        # Get community ID from URL parameter
+        community_id = self.kwargs.get('community_id')
+        if not community_id:
+            return context
+        
+        # Get the community
+        community = get_object_or_404(Community, id=community_id)
+        context['community'] = community
+        
+        # Get selected year (default to current year)
+        selected_year = self.request.GET.get('year', timezone.now().year)
+        try:
+            selected_year = int(selected_year)
+        except (ValueError, TypeError):
+            selected_year = timezone.now().year
+        context['selected_year'] = selected_year
+        
+        # Get available years from payments
+        available_years = TithePayment.objects.dates('date', 'year', order='DESC')
+        context['available_years'] = [year.year for year in available_years]
+        
+        # Get members in this community
+        community_members = community.get_members()
+        
+        # Get payments for this community's members in the selected year
+        queryset = TithePayment.objects.filter(
+            date__year=selected_year,
+            name__in=community_members
+        ).select_related('name').order_by('name__name', 'date')
+        
+        # Calculate total amount and payment count for stats
+        context['total_amount'] = queryset.aggregate(total=Sum('amount'))['total'] or 0
+        context['payment_count'] = queryset.count()
+        context['member_count'] = community_members.count()
+        
+        # Group by member with monthly breakdown
+        from collections import defaultdict
+        member_payments_dict = defaultdict(list)
+        for payment in queryset:
+            member_payments_dict[payment.name].append(payment)
+        
+        # Build member data with monthly breakdown
+        members_data = []
+        for member in community_members:
+            payments = member_payments_dict.get(member, [])
+            monthly_totals = {str(i): 0 for i in range(1, 13)}
+            total = 0
+            for payment in payments:
+                month = str(payment.date.month)
+                monthly_totals[month] += payment.amount
+                total += payment.amount
+            
+            members_data.append({
+                'member': member,
+                'monthly_totals': monthly_totals,
+                'total': total,
+                'payment_count': len(payments)
+            })
+        
+        # Sort by member name
+        members_data.sort(key=lambda x: x['member'].name)
+        
+        context['members_data'] = members_data
         
         return context

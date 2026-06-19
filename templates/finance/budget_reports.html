@@ -219,7 +219,7 @@
                         </div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-value">TSH {{ budget_summary.OPERATING.total_budgeted|floatformat:0|intcomma }}</div>
+                        <div class="kpi-value">{{ budget_summary.OPERATING.total_budgeted|currency }}</div>
                         <div class="kpi-label">Total Budgeted</div>
                         <div class="kpi-change positive">
                             <i class="fas fa-arrow-up"></i> 8% increase
@@ -259,11 +259,11 @@
                         <div class="summary-stat-label">{{ budget_type }} Budgets</div>
                     </div>
                     <div class="summary-stat">
-                        <div class="summary-stat-value">TSH {{ summary.total_budgeted|floatformat:0|intcomma }}</div>
+                        <div class="summary-stat-value">{{ summary.total_budgeted|currency }}</div>
                         <div class="summary-stat-label">Total Budgeted</div>
                     </div>
                     <div class="summary-stat">
-                        <div class="summary-stat-value">TSH {{ summary.total_spent|floatformat:0|intcomma }}</div>
+                        <div class="summary-stat-value">{{ summary.total_spent|currency }}</div>
                         <div class="summary-stat-label">Total Spent</div>
                     </div>
                     <div class="summary-stat">
@@ -285,7 +285,7 @@
             <div class="reports-card-body">
                 <div class="trend-chart">
                     {% for month_data in monthly_data %}
-                    <div class="trend-bar" style="height: {{ month_data.budgeted|div:monthly_data.0.budgeted|mul:100|default:0 }}%;" title="{{ month_data.month }}: Budgeted TSH {{ month_data.budgeted|floatformat:0|intcomma }}">
+                    <div class="trend-bar" style="height: {{ month_data.budgeted|div:monthly_data.0.budgeted|mul:100|default:0 }}%;" title="{{ month_data.month }}: Budgeted {{ month_data.budgeted|currency }}">
                         <span class="trend-label">{{ month_data.month|slice:":3" }}</span>
                     </div>
                     {% endfor %}
@@ -366,7 +366,7 @@
                         <div class="alert-meta">
                             <i class="fas fa-clock"></i> {{ alert.created_at|date:"M d, Y H:i" }}
                             {% if alert.current_value %}
-                            | Current: TSH {{ alert.current_value|floatformat:0|intcomma }}
+                            | Current: {{ alert.current_value|currency }}
                             {% endif %}
                         </div>
                     </div>

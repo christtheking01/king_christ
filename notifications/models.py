@@ -212,7 +212,7 @@ class NotificationLog(models.Model):
         on_delete=models.CASCADE, 
         related_name='logs'
     )
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, null=True, blank=True)
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
     status = models.CharField(max_length=20, default='PENDING')
     at_message_id = models.CharField(max_length=255, null=True, blank=True)
@@ -224,9 +224,7 @@ class NotificationLog(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        if self.member:
-            return f"{self.notification.title} -> {self.member.name}"
-        return f"{self.notification.title} -> {self.phone_number}"
+        return f"{self.notification.title} -> {self.member.name}"
     
 
 class NotificationReadStatus(models.Model):

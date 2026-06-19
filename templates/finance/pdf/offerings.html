@@ -1,4 +1,5 @@
 {% extends 'finance/pdf/base_pdf.html' %}
+{% load finance_filters %}
 
 {% block title %}Offerings{% endblock %}
 {% block report_title %}Offerings Report{% endblock %}
@@ -19,7 +20,7 @@
         {% for offering in offerings %}
         <tr>
             <td>#{{ offering.id }}</td>
-            <td>{{ offering.date|date:"Y-m-d" }}</td>
+            <td>{{ offering.date|date:"Y-m-d" }}</curency
             <td class="amount">{{ offering.amount|floatformat:2 }}</td>
             <td>{{ offering.get_offering_type_display }}</td>
             <td>{{ offering.get_payment_method_display }}</td>
@@ -43,7 +44,7 @@
 
 <div class="summary">
     <div class="summary-row">
-        <span><strong>Total Offerings:</strong> {{ offerings|length }}</span>
+        <span><strong>Total Offerings:</stro{{ offerings|length }}</spacurency
         <span><strong>Total Amount:</strong> TSH {{ total_amount|default:0|floatformat:2 }}</span>
     </div>
 </div>

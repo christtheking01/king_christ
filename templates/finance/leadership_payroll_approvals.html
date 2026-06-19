@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Payroll Approvals - Leadership{% endblock %}
 
@@ -251,11 +252,11 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Basic Salary</span>
-                    <span class="info-value">TZS {{ payroll.basic_salary|floatformat:0 }}</span>
+                    <span class="info-value">{{ payroll.basic_salary|currency }}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Net Salary</span>
-                    <span class="info-value">TZS {{ payroll.net_salary|floatformat:0 }}</span>
+                    <span class="info-value">{{ payroll.net_salary|currency }}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Submitted By</span>

@@ -21,7 +21,7 @@
             <td>#{{ report.id }}</td>
             <td>{{ report.title }}</td>
             <td>{{ report.employee.name|default:"N/A" }}</td>
-            <td class="amount">{{ report.total_amount|floatformat:2 }}</td>
+            <td class="amount">{{ report.total_amount|currency }}</td>
             <td>{{ report.date_submitted|date:"Y-m-d" }}</td>
             <td>
                 <span class="badge badge-{{ report.status|lower }}">{{ report.status }}</span>
@@ -38,7 +38,7 @@
 <div class="summary">
     <div class="summary-row">
         <span><strong>Total Reports:</strong> {{ expense_reports|length }}</span>
-        <span><strong>Total Amount:</strong> TSH {{ total_amount|default:0|floatformat:2 }}</span>
+        <span><strong>Total Amount:</strong> {{ total_amount|default:0|currency }}</span>
     </div>
 </div>
 {% endblock %}

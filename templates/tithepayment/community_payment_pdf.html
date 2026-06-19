@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+{% load finance_filters %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Community Payments Report - {{ selected_year }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        .community-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .community-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .community-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+        }
+        th {
+            background: #f5f5f5;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #667eea;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 0.85rem;
+        }
+        td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+        .total-row {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+        .total-row td {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .no-payment {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Community Payments Report - {{ selected_year }}</h1>
+    
+    {% for community_data in communities_data %}
+    <div class="community-section">
+        <div class="community-header">
+            <h2>{{ community_data.community.name }}</h2>
+            <div style="font-weight: 600;">Total: {{ community_data.total|currency }}</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Code</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member_data in community_data.members %}
+                <tr>
+                    <td>{{ member_data.member.name }}</td>
+                    <td>{{ member_data.member.code|default:"—" }}</td>
+                    {% for month_num in "123456789101112" %}
+                    <td>
+                        {% with month_total=member_data.monthly_totals|get_item:month_num %}
+                            {% if month_total > 0 %}
+                                <span class="amount">{{ month_total|currency }}</span>
+                            {% else %}
+                                <span class="no-payment">—</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td class="amount">{{ member_data.total|currency }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td colspan="2" style="text-align: right;">Community Total:</td>
+                    {% for month_num in "123456789101112" %}
+                    <td>
+                        {% with month_total=community_data.monthly_totals|get_item:month_num %}
+                            {% if month_total > 0 %}
+                                <span class="amount">{{ month_total|currency }}</span>
+                            {% else %}
+                                <span class="no-payment">—</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td class="amount">{{ community_data.total|currency }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</body>
+</html>

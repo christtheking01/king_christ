@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Offerings{% endblock %}
 
@@ -338,14 +339,14 @@
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="stat-card primary">
-                <div class="stat-value">TSH {{ total_amount|floatformat:0 }}</div>
+                <div class="stat-value">{{ total_amount|currency }}</div>
                 <div class="stat-label">Total Offerings</div>
             </div>
         </div>
         {% for breakdown in type_breakdown %}
         <div class="col-md-3">
             <div class="stat-card {% if forloop.counter == 1 %}success{% elif forloop.counter == 2 %}info{% else %}warning{% endif %}">
-                <div class="stat-value">TSH {{ breakdown.total|floatformat:0 }}</div>
+                <div class="stat-value">{{ breakdown.total|currency }}</div>
                 <div class="stat-label">{{ breakdown.offering_type }} ({{ breakdown.count }})</div>
             </div>
         </div>
@@ -457,7 +458,7 @@
                                     <span class="badge badge-bank"><i class="fas fa-university"></i> Bank</span>
                                 {% endif %}
                             </td>
-                            <td class="text-success" style="font-weight: 700;">TSH {{ offering.amount|floatformat:2 }}</td>
+                            <td class="text-success" style="font-weight: 700;">{{ offering.amount|currency }}</td>
                             <td>
                                 <div class="d-flex gap-1">
                                     <a href="{% url 'edit_offering' offering.pk %}" class="btn-action" title="Edit">

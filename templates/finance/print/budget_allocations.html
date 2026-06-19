@@ -1,3 +1,4 @@
+{% load finance_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -88,7 +89,7 @@
             {% if budget.period_start %}{{ budget.period_start|date:"F d, Y" }}{% endif %}
             {% if budget.period_end %} to {{ budget.period_end|date:"F d, Y" }}{% endif %}
         </p>
-        <p><strong>Total Budget:</strong> TSH {{ budget.total_amount|floatformat:2 }}</p>
+        <p><strong>Total Budget:</strong> {{ budget.total_amount|currency }}</p>
     </div>
 
     <table>
@@ -107,9 +108,9 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ allocation.category.name|default:"Uncategorized" }}</td>
-                <td class="amount">TSH {{ allocation.allocated_amount|floatformat:2 }}</td>
-                <td class="amount">TSH {{ allocation.spent_amount|default:0|floatformat:2 }}</td>
-                <td class="amount">TSH {{ allocation.remaining_amount|default:allocation.allocated_amount|floatformat:2 }}</td>
+                <td class="amount">{{ allocation.allocated_amount|currency }}</td>
+                <td class="amount">{{ allocation.spent_amount|default:0|currency }}</td>
+                <td class="amount">{{ allocation.remaining_amount|default:allocation.allocated_amount|currency }}</td>
                 <td>{{ allocation.notes|default:"-" }}</td>
             </tr>
             {% empty %}
@@ -122,13 +123,13 @@
             <tr class="total-row">
                 <td colspan="2"><strong>Total</strong></td>
                 <td class="amount">
-                    <strong>TSH {% widthratio allocations.total_allocated|default:0 1 1 %}</strong>
+                    <strong>{{ allocations.total_allocated|default:0|currency }}</strong>
                 </td>
                 <td class="amount">
-                    <strong>TSH {% widthratio allocations.total_spent|default:0 1 1 %}</strong>
+                    <strong>{{ allocations.total_spent|default:0|currency }}</strong>
                 </td>
                 <td class="amount">
-                    <strong>TSH {% widthratio allocations.total_remaining|default:0 1 1 %}</strong>
+                    <strong>{{ allocations.total_remaining|default:0|currency }}</strong>
                 </td>
                 <td></td>
             </tr>

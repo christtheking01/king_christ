@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -332,7 +333,7 @@
         <!-- Amount -->
         <div class="amount-box">
             <div class="amount-label">Amount Paid</div>
-            <div class="amount-value">TZS {{ payment.amount|floatformat:2 }}</div>
+            <div class="amount-value">{{ payment.amount|currency }}</div>
             <div class="amount-currency">Tanzanian Shillings</div>
         </div>
 

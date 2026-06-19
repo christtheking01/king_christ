@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Professional Budget Management{% endblock %}
 
@@ -270,15 +271,15 @@
             <div class="budget-stat-icon"><i class="fas fa-dollar-sign"></i></div>
             <div class="budget-stat-content">
                 <div class="budget-stat-label">Total Budgeted</div>
-                <div class="budget-stat-value">TSH {{ total_budget_amount|floatformat:0 }}</div>
-                <div class="budget-stat-change text-success">Approved: TSH {{ total_approved_amount|floatformat:0 }}</div>
+                <div class="budget-stat-value">{{ total_budget_amount|currency }}</div>
+                <div class="budget-stat-change text-success">Approved: {{ total_approved_amount|currency }}</div>
             </div>
         </div>
         <div class="budget-stat-card warning">
             <div class="budget-stat-icon"><i class="fas fa-shopping-cart"></i></div>
             <div class="budget-stat-content">
                 <div class="budget-stat-label">Total Spent</div>
-                <div class="budget-stat-value">TSH {{ total_spent_amount|floatformat:0 }}</div>
+                <div class="budget-stat-value">{{ total_spent_amount|currency }}</div>
                 <div class="budget-stat-change text-warning">{{ utilization_percentage|floatformat:1 }}% utilized</div>
             </div>
         </div>
@@ -286,7 +287,7 @@
             <div class="budget-stat-icon"><i class="fas fa-piggy-bank"></i></div>
             <div class="budget-stat-content">
                 <div class="budget-stat-label">Remaining</div>
-                <div class="budget-stat-value">TSH {{ total_remaining_amount|floatformat:0 }}</div>
+                <div class="budget-stat-value">{{ total_remaining_amount|currency }}</div>
                 <div class="budget-stat-change text-info">Available funds</div>
             </div>
         </div>
@@ -412,20 +413,20 @@
                                     {% endif %}
                                 </td>
                                 <td style="font-weight: 600; color: #333;">
-                                    TSH {{ budget.total_amount|floatformat:0 }}
+                                    {{ budget.total_amount|currency }}
                                 </td>
                                 <td style="font-weight: 600; color: #28a745;">
                                     {% if budget.approved_amount %}
-                                        TSH {{ budget.approved_amount|floatformat:0 }}
+                                        {{ budget.approved_amount|currency }}
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td style="color: #ffc107; font-weight: 600;">
-                                    TSH {{ budget.spent_amount|floatformat:0 }}
+                                    {{ budget.spent_amount|currency }}
                                 </td>
                                 <td style="color: #28a745; font-weight: 600;">
-                                    TSH {{ budget.remaining_amount|floatformat:0 }}
+                                    {{ budget.remaining_amount|currency }}
                                 </td>
                                 <td>
                                     {% if budget.usage_percentage > 0 %}

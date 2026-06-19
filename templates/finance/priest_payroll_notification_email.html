@@ -1,3 +1,4 @@
+{% load finance_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -126,27 +127,27 @@
             </tr>
             <tr>
                 <td>Basic Salary</td>
-                <td>TZS {{ payroll.basic_salary|floatformat:2|intcomma }}</td>
+                <td>{{ payroll.basic_salary|currency }}</td>
             </tr>
             <tr>
                 <td>Gross Salary</td>
-                <td>TZS {{ payroll.gross_salary|floatformat:2|intcomma }}</td>
+                <td>{{ payroll.gross_salary|currency }}</td>
             </tr>
             {% if payroll.tax_deduction > 0 %}
             <tr>
                 <td>Tax Deduction</td>
-                <td>TZS {{ payroll.tax_deduction|floatformat:2|intcomma }}</td>
+                <td>{{ payroll.tax_deduction|currency }}</td>
             </tr>
             {% endif %}
             {% if payroll.other_deductions > 0 %}
             <tr>
                 <td>Other Deductions</td>
-                <td>TZS {{ payroll.other_deductions|floatformat:2|intcomma }}</td>
+                <td>{{ payroll.other_deductions|currency }}</td>
             </tr>
             {% endif %}
             <tr class="salary-row">
                 <td>Net Salary</td>
-                <td>TZS {{ payroll.net_salary|floatformat:2|intcomma }}</td>
+                <td>{{ payroll.net_salary|currency }}</td>
             </tr>
             <tr>
                 <td>Payment Method</td>

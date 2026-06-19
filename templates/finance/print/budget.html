@@ -1,3 +1,4 @@
+{% load finance_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -118,15 +119,15 @@
             <h3>Financial Summary</h3>
             <div class="info-row">
                 <span class="info-label">Total Budget:</span>
-                <span class="info-value">TSH {{ budget.total_amount|floatformat:2 }}</span>
+                <span class="info-value">{{ budget.total_amount|currency }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Spent:</span>
-                <span class="info-value">TSH {{ budget.spent_amount|default:0|floatformat:2 }}</span>
+                <span class="info-value">{{ budget.spent_amount|default:0|currency }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Remaining:</span>
-                <span class="info-value">TSH {{ budget.remaining_amount|default:budget.total_amount|floatformat:2 }}</span>
+                <span class="info-value">{{ budget.remaining_amount|default:budget.total_amount|currency }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Utilization:</span>

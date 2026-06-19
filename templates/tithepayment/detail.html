@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -633,7 +634,7 @@
                             <!-- Member Statistics -->
                             <div class="stats-grid">
                                 <div class="stat-card">
-                                    <div class="stat-value">Tsh {{ member_total_contributions|floatformat:2 }}</div>
+                                    <div class="stat-value">{{ member_total_contributions|currency }}</div>
                                     <div class="stat-label">Total Contributions</div>
                                 </div>
                                 <div class="stat-card">

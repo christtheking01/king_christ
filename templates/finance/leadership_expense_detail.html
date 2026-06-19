@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Expense Report Review - Leadership{% endblock %}
 
@@ -327,7 +328,7 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Total Amount</span>
-                <span class="info-value">TZS {{ expense.total_amount|floatformat:0 }}</span>
+                <span class="info-value">{{ expense.total_amount|currency }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Date Submitted</span>
@@ -354,7 +355,7 @@
             {% for item in items %}
             <div class="expense-item">
                 <span>{{ item.description }}</span>
-                <span>TZS {{ item.amount|floatformat:0 }}</span>
+                <span>{{ item.amount|currency }}</span>
             </div>
             {% endfor %}
         </div>

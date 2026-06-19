@@ -12,7 +12,6 @@ def get_item(dictionary, key):
         return None
     return dictionary.get(key)
 
-
 @register.filter
 def month_filter(payment_list, month_num):
     """

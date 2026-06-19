@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Tithe Analytics Dashboard{% endblock %}
 
@@ -31,7 +32,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted text-uppercase mb-1">Total Collected</h6>
-                            <h4 class="mb-0">TSH {{ total_collected|floatformat:2 }}</h4>
+                            <h4 class="mb-0">{{ total_collected|currency }}</h4>
                         </div>
                     </div>
                 </div>
@@ -65,7 +66,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted text-uppercase mb-1">Average Payment</h6>
-                            <h4 class="mb-0">TSH {{ average_payment|floatformat:2 }}</h4>
+                            <h4 class="mb-0">{{ average_payment|currency }}</h4>
                         </div>
                     </div>
                 </div>

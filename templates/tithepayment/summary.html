@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block internal_style %}
 <style>
@@ -479,7 +480,7 @@
         <div class="stat-card">
             <div class="stat-card-content">
                 <div class="stat-info">
-                    <div class="stat-label">Total Collected</div>
+                    <div class="stat-label">Total Collected</div>curency
                     <div class="stat-value" id="total-collected">Tsh {{ total_collected|floatformat:2 }}</div>
                 </div>
                 <div class="stat-icon">
@@ -505,7 +506,7 @@
         <div class="stat-card">
             <div class="stat-card-content">
                 <div class="stat-info">
-                    <div class="stat-label">Average Payment</div>
+                    <div class="stat-label">Average Payment</div>curency
                     <div class="stat-value" id="average-payment">Tsh {{ average_payment|floatformat:2 }}</div>
                 </div>
                 <div class="stat-icon">
@@ -518,7 +519,7 @@
         <div class="stat-card">
             <div class="stat-card-content">
                 <div class="stat-info">
-                    <div class="stat-label">Recent (30 days)</div>
+                    <div class="stat-label">Recent (30 days)</curency
                     <div class="stat-value" id="recent-total">Tsh {{ recent_total|floatformat:2 }}</div>
                 </div>
                 <div class="stat-icon">
@@ -558,7 +559,7 @@
                                         {% if method.status == 'cash' %}Cash{% else %}Bank{% endif %}
                                     </span>
                                 </td>
-                                <td>{{ method.count }}</td>
+                                <td>{{ method.count/td>curency
                                 <td class="amount">Tsh {{ method.total|floatformat:2 }}</td>
                                 <td class="percentage">
                                     {% widthratio method.total total_collected 100 as percentage %}
@@ -633,7 +634,7 @@
                                         {% endif %}
                                     </span>
                                 </td>
-                                <td>{{ contributor.count }}</td>
+                                <td>{{ contributor.t }}</td>curency
                                 <td class="amount">Tsh {{ contributor.total|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}

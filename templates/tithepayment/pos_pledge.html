@@ -1,5 +1,6 @@
 {% extends "tithepayment/pos_base.html" %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}POS - Pledge{% endblock %}
 
@@ -298,7 +299,7 @@
                     <div class="progress-fill" style="width: {% widthratio pledge.paid_amount pledge.promised_amount 100 %}%"></div>
                 </div>
                 <div class="progress-text">
-                    Tsh {{ pledge.paid_amount|floatformat:0 }} / Tsh {{ pledge.promised_amount|floatformat:0 }} paid
+                    {{ pledge.paid_amount|currency }} / {{ pledge.promised_amount|currency }} paid
                 </div>
             </div>
         </div>

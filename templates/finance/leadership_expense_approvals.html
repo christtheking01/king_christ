@@ -223,7 +223,7 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Total Amount</span>
-                    <span class="info-value">TZS {{ expense.total_amount|floatformat:0 }}</span>
+                    <span class="info-value">{{ expense.total_amount|currency }}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Date Submitted</span>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Tithing Report{% endblock %}
 
@@ -70,7 +71,7 @@
           <div class="card bg-success text-white">
             <div class="card-body">
               <h3>Total Tithes</h3>
-              <h2>Tsh {{ summary.total|default:"0.00" }}</h2>
+              <h2>{{ summary.total|default:0|currency }}</h2>
             </div>
           </div>
         </div>
@@ -86,7 +87,7 @@
           <div class="card bg-primary text-white">
             <div class="card-body">
               <h3>Average Tithe</h3>
-              <h2>Tsh {{ summary.avg|default:"0.00" }}</h2>
+              <h2>{{ summary.avg|default:0|currency }}</h2>
             </div>
           </div>
         </div>
@@ -120,7 +121,7 @@
                   {% for month in monthly_data %}
                   <tr>
                     <td>{{ month.month|date:"F Y" }}</td>
-                    <td>Tsh {{ month.total }}</td>
+                    <td>{{ month.total|currency }}</td>
                     <td>{{ month.count }}</td>
                   </tr>
                   {% empty %}
@@ -153,7 +154,7 @@
                   {% for method in by_method %}
                   <tr>
                     <td>{{ method.status|title }}</td>
-                    <td>Tsh{{ method.total }}</td>
+                    <td>{{ method.total|currency }}</td>
                     <td>{{ method.count }}</td>
                   </tr>
                   {% empty %}
@@ -200,7 +201,7 @@
                     <td>{{ tithe.date|date:"Y-m-d" }}</td>
                     <td>{{ tithe.name.name }}</td>
                     <td>{{ tithe.contact_number }}</td>
-                    <td>{{ tithe.amount }}</td>
+                    <td>{{ tithe.amount|currency }}</td>
                     <td>
                       <span class="badge badge-info">{{ tithe.get_status_display }}</span>
                     </td>

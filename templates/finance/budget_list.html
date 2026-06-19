@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load finance_filters %}
 
 {% block title %}Budget Management{% endblock %}
 
@@ -84,21 +85,21 @@
             <div class="finance-stat-icon"><i class="fas fa-dollar-sign"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Total Allocated</div>
-                <div class="finance-stat-value">TSH{{ total_budget_amount|floatformat:2 }}</div>
+                <div class="finance-stat-value">{{ total_budget_amount|currency }}</div>
             </div>
         </div>
         <div class="finance-stat-card warning">
             <div class="finance-stat-icon"><i class="fas fa-shopping-cart"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Total Spent</div>
-                <div class="finance-stat-value">TSH{{ total_spent_amount|floatformat:2 }}</div>
+                <div class="finance-stat-value">{{ total_spent_amount|currency }}</div>
             </div>
         </div>
         <div class="finance-stat-card info">
             <div class="finance-stat-icon"><i class="fas fa-piggy-bank"></i></div>
             <div class="finance-stat-content">
                 <div class="finance-stat-label">Remaining</div>
-                <div class="finance-stat-value">TSH{{ total_remaining_amount|floatformat:2 }}</div>
+                <div class="finance-stat-value">{{ total_remaining_amount|currency }}</div>
             </div>
         </div>
     </div>
@@ -167,9 +168,9 @@
                                 <div>{{ budget.start_date|date:"M d, Y" }}</div>
                                 <small style="color: #666;">to {{ budget.end_date|date:"M d, Y" }}</small>
                             </td>
-                            <td style="font-weight: 600;">TSH {{ budget.total_amount|floatformat:2 }}</td>
-                            <td style="color: #ffc107; font-weight: 600;">TSH {{ budget.spent_amount|floatformat:2 }}</td>
-                            <td style="color: #28a745; font-weight: 600;">TSH {{ budget.remaining_amount|floatformat:2 }}</td>
+                            <td style="font-weight: 600;">{{ budget.total_amount|currency }}</td>
+                            <td style="color: #ffc107; font-weight: 600;">{{ budget.spent_amount|currency }}</td>
+                            <td style="color: #28a745; font-weight: 600;">{{ budget.remaining_amount|currency }}</td>
                             <td>
                                 {% if budget.total_amount > 0 %}
                                 <div class="finance-progress">

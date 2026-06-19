@@ -161,6 +161,15 @@
                 <a href="{% url 'analytics:blocked_users' %}" class="btn btn-danger ml-2">
                   <i class="fas fa-shield-alt mr-1"></i> Security
                 </a>
+                <a href="{% url 'analytics:export_tithe_analytics' %}?{{ request.GET.urlencode }}" class="btn btn-secondary ml-2">
+                  <i class="fas fa-download mr-1"></i> Export Tithe CSV
+                </a>
+                <a href="{% url 'analytics:export_financial_report' %}?{{ request.GET.urlencode }}" class="btn btn-secondary ml-2">
+                  <i class="fas fa-download mr-1"></i> Export Finance CSV
+                </a>
+                <a href="{% url 'analytics:export_member_analytics' %}" class="btn btn-secondary ml-2">
+                  <i class="fas fa-download mr-1"></i> Export Member CSV
+                </a>
               </form>
             </div>
           </div>
