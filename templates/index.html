@@ -507,7 +507,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <span class="stat-trend up">
-                    <i class="fas fa-arrow-up"></i> 12%
+                    <i class="fas fa-user-check"></i> {{ active_members }}
                 </span>
             </div>
             <div class="stat-value count" data-target="{{ member_count }}">0</div>
@@ -519,7 +519,7 @@
                     <i class="fas fa-church"></i>
                 </div>
                 <span class="stat-trend up">
-                    <i class="fas fa-arrow-up"></i> 5%
+                    <i class="fas fa-map-marker-alt"></i> {{ zone_count }}
                 </span>
             </div>
             <div class="stat-value count" data-target="{{ ministry_count }}">0</div>
@@ -531,7 +531,7 @@
                     <i class="fas fa-hands-helping"></i>
                 </div>
                 <span class="stat-trend up">
-                    <i class="fas fa-arrow-up"></i> 8%
+                    <i class="fas fa-users-slash"></i> {{ inactive_members }}
                 </span>
             </div>
             <div class="stat-value count" data-target="{{ community_count }}">0</div>
@@ -540,14 +540,96 @@
         <div class="stat-card-modern committees">
             <div class="stat-header">
                 <div class="stat-icon-wrapper">
-                    <i class="fas fa-user-shield"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
-                <span class="stat-trend up">
-                    <i class="fas fa-arrow-up"></i> 3%
+                <span class="stat-trend {% if pending_sacraments > 5 %}down{% else %}up{% endif %}">
+                    {{ pending_sacraments }}
                 </span>
             </div>
             <div class="stat-value count" data-target="{{ committee_count }}">0</div>
-            <div class="stat-label">{% trans "Committees" %}</div>
+            <div class="stat-label">{% trans "Pending Requests" %}</div>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    {% if alerts %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for alert in alerts %}
+                <div class="alert alert-{{ alert.type }} d-flex align-items-center" style="padding: 1rem 1.25rem; border-radius: var(--border-radius); border: none; background: {% if alert.type == 'danger' %}#fee2e2{% elif alert.type == 'warning' %}#fef3c7{% else %}#dbeafe{% endif %};">
+                    <i class="fas {{ alert.icon }} me-3" style="font-size: 1.25rem;"></i>
+                    <div style="flex: 1;">
+                        <strong style="color: {% if alert.type == 'danger' %}#dc2626{% elif alert.type == 'warning' %}#d97706{% else %}#2563eb{% endif %};">
+                            {% if alert.type == 'danger' %}Attention Required{% elif alert.type == 'warning' %}Warning{% else %}Information{% endif %}
+                        </strong>
+                        <span style="color: var(--text-secondary); margin-left: 0.5rem;">{{ alert.message }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Financial Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="content-card" style="background: linear-gradient(135deg, #10b98115 0%, #05966915 100%); border: 1px solid #10b98130;">
+                <div class="card-header-custom" style="border-bottom-color: #10b98130;">
+                    <h5 class="card-title">
+                        <span class="card-title-icon" style="background: #10b98120; color: #10b981;">
+                            <i class="fas fa-calendar-day"></i>
+                        </span>
+                        {% trans "Today's Collections" %}
+                    </h5>
+                </div>
+                <div class="stat-value" style="color: #10b981; font-size: 2.5rem;">{{ today_tithe|floatformat:0 }}</div>
+                <div class="stat-label">{% trans "TSh Collected Today" %}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="content-card" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 1px solid #667eea30;">
+                <div class="card-header-custom" style="border-bottom-color: #667eea30;">
+                    <h5 class="card-title">
+                        <span class="card-title-icon" style="background: #667eea20; color: #667eea;">
+                            <i class="fas fa-calendar-alt"></i>
+                        </span>
+                        {% trans "This Month" %}
+                    </h5>
+                </div>
+                <div class="stat-value" style="color: #667eea; font-size: 2.5rem;">{{ this_month_tithe|floatformat:0 }}</div>
+                <div class="stat-label">{% trans "TSh Collected This Month" %}</div>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    <i class="fas fa-receipt"></i> {{ this_month_payments }} payments
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="content-card" style="background: linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%); border: 1px solid #f59e0b30;">
+                <div class="card-header-custom" style="border-bottom-color: #f59e0b30;">
+                    <h5 class="card-title">
+                        <span class="card-title-icon" style="background: #f59e0b20; color: #f59e0b;">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        {% trans "Member Breakdown" %}
+                    </h5>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-top: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">{{ elders_count }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Elders</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #667eea;">{{ youth_count }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Youth</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">{{ children_count }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Children</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -570,16 +652,16 @@
                 <div class="activity-list-modern">
                     {% for activity in recent_activities %}
                     <div class="activity-item-modern">
-                        <div class="activity-avatar">
-                            {{ activity.name|slice:":1"|upper }}
+                        <div class="activity-avatar" style="background: {{ activity.color }};">
+                            <i class="fas {{ activity.icon }}"></i>
                         </div>
                         <div class="activity-content">
                             <div class="activity-text">
-                                <strong>{{ activity.name }}</strong> {% trans "was added to the database" %}
+                                {{ activity.text }}
                             </div>
                             <div class="activity-meta">
-                                <span><i class="far fa-clock"></i> {% trans "Just now" %}</span>
-                                <span class="activity-badge new">{% trans "New" %}</span>
+                                <span><i class="far fa-clock"></i> {{ activity.time_display }}</span>
+                                <span class="activity-badge" style="background: {{ activity.color }}20; color: {{ activity.color }};">{{ activity.badge }}</span>
                             </div>
                         </div>
                     </div>
@@ -593,45 +675,80 @@
             </div>
         </div>
 
-        <!-- Upcoming Events -->
+        <!-- Zone Performance -->
         <div class="col-lg-5">
             <div class="content-card">
                 <div class="card-header-custom">
                     <h5 class="card-title">
                         <span class="card-title-icon events">
-                            <i class="fas fa-calendar-star"></i>
+                            <i class="fas fa-trophy"></i>
                         </span>
-                        {% trans "Upcoming Events" %}
+                        {% trans "Top Zones" %}
                     </h5>
-                    <a href="{% url 'event_list' %}" class="btn-view-all">
+                    <a href="{% url 'tithepayment:community_payment_list' %}" class="btn-view-all">
                         {% trans "View All" %} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="event-list-modern">
-                    {% for event in upcoming_events %}
+                    {% for zone in top_zones %}
                     <div class="event-item-modern">
-                        <div class="event-date-modern">
-                            <span class="day">{{ event.date|date:"d" }}</span>
-                            <span class="month">{{ event.date|date:"M" }}</span>
+                        <div class="event-date-modern" style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);">
+                            <span class="day" style="color: #667eea;">{{ zone.members }}</span>
+                            <span class="month" style="color: #667eea;">Members</span>
                         </div>
                         <div class="event-info">
-                            <div class="event-title">{{ event.name }}</div>
+                            <div class="event-title">{{ zone.name }}</div>
                             <div class="event-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                {{ event.location }}
+                                <i class="fas fa-hands-helping"></i>
+                                {{ zone.communities }} communities
                             </div>
                         </div>
                     </div>
                     {% empty %}
                     <div class="event-empty">
-                        <i class="far fa-calendar-times"></i>
-                        <p>{% trans "No upcoming events scheduled" %}</p>
+                        <i class="fas fa-globe"></i>
+                        <p>{% trans "No zones data available" %}</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Today's Events Section -->
+    {% if today_events %}
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="content-card" style="background: linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%); border: 1px solid #f59e0b30;">
+                <div class="card-header-custom" style="border-bottom-color: #f59e0b30;">
+                    <h5 class="card-title">
+                        <span class="card-title-icon" style="background: #f59e0b20; color: #f59e0b;">
+                            <i class="fas fa-calendar-day"></i>
+                        </span>
+                        {% trans "Today's Events" %}
+                    </h5>
+                </div>
+                <div class="event-list-modern">
+                    {% for event in today_events %}
+                    <div class="event-item-modern" style="border-left-color: #f59e0b;">
+                        <div class="event-date-modern" style="background: #f59e0b;">
+                            <span class="day" style="color: white;">{{ event.start_date|date:"d" }}</span>
+                            <span class="month" style="color: rgba(255,255,255,0.9);">{{ event.start_date|date:"M" }}</span>
+                        </div>
+                        <div class="event-info">
+                            <div class="event-title" style="color: #f59e0b;">{{ event.title }}</div>
+                            <div class="event-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ event.location.name|default:event.location_details|default:"TBD" }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Counter Animation & Date Script -->
