@@ -66,6 +66,10 @@
             <div class="stat-label">Total Communities</div>
             <div class="stat-value">{{ community_count|default:0 }}</div>
         </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Zones</div>
+            <div class="stat-value">{{ zones_data|length }}</div>
+        </div>
     </div>
 
     <div class="content-grid">
@@ -108,39 +112,54 @@
 
         <div class="table-card">
             <div class="table-header">
-                <h3><i class="fas fa-calendar-alt"></i> Communities ({{ selected_year }})</h3>
+                <h3><i class="fas fa-calendar-alt"></i> Communities by Zone ({{ selected_year }})</h3>
             </div>
-            {% if communities_data %}
+            {% if zones_data %}
             <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Community</th>
-                            <th>Payment Count</th>
-                            <th>Total Amount</th>
-                            <th>Average</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for community_data in communities_data %}
-                        <tr>
-                            <td>
-                                <div class="community-cell">
-                                    <div class="community-avatar">{{ community_data.community.name|first|upper }}</div>
-                                    <span class="community-name">{{ community_data.community.name }}</span>
-                                </div>
-                            </td>
-                            <td>{{ community_data.payment_count }}</td>
-                            <td><strong class="amount">{{ community_data.total|currency }}</strong></td>
-                            <td>{{ community_data.average|currency }}</td>
-                            <td>
-                                <a href="{% url 'tithepayment:community_payment_detail' community_data.community.id %}?year={{ selected_year }}" class="btn btn-primary">View Payments</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {% for zone_data in zones_data %}
+                <div style="margin-bottom: 32px;">
+                    <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%); padding: 16px 20px; border-radius: 8px; margin-bottom: 16px;">
+                        <h4 style="margin: 0; color: var(--text-primary); font-size: 1.1rem;">
+                            <i class="fas fa-map-marker-alt"></i> {{ zone_data.zone.name }}
+                        </h4>
+                        <div style="margin-top: 8px; display: flex; gap: 24px; font-size: 0.9rem; color: var(--text-secondary);">
+                            <span><strong>Total:</strong> {{ zone_data.total|currency }}</span>
+                            <span><strong>Payments:</strong> {{ zone_data.payment_count }}</span>
+                            <span><strong>Average:</strong> {{ zone_data.average|currency }}</span>
+                            <span><strong>Communities:</strong> {{ zone_data.communities|length }}</span>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Community</th>
+                                <th>Payment Count</th>
+                                <th>Total Amount</th>
+                                <th>Average</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for community_data in zone_data.communities %}
+                            <tr>
+                                <td>
+                                    <div class="community-cell">
+                                        <div class="community-avatar">{{ community_data.community.name|first|upper }}</div>
+                                        <span class="community-name">{{ community_data.community.name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ community_data.payment_count }}</td>
+                                <td><strong class="amount">{{ community_data.total|currency }}</strong></td>
+                                <td>{{ community_data.average|currency }}</td>
+                                <td>
+                                    <a href="{% url 'tithepayment:community_payment_detail' community_data.community.id %}?year={{ selected_year }}" class="btn btn-primary">View Payments</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
             </div>
 
             {% if is_paginated %}
@@ -166,6 +185,95 @@
                 <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-disabled); margin-bottom: 20px;"></i>
                 <h3>No communities found</h3>
                 <p>{% if current_filters.community or current_filters.search %}No results match your filters.{% else %}No communities with payments yet.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Top 10 Communities by Contribution -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3><i class="fas fa-trophy"></i> Top 10 Communities by Contribution ({{ selected_year }})</h3>
+            </div>
+            {% if top_communities %}
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Community</th>
+                            <th>Zone</th>
+                            <th>Total Amount</th>
+                            <th>Payment Count</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for community_data in top_communities %}
+                        <tr>
+                            <td>
+                                <span style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; padding: 4px 12px; border-radius: 12px; font-weight: 700;">#{{ forloop.counter }}</span>
+                            </td>
+                            <td>
+                                <div class="community-cell">
+                                    <div class="community-avatar">{{ community_data.community.name|first|upper }}</div>
+                                    <span class="community-name">{{ community_data.community.name }}</span>
+                                </div>
+                            </td>
+                            <td>{{ community_data.zone.name|default:"No Zone" }}</td>
+                            <td><strong class="amount">{{ community_data.total|currency }}</strong></td>
+                            <td>{{ community_data.payment_count }}</td>
+                            <td>{{ community_data.average|currency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px 20px;">
+                <i class="fas fa-chart-line" style="font-size: 2rem; color: var(--text-disabled); margin-bottom: 16px;"></i>
+                <p>No contribution data available</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Best 5 Zones by Tithe Contribution -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3><i class="fas fa-medal"></i> Best 5 Zones by Tithe Contribution ({{ selected_year }})</h3>
+            </div>
+            {% if best_zones %}
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Zone</th>
+                            <th>Total Amount</th>
+                            <th>Payment Count</th>
+                            <th>Average</th>
+                            <th>Communities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zone_data in best_zones %}
+                        <tr>
+                            <td>
+                                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 700;">#{{ forloop.counter }}</span>
+                            </td>
+                            <td><strong>{{ zone_data.zone.name }}</strong></td>
+                            <td><strong class="amount">{{ zone_data.total|currency }}</strong></td>
+                            <td>{{ zone_data.payment_count }}</td>
+                            <td>{{ zone_data.average|currency }}</td>
+                            <td>{{ zone_data.communities|length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px 20px;">
+                <i class="fas fa-globe" style="font-size: 2rem; color: var(--text-disabled); margin-bottom: 16px;"></i>
+                <p>No zone data available</p>
             </div>
             {% endif %}
         </div>

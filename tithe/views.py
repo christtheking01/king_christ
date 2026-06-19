@@ -2610,7 +2610,7 @@ class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         # Get all communities for filter dropdown
-        from member.models import Community
+        from member.models import Community, Zone
         context['communities'] = Community.objects.all()
         
         # Get selected year (default to current year)
@@ -2657,8 +2657,9 @@ class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
         # Calculate total amount and payment count for stats
         context['total_amount'] = queryset.aggregate(total=Sum('amount'))['total'] or 0
         context['payment_count'] = queryset.count()
+        context['community_count'] = Community.objects.all().count()
         
-        # Group payments by community
+        # Group payments by community with zone information
         communities_data = []
         
         # Get communities to display (either selected or all)
@@ -2675,6 +2676,10 @@ class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
             community_payments = queryset.filter(name__in=community_members).select_related('name').order_by('name__name', 'date')
             
             if community_payments.exists():
+                # Get zone for this community
+                community_zone = community.community_zones.first()
+                zone = community_zone.zone if community_zone else None
+                
                 # Group by member
                 from collections import defaultdict
                 member_payments_dict = defaultdict(list)
@@ -2705,14 +2710,56 @@ class CommunityPaymentListView(LoginRequiredMixin, TemplateView):
                         community_monthly_totals[month] += amount
                     community_total += member_data['total']
                 
+                # Calculate payment count and average for this community
+                payment_count = community_payments.count()
+                average = community_total / payment_count if payment_count > 0 else 0
+                
                 communities_data.append({
                     'community': community,
+                    'zone': zone,
                     'members': members_data,
                     'monthly_totals': community_monthly_totals,
-                    'total': community_total
+                    'total': community_total,
+                    'payment_count': payment_count,
+                    'average': average
                 })
         
+        # Sort communities by zone, then by name
+        communities_data.sort(key=lambda x: (x['zone'].name if x['zone'] else '', x['community'].name))
+        
         context['communities_data'] = communities_data
+        
+        # Group by zones and calculate zone totals
+        zones_data = []
+        for zone in Zone.objects.all():
+            # Get communities that belong to this zone using the proper relationship
+            zone_communities_list = zone.get_communities()
+            zone_communities = [c for c in communities_data if c['community'] in zone_communities_list]
+            
+            if zone_communities:
+                zone_total = sum(c['total'] for c in zone_communities)
+                zone_payment_count = sum(c['payment_count'] for c in zone_communities)
+                zone_average = zone_total / zone_payment_count if zone_payment_count > 0 else 0
+                
+                zones_data.append({
+                    'zone': zone,
+                    'communities': zone_communities,
+                    'total': zone_total,
+                    'payment_count': zone_payment_count,
+                    'average': zone_average
+                })
+        
+        # Sort zones by total contribution
+        zones_data.sort(key=lambda x: x['total'], reverse=True)
+        context['zones_data'] = zones_data
+        
+        # Top 10 communities by contribution
+        top_communities = sorted(communities_data, key=lambda x: x['total'], reverse=True)[:10]
+        context['top_communities'] = top_communities
+        
+        # Best 5 zones by tithe contribution
+        best_zones = sorted(zones_data, key=lambda x: x['total'], reverse=True)[:5]
+        context['best_zones'] = best_zones
         
         # Active state for sidebar
         context['finance_active'] = True
