@@ -218,7 +218,7 @@ def list_deleted_members(request):
 def detail_member(request, pk):
     template = "members/detail.html"
     member = get_object_or_404(Member, pk=pk)
-    profile = UserProfile.objects.get_or_create(user=request.user)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
     
     # Get member's committees
     committees = Committee.objects.filter(member=member)

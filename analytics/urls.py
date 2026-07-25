@@ -5,11 +5,22 @@ app_name = 'analytics'
 
 urlpatterns = [
     path('', views.analytics_dashboard, name='analytics_dashboard'),
+    
+    # HTML Analytics Views
+    path('tithes/', views.tithe_analytics_html, name='tithe_analytics'),
+    path('finance/', views.finance_analytics_html, name='finance_analytics'),
+    path('members/', views.member_analytics_html, name='member_analytics'),
+    
+    # API Endpoints (kept for JavaScript usage)
     path('api/tithes/', views.tithe_analytics_api, name='tithe_analytics_api'),
     path('api/finance/', views.finance_analytics_api, name='finance_analytics_api'),
     path('api/members/', views.member_analytics_api, name='member_analytics_api'),
+    
+    # Reports
     path('reports/tithes/', views.tithing_report, name='tithing_report'),
     path('reports/finance/', views.financial_report, name='financial_report'),
+    
+    # Security
     path('security/blocked-users/', views.blocked_users_list, name='blocked_users'),
     path('security/unblock/<int:user_id>/', views.unblock_user_view, name='unblock_user'),
     

@@ -60,6 +60,81 @@ def analytics_dashboard(request):
 
 
 @login_required
+def tithe_analytics_html(request):
+    """HTML view for tithe analytics data"""
+    start_date, end_date = get_date_range(request)
+    
+    # Monthly tithe trends
+    monthly_data = TithePayment.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    ).annotate(
+        month=TruncMonth('date')
+    ).values('month').annotate(
+        total=Sum('amount'),
+        count=Count('id')
+    ).order_by('month')
+    
+    # Top contributors
+    top_contributors = TithePayment.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    ).values('name__name').annotate(
+        total=Sum('amount'),
+        payments=Count('id')
+    ).order_by('-total')[:10]
+    
+    # Summary statistics
+    total_tithes = TithePayment.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    total_payments = TithePayment.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    ).count()
+    
+    avg_tithe = TithePayment.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    ).aggregate(avg=Avg('amount'))['avg'] or 0
+    
+    # Year-over-year comparison
+    previous_start = start_date - relativedelta(years=1)
+    previous_end = end_date - relativedelta(years=1)
+    
+    previous_total = TithePayment.objects.filter(
+        date__gte=previous_start,
+        date__lte=previous_end
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    yoy_change = 0
+    if previous_total > 0:
+        yoy_change = ((total_tithes - previous_total) / previous_total) * 100
+    
+    # Calculate max value for chart scaling
+    max_count = 0
+    if monthly_data:
+        max_count = max((month.total for month in monthly_data), default=0)
+    
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'monthly_data': monthly_data,
+        'top_contributors': top_contributors,
+        'total_tithes': total_tithes,
+        'total_payments': total_payments,
+        'avg_tithe': avg_tithe,
+        'yoy_change': yoy_change,
+        'previous_total': previous_total,
+        'max_count': max_count,
+    }
+    
+    return render(request, 'analytics/tithe_analytics.html', context)
+
+
+@login_required
 def tithe_analytics_api(request):
     """ API endpoint for tithe analytics data """
     try:
@@ -158,6 +233,120 @@ def tithe_analytics_api(request):
                 'yoy_change': 0
             }
         }, status=200)
+
+
+@login_required
+def finance_analytics_html(request):
+    """HTML view for finance analytics data"""
+    start_date, end_date = get_date_range(request)
+    
+    # Income vs Expense
+    income = Transaction.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date,
+        type='Income',
+        status='COMPLETED'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    expense = Transaction.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date,
+        type='Expense',
+        status='COMPLETED'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # Category breakdown
+    category_data = Transaction.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date,
+        status='COMPLETED'
+    ).values('category__name', 'type').annotate(
+        total=Sum('amount')
+    ).order_by('-total')
+    
+    categories = {}
+    for entry in category_data:
+        cat_name = entry['category__name']
+        if cat_name not in categories:
+            categories[cat_name] = {'income': 0, 'expense': 0}
+        if entry['type'] == 'Income':
+            categories[cat_name]['income'] = float(entry['total'])
+        else:
+            categories[cat_name]['expense'] = float(entry['total'])
+    
+    # Monthly trends
+    monthly_finance = Transaction.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date,
+        status='COMPLETED'
+    ).annotate(
+        month=TruncMonth('date')
+    ).values('month', 'type').annotate(
+        total=Sum('amount')
+    ).order_by('month')
+    
+    months = []
+    income_data = []
+    expense_data = []
+    
+    current_month = start_date
+    while current_month <= end_date:
+        month_str = current_month.strftime('%b %Y')
+        months.append(month_str)
+        
+        month_income = next(
+            (float(m['total']) for m in monthly_finance 
+             if m['month'].strftime('%b %Y') == month_str and m['type'] == 'Income'),
+            0
+        )
+        month_expense = next(
+            (float(m['total']) for m in monthly_finance 
+             if m['month'].strftime('%b %Y') == month_str and m['type'] == 'Expense'),
+            0
+        )
+        
+        income_data.append(month_income)
+        expense_data.append(month_expense)
+        
+        current_month += relativedelta(months=1)
+    
+    # Budget utilization
+    active_budgets = Budget.objects.filter(
+        status='ACTIVE',
+        start_date__lte=end_date,
+        end_date__gte=start_date
+    )
+    
+    budget_data = []
+    for budget in active_budgets:
+        budget_data.append({
+            'name': budget.name,
+            'total': float(budget.total_amount),
+            'spent': float(budget.spent_amount),
+            'remaining': float(budget.remaining_amount),
+            'utilization': round((budget.spent_amount / budget.total_amount * 100), 2) if budget.total_amount > 0 else 0
+        })
+    
+    # Calculate max values for chart scaling
+    max_income = max(income_data) if income_data else 0
+    max_expense = max(expense_data) if expense_data else 0
+    max_value = max(max_income, max_expense)
+    
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'income': income,
+        'expense': expense,
+        'net': income - expense,
+        'categories': categories,
+        'months': months,
+        'income_data': income_data,
+        'expense_data': expense_data,
+        'budget_data': budget_data,
+        'max_value': max_value,
+    }
+    
+    return render(request, 'analytics/finance_analytics.html', context)
 
 
 @login_required
@@ -288,6 +477,77 @@ def finance_analytics_api(request):
             'monthly_expense': [],
             'budget_utilization': []
         }, status=200)
+
+
+@login_required
+def member_analytics_html(request):
+    """HTML view for member analytics data"""
+    # Total members
+    total_members = Member.objects.count()
+    active_members = Member.objects.filter(active=True).count()
+    inactive_members = total_members - active_members
+    
+    # Ministry distribution
+    ministry_data = Ministry.objects.annotate(
+        member_count=Count('members', filter=Q(members__active=True))
+    ).values('name', 'member_count').order_by('-member_count')
+    
+    # Community distribution
+    community_data = Community.objects.annotate(
+        member_count=Count('members', filter=Q(members__active=True))
+    ).values('name', 'member_count').order_by('-member_count')
+    
+    # Gender distribution
+    gender_data = Member.objects.filter(
+        active=True
+    ).values('gender').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Membership category distribution
+    category_data = Member.objects.filter(
+        active=True
+    ).values('membership_category').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Membership growth (members joined by month)
+    growth_months = []
+    growth_counts = []
+    try:
+        Member._meta.get_field('created_at')
+        growth_data = Member.objects.filter(
+            created_at__gte=timezone.now() - relativedelta(years=1)
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('month')
+
+        for entry in growth_data:
+            growth_months.append(entry['month'].strftime('%b %Y'))
+            growth_counts.append(entry['count'])
+    except FieldDoesNotExist:
+        growth_months = []
+        growth_counts = []
+    
+    # Calculate max value for chart scaling
+    max_growth = max(growth_counts) if growth_counts else 0
+    
+    context = {
+        'total_members': total_members,
+        'active_members': active_members,
+        'inactive_members': inactive_members,
+        'ministry_data': ministry_data,
+        'community_data': community_data,
+        'gender_data': gender_data,
+        'category_data': category_data,
+        'growth_months': growth_months,
+        'growth_counts': growth_counts,
+        'max_growth': max_growth,
+    }
+    
+    return render(request, 'analytics/member_analytics.html', context)
 
 
 @login_required

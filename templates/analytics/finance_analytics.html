@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load finance_filters %}
+
+{% block title %}Finance Analytics{% endblock %}
+
+{% block internal_style %}
+<link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
+<style>
+    .analytics-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .analytics-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .analytics-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .analytics-header h1 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .stat-card.primary::before { background: var(--gradient-primary); }
+    .stat-card.success::before { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-card.info::before { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .stat-card.warning::before { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .stat-card.danger::before { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-card.success .stat-icon { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-card.info .stat-icon { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .stat-card.warning .stat-icon { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .stat-card.danger .stat-icon { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+    .stat-value {
+        font-family: var(--font-display);
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .glass-card-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .glass-card-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .glass-card-header h3 i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .glass-card-body {
+        padding: 1.5rem;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        padding: 14px 18px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--primary-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.15);
+    }
+
+    .data-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .stat-success { color: var(--success); font-weight: 600; }
+    .stat-warning { color: var(--warning); font-weight: 600; }
+    .stat-info { color: var(--info); font-weight: 600; }
+    .stat-danger { color: var(--danger); font-weight: 600; }
+
+    .monthly-chart-container {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .monthly-chart {
+        display: flex;
+        align-items: flex-end;
+        height: 220px;
+        gap: 12px;
+    }
+
+    .chart-bar-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .bar-pair {
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        height: 180px;
+    }
+
+    .income-bar {
+        width: 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .expense-bar {
+        width: 20px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .income-bar:hover, .expense-bar:hover {
+        transform: scaleY(1.05);
+        filter: brightness(1.1);
+    }
+
+    .bar-value {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+    }
+
+    .month-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .progress-bar-modern {
+        height: 32px;
+        background: var(--bg-tertiary);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: width 1s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill.success { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+    .progress-fill.warning { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+    .progress-fill.danger { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
+
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary-modern {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card, .glass-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-wrapper">
+    <!-- Header -->
+    <div class="analytics-header">
+        <h1><i class="fas fa-chart-line"></i> Finance Analytics</h1>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'analytics:analytics_dashboard' %}" class="btn-modern btn-outline-modern">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{% url 'analytics:financial_report' %}" class="btn-modern btn-primary-modern">
+                <i class="fas fa-file-alt"></i> Full Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+            </div>
+            <h2 class="stat-value">{{ income|currency }}</h2>
+            <div class="stat-label">Total Income</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+            </div>
+            <h2 class="stat-value">{{ expense|currency }}</h2>
+            <div class="stat-label">Total Expenses</div>
+        </div>
+        <div class="stat-card {% if net >= 0 %}primary{% else %}danger{% endif %}">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
+            </div>
+            <h2 class="stat-value">{{ net|currency }}</h2>
+            <div class="stat-label">Net Balance</div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+            </div>
+            <h2 class="stat-value" style="font-size: 1.5rem;">{{ start_date|date:"M d" }} - {{ end_date|date:"M d" }}</h2>
+            <div class="stat-label">Date Range</div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="glass-card">
+        <div class="glass-card-header">
+            <h3><i class="fas fa-chart-bar"></i> Monthly Income vs Expenses</h3>
+        </div>
+        <div class="monthly-chart-container">
+            {% if months %}
+            <div class="monthly-chart">
+                {% for month in months %}
+                <div class="chart-bar-group">
+                    <div class="bar-pair">
+                        <div class="income-bar" style="height: {% if max_value > 0 %}{% widthratio income_data.forloop.counter0 max_value 180 %}px{% else %}0px{% endif %};"></div>
+                        <div class="expense-bar" style="height: {% if max_value > 0 %}{% widthratio expense_data.forloop.counter0 max_value 180 %}px{% else %}0px{% endif %};"></div>
+                    </div>
+                    <div class="bar-value">
+                        <span class="stat-success">{{ income_data.forloop.counter0|currency }}</span>
+                        <span class="stat-warning">{{ expense_data.forloop.counter0|currency }}</span>
+                    </div>
+                    <div class="month-label">{{ month }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                No monthly data available
+            </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="glass-card">
+        <div class="glass-card-header">
+            <h3><i class="fas fa-tags"></i> Category Breakdown</h3>
+        </div>
+        <div class="glass-card-body" style="padding: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Income</th>
+                        <th>Expense</th>
+                        <th>Net</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category_name, data in categories.items %}
+                    <tr>
+                        <td><strong>{{ category_name|default:"Uncategorized" }}</strong></td>
+                        <td class="stat-success">{{ data.income|currency }}</td>
+                        <td class="stat-warning">{{ data.expense|currency }}</td>
+                        <td class="{% if data.income > data.expense %}stat-success{% elif data.expense > data.income %}stat-danger{% else %}stat-info{% endif %}">
+                            {{ data.income|add:data.expense|currency }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                            <i class="fas fa-tags" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block;"></i>
+                            No category data available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Budget Utilization -->
+    <div class="glass-card">
+        <div class="glass-card-header">
+            <h3><i class="fas fa-wallet"></i> Budget Utilization</h3>
+        </div>
+        <div class="glass-card-body">
+            {% if budget_data %}
+            {% for budget in budget_data %}
+            <div style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>{{ budget.name }}</strong>
+                    <span>{{ budget.spent|currency }} / {{ budget.total|currency }}</span>
+                </div>
+                <div class="progress-bar-modern">
+                    <div class="progress-fill {% if budget.utilization > 80 %}danger{% elif budget.utilization > 50 %}warning{% else %}success{% endif %}" 
+                         style="width: {{ budget.utilization }}%;">
+                        {{ budget.utilization }}%
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    <span>Spent: {{ budget.spent|currency }}</span>
+                    <span>Remaining: {{ budget.remaining|currency }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                <i class="fas fa-wallet" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block;"></i>
+                No budget data available
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

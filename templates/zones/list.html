@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block internal_style %}
 <link href="{% static 'style/css/glassmorphism.css' %}" rel="stylesheet">
@@ -562,7 +563,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-content">
-                <p class="stat-value">{% with total=0 %}{% for zone in zones %}{% with zone_total=zone.get_total_members %}{{ zone_total|add:total }}{% endwith %}{% endfor %}{{ total }}{% endwith %}</p>
+                <p class="stat-value">{{ zones|sum_attr:'get_total_members' }}</p>
                 <p class="stat-label">Total Members</p>
             </div>
         </div>
@@ -571,7 +572,7 @@
                 <i class="fas fa-church"></i>
             </div>
             <div class="stat-content">
-                <p class="stat-value">{% with total=0 %}{% for zone in zones %}{% with zone_total=zone.get_communities_count %}{{ zone_total|add:total }}{% endwith %}{% endfor %}{{ total }}{% endwith %}</p>
+                <p class="stat-value">{{ zones|sum_attr:'get_communities_count' }}</p>
                 <p class="stat-label">Total Communities</p>
             </div>
         </div>

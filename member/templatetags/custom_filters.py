@@ -56,3 +56,11 @@ def get_item(dictionary, key):
         return dictionary.get(key)
     except (AttributeError, TypeError):
         return None
+
+@register.filter
+def sum_attr(queryset, attr):
+    """Sums a specific attribute across all objects in a queryset"""
+    try:
+        return sum(getattr(obj, attr)() if callable(getattr(obj, attr)) else getattr(obj, attr) for obj in queryset)
+    except (AttributeError, TypeError):
+        return 0
