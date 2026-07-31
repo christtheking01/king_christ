@@ -246,13 +246,20 @@
     });
   }
 
+  let chartInstance = null;
+
   function renderChart() {
     const ctx = document.getElementById('monthlyTitheChart');
     if (!ctx || !monthLabels.length) {
       return;
     }
 
-    new Chart(ctx, {
+    // Destroy existing chart instance if it exists
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: monthLabels,
