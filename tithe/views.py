@@ -16,6 +16,8 @@ import json
 import hashlib
 import hmac
 import time
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 
 from .models import TithePayment, TitheReceipt
 from .forms import TithePaymentForm
@@ -563,8 +565,10 @@ def quick_add_tithe_payment(request):
 
 @login_required
 def export_tithe_payments(request):
-    """Export tithe payments to CSV - requires authentication"""
+    """Export tithe payments to Excel with separate sheets per community"""
     try:
+        from member.models import Community
+        
         # Get filtered queryset
         queryset = TithePayment.objects.all().order_by('-date')
         
@@ -580,21 +584,104 @@ def export_tithe_payments(request):
         if status_filter:
             queryset = queryset.filter(status=status_filter)
         
+        # Create Excel workbook
+        wb = Workbook()
+        
+        # Remove default sheet
+        if 'Sheet' in wb.sheetnames:
+            wb.remove(wb['Sheet'])
+        
+        # Get all communities
+        communities = Community.objects.all().order_by('name')
+        
+        # Header style
+        header_font = Font(bold=True, color='FFFFFF')
+        header_fill = PatternFill(start_color='4e73df', end_color='4e73df', fill_type='solid')
+        header_alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Create a sheet for each community
+        for community in communities:
+            # Sanitize sheet name (Excel has restrictions)
+            sheet_name = str(community.name)[:31]  # Max 31 chars
+            sheet_name = sheet_name.replace('/', '-').replace('\\', '-').replace('*', '').replace('?', '').replace(':', '').replace('[', '').replace(']', '')
+            
+            # Create sheet
+            ws = wb.create_sheet(title=sheet_name)
+            
+            # Get payments for this community
+            community_payments = queryset.filter(name__shepherd=community)
+            
+            # Add headers
+            headers = ['Date', 'Member Name', 'Contact Number', 'Amount', 'Payment Method']
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_alignment
+            
+            # Add data
+            for row_num, payment in enumerate(community_payments, 2):
+                ws.cell(row=row_num, column=1, value=payment.date.strftime('%Y-%m-%d %H:%M'))
+                ws.cell(row=row_num, column=2, value=payment.name.name)
+                ws.cell(row=row_num, column=3, value=payment.contact_number)
+                ws.cell(row=row_num, column=4, value=float(payment.amount))
+                ws.cell(row=row_num, column=5, value=payment.get_status_display())
+            
+            # Auto-adjust column widths
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column].width = adjusted_width
+        
+        # Create a summary sheet with all payments
+        summary_ws = wb.create_sheet(title='Summary', index=0)
+        
+        # Add headers to summary
+        headers = ['Date', 'Member Name', 'Community', 'Contact Number', 'Amount', 'Payment Method']
+        for col_num, header in enumerate(headers, 1):
+            cell = summary_ws.cell(row=1, column=col_num, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        # Add all data to summary
+        for row_num, payment in enumerate(queryset, 2):
+            community_name = payment.name.shepherd.name if payment.name.shepherd else 'No Community'
+            summary_ws.cell(row=row_num, column=1, value=payment.date.strftime('%Y-%m-%d %H:%M'))
+            summary_ws.cell(row=row_num, column=2, value=payment.name.name)
+            summary_ws.cell(row=row_num, column=3, value=community_name)
+            summary_ws.cell(row=row_num, column=4, value=payment.contact_number)
+            summary_ws.cell(row=row_num, column=5, value=float(payment.amount))
+            summary_ws.cell(row=row_num, column=6, value=payment.get_status_display())
+        
+        # Auto-adjust column widths for summary
+        for col in summary_ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            summary_ws.column_dimensions[column].width = adjusted_width
+        
         # Create HTTP response
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="tithe_payments.csv"'
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="tithe_payments_by_community.xlsx"'
         
-        writer = csv.writer(response)
-        writer.writerow(['Date', 'Member Name', 'Contact Number', 'Amount', 'Payment Method'])
-        
-        for payment in queryset:
-            writer.writerow([
-                payment.date.strftime('%Y-%m-%d %H:%M'),
-                payment.name.name,
-                payment.contact_number,
-                payment.amount,
-                payment.get_status_display()
-            ])
+        # Save workbook to response
+        wb.save(response)
         
         return response
         
