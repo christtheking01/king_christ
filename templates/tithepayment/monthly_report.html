@@ -211,6 +211,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // Use global window object to track chart instance across page loads
+  if (!window.monthlyTitheChartInstance) {
+    window.monthlyTitheChartInstance = null;
+  }
+
   const monthLabels = [{% for item in monthly_data %}'{{ item.month|date:"M Y" }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
   const monthlyTotals = [{% for item in monthly_data %}{{ item.total_amount|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
   const monthCounts = [{% for item in monthly_data %}{{ item.payment_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
@@ -246,7 +251,18 @@
     });
   }
 
-  let chartInstance = null;
+  function cleanupChart() {
+    // Destroy existing chart instance if it exists
+    if (window.monthlyTitheChartInstance) {
+      try {
+        window.monthlyTitheChartInstance.destroy();
+        window.monthlyTitheChartInstance = null;
+      } catch (e) {
+        console.warn('Error destroying chart:', e);
+        window.monthlyTitheChartInstance = null;
+      }
+    }
+  }
 
   function renderChart() {
     const ctx = document.getElementById('monthlyTitheChart');
@@ -254,12 +270,16 @@
       return;
     }
 
-    // Destroy existing chart instance if it exists
-    if (chartInstance) {
-      chartInstance.destroy();
+    // Clean up any existing chart
+    cleanupChart();
+
+    // Check if Chart is already registered on this canvas
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+      existingChart.destroy();
     }
 
-    chartInstance = new Chart(ctx, {
+    window.monthlyTitheChartInstance = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: monthLabels,
@@ -337,6 +357,16 @@
   document.addEventListener('DOMContentLoaded', () => {
     updateSummary();
     renderChart();
+  });
+
+  // Cleanup chart when page is unloaded
+  window.addEventListener('beforeunload', () => {
+    cleanupChart();
+  });
+
+  // Cleanup chart when navigating away (for SPA-like behavior)
+  window.addEventListener('pagehide', () => {
+    cleanupChart();
   });
 </script>
 {% endblock %}
