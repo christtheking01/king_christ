@@ -48,11 +48,8 @@ class SMSService:
         sender_id = getattr(settings, 'AFRICASTALKING_SENDER_ID', None)
 
         try:
-            # Add prefix to message
-            prefixed_message = f"Parokia ya Kristo Mfalme:\n{message}"
-            
             params = {
-                'message': prefixed_message,
+                'message': message,
                 'recipients': [phone_number]
             }
             if sender_id:
