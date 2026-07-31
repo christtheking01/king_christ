@@ -565,8 +565,10 @@ def quick_add_tithe_payment(request):
 
 @login_required
 def export_tithe_payments(request):
-    """Export tithe payments to Excel with separate sheets per community"""
+    """Export tithe payments to Excel with separate sheets per month"""
     try:
+        from django.db.models.functions import TruncMonth
+        from django.db.models import Sum, Count
         from member.models import Community
         
         # Get filtered queryset
@@ -584,6 +586,23 @@ def export_tithe_payments(request):
         if status_filter:
             queryset = queryset.filter(status=status_filter)
         
+        # Apply export filters from modal
+        community_id = request.GET.get('community')
+        if community_id:
+            queryset = queryset.filter(name__shepherd_id=community_id)
+        
+        year_filter = request.GET.get('year')
+        if year_filter:
+            queryset = queryset.filter(date__year=year_filter)
+        
+        month_filter = request.GET.get('month')
+        if month_filter:
+            try:
+                year, month = map(int, month_filter.split('-'))
+                queryset = queryset.filter(date__year=year, date__month=month)
+            except (ValueError, AttributeError):
+                pass
+        
         # Create Excel workbook
         wb = Workbook()
         
@@ -591,28 +610,37 @@ def export_tithe_payments(request):
         if 'Sheet' in wb.sheetnames:
             wb.remove(wb['Sheet'])
         
-        # Get all communities
-        communities = Community.objects.all().order_by('name')
-        
         # Header style
         header_font = Font(bold=True, color='FFFFFF')
         header_fill = PatternFill(start_color='4e73df', end_color='4e73df', fill_type='solid')
         header_alignment = Alignment(horizontal='center', vertical='center')
         
-        # Create a sheet for each community
-        for community in communities:
+        # Get all months with payments (after filtering)
+        months = queryset.annotate(
+            month=TruncMonth('date')
+        ).values('month').distinct().order_by('-month')
+        
+        # Create a sheet for each month
+        for month_data in months:
+            month = month_data['month']
+            # Format month name (e.g., "Jan 2024")
+            sheet_name = month.strftime('%b %Y')
+            
             # Sanitize sheet name (Excel has restrictions)
-            sheet_name = str(community.name)[:31]  # Max 31 chars
+            sheet_name = sheet_name[:31]  # Max 31 chars
             sheet_name = sheet_name.replace('/', '-').replace('\\', '-').replace('*', '').replace('?', '').replace(':', '').replace('[', '').replace(']', '')
             
             # Create sheet
             ws = wb.create_sheet(title=sheet_name)
             
-            # Get payments for this community
-            community_payments = queryset.filter(name__shepherd=community)
+            # Get payments for this month
+            month_payments = queryset.filter(
+                date__year=month.year,
+                date__month=month.month
+            ).order_by('-date')
             
             # Add headers
-            headers = ['Date', 'Member Name', 'Contact Number', 'Amount', 'Payment Method']
+            headers = ['Date', 'Member Name', 'Community', 'Contact Number', 'Amount', 'Payment Method']
             for col_num, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)
                 cell.font = header_font
@@ -620,12 +648,14 @@ def export_tithe_payments(request):
                 cell.alignment = header_alignment
             
             # Add data
-            for row_num, payment in enumerate(community_payments, 2):
+            for row_num, payment in enumerate(month_payments, 2):
+                community_name = payment.name.shepherd.name if payment.name.shepherd else 'No Community'
                 ws.cell(row=row_num, column=1, value=payment.date.strftime('%Y-%m-%d %H:%M'))
                 ws.cell(row=row_num, column=2, value=payment.name.name)
-                ws.cell(row=row_num, column=3, value=payment.contact_number)
-                ws.cell(row=row_num, column=4, value=float(payment.amount))
-                ws.cell(row=row_num, column=5, value=payment.get_status_display())
+                ws.cell(row=row_num, column=3, value=community_name)
+                ws.cell(row=row_num, column=4, value=payment.contact_number)
+                ws.cell(row=row_num, column=5, value=float(payment.amount))
+                ws.cell(row=row_num, column=6, value=payment.get_status_display())
             
             # Auto-adjust column widths
             for col in ws.columns:
@@ -678,7 +708,7 @@ def export_tithe_payments(request):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="tithe_payments_by_community.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="tithe_payments_by_month.xlsx"'
         
         # Save workbook to response
         wb.save(response)
@@ -730,6 +760,10 @@ class MonthlyReportView(LoginRequiredMixin, ListView):
         # Get available years
         available_years = TithePayment.objects.dates('date', 'year', order='DESC')
         context['available_years'] = [year.year for year in available_years]
+        
+        # Get available communities for export filter
+        from member.models import Community
+        context['available_communities'] = Community.objects.all().order_by('name')
         
         # Convert queryset to list for template rendering
         if 'monthly_data' in context:
