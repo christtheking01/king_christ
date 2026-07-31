@@ -302,6 +302,10 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
         scales: {
           y: {
             beginAtZero: true,
@@ -332,6 +336,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('Chart Data:', { monthLabels, monthlyTotals, monthCounts });
     updateSummary();
     renderChart();
   });
