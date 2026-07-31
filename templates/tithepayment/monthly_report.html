@@ -267,6 +267,7 @@
   function renderChart() {
     const ctx = document.getElementById('monthlyTitheChart');
     if (!ctx || !monthLabels.length) {
+      console.log('Chart rendering skipped: canvas or data missing');
       return;
     }
 
@@ -279,42 +280,31 @@
       existingChart.destroy();
     }
 
+    // Clone data arrays to prevent reference issues
+    const labels = [...monthLabels];
+    const totals = [...monthlyTotals];
+    const counts = [...monthCounts];
+
     window.monthlyTitheChartInstance = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: monthLabels,
+        labels: labels,
         datasets: [
           {
-            type: 'line',
-            label: 'Collection',
-            data: monthlyTotals,
+            label: 'Collection (TZS)',
+            data: totals,
+            backgroundColor: '#4e73df',
             borderColor: '#4e73df',
-            backgroundColor: 'rgba(78, 115, 223, 0.12)',
-            tension: 0.35,
-            fill: true,
-            yAxisID: 'y1'
-          },
-          {
-            label: 'Payments',
-            data: monthCounts,
-            backgroundColor: '#1cc88a',
-            borderRadius: 6,
-            borderSkipped: false,
-            yAxisID: 'y2'
+            borderWidth: 1
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
         scales: {
-          y1: {
-            type: 'linear',
-            position: 'left',
+          y: {
+            beginAtZero: true,
             ticks: {
               callback: value => formatTZS(value)
             },
@@ -322,30 +312,17 @@
               display: true,
               text: 'Amount (TZS)'
             }
-          },
-          y2: {
-            type: 'linear',
-            position: 'right',
-            grid: {
-              drawOnChartArea: false
-            },
-            title: {
-              display: true,
-              text: 'Payments'
-            }
           }
         },
         plugins: {
           legend: {
-            display: false
+            display: true,
+            position: 'top'
           },
           tooltip: {
             callbacks: {
               label: context => {
-                if (context.dataset.label === 'Collection') {
-                  return `${context.dataset.label}: ${formatTZS(context.parsed.y)}`;
-                }
-                return `${context.dataset.label}: ${context.parsed.y}`;
+                return `${context.dataset.label}: ${formatTZS(context.parsed.y)}`;
               }
             }
           }
