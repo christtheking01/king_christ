@@ -65,7 +65,12 @@ def send_tithe_sms_notification(sender, instance, created, **kwargs):
         
         phone_number = format_phone_number(raw_phone)
         
-        member_name = instance.name.name if hasattr(instance.name, 'name') else "Mpendwa"
+        # Handle both member and guest payments
+        if instance.name:
+            member_name = instance.name.name if hasattr(instance.name, 'name') else "Mpendwa"
+        else:
+            member_name = instance.guest_name or "Mpendwa"
+        
         formatted_amount = "{:,}".format(instance.amount)
         month_name = get_swahili_month(instance.date)
         

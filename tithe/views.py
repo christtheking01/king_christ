@@ -20,7 +20,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 
 from .models import TithePayment, TitheReceipt
-from .forms import TithePaymentForm
+from .forms import TithePaymentForm, GuestTithePaymentForm
 from member.models import Member
 
 
@@ -336,6 +336,57 @@ class TithePaymentCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
+class GuestTithePaymentCreateView(LoginRequiredMixin, CreateView):
+    form_class = GuestTithePaymentForm
+    template_name = 'tithepayment/guest_create.html'
+    success_url = reverse_lazy('tithepayment:tithepayment_list')
+
+    def form_valid(self, form):
+        tithe_payment = form.save()
+        
+        # Auto-generate receipt if enabled
+        if getattr(settings, 'TITHE_AUTO_GENERATE_RECEIPT', True):
+            generated_by = self.request.user.get_full_name() or self.request.user.username
+            receipt, created = TitheReceipt.objects.get_or_create(
+                tithe_payment=tithe_payment,
+                defaults={
+                    'generated_by': generated_by,
+                    'church_name': settings.CHURCH_NAME,
+                    'church_address': settings.CHURCH_ADDRESS,
+                    'church_phone': settings.CHURCH_PHONE,
+                }
+            )
+            
+            # Auto-print if enabled
+            if created and getattr(settings, 'TITHE_AUTO_PRINT_RECEIPT', False):
+                receipt.mark_printed()
+                messages.info(
+                    self.request,
+                    f'Receipt {receipt.receipt_number} generated and marked as printed.'
+                )
+            elif created:
+                messages.info(
+                    self.request,
+                    f'Receipt {receipt.receipt_number} generated. Ready to print.'
+                )
+        
+        messages.success(
+            self.request, 
+            f'Guest tithe payment of Tsh {form.cleaned_data["amount"]} for {form.cleaned_data["guest_name"]} created successfully!'
+        )
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Guest Tithe Payment'
+        
+        # Active state for sidebar
+        context['finance_active'] = True
+        context['tithepayment_active_create'] = True
+        
+        return context
+
+
 class TithePaymentUpdateView(LoginRequiredMixin, UpdateView):
     model = TithePayment
     form_class = TithePaymentForm
@@ -345,12 +396,23 @@ class TithePaymentUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         # Auto-populate contact number if member is changed
         member = form.cleaned_data['name']
+        guest_name = form.cleaned_data.get('guest_name', '')
         tithe_payment = form.save(commit=False)
-        tithe_payment.contact_number = str(member.telephone) if member.telephone else ''
+        
+        if member:
+            # Member payment
+            tithe_payment.contact_number = str(member.telephone) if member.telephone else ''
+            tithe_payment.guest_name = ''
+            payment_display = member.name
+        else:
+            # Guest payment
+            tithe_payment.contact_number = form.cleaned_data.get('contact_number', '')
+            tithe_payment.guest_name = guest_name
+            payment_display = guest_name or 'Guest'
         
         messages.success(
             self.request, 
-            f'Tithe payment for {member.name} updated successfully!'
+            f'Tithe payment for {payment_display} updated successfully!'
         )
         return super().form_valid(form)
 
@@ -359,7 +421,12 @@ class TithePaymentUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = f'Edit Tithe Payment - {self.object.name.name}'
+        
+        # Handle both member and guest payments
+        if self.object.name:
+            context['title'] = f'Edit Tithe Payment - {self.object.name.name}'
+        else:
+            context['title'] = f'Edit Tithe Payment - {self.object.guest_name or "Guest"}'
         
         # Active state for sidebar
         context['finance_active'] = True

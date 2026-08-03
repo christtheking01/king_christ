@@ -31,6 +31,7 @@ urlpatterns = [
     path('', views.TithePaymentListView.as_view(), name='tithepayment_list'),
     path('summary/', views.TithePaymentSummaryView.as_view(), name='tithepayment_summary'),
     path('create/', views.TithePaymentCreateView.as_view(), name='tithepayment_create'),
+    path('guest/create/', views.GuestTithePaymentCreateView.as_view(), name='guest_tithepayment_create'),
     path('<int:pk>/', views.TithePaymentDetailView.as_view(), name='tithepayment_detail'),
     path('<int:pk>/update/', views.TithePaymentUpdateView.as_view(), name='tithepayment_update'),
     path('<int:pk>/delete/', views.TithePaymentDeleteView.as_view(), name='tithepayment_delete'),

@@ -1,30 +1,83 @@
 from django import forms
 from django.forms import formset_factory
+from django.utils import timezone
 from .models import TithePayment
 from member.models import Member
 
 class TithePaymentForm(forms.ModelForm):
     class Meta:
         model = TithePayment
-        fields = ['name', 'contact_number', 'amount', 'status', 'date']
+        fields = ['name', 'guest_name', 'contact_number', 'amount', 'status', 'date']
         widgets = {
             'name': forms.HiddenInput(),
-            'contact_number': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'amount': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+            'guest_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Guest name...'}),
+            'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone number...'}),
+            'date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Rename label for contact_number to match telephone
         self.fields['contact_number'].label = 'Telephone'
+        self.fields['guest_name'].required = False
+        self.fields['name'].required = False
         
     def clean(self):
         cleaned_data = super().clean()
-        # Ensure member is selected
-        if not cleaned_data.get('name'):
-            raise forms.ValidationError("Please select a member.")
+        member = cleaned_data.get('name')
+        guest_name = cleaned_data.get('guest_name')
+        
+        # Ensure either member or guest name is provided
+        if not member and not guest_name:
+            raise forms.ValidationError("Please select a member or enter a guest name.")
+        
         return cleaned_data
+
+
+class GuestTithePaymentForm(forms.ModelForm):
+    """Dedicated form for guest tithe payments with full details"""
+    class Meta:
+        model = TithePayment
+        fields = ['guest_name', 'contact_number', 'amount', 'status', 'date']
+        widgets = {
+            'guest_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter guest name...'
+            }),
+            'contact_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter phone number...'
+            }),
+            'date': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-control'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'step': '0.01',
+                'min': '0',
+                'class': 'form-control',
+                'placeholder': 'Enter amount...'
+            }),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['guest_name'].required = True
+        self.fields['contact_number'].required = True
+        self.fields['amount'].required = True
+        self.fields['status'].required = True
+        self.fields['date'].required = True
+        self.fields['status'].initial = 'cash'
+    
+    def save(self, commit=True):
+        payment = super().save(commit=False)
+        payment.name = None  # Ensure no member is linked
+        if commit:
+            payment.save()
+        return payment
 
 
 class BulkTithePaymentForm(forms.ModelForm):
@@ -60,6 +113,7 @@ BulkTithePaymentFormSet = formset_factory(
     BulkTithePaymentForm,
     extra=5,
     min_num=1,
+    max_num=500,  # Allow up to 500 payments in bulk
     validate_min=True,
     can_delete=True
 )

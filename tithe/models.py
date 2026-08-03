@@ -17,7 +17,8 @@ class TithePayment(models.Model):
     last_sms_error = models.TextField(blank=True, null=True)
 
     date = models.DateTimeField(default=timezone.now, verbose_name='Invoice Date')
-    name = models.ForeignKey(Member, verbose_name="Member", on_delete=models.CASCADE)  # Direct reference
+    name = models.ForeignKey(Member, verbose_name="Member", on_delete=models.CASCADE, null=True, blank=True)  # Direct reference
+    guest_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Guest Name")
     contact_number = models.CharField(max_length=13, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
@@ -27,7 +28,10 @@ class TithePayment(models.Model):
     )
     
     def __str__(self):
-        return f"{self.name} - {self.amount} - {self.date.strftime('%Y-%m-%d')}"
+        if self.name:
+            return f"{self.name} - {self.amount} - {self.date.strftime('%Y-%m-%d')}"
+        else:
+            return f"{self.guest_name or 'Guest'} - {self.amount} - {self.date.strftime('%Y-%m-%d')}"
 
     
 

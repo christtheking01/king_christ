@@ -39,6 +39,10 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.s
 csrf_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_env.split(',') if origin.strip()] if csrf_origins_env else ['http://localhost', 'http://127.0.0.1']
 
+# Data upload limits for bulk payments
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # Allow up to 5000 form fields (for bulk payments)
+
 
 # Application definition
 
