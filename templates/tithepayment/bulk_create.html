@@ -6,23 +6,27 @@
     .form-container {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 24px;
     }
 
     .page-header {
-        margin-bottom: 30px;
-        padding-bottom: 20px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
         border-bottom: 1px solid var(--divider);
     }
 
     .page-title {
-        font-size: 1.75rem;
-        font-weight: 600;
+        font-size: 2rem;
+        font-weight: 700;
         color: var(--text-primary);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         margin-bottom: 8px;
+    }
+
+    .page-title i {
+        color: var(--primary);
     }
 
     .breadcrumb {
@@ -39,66 +43,138 @@
     .breadcrumb-item a {
         color: var(--primary);
         text-decoration: none;
+        font-weight: 500;
     }
 
     .breadcrumb-item a:hover {
         text-decoration: underline;
     }
 
-    .formset-container {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        box-shadow: var(--shadow-sm);
+    .breadcrumb-separator {
+        color: var(--text-secondary);
     }
 
-    .formset-header {
+    /* Modern Card Design */
+    .modern-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--border);
+    }
+
+    .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid var(--divider);
-    }
-
-    .formset-header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        color: var(--text-primary);
-    }
-
-    .formset-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .formset-table th {
-        background: var(--surface-variant);
-        padding: 12px 16px;
-        text-align: left;
-        font-weight: 600;
-        color: var(--text-primary);
+        margin-bottom: 24px;
+        padding-bottom: 16px;
         border-bottom: 2px solid var(--divider);
     }
 
-    .formset-table td {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--divider);
-        vertical-align: top;
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .formset-table tr:last-child td {
+    .card-title i {
+        color: var(--primary);
+    }
+
+    /* Date Picker Section */
+    .date-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        color: white;
+    }
+
+    .date-section label {
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: block;
+        font-size: 1rem;
+    }
+
+    .date-section input[type="datetime-local"] {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        max-width: 320px;
+        font-weight: 500;
+    }
+
+    .date-section .help-text {
+        color: rgba(255, 255, 255, 0.9);
+        margin-top: 8px;
+        font-size: 0.875rem;
+    }
+
+    /* Modern Table Design */
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 24px;
+    }
+
+    .modern-table thead {
+        background: var(--surface-variant);
+    }
+
+    .modern-table th {
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid var(--divider);
+    }
+
+    .modern-table th:first-child {
+        border-radius: 8px 0 0 0;
+    }
+
+    .modern-table th:last-child {
+        border-radius: 0 8px 0 0;
+    }
+
+    .modern-table td {
+       padding: 16px;
+        border-bottom: 1px solid var(--divider);
+        vertical-align: middle;
+        background: var(--surface);
+    }
+
+    .modern-table tr:hover td {
+        background: var(--surface-variant-hover);
+    }
+
+    .modern-table tr:last-child td {
         border-bottom: none;
     }
 
+    /* Modern Form Controls */
     .form-control {
         width: 100%;
-        padding: 8px 12px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: var(--surface);
+        color: var(--text-primary);
     }
 
     .form-control:focus {
@@ -109,90 +185,123 @@
 
     .form-control.is-invalid {
         border-color: var(--danger);
+        background-color: rgba(244, 67, 54, 0.05);
     }
 
-    .error-message {
-        color: var(--danger);
-        font-size: 0.75rem;
-        margin-top: 4px;
-    }
-
+    /* Modern Buttons */
     .btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 10px 20px;
-        border-radius: var(--radius-md);
-        font-weight: 500;
-        font-size: 0.875rem;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
         transition: all 0.2s;
         border: none;
         text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+        transform: translateY(0);
     }
 
     .btn-primary {
-        background: var(--primary);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
     }
 
     .btn-primary:hover {
-        background: var(--primary-dark);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     }
 
     .btn-secondary {
         background: var(--surface-variant);
         color: var(--text-primary);
-        border: 1px solid var(--border);
+        border: 2px solid var(--border);
     }
 
     .btn-secondary:hover {
         background: var(--surface-variant-hover);
+        border-color: var(--primary);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     }
 
     .btn-danger {
-        background: var(--danger);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
     }
 
     .btn-danger:hover {
-        background: var(--danger-dark);
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     }
 
     .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.75rem;
+        padding: 8px 16px;
+        font-size: 0.875rem;
     }
 
+    .btn-icon {
+        padding: 8px;
+        border-radius: 6px;
+    }
+
+    /* Form Actions */
     .form-actions {
         display: flex;
         gap: 12px;
         justify-content: flex-end;
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid var(--divider);
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 2px solid var(--divider);
     }
 
+    /* Delete Button */
     .delete-row {
         color: var(--danger);
         cursor: pointer;
         font-size: 1.25rem;
+        padding: 8px;
+        border-radius: 6px;
+        transition: all 0.2s;
     }
 
     .delete-row:hover {
         color: var(--danger-dark);
+        background: rgba(239, 68, 68, 0.1);
     }
 
-    .empty-formset {
-        display: none;
+    /* Error Messages */
+    .error-message {
+        color: var(--danger);
+        font-size: 0.8rem;
+        margin-top: 6px;
+        font-weight: 500;
     }
 
+    /* Help Text */
     .help-text {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: var(--text-secondary);
-        margin-top: 4px;
+        margin-top: 6px;
     }
 
+    /* Member Search */
     .member-search-container {
         position: relative;
     }
@@ -202,15 +311,15 @@
         top: 100%;
         left: 0;
         right: 0;
-        background-color: #ffffff !important;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-        max-height: 200px;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-height: 250px;
         overflow-y: auto;
         z-index: 1000;
         display: none;
-        opacity: 1;
+        margin-top: 4px;
     }
 
     .member-search-results.active {
@@ -218,11 +327,10 @@
     }
 
     .member-search-item {
-        padding: 10px 14px;
+        padding: 12px 16px;
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: all 0.2s;
         border-bottom: 1px solid var(--divider);
-        background-color: #ffffff !important;
     }
 
     .member-search-item:last-child {
@@ -234,20 +342,106 @@
     }
 
     .member-search-item .member-name {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-primary);
+        font-size: 0.95rem;
     }
 
     .member-search-item .member-phone {
         font-size: 0.875rem;
         color: var(--text-secondary);
+        margin-top: 4px;
     }
 
     .selected-member-info {
-        padding: 8px 12px;
-        background: rgba(52, 168, 83, 0.1);
-        border: 1px solid rgba(52, 168, 83, 0.2);
-        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+        border-radius: 8px;
+        margin-top: 12px;
+    }
+
+    .selected-member-info .member-name-display {
+        font-weight: 600;
+        color: #059669;
+    }
+
+    .selected-member-info .member-phone-display {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    /* Payment Method Radio Buttons */
+    .payment-method-group {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .payment-method-option {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .payment-method-option input[type="radio"] {
+        display: none;
+    }
+
+    .payment-method-option label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+        color: var(--text-primary);
+        background: var(--surface);
+    }
+
+    .payment-method-option input[type="radio"]:checked + label {
+        border-color: var(--primary);
+        background: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary);
+    }
+
+    .payment-method-option label:hover {
+        border-color: var(--primary);
+    }
+
+    /* Stats Summary */
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: var(--surface-variant);
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid var(--border);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-value.highlight {
+        color: var(--primary);
     }
 </style>
 {% endblock %}
@@ -283,21 +477,44 @@
         {% csrf_token %}
         {{ formset.management_form }}
 
-        <div class="formset-container">
-            <div class="formset-header">
-                <h3>Payment Entries</h3>
-                <button type="button" class="btn btn-secondary btn-sm" id="add-form">
+        <div class="modern-card">
+            <!-- Date & Time Section -->
+            <div class="date-section">
+                <label for="bulk-payment-date">
+                    <i class="fas fa-calendar-alt"></i> Payment Date & Time
+                </label>
+                <input type="datetime-local" id="bulk-payment-date" name="bulk_payment_date" required>
+                <small class="help-text">This date and time will be applied to all payment entries in this bulk creation.</small>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-label">Total Rows</div>
+                    <div class="stat-value highlight" id="total-rows">5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Amount</div>
+                    <div class="stat-value highlight" id="total-amount">TZS 0</div>
+                </div>
+            </div>
+
+            <!-- Payment Entries -->
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list"></i> Payment Entries
+                </h3>
+                <button type="button" class="btn btn-success btn-sm" id="add-form">
                     <i class="fas fa-plus"></i> Add Row
                 </button>
             </div>
 
-            <table class="formset-table" id="formset-table">
+            <table class="modern-table" id="formset-table">
                 <thead>
                     <tr>
-                        <th style="width: 30%;">Member</th>
-                        <th style="width: 15%;">Amount (TZS)</th>
-                        <th style="width: 15%;">Payment Method</th>
-                        <th style="width: 20%;">Date & Time</th>
+                        <th style="width: 40%;">Member</th>
+                        <th style="width: 25%;">Amount (TZS)</th>
+                        <th style="width: 25%;">Payment Method</th>
                         <th style="width: 10%;">Actions</th>
                     </tr>
                 </thead>
@@ -309,10 +526,9 @@
                                 {{ form.member_search }}
                                 {{ form.name }}
                                 <div class="member-search-results" id="search-results-{{ forloop.counter0 }}"></div>
-                                <div class="selected-member-info" id="member-info-{{ forloop.counter0 }}" style="display: none; margin-top: 8px; font-size: 0.875rem; color: var(--text-secondary);">
-                                    <i class="fas fa-user"></i> <span class="member-name-display"></span>
-                                    <br>
-                                    <i class="fas fa-phone"></i> <span class="member-phone-display"></span>
+                                <div class="selected-member-info" id="member-info-{{ forloop.counter0 }}" style="display: none;">
+                                    <div class="member-name-display"></div>
+                                    <div class="member-phone-display"></div>
                                 </div>
                             </div>
                             {% if form.name.errors %}
@@ -326,24 +542,30 @@
                             {% endif %}
                         </td>
                         <td>
+                            <div class="payment-method-group">
+                                <div class="payment-method-option">
+                                    <input type="radio" id="id_form-{{ forloop.counter0 }}-status_cash" name="form-{{ forloop.counter0 }}-status" value="cash" {% if form.status.value == 'cash' or not form.status.value %}checked{% endif %}>
+                                    <label for="id_form-{{ forloop.counter0 }}-status_cash">
+                                        <i class="fas fa-money-bill-wave"></i> Cash
+                                    </label>
+                                </div>
+                                <div class="payment-method-option">
+                                    <input type="radio" id="id_form-{{ forloop.counter0 }}-status_bank" name="form-{{ forloop.counter0 }}-status" value="bank" {% if form.status.value == 'bank' %}checked{% endif %}>
+                                    <label for="id_form-{{ forloop.counter0 }}-status_bank">
+                                        <i class="fas fa-university"></i> Bank
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.status }}
                             {% if form.status.errors %}
                             <div class="error-message">{{ form.status.errors }}</div>
                             {% endif %}
                         </td>
                         <td>
-                            {{ form.date }}
-                            {% if form.date.errors %}
-                            <div class="error-message">{{ form.date.errors }}</div>
-                            {% endif %}
-                        </td>
-                        <td>
                             {{ form.DELETE }}
-                            {% if forloop.counter > 1 %}
                             <span class="delete-row" onclick="deleteRow(this)">
                                 <i class="fas fa-trash"></i>
                             </span>
-                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -445,14 +667,105 @@
         }
     }
     
+    // Update stats summary
+    function updateStats() {
+        const rows = document.querySelectorAll('.formset-row:not([style*="display: none"])');
+        const totalRows = rows.length;
+        
+        let totalAmount = 0;
+        rows.forEach(row => {
+            const amountInput = row.querySelector('input[name$="-amount"]');
+            if (amountInput && amountInput.value) {
+                totalAmount += parseFloat(amountInput.value) || 0;
+            }
+        });
+        
+        document.getElementById('total-rows').textContent = totalRows;
+        document.getElementById('total-amount').textContent = `TZS ${totalAmount.toLocaleString()}`;
+    }
+    
+    // Sync radio buttons with hidden select
+    function setupPaymentMethodSync(rowElement) {
+        const radioButtons = rowElement.querySelectorAll('input[type="radio"]');
+        const hiddenSelect = rowElement.querySelector('select[name$="-status"]');
+        
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (hiddenSelect) {
+                    hiddenSelect.value = this.value;
+                }
+            });
+        });
+    }
+    
     // Add new form row
     document.getElementById('add-form').addEventListener('click', function() {
         const formsetBody = document.getElementById('formset-body');
         const totalForms = document.getElementById('id_form-TOTAL_FORMS');
-        const formCount = parseInt(totalForms.value);
+        const allRows = formsetBody.querySelectorAll('.formset-row');
+        const visibleRows = formsetBody.querySelectorAll('.formset-row:not([style*="display: none"])');
         
-        // Get the last row to clone
-        const lastRow = formsetBody.lastElementChild;
+        // Use the actual count of all rows (including hidden) for the new index
+        const formCount = allRows.length;
+        
+        // Get the last visible row to clone
+        if (visibleRows.length === 0) {
+            // If no visible rows, create a fresh row from the first row
+            const firstRow = allRows[0];
+            if (!firstRow) return;
+            
+            const newRow = firstRow.cloneNode(true);
+            newRow.style.display = '';
+            
+            // Update form indices
+            const inputs = newRow.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                const name = input.name.replace(/form-\d+-/, `form-${formCount}-`);
+                const id = input.id.replace(/id_form-\d+-/, `id_form-${formCount}-`);
+                input.name = name;
+                input.id = id;
+                
+                // Reset values
+                if (input.type === 'text' || input.type === 'number') {
+                    input.value = '';
+                } else if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else if (input.type === 'radio') {
+                    if (input.value === 'cash') {
+                        input.checked = true;
+                    } else {
+                        input.checked = false;
+                    }
+                }
+            });
+            
+            // Update IDs
+            const resultsDiv = newRow.querySelector('.member-search-results');
+            const memberInfoDiv = newRow.querySelector('.selected-member-info');
+            if (resultsDiv) resultsDiv.id = `search-results-${formCount}`;
+            if (memberInfoDiv) memberInfoDiv.id = `member-info-${formCount}`;
+            
+            // Reset member info
+            const memberNameDisplay = memberInfoDiv.querySelector('.member-name-display');
+            const memberPhoneDisplay = memberInfoDiv.querySelector('.member-phone-display');
+            if (memberNameDisplay) memberNameDisplay.textContent = '';
+            if (memberPhoneDisplay) memberPhoneDisplay.textContent = '';
+            memberInfoDiv.style.display = 'none';
+            
+            // Remove error messages
+            const errorMessages = newRow.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => msg.remove());
+            
+            formsetBody.appendChild(newRow);
+            totalForms.value = formCount + 1;
+            
+            setupMemberSearch(newRow, formCount);
+            setupPaymentMethodSync(newRow);
+            updateStats();
+            return;
+        }
+        
+        const lastRow = visibleRows[visibleRows.length - 1];
         const newRow = lastRow.cloneNode(true);
         
         // Update form indices
@@ -462,11 +775,19 @@
             const id = input.id.replace(/id_form-\d+-/, `id_form-${formCount}-`);
             input.name = name;
             input.id = id;
-            input.value = '';
             
-            // Reset checkbox
-            if (input.type === 'checkbox') {
+            // Reset text inputs and checkboxes
+            if (input.type === 'text' || input.type === 'number') {
+                input.value = '';
+            } else if (input.type === 'checkbox') {
                 input.checked = false;
+            } else if (input.type === 'radio') {
+                // Reset radio buttons - cash should be checked by default
+                if (input.value === 'cash') {
+                    input.checked = true;
+                } else {
+                    input.checked = false;
+                }
             }
         });
         
@@ -487,15 +808,15 @@
         const errorMessages = newRow.querySelectorAll('.error-message');
         errorMessages.forEach(msg => msg.remove());
         
-        // Show delete button for new rows
+        // Ensure delete button exists
         const deleteCell = newRow.querySelector('td:last-child');
         const deleteSpan = deleteCell.querySelector('.delete-row');
         if (!deleteSpan) {
-            deleteSpan = document.createElement('span');
-            deleteSpan.className = 'delete-row';
-            deleteSpan.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteSpan.onclick = function() { deleteRow(this); };
-            deleteCell.appendChild(deleteSpan);
+            const newDeleteSpan = document.createElement('span');
+            newDeleteSpan.className = 'delete-row';
+            newDeleteSpan.innerHTML = '<i class="fas fa-trash"></i>';
+            newDeleteSpan.onclick = function() { deleteRow(this); };
+            deleteCell.appendChild(newDeleteSpan);
         }
         
         formsetBody.appendChild(newRow);
@@ -503,26 +824,32 @@
         
         // Setup search for new row
         setupMemberSearch(newRow, formCount);
+        
+        // Setup payment method sync for new row
+        setupPaymentMethodSync(newRow);
+        
+        // Update stats
+        updateStats();
     });
 
     // Delete form row
     function deleteRow(element) {
         const row = element.closest('tr');
-        const deleteCheckbox = row.querySelector('[name$="-DELETE"]');
+        const formsetBody = document.getElementById('formset-body');
+        const allRows = formsetBody.querySelectorAll('.formset-row');
         
-        if (deleteCheckbox) {
-            deleteCheckbox.checked = true;
-            row.style.display = 'none';
-        } else {
-            row.remove();
-            updateFormIndices();
-        }
+        // Always remove the row completely to avoid formset issues
+        row.remove();
+        updateFormIndices();
+        
+        // Update stats
+        updateStats();
     }
 
     // Update form indices after deletion
     function updateFormIndices() {
         const formsetBody = document.getElementById('formset-body');
-        const rows = formsetBody.querySelectorAll('.formset-row:not([style*="display: none"])');
+        const rows = formsetBody.querySelectorAll('.formset-row');
         const totalForms = document.getElementById('id_form-TOTAL_FORMS');
         
         rows.forEach((row, index) => {
@@ -546,27 +873,35 @@
         totalForms.value = rows.length;
     }
 
-    // Set default date for new rows
+    // Set default date for bulk payment
     document.addEventListener('DOMContentLoaded', function() {
         // Setup search for existing rows
         const rows = document.querySelectorAll('.formset-row');
         rows.forEach((row, index) => {
             setupMemberSearch(row, index);
+            setupPaymentMethodSync(row);
         });
         
-        // Set default dates
-        const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
-        dateInputs.forEach(input => {
-            if (!input.value) {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            }
+        // Set default date for bulk payment
+        const bulkDateInput = document.getElementById('bulk-payment-date');
+        if (bulkDateInput && !bulkDateInput.value) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            bulkDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        
+        // Setup amount change listeners for stats
+        const amountInputs = document.querySelectorAll('input[name$="-amount"]');
+        amountInputs.forEach(input => {
+            input.addEventListener('input', updateStats);
         });
+        
+        // Initial stats update
+        updateStats();
     });
 </script>
 {% endblock %}

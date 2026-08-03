@@ -40,12 +40,11 @@ class BulkTithePaymentForm(forms.ModelForm):
 
     class Meta:
         model = TithePayment
-        fields = ['name', 'amount', 'status', 'date']
+        fields = ['name', 'amount', 'status']
         widgets = {
             'name': forms.HiddenInput(attrs={'class': 'form-control member-id-input'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': 'Amount'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -53,7 +52,7 @@ class BulkTithePaymentForm(forms.ModelForm):
         self.fields['name'].required = True
         self.fields['amount'].required = True
         self.fields['status'].required = True
-        self.fields['date'].required = True
+        self.fields['status'].initial = 'cash'
 
 
 # Formset for bulk payments

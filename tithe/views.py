@@ -1748,6 +1748,26 @@ def bulk_payment_create(request):
     if request.method == 'POST':
         formset = BulkTithePaymentFormSet(request.POST)
         
+        # Get the bulk payment date from the form
+        bulk_payment_date_str = request.POST.get('bulk_payment_date')
+        payment_date = None
+        
+        if bulk_payment_date_str:
+            try:
+                payment_date = datetime.strptime(bulk_payment_date_str, '%Y-%m-%dT%H:%M')
+            except ValueError:
+                messages.error(request, 'Invalid date format. Please use the date picker.')
+                context = {
+                    'formset': formset,
+                    'title': 'Bulk Create Tithe Payments',
+                    'finance_active': True,
+                    'tithepayment_active_create': True,
+                }
+                return render(request, 'tithepayment/bulk_create.html', context)
+        else:
+            # Default to current time if not provided
+            payment_date = timezone.now()
+        
         if formset.is_valid():
             from django.db import transaction
             
@@ -1761,9 +1781,8 @@ def bulk_payment_create(request):
                             member = form.cleaned_data['name']
                             amount = form.cleaned_data['amount']
                             payment_method = form.cleaned_data['status']
-                            payment_date = form.cleaned_data['date']
                             
-                            # Create payment
+                            # Create payment with the bulk date
                             tithe_payment = TithePayment(
                                 name=member,
                                 contact_number=str(member.telephone) if member.telephone else '',
