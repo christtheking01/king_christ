@@ -49,11 +49,14 @@ def send_tithe_sms_notification(sender, instance, created, **kwargs):
     if not getattr(settings, 'SEND_SMS_ENABLED', False):
         return
 
+    # Prevent duplicate SMS processing
     if getattr(instance, '_tithe_sms_processed', False):
+        logger.info(f"SMS already processed for Tithe ID {instance.id}, skipping")
         return
 
     # Only send SMS for new payments (not updates)
     if not created:
+        logger.info(f"Skipping SMS for update of Tithe ID {instance.id}")
         return
 
     try:
@@ -109,7 +112,8 @@ def log_tithe_update(sender, instance, **kwargs):
     Signal triggered before tithe payment is updated.
     Logs the changes and can trigger additional actions.
     """
-    if instance.pk:  # Only for existing records (not new ones)
+    # Only for existing records (not new ones)
+    if instance.pk:
         try:
             old_instance = TithePayment.objects.get(pk=instance.pk)
             
@@ -131,6 +135,8 @@ def log_tithe_update(sender, instance, **kwargs):
                 
                 # Optional: Send SMS notification for significant changes
                 if getattr(settings, 'SEND_SMS_ENABLED', False):
+                    # Mark as update SMS to prevent duplicate processing
+                    instance._update_sms_processed = True
                     _send_update_notification(instance, old_instance, changes)
                     
         except TithePayment.DoesNotExist:
@@ -162,8 +168,14 @@ def _send_update_notification(instance, old_instance, changes):
     Helper function to send SMS notification for tithe updates.
     """
     try:
+        # Prevent duplicate update SMS
+        if getattr(instance, '_update_sms_processed', False):
+            logger.info(f"Update SMS already processed for Tithe ID {instance.id}, skipping")
+            return
+        
         phone_number = format_phone_number(instance.contact_number)
         if not phone_number:
+            logger.warning(f"Tithe ID {instance.id}: No contact number for update SMS")
             return
             
         member_name = instance.name.name if hasattr(instance.name, 'name') else "Mpendwa"
