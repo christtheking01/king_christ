@@ -52,10 +52,6 @@ def send_tithe_sms_notification(sender, instance, created, **kwargs):
     if getattr(instance, '_tithe_sms_processed', False):
         return
 
-    # Send SMS for new tithe payments, or on update when no SMS has been sent yet.
-    if not created and instance.sms_sent:
-        return
-
     try:
         instance._tithe_sms_processed = True
         raw_phone = getattr(instance, 'contact_number', None)
