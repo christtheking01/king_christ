@@ -52,6 +52,10 @@ def send_tithe_sms_notification(sender, instance, created, **kwargs):
     if getattr(instance, '_tithe_sms_processed', False):
         return
 
+    # Only send SMS for new payments (not updates)
+    if not created:
+        return
+
     try:
         instance._tithe_sms_processed = True
         raw_phone = getattr(instance, 'contact_number', None)
@@ -119,6 +123,8 @@ def log_tithe_update(sender, instance, **kwargs):
                 changes.append(f"Status: {old_instance.status} -> {instance.status}")
             if old_instance.contact_number != instance.contact_number:
                 changes.append(f"Contact: {old_instance.contact_number} -> {instance.contact_number}")
+            if old_instance.date != instance.date:
+                changes.append(f"Date: {old_instance.date} -> {instance.date}")
             
             if changes:
                 logger.info(f"Tithe ID {instance.id} update: {', '.join(changes)}")
