@@ -135,8 +135,6 @@ def log_tithe_update(sender, instance, **kwargs):
                 
                 # Optional: Send SMS notification for significant changes
                 if getattr(settings, 'SEND_SMS_ENABLED', False):
-                    # Mark as update SMS to prevent duplicate processing
-                    instance._update_sms_processed = True
                     _send_update_notification(instance, old_instance, changes)
                     
         except TithePayment.DoesNotExist:
@@ -168,11 +166,6 @@ def _send_update_notification(instance, old_instance, changes):
     Helper function to send SMS notification for tithe updates.
     """
     try:
-        # Prevent duplicate update SMS
-        if getattr(instance, '_update_sms_processed', False):
-            logger.info(f"Update SMS already processed for Tithe ID {instance.id}, skipping")
-            return
-        
         phone_number = format_phone_number(instance.contact_number)
         if not phone_number:
             logger.warning(f"Tithe ID {instance.id}: No contact number for update SMS")
