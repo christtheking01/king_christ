@@ -134,21 +134,21 @@ class Command(BaseCommand):
             if phone:
                 if is_overdue:
                     sms_message = (
-                        f"Parokia ya Kristo Mfalme: Mpendwa, tunakukumbusha kuhusu ahadi yako "
+                        f"Mpendwa, tunakukumbusha kuhusu ahadi yako "
                         f"ya TZS {remaining:,.0f} kwa ajili ya {event_title} ambayo imepitiliza muda. "
                         f"Tafadhali kamilisha wakati unapoweza. Tunakushukuru kwa moyo wako wa kutoa. Mungu akubariki."
 
                     )
                 elif is_urgent:
                     sms_message = (
-                        f"Parokia ya Kristo Mfalme: Mpendwa, ahadi yako ya TZS {remaining:,.0f} "
+                        f"Mpendwa, ahadi yako ya TZS {remaining:,.0f} "
                         f"kwa ajili ya {event_title} inatakiwa kukamilika baada ya siku {days_until_due}. "
                         f"Tunathamini mchango wako. Mungu akubariki."
 
                     )
                 else:
                     sms_message = (
-                        f"Parokia ya Kristo Mfalme: Mpendwa, tunakukaribisha kukamilisha ahadi yako "
+                        f"Mpendwa, tunakukaribisha kukamilisha ahadi yako "
                         f"ya TZS {remaining:,.0f} kwa ajili ya {event_title} kufikia {pledge.due_date.strftime('%d %b %Y')}. "
                         f"Ushirika wako ni muhimu sana. Tunakushukuru. Mungu akubariki."
 

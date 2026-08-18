@@ -11,11 +11,8 @@ class AfricaTalkingProvider(BaseSMSProvider):
 
     def send_sms(self, phone_number, message):
         try:
-            # Add prefix to message
-            prefixed_message = f"Parokia ya Kristo Mfalme:\n{message}"
-            
             params = {
-                'message': prefixed_message,
+                'message': message,
                 'recipients': [phone_number]
             }
 
@@ -38,11 +35,8 @@ class AfricaTalkingProvider(BaseSMSProvider):
 
     def send_bulk_sms(self, recipients, message):
         try:
-            # Add prefix to message
-            prefixed_message = f"Parokia ya Kristo Mfalme:\n{message}"
-            
             params = {
-                'message': prefixed_message,
+                'message': message,
                 'recipients': recipients
             }
 

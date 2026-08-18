@@ -205,39 +205,15 @@ class NotificationService:
                                 cost = recipient_info.get('cost', '')
                                 is_sent = status.lower() in ('success', 'sent')
 
-                                NotificationLog.objects.create(
-                                    notification=notification,
-                                    member=None,  # No member for custom phones
-                                    phone_number=normalized_phone,
-                                    status='SENT' if is_sent else 'FAILED',
-                                    at_message_id=message_id,
-                                    cost=cost,
-                                    error_message=None if is_sent else status
-                                )
-
+                                # Skip NotificationLog for custom phones (no member available)
+                                # Log success/failure in the main notification status instead
                                 if is_sent:
                                     sent_count += 1
                                 else:
                                     failed_count += 1
                             else:
-                                NotificationLog.objects.create(
-                                    notification=notification,
-                                    member=None,
-                                    phone_number=normalized_phone,
-                                    status='SENT',
-                                    at_message_id=message_id,
-                                    cost='',
-                                    error_message=None
-                                )
                                 sent_count += 1
                         else:
-                            NotificationLog.objects.create(
-                                notification=notification,
-                                member=None,
-                                phone_number=normalized_phone,
-                                status='FAILED',
-                                error_message=result.get('error', 'Unknown error')
-                            )
                             failed_count += 1
                 else:
                     # Handle member-based recipients
@@ -428,7 +404,7 @@ class SMS:
         sender_id = getattr(settings, 'AFRICASTALKING_SENDER_ID', None)
 
         try:
-            prefixed_message = f"Parokia ya Kristo Mfalme:\n{message}"
+            prefixed_message = message
 
             params = {
                 'message': prefixed_message,

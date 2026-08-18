@@ -1458,7 +1458,7 @@ def pos_tithe_submission(request):
                     month_name = get_swahili_month(tithe_payment.date)
                     
                     message = (
-                        f"Parokia ya Kristo Mfalme: Tumsifu Yesu Kristu; mpendwa {member_name} "
+                        f"Tumsifu Yesu Kristu; mpendwa {member_name} "
                         f"zaka ya {month_name} Tsh {formatted_amount} imepokelewa kwa maendeleo ya parokia. Malaki 3:10. Ubarikiwe!"
                     )
                     
@@ -1984,7 +1984,7 @@ def bulk_sms_send(request):
                 
                 if template_type == 'default':
                     message = (
-                        f"Parokia ya Kristo Mfalme: Tumsifu Yesu Kristu; mpendwa {member_name} "
+                        f"Tumsifu Yesu Kristu; mpendwa {member_name} "
                         f"zaka ya {month_name} Tsh {formatted_amount} imepokelewa kwa maendeleo ya parokia. Malaki 3:10. Ubarikiwe!"
                     )
                 elif template_type == 'update':
@@ -2374,17 +2374,17 @@ def send_pos_sms(phone_number, member_name, amount, payment_type):
         
         if payment_type == 'tithe':
             message = (
-                f"Parokia ya Kristo Mfalme: Tumsifu Yesu Kristu; mpendwa {member_name} "
+                f"Tumsifu Yesu Kristu; mpendwa {member_name} "
                 f"zaka ya {month_name} Tsh {formatted_amount} imepokelewa. Malaki 3:10. Ubarikiwe!"
             )
         elif payment_type == 'offering':
             message = (
-                f"Parokia ya Kristo Mfalme: Tumsifu Yesu; mpendwa {member_name} "
+                f"Tumsifu Yesu kristu; mpendwa {member_name} "
                 f"mchango wako wa Tsh {formatted_amount} umepokewa. Asante kwa sadaka yako. Ubarikiwe!"
             )
         else:
             message = (
-                f"Parokia ya Kristo Mfalme: Mpendwa {member_name}, "
+                f"Mpendwa {member_name}, "
                 f"malipo yako ya Tsh {formatted_amount} yamekamilika. Ubarikiwe!"
             )
         
