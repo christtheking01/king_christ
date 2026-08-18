@@ -111,11 +111,36 @@ class Notification(models.Model):
     def get_recipients(self):
         """Get all recipients based on recipient_type"""
         recipients = []
+        import logging
+        logger = logging.getLogger(__name__)
 
         if self.recipient_type == 'MEMBER' and self.member:
             recipients = [self.member]
         elif self.recipient_type == 'MINISTRY' and self.ministry:
-            recipients = Member.objects.active().filter(ministry=self.ministry)
+            ministry_name = self.ministry.name if self.ministry else "Unknown"
+            logger.info(f"Getting recipients for ministry: {ministry_name}")
+            
+            # Get members who have this ministry assigned directly
+            direct_members = Member.objects.active().filter(ministry=self.ministry)
+            logger.info(f"Direct members in {ministry_name}: {direct_members.count()}")
+            
+            # Get members who are leaders in this ministry
+            from member.models import MinistryLeader
+            all_leaders = MinistryLeader.objects.filter(ministry=self.ministry, is_active=True)
+            logger.info(f"Total leaders in {ministry_name}: {all_leaders.count()}")
+            
+            leaders_with_member = all_leaders.filter(member__isnull=False)
+            logger.info(f"Leaders with member association: {leaders_with_member.count()}")
+            
+            leader_member_ids = leaders_with_member.values_list('member', flat=True)
+            logger.info(f"Leader member IDs: {list(leader_member_ids)}")
+            
+            leader_members = Member.objects.active().filter(id__in=leader_member_ids)
+            logger.info(f"Active leader members: {leader_members.count()}")
+            
+            # Combine both sets (use union to avoid duplicates)
+            recipients = direct_members.union(leader_members)
+            logger.info(f"Total recipients for {ministry_name}: {recipients.count()}")
         elif self.recipient_type == 'COMMITTEE' and self.committee:
             # Get members who are in this committee (same committee name)
             committee_members = Committee.objects.filter(Commitee_name=self.committee.Commitee_name).values_list('member', flat=True)
