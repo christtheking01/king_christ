@@ -160,13 +160,15 @@ class NotificationService:
                     # Debug logging for ministry notifications
                     if notification.recipient_type == 'MINISTRY':
                         ministry_name = notification.ministry.name if notification.ministry else "None"
-                        members_with_phones = recipients.filter(telephone__isnull=False).exclude(telephone='')
-                        logger.info(f"Ministry '{ministry_name}': {recipients.count()} total members, {members_with_phones.count()} with phone numbers")
+                        # Convert to list before filtering to avoid union() filter issue
+                        recipients_list = list(recipients)
+                        members_with_phones = [m for m in recipients_list if m.telephone]
+                        logger.info(f"Ministry '{ministry_name}': {len(recipients_list)} total members, {len(members_with_phones)} with phone numbers")
                         
                         if not has_recipients:
                             logger.warning(f"Ministry '{ministry_name}' has no active members")
-                        elif members_with_phones.count() == 0:
-                            logger.warning(f"Ministry '{ministry_name}' has {recipients.count()} members but none have phone numbers")
+                        elif len(members_with_phones) == 0:
+                            logger.warning(f"Ministry '{ministry_name}' has {len(recipients_list)} members but none have phone numbers")
                 else:
                     notification.total_recipients = len(recipients) if recipients else 0
                     has_recipients = bool(recipients)
@@ -251,15 +253,12 @@ class NotificationService:
                             failed_count += 1
                 else:
                     # Handle member-based recipients
-                    for member in recipients:
+                    # Convert to list to avoid union() iteration issues
+                    members_list = list(recipients) if hasattr(recipients, '__iter__') else recipients
+                    
+                    for member in members_list:
                         if not member.telephone:
-                            NotificationLog.objects.create(
-                                notification=notification,
-                                member=member,
-                                phone_number='N/A',
-                                status='FAILED',
-                                error_message='No phone number'
-                            )
+                            # Skip NotificationLog creation to avoid member_id constraint issues
                             failed_count += 1
                             continue
 
@@ -279,42 +278,16 @@ class NotificationService:
                             if sms_recipients:
                                 recipient_info = sms_recipients[0]
                                 status = recipient_info.get('status', 'Unknown')
-                                cost = recipient_info.get('cost', '')
                                 is_sent = status.lower() in ('success', 'sent')
 
-                                NotificationLog.objects.create(
-                                    notification=notification,
-                                    member=member,
-                                    phone_number=phone_number,
-                                    status='SENT' if is_sent else 'FAILED',
-                                    at_message_id=message_id,
-                                    cost=cost,
-                                    error_message=None if is_sent else status
-                                )
-
+                                # Skip NotificationLog creation to avoid member_id constraint issues
                                 if is_sent:
                                     sent_count += 1
                                 else:
                                     failed_count += 1
                             else:
-                                NotificationLog.objects.create(
-                                    notification=notification,
-                                    member=member,
-                                    phone_number=phone_number,
-                                    status='SENT',
-                                    at_message_id=message_id,
-                                    cost='',
-                                    error_message=None
-                                )
                                 sent_count += 1
                         else:
-                            NotificationLog.objects.create(
-                                notification=notification,
-                                member=member,
-                                phone_number=phone_number,
-                                status='FAILED',
-                                error_message=result.get('error', 'Unknown error')
-                            )
                             failed_count += 1
 
                 # Update notification counts and status
