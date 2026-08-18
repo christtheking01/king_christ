@@ -156,6 +156,17 @@ class NotificationService:
                 if hasattr(recipients, 'count') and hasattr(recipients, 'model'):
                     notification.total_recipients = recipients.count()
                     has_recipients = recipients.exists()
+                    
+                    # Debug logging for ministry notifications
+                    if notification.recipient_type == 'MINISTRY':
+                        ministry_name = notification.ministry.name if notification.ministry else "None"
+                        members_with_phones = recipients.filter(telephone__isnull=False).exclude(telephone='')
+                        logger.info(f"Ministry '{ministry_name}': {recipients.count()} total members, {members_with_phones.count()} with phone numbers")
+                        
+                        if not has_recipients:
+                            logger.warning(f"Ministry '{ministry_name}' has no active members")
+                        elif members_with_phones.count() == 0:
+                            logger.warning(f"Ministry '{ministry_name}' has {recipients.count()} members but none have phone numbers")
                 else:
                     notification.total_recipients = len(recipients) if recipients else 0
                     has_recipients = bool(recipients)
@@ -163,11 +174,34 @@ class NotificationService:
             notification.save()
 
             if not has_recipients:
-                notification.status = 'FAILED'
-                notification.error_message = 'No recipients found'
+                # Log detailed information about why there are no recipients
+                if notification.recipient_type == 'MINISTRY':
+                    ministry_name = notification.ministry.name if notification.ministry else "None"
+                    logger.warning(f"Notification ID {notification_id}: No members found in ministry '{ministry_name}'")
+                    notification.status = 'FAILED'
+                    notification.error_message = f'No members found in ministry "{ministry_name}"'
+                elif notification.recipient_type == 'COMMITTEE':
+                    committee_name = notification.committee.Commitee_name if notification.committee else "None"
+                    logger.warning(f"Notification ID {notification_id}: No members found in committee '{committee_name}'")
+                    notification.status = 'FAILED'
+                    notification.error_message = f'No members found in committee "{committee_name}"'
+                elif notification.recipient_type == 'COMMUNITY':
+                    community_name = notification.community.name if notification.community else "None"
+                    logger.warning(f"Notification ID {notification_id}: No members found in community '{community_name}'")
+                    notification.status = 'FAILED'
+                    notification.error_message = f'No members found in community "{community_name}"'
+                elif notification.recipient_type == 'MEMBER':
+                    member_name = notification.member.name if notification.member else "None"
+                    logger.warning(f"Notification ID {notification_id}: Member '{member_name}' not found or inactive")
+                    notification.status = 'FAILED'
+                    notification.error_message = f'Member "{member_name}" not found or inactive'
+                else:
+                    logger.warning(f"Notification ID {notification_id} has no recipients for type {notification.recipient_type}")
+                    notification.status = 'FAILED'
+                    notification.error_message = 'No recipients found'
+                
                 notification.save()
-                logger.warning(f"Notification ID {notification_id} has no recipients")
-                return {'success': False, 'error': 'No recipients found'}
+                return {'success': False, 'error': notification.error_message}
 
             # Send SMS if enabled
             if notification.send_sms:
