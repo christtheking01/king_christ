@@ -95,6 +95,9 @@ class NotificationService:
         import re
         phone = phone.strip()
         
+        if not phone:
+            return None
+        
         # Remove all non-digit characters
         cleaned = re.sub(r'\D', '', phone)
         
@@ -138,16 +141,25 @@ class NotificationService:
             notification.status = 'SENDING'
             notification.save()
 
-            # Get recipients
-            recipients = notification.get_recipients()
-
-            # Handle both QuerySet and list returns
-            if hasattr(recipients, 'count') and hasattr(recipients, 'model'):
-                notification.total_recipients = recipients.count()
-                has_recipients = recipients.exists()
+            # Get recipients or phone numbers based on recipient type
+            if notification.recipient_type == 'CUSTOM_PHONES':
+                # For custom phone numbers, get phone numbers directly
+                phone_numbers = notification.get_phone_numbers()
+                notification.total_recipients = len(phone_numbers) if phone_numbers else 0
+                has_recipients = bool(phone_numbers)
+                recipients = phone_numbers  # Use phone numbers as recipients
             else:
-                notification.total_recipients = len(recipients) if recipients else 0
-                has_recipients = bool(recipients)
+                # For member-based recipients, get member objects
+                recipients = notification.get_recipients()
+                
+                # Handle both QuerySet and list returns
+                if hasattr(recipients, 'count') and hasattr(recipients, 'model'):
+                    notification.total_recipients = recipients.count()
+                    has_recipients = recipients.exists()
+                else:
+                    notification.total_recipients = len(recipients) if recipients else 0
+                    has_recipients = bool(recipients)
+            
             notification.save()
 
             if not has_recipients:
@@ -164,12 +176,18 @@ class NotificationService:
 
                 # Handle custom phone numbers differently
                 if notification.recipient_type == 'CUSTOM_PHONES':
-                    phone_numbers = notification.get_phone_numbers()
+                    # Use the phone numbers we already retrieved
+                    phone_numbers = recipients if isinstance(recipients, list) else notification.get_phone_numbers()
                     logger.info(f"Sending SMS to {len(phone_numbers)} custom phone numbers")
                     
                     for phone_number in phone_numbers:
                         # Normalize to international format
                         normalized_phone = self._normalize_phone(str(phone_number))
+                        
+                        if not normalized_phone:
+                            logger.warning(f"Invalid phone number format: {phone_number}")
+                            failed_count += 1
+                            continue
                         
                         result = self.sms_service.send_sms(
                             phone_number=normalized_phone,
