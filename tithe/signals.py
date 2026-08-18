@@ -36,13 +36,26 @@ def format_phone_number(phone):
         return None
     cleaned = re.sub(r'\D', '', str(phone))
     
+    if not cleaned:
+        return None
+    
+    # Handle Tanzania phone numbers
     if cleaned.startswith('0'):
         return '+255' + cleaned[1:]
     elif cleaned.startswith('255'):
         return '+' + cleaned
-    elif not cleaned.startswith('+') and len(cleaned) in [11, 12, 13]:
-         return '+' + cleaned
-    return phone
+    elif not cleaned.startswith('+') and len(cleaned) in [9, 10, 12, 13]:
+        # Assume Tanzania number if it's 9-13 digits and doesn't have country code
+        if len(cleaned) == 9:
+            return '+255' + cleaned
+        return '+' + cleaned
+    elif cleaned.startswith('+'):
+        return cleaned
+    else:
+        # If it's already in some format, try to make it international
+        if len(cleaned) >= 10:
+            return '+' + cleaned
+        return '+' + cleaned
 
 @receiver(post_save, sender=TithePayment)
 def send_tithe_sms_notification(sender, instance, created, **kwargs):

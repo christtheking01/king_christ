@@ -2388,13 +2388,22 @@ def send_pos_sms(phone_number, member_name, amount, payment_type):
                 f"malipo yako ya Tsh {formatted_amount} yamekamilika. Ubarikiwe!"
             )
         
-        # Format phone number
-        phone = str(phone_number)
-        if not phone.startswith('+'):
-            phone = '+255' + phone.lstrip('0')
+        # Format phone number using existing helper function
+        from .signals import format_phone_number
+        phone = format_phone_number(phone_number)
         
-        SMS.send_sms(phone, message)
-        return True
+        if not phone:
+            print(f"SMS sending failed: Invalid phone number format: {phone_number}")
+            return False
+        
+        result = SMS.send_sms(phone, message)
+        
+        if result.get('success'):
+            print(f"SMS sent successfully to {phone}")
+            return True
+        else:
+            print(f"SMS sending failed: {result.get('error', 'Unknown error')}")
+            return False
     except Exception as e:
         print(f"SMS sending failed: {e}")
         return False

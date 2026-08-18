@@ -1,0 +1,25 @@
+
+    this is for future reference, the portal urls are now in the main urls.py file, but if you want to use them here, you can uncomment the following lines and import the views from users.views
+     # Member Portal URLs
+    path('portal/', portal_dashboard, name='portal_dashboard'),
+    path('portal/register/', portal_register, name='portal_register'),
+    # Old verification (for existing users)
+    path('portal/verify/<int:member_id>/', portal_verify, name='portal_verify'),
+    path('portal/resend/<int:member_id>/', portal_resend_code, name='portal_resend_code'),
+    # New session-based verification (user created AFTER verification)
+    path('portal/verify/', portal_verify_session, name='portal_verify_session'),
+    path('portal/resend/', portal_resend_code_session, name='portal_resend_code_session'),
+    path('portal/login/', portal_login, name='portal_login'),
+    path('portal/logout/', portal_logout, name='portal_logout'),
+    path('portal/profile/', portal_profile, name='portal_profile'),
+    path('portal/password/', portal_password_change, name='portal_password_change'),
+    path('portal/events/', portal_events, name='portal_events'),
+    path('portal/events/<int:event_id>/', portal_event_detail, name='portal_event_detail'),
+    path('portal/tithes/', portal_tithe_history, name='portal_tithe_history'),
+    path('portal/pledges/', portal_pledges, name='portal_pledges'),
+    path('portal/community/', portal_community, name='portal_community'),
+    path('portal/ministry/', portal_ministry, name='portal_ministry'),
+    path('portal/sacraments/', portal_sacraments, name='portal_sacraments'),
+    path('portal/chart/tithe-json/', TitheChartJSONView.as_view(), name='tithe_chart_json'),
+    
+    """

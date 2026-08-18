@@ -102,6 +102,9 @@ def send_pledge_assignment_notification(sender, instance, created, **kwargs):
                 church_member__member=member,
                 church_member__is_portal_active=True
             ).first()
+            
+            if not user:
+                logger.info(f"No active portal user found for member {member.name} - skipping portal notification")
         except Exception as e:
             logger.warning(f"Could not find user for member {member}: {e}")
         

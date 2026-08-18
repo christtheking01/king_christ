@@ -73,7 +73,7 @@ urlpatterns = [
     path('sacraments/edit/<int:sacrament_id>/', edit_user_sacrament, name='edit_user_sacrament'),
     path('sacraments/delete/<int:sacrament_id>/', delete_user_sacrament, name='delete_user_sacrament'),
 
-    # Member Portal URLs
+     # Member Portal URLs
     path('portal/', portal_dashboard, name='portal_dashboard'),
     path('portal/register/', portal_register, name='portal_register'),
     # Old verification (for existing users)

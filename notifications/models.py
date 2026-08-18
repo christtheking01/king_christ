@@ -201,6 +201,15 @@ class Notification(models.Model):
             
             # Broadcast to WebSocket groups
             broadcast_notification(self)
+        else:
+            # Log when no target users are found for the notification
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                f"No target users found for notification ID {self.id} "
+                f"with audience '{self.target_audience}'. "
+                f"Notification will not be delivered to any users."
+            )
         
         return len(user_notifications)
 

@@ -189,6 +189,7 @@ class Command(BaseCommand):
             ).first()
 
             if not user:
+                self.logger.info(f"No active portal user found for member {member.name} - skipping in-app reminder")
                 return False
 
             month_name = check_date.strftime('%B %Y')
